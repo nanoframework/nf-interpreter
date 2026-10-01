@@ -182,7 +182,7 @@ Each target board has:
 
 nanoBooter, nanoCLR and the firmware package each have their own version per platform, computed by nbgv from the path filters in `versions/<image>/<platform>/version.json`. A change only bumps the versions of the images whose path filters match it. Full details are in `versions/README.md`.
 
-- `versions/pathfilters.json` is the source of truth. The leaf `version.json` files are **generated** by `versions/Update-PathFilters.ps1` and must never be edited by hand. Only the `version` (major.minor) in the parent files `versions/<image>/version.json` is edited by hand.
+- `versions/pathfilters.json` is the source of truth. The leaf `version.json` files are **generated** by `versions/Update-PathFilters.ps1` and must never be edited by hand. Only the `version` (major.minor.patch, the git height is the 4th field) in the parent files `versions/<image>/version.json` is edited by hand.
 - A missing path filter is a silent failure: changes to that file don't bump the version, so different binaries ship with the same version number. Over-including only causes extra bumps, so when in doubt, include.
 
 When reviewing a PR or making changes, check:

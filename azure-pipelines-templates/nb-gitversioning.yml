@@ -8,7 +8,9 @@
 #   FIRMWARE_VERSION    version of the firmware package (both images), also exposed as NBGV_* variables
 #   NANOCLR_VERSION     version of the nanoCLR image
 #   NANOBOOTER_VERSION  version of the nanoBooter image (same as nanoCLR if the platform doesn't have one)
-# All of them are major.minor.height, where height only increases with commits that touch that image sources.
+# All of them are major.minor.patch.height (major.minor.patch from versions/<image>/version.json), where height only
+# increases with commits that touch that image sources.
+# Package versions keep the existing formats: major.minor.patch.height (stable) and major.minor.patch-preview.height.
 #
 # When 'versionLeaf' is empty the legacy versioning is used: the root version.json plus the job 'REVISION' counter.
 #
@@ -83,13 +85,14 @@ steps:
           $leaf = "${{ parameters.versionLeaf }}"
           $prNumber = $env:SYSTEM_PULLREQUEST_PULLREQUESTNUMBER
 
+          # returns the nbgv version info of versions/<image>/<leaf>, or $null if there's no such leaf
           function Get-ImageVersion([string]$image)
           {
               $path = "versions/$image/$leaf"
 
               if (-not (Test-Path "$path/version.json"))
               {
-                  return ''
+                  return $null
               }
 
               $nbgv = nbgv get-version -p $path -f json | ConvertFrom-Json
@@ -99,38 +102,42 @@ steps:
                   throw "nbgv failed to compute the version of $path"
               }
 
-              if (-not [string]::IsNullOrEmpty($prNumber))
-              {
-                  # PR builds get a temporary version that can't be confused with a real one
-                  return "0.$prNumber.$($nbgv.BuildNumber)"
-              }
-
-              return $nbgv.SimpleVersion
+              return $nbgv
           }
 
-          $firmwareVersion = Get-ImageVersion 'firmware'
-          $clrVersion = Get-ImageVersion 'nanoCLR'
-          $booterVersion = Get-ImageVersion 'nanoBooter'
+          # major.minor.patch.height, or a temporary version for PR builds that can't be confused with a real one
+          function Format-ImageVersion($nbgv)
+          {
+              if (-not [string]::IsNullOrEmpty($prNumber))
+              {
+                  return "0.$prNumber.0.$($nbgv.VersionHeight)"
+              }
 
-          if ([string]::IsNullOrEmpty($firmwareVersion) -or [string]::IsNullOrEmpty($clrVersion))
+              return $nbgv.Version
+          }
+
+          $firmware = Get-ImageVersion 'firmware'
+          $clr = Get-ImageVersion 'nanoCLR'
+          $booter = Get-ImageVersion 'nanoBooter'
+
+          if ($null -eq $firmware -or $null -eq $clr)
           {
               throw "Missing versions/firmware/$leaf or versions/nanoCLR/$leaf"
           }
 
-          if ([string]::IsNullOrEmpty($booterVersion))
-          {
-              # platform without nanoBooter, the value is required by CMake but it's not used
-              $booterVersion = $clrVersion
-          }
+          $firmwareVersion = Format-ImageVersion $firmware
+          $clrVersion = Format-ImageVersion $clr
+
+          # platform without nanoBooter, the value is required by CMake but it's not used
+          $booterVersion = if ($null -eq $booter) { $clrVersion } else { Format-ImageVersion $booter }
 
           Write-Host "$("##vso[task.setvariable variable=FIRMWARE_VERSION]")$firmwareVersion"
           Write-Host "$("##vso[task.setvariable variable=NANOCLR_VERSION]")$clrVersion"
           Write-Host "$("##vso[task.setvariable variable=NANOBOOTER_VERSION]")$booterVersion"
 
-          Write-Host "$("##vso[task.setvariable variable=FIRMWARE_PACKAGE_VERSION]")$firmwareVersion"
-          Write-Host "$("##vso[task.setvariable variable=FIRMWARE_PREVIEW_PACKAGE_VERSION]")$firmwareVersion-preview"
+          Write-Host "$("##vso[task.setvariable variable=FIRMWARE_PACKAGE_VERSION]")$($firmware.SimpleVersion).$($firmware.VersionHeight)"
+          Write-Host "$("##vso[task.setvariable variable=FIRMWARE_PREVIEW_PACKAGE_VERSION]")$($firmware.SimpleVersion)-preview.$($firmware.VersionHeight)"
 
-          Write-Host "$("##vso[task.setvariable variable=NBGV_SimpleVersion]")$firmwareVersion"
           Write-Host "$("##vso[task.setvariable variable=NBGV_NuGetPackageVersion]")$firmwareVersion"
 
           Write-Host "$("##vso[build.updatebuildnumber]")$firmwareVersion"

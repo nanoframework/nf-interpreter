@@ -22,21 +22,22 @@ Each firmware image has its own version, per platform, computed by [Nerdbank.Git
 
 Platforms are the RTOS folders, split by vendor where the tree already is: `ChibiOS`, `ESP32`, `FreeRTOS-NXP`, `TI_SimpleLink`, `ThreadX-<vendor>`.
 
-Versions have the format `major.minor.height`:
+Versions have the format `major.minor.patch.height`:
 
-- `major.minor` is set by hand in the parent file, e.g. `versions/nanoCLR/version.json`, and applies to all the platforms of that image.
-- `height` is the number of commits since `major.minor` was last changed that touched a path matched by the leaf's `pathFilters`. A commit that touches only ESP32 code doesn't change any ChibiOS version; a booter-only change doesn't change the nanoCLR version.
-- The 4th component (revision) isn't used and is always 0.
+- `major.minor.patch` is set by hand in the parent file, e.g. `versions/nanoCLR/version.json`, and applies to all the platforms of that image. It always has 3 numbers: that's what makes nbgv put the height in the 4th field.
+- `height` is the number of commits since `major.minor.patch` was last changed that touched a path matched by the leaf's `pathFilters`. A commit that touches only ESP32 code doesn't change any ChibiOS version; a booter-only change doesn't change the nanoCLR version.
+- Firmware packages keep the formats used before per-image versioning: `major.minor.patch.height` for stable and `major.minor.patch-preview.height` for preview.
+- The versions started at `2.0.1`, so they sort above every `2.0.0.<build counter>` published before.
 
 The leaves inherit the nbgv settings from the root `version.json`, which is still used for the WIN32, POSIX and netcore builds and for the release process.
 
 > [!NOTE]
-> The `version` in the root `version.json` does **not** set the firmware image versions: the leaves get their `major.minor` from the parent files in `versions/`. The root `version` only applies to:
+> The `version` in the root `version.json` does **not** set the firmware image versions: the leaves get their `major.minor.patch` from the parent files in `versions/`. The root `version` only applies to:
 >
-> - The builds that don't use `versionLeaf`: WIN32 and POSIX nanoCLR, and the nf-Community-Targets pipeline, as `major.minor.0.<counter>`.
+> - The builds that don't use `versionLeaf`: WIN32 and POSIX nanoCLR, and the nf-Community-Targets pipeline, as `major.minor.patch.<counter>`.
 > - `nbgv prepare-release`, which names the release branch after it.
 >
-> The root `version` keeps its 3-part format (`x.y.0`), because the legacy builds expect the git height in the 4th field. Keep its `major.minor` in line with `versions/firmware/version.json`, so the release branch name matches the firmware being released.
+> Keep the root `version` equal to the one in `versions/firmware/version.json`, so the release branch name matches the firmware being released.
 >
 > Removing the root `version.json` requires moving those builds and the release process to leaves first. It also holds the nbgv settings the leaves inherit.
 
@@ -45,10 +46,10 @@ The leaves inherit the nbgv settings from the root `version.json`, which is stil
 The release process (`nbgv prepare-release`, run by the `StartReleaseCandidate` step in `azure-pipelines.yml`) only updates the root `version.json`. It doesn't touch the files in `versions/`:
 
 - The heights keep increasing on their own, so every release gets new image versions whenever their sources changed.
-- To start a new `major.minor` for an image (e.g. nanoCLR `2.1` → `2.2`), edit the `version` in the parent file (`versions/firmware/version.json`, `versions/nanoCLR/version.json` or `versions/nanoBooter/version.json`) by hand, in its own commit. The height of that image restarts from 0 on all platforms.
-- The firmware package version is the one nanoff and Cloudsmith see. When bumping an image `major.minor`, consider bumping `versions/firmware/version.json` too, so the package version reflects the change. It isn't required: the firmware height keeps increasing anyway.
-- When bumping `versions/firmware/version.json`, bump the root `version.json` to the same `major.minor` (as `x.y.0`) in the same commit.
-- Never lower a `major.minor`: nanoff would see the new firmware as older than what's on the devices.
+- To start a new version for an image (e.g. nanoCLR `2.0.1` → `2.1.0`), edit the `version` in the parent file (`versions/firmware/version.json`, `versions/nanoCLR/version.json` or `versions/nanoBooter/version.json`) by hand, in its own commit. The height of that image restarts from 0 on all platforms.
+- The firmware package version is the one nanoff and Cloudsmith see. When bumping an image version, consider bumping `versions/firmware/version.json` too, so the package version reflects the change. It isn't required: the firmware height keeps increasing anyway.
+- When bumping `versions/firmware/version.json`, bump the root `version.json` to the same version in the same commit.
+- Never lower a version: nanoff would see the new firmware as older than what's on the devices.
 
 Versions are reproducible locally:
 

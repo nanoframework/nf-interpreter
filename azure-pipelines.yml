@@ -1040,7 +1040,7 @@ jobs:
         value: true
       # creates a counter and assigns it to the revision variable
       - name: REVISION
-        value: $[counter('WIN32_2_1_0_versioncounter', 0)]
+        value: $[counter('WIN32_2_0_1_versioncounter', 0)]
       - name: LITTLEFS_PATH
         value: "D:/a/1/s/littlefs"
 
@@ -1287,7 +1287,7 @@ jobs:
     variables:
       - group: sign-client-credentials
       - name: REVISION
-        value: $[counter('POSIX_2_1_0_versioncounter', 0)]
+        value: $[counter('POSIX_2_0_1_versioncounter', 0)]
 
     steps:
       - checkout: self
