@@ -16,6 +16,8 @@
     - Every non-wildcard path must exist and every wildcard must match at least one path.
     - An exclude that is identical to an include is dropped (lets a leaf exclude "all other platforms" sets).
     - An exclude that isn't under any include is dropped (it has no effect).
+    - An include under an excluded directory is carved out of it: the exclude is replaced by the other entries of
+      that directory (nbgv applies excludes after includes, so the include alone would have no effect).
 
     TODO: when nbgv 3.11 (glob support in pathFilters) ships as stable, consider emitting the wildcards
     directly instead of expanding them, so new boards don't require regenerating the version files.
@@ -196,6 +198,52 @@ function Compress-Paths([string[]]$paths)
     return $result
 }
 
+# tracked children of each directory, used to carve included paths out of excluded directories
+$children = @{}
+
+foreach ($path in $tracked.Values)
+{
+    $parent = $path.Substring(0, [Math]::Max(0, $path.LastIndexOf('/'))).ToLowerInvariant()
+
+    if (-not $children.ContainsKey($parent))
+    {
+        $children[$parent] = [System.Collections.Generic.List[string]]::new()
+    }
+
+    $children[$parent].Add($path)
+}
+
+# nbgv applies excludes after includes, so an explicit include under an excluded directory (e.g. a _nanoCLR
+# folder that is also compiled into nanoBooter) would still be excluded. Replace the exclude with the entries
+# of that directory that don't lead to the include, recursively.
+function Split-Exclude([string]$exclude, [string[]]$keep)
+{
+    $inside = @($keep | Where-Object { $_.StartsWith("$exclude/", 'OrdinalIgnoreCase') })
+
+    if ($inside.Count -eq 0)
+    {
+        return , @($exclude)
+    }
+
+    $result = [System.Collections.Generic.List[string]]::new()
+
+    foreach ($child in $children[$exclude.ToLowerInvariant()])
+    {
+        if ($inside -contains $child)
+        {
+            # this is the included path, don't exclude it
+            continue
+        }
+
+        foreach ($path in (Split-Exclude $child $inside))
+        {
+            $result.Add($path)
+        }
+    }
+
+    return , $result.ToArray()
+}
+
 $stale = @()
 
 foreach ($leafName in ($spec.leaves.Keys | Sort-Object))
@@ -214,7 +262,13 @@ foreach ($leafName in ($spec.leaves.Keys | Sort-Object))
         $candidates = @(Resolve-Entries $leaf.exclude "leaf '$leafName' exclude") | Where-Object { -not $rawIncludeSet.Contains($_) }
 
         # drop excludes that aren't under any include, they have no effect
-        $excludes = @(Compress-Paths $candidates | Where-Object { Test-UnderAny $_ $includeSet })
+        $split = [System.Collections.Generic.List[string]]::new()
+
+        Compress-Paths $candidates | Where-Object { Test-UnderAny $_ $includeSet } |
+            ForEach-Object { Split-Exclude $_ $rawIncludes } | ForEach-Object { $_ } | ForEach-Object { $split.Add($_) }
+
+        $split.Sort([System.StringComparer]::OrdinalIgnoreCase)
+        $excludes = $split.ToArray()
     }
 
     $pathFilters = @($includes | ForEach-Object { ":$_" }) + @($excludes | ForEach-Object { ":!$_" })

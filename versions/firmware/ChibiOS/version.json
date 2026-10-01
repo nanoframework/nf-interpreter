@@ -18,6 +18,7 @@
     ":/src",
     ":/targets-community",
     ":/targets/ChibiOS",
+    ":/targets/ThreadX/ST/_common/CubeMX",
     ":!/CMake/binutils.ESP32.cmake",
     ":!/CMake/binutils.FreeRTOS.cmake",
     ":!/CMake/binutils.ThreadX.cmake",

@@ -111,6 +111,12 @@
             "/targets/ThreadX/SiliconLabs",
             "/targets/ThreadX/ST"
         ],
+        "from-ThreadX-for-ChibiOS": [
+            "/targets/ThreadX/ST/_common/CubeMX"
+        ],
+        "from-nanoCLR-for-nanoBooter-ThreadX-SiliconLabs": [
+            "/targets/ThreadX/SiliconLabs/_nanoCLR/System.Device.Spi"
+        ],
         "src-clr": [
             "/src",
             "/InteropAssemblies"
@@ -149,7 +155,7 @@
     },
     "leaves": {
         "firmware/ChibiOS": {
-            "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/ChibiOS", "/targets-community", "@cmake-arm", "@cmake-ChibiOS" ],
+            "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/ChibiOS", "/targets-community", "@cmake-arm", "@cmake-ChibiOS", "@from-ThreadX-for-ChibiOS" ],
             "exclude": [ "@cmake-platforms" ]
         },
         "firmware/ESP32": {
@@ -189,7 +195,7 @@
             "exclude": [ "@cmake-platforms", "@targets-ThreadX-vendors" ]
         },
         "nanoCLR/ChibiOS": {
-            "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/ChibiOS", "/targets-community", "@cmake-arm", "@cmake-ChibiOS" ],
+            "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/ChibiOS", "/targets-community", "@cmake-arm", "@cmake-ChibiOS", "@from-ThreadX-for-ChibiOS" ],
             "exclude": [ "@cmake-platforms", "@booter-only" ]
         },
         "nanoCLR/ESP32": {
@@ -229,7 +235,7 @@
             "exclude": [ "@cmake-platforms", "@targets-ThreadX-vendors", "@booter-only" ]
         },
         "nanoBooter/ChibiOS": {
-            "include": [ "@repo-build", "@kconfig-booter", "@src-booter", "/targets/ChibiOS", "/targets-community", "@cmake-arm", "@cmake-ChibiOS" ],
+            "include": [ "@repo-build", "@kconfig-booter", "@src-booter", "/targets/ChibiOS", "/targets-community", "@cmake-arm", "@cmake-ChibiOS", "@from-ThreadX-for-ChibiOS" ],
             "exclude": [ "@cmake-platforms", "@clr-only" ]
         },
         "nanoBooter/FreeRTOS-NXP": {
@@ -253,7 +259,7 @@
             "exclude": [ "@cmake-platforms", "@targets-ThreadX-vendors", "@clr-only" ]
         },
         "nanoBooter/ThreadX-SiliconLabs": {
-            "include": [ "@repo-build", "@kconfig-booter", "@src-booter", "/targets/ThreadX", "/targets/ThreadX/SiliconLabs", "@cmake-arm", "@cmake-ThreadX", "@cmake-ThreadX-SiliconLabs" ],
+            "include": [ "@repo-build", "@kconfig-booter", "@src-booter", "/targets/ThreadX", "/targets/ThreadX/SiliconLabs", "@cmake-arm", "@cmake-ThreadX", "@cmake-ThreadX-SiliconLabs", "@from-nanoCLR-for-nanoBooter-ThreadX-SiliconLabs" ],
             "exclude": [ "@cmake-platforms", "@targets-ThreadX-vendors", "@clr-only" ]
         },
         "nanoBooter/ThreadX-ST": {
