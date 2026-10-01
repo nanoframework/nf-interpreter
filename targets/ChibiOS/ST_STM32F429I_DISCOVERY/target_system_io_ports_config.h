@@ -6,8 +6,8 @@
 // UART1 (PA9/PA10) is used by Wire Protocol through the ST-LINK Virtual COM port
 
 ///////////
-// UART3 //
+// UART5 //
 ///////////
 
-// enable USART3
-#define NF_SERIAL_COMM_STM32_UART_USE_USART3 TRUE
+// enable UART5
+#define NF_SERIAL_COMM_STM32_UART_USE_UART5 TRUE
