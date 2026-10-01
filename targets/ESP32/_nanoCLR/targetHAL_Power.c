@@ -6,6 +6,7 @@
 #include <target_platform.h>
 #include <esp32_idf.h>
 #include <nanoHAL_v2.h>
+#include <WireProtocol_Transport.h>
 
 // the classic ESP32 is absent because it has no FORCE_DOWNLOAD_BOOT bit
 #if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
@@ -19,14 +20,16 @@
 
 inline void CPU_Reset()
 {
-#if CONFIG_IDF_TARGET_ESP32C3 && CONFIG_NF_WP_TRANSPORT_USB_CDC
-    SET_PERI_REG_MASK(RTC_CNTL_OPTIONS0_REG, RTC_CNTL_SW_SYS_RST);
-    while (true)
+#if CONFIG_IDF_TARGET_ESP32C3
+    if (g_WP_Transport == WP_TRANSPORT_USB_JTAG)
     {
+        SET_PERI_REG_MASK(RTC_CNTL_OPTIONS0_REG, RTC_CNTL_SW_SYS_RST);
+        while (true)
+        {
+        }
     }
-#else
-    esp_restart();
 #endif
+    esp_restart();
 };
 
 // The proprietary bootloader of an ESP32 is the ROM download mode. The bit lives in the always-on
