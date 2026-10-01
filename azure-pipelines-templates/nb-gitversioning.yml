@@ -108,12 +108,13 @@ steps:
               return $nbgv
           }
 
-          # major.minor.patch.height, or a temporary version for PR builds that can't be confused with a real one
+          # major.minor.patch.height
+          # or a temporary version for PR builds that can't be confused with a real one: 0.0.<PR>.<height>
           function Format-ImageVersion($nbgv)
           {
               if (-not [string]::IsNullOrEmpty($prNumber))
               {
-                  return "0.$prNumber.0.$($nbgv.VersionHeight)"
+                  return "0.0.$prNumber.$($nbgv.VersionHeight)"
               }
 
               return $nbgv.Version
