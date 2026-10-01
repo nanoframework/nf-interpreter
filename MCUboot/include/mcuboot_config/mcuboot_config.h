@@ -181,13 +181,17 @@
 #endif
 // MCUBOOT_SERIAL_IMG_GRP_SLOT_INFO    not defined → disabled
 
-// Disable per-user management group extension.
-// Set to 0 to disable bs_peruser_system_specific() call in boot_serial_input().
-#define MCUBOOT_PERUSER_MGMT_GROUP_ENABLED 0
 // Largest SMP frame the serial recovery reassembles; also reported as buf_size by the
 // MCUmgr parameters command, so it sets the upload chunk size clients negotiate.
 // Configured via CONFIG_NF_MCUBOOT_SERIAL_MAX_RECEIVE_SIZE in Kconfig.
 #define MCUBOOT_SERIAL_MAX_RECEIVE_SIZE CONFIG_NF_MCUBOOT_SERIAL_MAX_RECEIVE_SIZE
+
+// OS group: MCUmgr parameters (group 0, cmd 6) and echo (group 0, cmd 0).
+#define MCUBOOT_BOOT_MGMT_MCUMGR_PARAMS 1
+#define MCUBOOT_BOOT_MGMT_ECHO          1
+
+// nanoFramework management group (64) - device info
+#define MCUBOOT_PERUSER_MGMT_GROUP_ENABLED 1
 
 // Enable direct image upload group (group 1, cmd 1) for IFU recovery via UART.
 #define MCUBOOT_SERIAL_DIRECT_IMAGE_UPLOAD 1

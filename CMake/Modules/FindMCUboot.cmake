@@ -43,6 +43,27 @@ endif()
 
 FetchContent_MakeAvailable(mcuboot)
 
+# MCUboot upstream version, reported by the serial recovery device info command.
+set(MCUBOOT_UPSTREAM_VERSION "unknown")
+
+if(EXISTS ${mcuboot_SOURCE_DIR}/boot/zephyr/VERSION)
+    file(STRINGS ${mcuboot_SOURCE_DIR}/boot/zephyr/VERSION _mcuboot_version_lines)
+
+    foreach(_line ${_mcuboot_version_lines})
+        if(_line MATCHES "^([A-Z_]+)[ \t]*=[ \t]*(.*)$")
+            set(_mcuboot_${CMAKE_MATCH_1} "${CMAKE_MATCH_2}")
+        endif()
+    endforeach()
+
+    set(MCUBOOT_UPSTREAM_VERSION "${_mcuboot_VERSION_MAJOR}.${_mcuboot_VERSION_MINOR}.${_mcuboot_PATCHLEVEL}")
+
+    if(_mcuboot_EXTRAVERSION)
+        string(APPEND MCUBOOT_UPSTREAM_VERSION "-${_mcuboot_EXTRAVERSION}")
+    endif()
+endif()
+
+message(STATUS "MCUboot upstream version: ${MCUBOOT_UPSTREAM_VERSION}")
+
 # MCUboot upstream include paths required by the porting layer.
 # These are the standard MCUboot header locations within the upstream tree.
 list(APPEND MCUboot_INCLUDE_DIRS

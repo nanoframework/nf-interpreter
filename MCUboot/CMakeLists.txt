@@ -357,7 +357,14 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
     # When serial recovery is enabled, add the full SMP/mcumgr serial stack:
     if(NF_MCUBOOT_SERIAL_RECOVERY)
 
-        list(APPEND MCUBOOT_SERIES_COMMON_COMPILE_DEFINITIONS MCUBOOT_SERIAL=1)
+        list(APPEND MCUBOOT_SERIES_COMMON_COMPILE_DEFINITIONS
+            MCUBOOT_SERIAL=1
+
+            # identity reported by the nanoFramework group (64) device info command
+            NF_MCUBOOT_TARGET_NAME="${TARGET_NAME}"
+            NF_MCUBOOT_UPSTREAM_VERSION="${MCUBOOT_UPSTREAM_VERSION}"
+            NF_NANOMCUBOOT_BUILD_VERSION="${BUILD_VERSION}"
+        )
 
         list(APPEND MCUBOOT_SERIES_COMMON_SOURCES
             ${mcuboot_SOURCE_DIR}/boot/boot_serial/src/boot_serial.c
@@ -369,6 +376,7 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
             ${CMAKE_SOURCE_DIR}/MCUboot/common/crc16_ccitt.c
             ${CMAKE_SOURCE_DIR}/MCUboot/common/base64_impl.c
             ${CMAKE_SOURCE_DIR}/MCUboot/common/flash_map_extend.c
+            ${CMAKE_SOURCE_DIR}/MCUboot/common/mcuboot_serial_extensions.c
         )
 
         list(APPEND MCUBOOT_SERIES_COMMON_INCLUDES
