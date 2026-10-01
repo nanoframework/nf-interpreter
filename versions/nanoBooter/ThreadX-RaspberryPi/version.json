@@ -78,6 +78,7 @@
     ":!/CMake/Modules/FindFreeRTOS.cmake",
     ":!/CMake/Modules/FindGecko_SDK.cmake",
     ":!/CMake/Modules/FindMaximMicrosSDK.cmake",
+    ":!/CMake/Modules/FindMCUboot.cmake",
     ":!/CMake/Modules/FindnanoFramework.EspNow.cmake",
     ":!/CMake/Modules/FindnanoFramework.GiantGecko.Adc.cmake",
     ":!/CMake/Modules/FindnanoFramework.Hardware.Esp32.Ble.cmake",

@@ -116,7 +116,7 @@ set(NANOMCUBOOTER_PROJECT_NAME "nanoMcubooter")
 
 # each image has its own version (major.minor.build[.revision]), computed by nbgv from versions/<image>/<platform>
 # when not set, they default to BUILD_VERSION
-foreach(image NANOBOOTER NANOCLR)
+foreach(image NANOBOOTER NANOCLR NANOMCUBOOT)
 
     if(NOT ${image}_VERSION)
         set(${image}_VERSION ${BUILD_VERSION})
@@ -150,6 +150,9 @@ message(STATUS "")
 message(STATUS "Building nanoFramework version ${PROJECT_VERSION} using build type '${CMAKE_BUILD_TYPE}'.")
 message(STATUS "nanoBooter version ${NANOBOOTER_VERSION_MAJOR}.${NANOBOOTER_VERSION_MINOR}.${NANOBOOTER_VERSION_BUILD}.${NANOBOOTER_VERSION_REVISION}")
 message(STATUS "nanoCLR version ${NANOCLR_VERSION_MAJOR}.${NANOCLR_VERSION_MINOR}.${NANOCLR_VERSION_BUILD}.${NANOCLR_VERSION_REVISION}")
+if(NF_FEATURE_HAS_MCUBOOT)
+    message(STATUS "nanoMCUboot version ${NANOMCUBOOT_VERSION_MAJOR}.${NANOMCUBOOT_VERSION_MINOR}.${NANOMCUBOOT_VERSION_BUILD}.${NANOMCUBOOT_VERSION_REVISION}")
+endif()
 message(STATUS "Source directory is '${CMAKE_SOURCE_DIR}'.")
 message(STATUS "Build  directory is '${CMAKE_BINARY_DIR}'.")
 message(STATUS "")

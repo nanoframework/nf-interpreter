@@ -21,7 +21,8 @@
     Path to a ninja build directory that has been fully built.
 
 .PARAMETER Component
-    Image to check: nanoBooter or nanoCLR. The ninja target is '<Component>.elf'.
+    Image to check: nanoBooter, nanoCLR or nanoMCUboot. The ninja target is '<Component>.elf', except for nanoMCUboot
+    which is built as 'nanoMcubooter.elf'.
 
 .PARAMETER Platform
     Leaf under versions/<Component>, e.g. ChibiOS or ThreadX-ST.
@@ -51,7 +52,7 @@ param (
     [string]$BuildDir,
 
     [Parameter(Mandatory)]
-    [ValidateSet('nanoBooter', 'nanoCLR')]
+    [ValidateSet('nanoBooter', 'nanoCLR', 'nanoMCUboot')]
     [string]$Component,
 
     [Parameter(Mandatory)]
@@ -165,7 +166,9 @@ if ($LASTEXITCODE -ne 0)
 
 $gitFiles | ForEach-Object { $trackedFiles.Add('/' + $_) | Out-Null }
 
-$elfTarget = "$Component.elf"
+# executable name of each image (versions/<Component> is named after the image)
+$executableName = if ($Component -eq 'nanoMCUboot') { 'nanoMcubooter' } else { $Component }
+$elfTarget = "$executableName.elf"
 
 # all transitive inputs of the image (sources, objects, libraries)
 $targetInputs = ninja -C $buildRoot -t inputs $elfTarget
@@ -182,7 +185,7 @@ foreach ($item in $targetInputs)
 {
     # objects of other executables show up through order-only dependencies (C++ module scanning), skip them
     if ($item -match '\.(obj|o)$' -and
-        ($item -notmatch 'CMakeFiles/([^/]+)\.elf\.dir/' -or $Matches[1] -eq $Component))
+        ($item -notmatch 'CMakeFiles/([^/]+)\.elf\.dir/' -or $Matches[1] -eq $executableName))
     {
         $objects.Add($item) | Out-Null
     }
