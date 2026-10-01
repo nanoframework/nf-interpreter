@@ -103,23 +103,6 @@ endif()
 if(${TARGET_SERIES_SHORT} STREQUAL "esp32p4")
     # defaulting to hardware v3, if v1 version is needed, need to use hw_ver1 instead of hw_ver3 in the path below
     list(APPEND ESP32_IDF_INCLUDE_DIRS ${IDF_PATH_CMAKED}/components/soc/esp32p4/register/hw_ver3)
-
-    # esp_wifi_remote provides "injected" esp_wifi headers using CONFIG_WIFI_RMT_* options
-    # these have to take precedence over the native esp_wifi headers (same logic as esp_wifi_remote CMakeLists)
-    set(ESP_WIFI_REMOTE_PATH ${IDF_PATH_CMAKED}/components/esp_wifi_remote)
-
-    if(EXISTS ${ESP_WIFI_REMOTE_PATH}/idf_tag_v${ESP32_IDF_TAG})
-        set(ESP_WIFI_REMOTE_VER_DIR ${ESP_WIFI_REMOTE_PATH}/idf_tag_v${ESP32_IDF_TAG})
-    else()
-        string(REGEX MATCH "^[0-9]+\\.[0-9]+" ESP32_IDF_MAJOR_MINOR ${ESP32_IDF_TAG})
-        set(ESP_WIFI_REMOTE_VER_DIR ${ESP_WIFI_REMOTE_PATH}/idf_v${ESP32_IDF_MAJOR_MINOR})
-    endif()
-
-    list(PREPEND ESP32_IDF_INCLUDE_DIRS
-        ${ESP_WIFI_REMOTE_VER_DIR}/include/injected
-        ${ESP_WIFI_REMOTE_VER_DIR}/include
-        ${ESP_WIFI_REMOTE_PATH}/include
-    )
 endif()
 
 # includes specific to Thread, native only for ESP32C6 and ESP32H2. Other mcu as attached network chip (EPS32-H2 etc)
