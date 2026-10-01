@@ -14,7 +14,7 @@ steps:
   - task: CMake@1
     displayName: Setup CMake build (RP target)
     inputs:
-      cmakeArgs: "--preset $(CMakePreset) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_NAME=$(TargetPublishName) $(BuildOptions) "
+      cmakeArgs: "--preset $(CMakePreset) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(FIRMWARE_VERSION) -DNANOCLR_VERSION=$(NANOCLR_VERSION) -DNANOBOOTER_VERSION=$(NANOBOOTER_VERSION) -DTARGET_NAME=$(TargetPublishName) $(BuildOptions) "
       workingDirectory: ${{ parameters.repoDirectory }}
 
   - task: CMake@1

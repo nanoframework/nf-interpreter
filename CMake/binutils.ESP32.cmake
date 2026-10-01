@@ -849,7 +849,7 @@ macro(nf_add_idf_as_library)
         SDKCONFIG_DEFAULTS
             ${SDKCONFIG_DEFAULTS_TEMP_FILE}
         PROJECT_NAME "nanoCLR"
-        PROJECT_VER ${BUILD_VERSION}
+        PROJECT_VER ${NANOCLR_VERSION}
         PROJECT_DIR ${CMAKE_SOURCE_DIR}
     )
 

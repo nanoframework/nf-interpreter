@@ -1,0 +1,270 @@
+{
+    "$comment": [
+        "Source of the nbgv 'pathFilters' for versions/<component>/<platform>/version.json.",
+        "Edit this file, then run 'pwsh versions/Update-PathFilters.ps1' to regenerate the version.json files.",
+        "Paths are repository-root relative. '*', '?' and '**' wildcards are expanded against the files tracked by git.",
+        "'@name' references a set. An exclude identical to an include is dropped, so a leaf can include its own",
+        "platform files and exclude a set with all the platforms.",
+        "Over-including only causes extra version bumps; under-including means a change won't bump the version.",
+        "Use 'pwsh versions/Test-BuildCoverage.ps1' on a build to confirm everything compiled in is covered."
+    ],
+    "sets": {
+        "repo-build": [
+            "/CMakeLists.txt",
+            "/CMakePresets.json",
+            "/CMake"
+        ],
+        "kconfig-all": [
+            "/Kconfig*"
+        ],
+        "kconfig-booter": [
+            "/Kconfig",
+            "/Kconfig.build",
+            "/Kconfig.features",
+            "/Kconfig.rtos",
+            "/Kconfig.serial",
+            "/Kconfig.wireprotocol"
+        ],
+        "cmake-arm": [
+            "/CMake/arm-gcc.json",
+            "/CMake/binutils.arm-none-eabi.cmake",
+            "/CMake/toolchain.arm-none-eabi.cmake"
+        ],
+        "cmake-ChibiOS": [
+            "/CMake/binutils.ChibiOS.cmake",
+            "/CMake/ChibiOS_target_os.h.in",
+            "/CMake/Modules/CHIBIOS_*",
+            "/CMake/Modules/FindCHIBIOS*",
+            "/CMake/Modules/FindChibiOS*",
+            "/CMake/Modules/FindCYW43_Driver.cmake",
+            "/CMake/Scripts/bin2uf2"
+        ],
+        "cmake-ESP32": [
+            "/CMake/binutils.ESP32.cmake",
+            "/CMake/ESP32_target_os.h.in",
+            "/CMake/riscv-*.json",
+            "/CMake/xtensa-*.json",
+            "/CMake/toolchain.riscv32-*",
+            "/CMake/toolchain.xtensa-*",
+            "/CMake/Modules/ESP32_*",
+            "/CMake/Modules/FindESP32_IDF.cmake",
+            "/CMake/Modules/FindnanoFramework.EspNow.cmake",
+            "/CMake/Modules/FindnanoFramework.Hardware.Esp32*"
+        ],
+        "cmake-FreeRTOS": [
+            "/CMake/binutils.FreeRTOS.cmake",
+            "/CMake/FreeRTOS_target_os.h.in",
+            "/CMake/Modules/FindFreeRTOS.cmake",
+            "/CMake/Modules/FindSTM32FREERTOS.cmake",
+            "/CMake/Modules/FreeRTOS_*"
+        ],
+        "cmake-TI_SimpleLink": [
+            "/CMake/binutils.TI_SimpleLink.cmake",
+            "/CMake/TI_SimpleLink_target_os.h.in",
+            "/CMake/Modules/FindTI_SimpleLink.cmake",
+            "/CMake/Modules/FindnanoFramework.Hardware.TI.cmake",
+            "/CMake/Modules/FindnanoFramework.TI.EasyLink.cmake",
+            "/CMake/Modules/TI_SimpleLink_*"
+        ],
+        "cmake-ThreadX": [
+            "/CMake/binutils.ThreadX.cmake",
+            "/CMake/ThreadX_target_os.h.in"
+        ],
+        "cmake-ThreadX-Maxim": [
+            "/CMake/Modules/FindMaximMicrosSDK.cmake",
+            "/CMake/Modules/ThreadX_MAX78000_*"
+        ],
+        "cmake-ThreadX-MicroBit": [
+            "/CMake/Modules/ThreadX_MICROBIT_*"
+        ],
+        "cmake-ThreadX-RaspberryPi": [
+            "/CMake/Modules/ThreadX_RP2040_*"
+        ],
+        "cmake-ThreadX-SiliconLabs": [
+            "/CMake/Modules/FindGecko_SDK.cmake",
+            "/CMake/Modules/FindnanoFramework.GiantGecko.Adc.cmake",
+            "/CMake/Modules/FindnanoFramework.Hardware.GiantGecko.cmake",
+            "/CMake/Modules/Gecko_SDK.cmake",
+            "/CMake/Modules/ThreadX_EFM32GG11_*"
+        ],
+        "cmake-ThreadX-ST": [
+            "/CMake/Modules/ThreadX_STM32*"
+        ],
+        "cmake-platforms": [
+            "@cmake-arm",
+            "@cmake-ChibiOS",
+            "@cmake-ESP32",
+            "@cmake-FreeRTOS",
+            "@cmake-TI_SimpleLink",
+            "@cmake-ThreadX",
+            "@cmake-ThreadX-Maxim",
+            "@cmake-ThreadX-MicroBit",
+            "@cmake-ThreadX-RaspberryPi",
+            "@cmake-ThreadX-SiliconLabs",
+            "@cmake-ThreadX-ST"
+        ],
+        "targets-ThreadX-vendors": [
+            "/targets/ThreadX/Maxim",
+            "/targets/ThreadX/MicroBit",
+            "/targets/ThreadX/Nordic",
+            "/targets/ThreadX/RaspberryPi",
+            "/targets/ThreadX/SiliconLabs",
+            "/targets/ThreadX/ST"
+        ],
+        "from-ThreadX-for-ChibiOS": [
+            "/targets/ThreadX/ST/_common/CubeMX"
+        ],
+        "from-nanoCLR-for-nanoBooter-ThreadX-SiliconLabs": [
+            "/targets/ThreadX/SiliconLabs/_nanoCLR/System.Device.Spi"
+        ],
+        "src-clr": [
+            "/src",
+            "/InteropAssemblies"
+        ],
+        "src-booter": [
+            "/src/CLR/Include",
+            "/src/CLR/WireProtocol",
+            "/src/CLR/Core/nanoSupport_CRC32.c",
+            "/src/CLR/Debugger",
+            "/src/HAL",
+            "/src/PAL/Include",
+            "/src/PAL/BlockStorage",
+            "/src/DeviceInterfaces/Networking.Sntp"
+        ],
+        "booter-only": [
+            "/targets/**/_nanoBooter",
+            "/targets/**/nanoBooter"
+        ],
+        "clr-only": [
+            "/targets/**/_nanoCLR",
+            "/targets/**/nanoCLR",
+            "/targets/**/_lwIP",
+            "/targets/**/_FatFs",
+            "/targets/**/_littlefs",
+            "/targets/**/_WiFi",
+            "/targets/**/_Network",
+            "/targets/**/managed_helpers",
+            "/targets/**/target_system_device_*",
+            "/targets/**/target_system_io_ports_config.*",
+            "/targets/**/target_nf_*",
+            "/targets/**/target_FileSystem.cpp",
+            "/targets/**/target_littlefs.*",
+            "/targets/**/lfs_config.h",
+            "/targets/**/mbedtls_config.h"
+        ]
+    },
+    "leaves": {
+        "firmware/ChibiOS": {
+            "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/ChibiOS", "/targets-community", "@cmake-arm", "@cmake-ChibiOS", "@from-ThreadX-for-ChibiOS" ],
+            "exclude": [ "@cmake-platforms" ]
+        },
+        "firmware/ESP32": {
+            "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/ESP32", "@cmake-ESP32" ],
+            "exclude": [ "@cmake-platforms" ]
+        },
+        "firmware/FreeRTOS-NXP": {
+            "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/FreeRTOS", "@cmake-arm", "@cmake-FreeRTOS" ],
+            "exclude": [ "@cmake-platforms" ]
+        },
+        "firmware/TI_SimpleLink": {
+            "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/TI_SimpleLink", "/targets-community", "@cmake-arm", "@cmake-TI_SimpleLink" ],
+            "exclude": [ "@cmake-platforms" ]
+        },
+        "firmware/ThreadX-Maxim": {
+            "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/ThreadX", "/targets/ThreadX/Maxim", "@cmake-arm", "@cmake-ThreadX", "@cmake-ThreadX-Maxim" ],
+            "exclude": [ "@cmake-platforms", "@targets-ThreadX-vendors" ]
+        },
+        "firmware/ThreadX-MicroBit": {
+            "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/ThreadX", "/targets/ThreadX/MicroBit", "@cmake-arm", "@cmake-ThreadX", "@cmake-ThreadX-MicroBit" ],
+            "exclude": [ "@cmake-platforms", "@targets-ThreadX-vendors" ]
+        },
+        "firmware/ThreadX-Nordic": {
+            "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/ThreadX", "/targets/ThreadX/Nordic", "@cmake-arm", "@cmake-ThreadX" ],
+            "exclude": [ "@cmake-platforms", "@targets-ThreadX-vendors" ]
+        },
+        "firmware/ThreadX-RaspberryPi": {
+            "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/ThreadX", "/targets/ThreadX/RaspberryPi", "@cmake-arm", "@cmake-ThreadX", "@cmake-ThreadX-RaspberryPi" ],
+            "exclude": [ "@cmake-platforms", "@targets-ThreadX-vendors" ]
+        },
+        "firmware/ThreadX-SiliconLabs": {
+            "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/ThreadX", "/targets/ThreadX/SiliconLabs", "@cmake-arm", "@cmake-ThreadX", "@cmake-ThreadX-SiliconLabs" ],
+            "exclude": [ "@cmake-platforms", "@targets-ThreadX-vendors" ]
+        },
+        "firmware/ThreadX-ST": {
+            "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/ThreadX", "/targets/ThreadX/ST", "@cmake-arm", "@cmake-ThreadX", "@cmake-ThreadX-ST" ],
+            "exclude": [ "@cmake-platforms", "@targets-ThreadX-vendors" ]
+        },
+        "nanoCLR/ChibiOS": {
+            "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/ChibiOS", "/targets-community", "@cmake-arm", "@cmake-ChibiOS", "@from-ThreadX-for-ChibiOS" ],
+            "exclude": [ "@cmake-platforms", "@booter-only" ]
+        },
+        "nanoCLR/ESP32": {
+            "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/ESP32", "@cmake-ESP32" ],
+            "exclude": [ "@cmake-platforms", "@booter-only" ]
+        },
+        "nanoCLR/FreeRTOS-NXP": {
+            "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/FreeRTOS", "@cmake-arm", "@cmake-FreeRTOS" ],
+            "exclude": [ "@cmake-platforms", "@booter-only" ]
+        },
+        "nanoCLR/TI_SimpleLink": {
+            "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/TI_SimpleLink", "/targets-community", "@cmake-arm", "@cmake-TI_SimpleLink" ],
+            "exclude": [ "@cmake-platforms", "@booter-only" ]
+        },
+        "nanoCLR/ThreadX-Maxim": {
+            "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/ThreadX", "/targets/ThreadX/Maxim", "@cmake-arm", "@cmake-ThreadX", "@cmake-ThreadX-Maxim" ],
+            "exclude": [ "@cmake-platforms", "@targets-ThreadX-vendors", "@booter-only" ]
+        },
+        "nanoCLR/ThreadX-MicroBit": {
+            "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/ThreadX", "/targets/ThreadX/MicroBit", "@cmake-arm", "@cmake-ThreadX", "@cmake-ThreadX-MicroBit" ],
+            "exclude": [ "@cmake-platforms", "@targets-ThreadX-vendors", "@booter-only" ]
+        },
+        "nanoCLR/ThreadX-Nordic": {
+            "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/ThreadX", "/targets/ThreadX/Nordic", "@cmake-arm", "@cmake-ThreadX" ],
+            "exclude": [ "@cmake-platforms", "@targets-ThreadX-vendors", "@booter-only" ]
+        },
+        "nanoCLR/ThreadX-RaspberryPi": {
+            "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/ThreadX", "/targets/ThreadX/RaspberryPi", "@cmake-arm", "@cmake-ThreadX", "@cmake-ThreadX-RaspberryPi" ],
+            "exclude": [ "@cmake-platforms", "@targets-ThreadX-vendors", "@booter-only" ]
+        },
+        "nanoCLR/ThreadX-SiliconLabs": {
+            "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/ThreadX", "/targets/ThreadX/SiliconLabs", "@cmake-arm", "@cmake-ThreadX", "@cmake-ThreadX-SiliconLabs" ],
+            "exclude": [ "@cmake-platforms", "@targets-ThreadX-vendors", "@booter-only" ]
+        },
+        "nanoCLR/ThreadX-ST": {
+            "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/ThreadX", "/targets/ThreadX/ST", "@cmake-arm", "@cmake-ThreadX", "@cmake-ThreadX-ST" ],
+            "exclude": [ "@cmake-platforms", "@targets-ThreadX-vendors", "@booter-only" ]
+        },
+        "nanoBooter/ChibiOS": {
+            "include": [ "@repo-build", "@kconfig-booter", "@src-booter", "/targets/ChibiOS", "/targets-community", "@cmake-arm", "@cmake-ChibiOS", "@from-ThreadX-for-ChibiOS" ],
+            "exclude": [ "@cmake-platforms", "@clr-only" ]
+        },
+        "nanoBooter/FreeRTOS-NXP": {
+            "include": [ "@repo-build", "@kconfig-booter", "@src-booter", "/targets/FreeRTOS", "@cmake-arm", "@cmake-FreeRTOS" ],
+            "exclude": [ "@cmake-platforms", "@clr-only" ]
+        },
+        "nanoBooter/ThreadX-Maxim": {
+            "include": [ "@repo-build", "@kconfig-booter", "@src-booter", "/targets/ThreadX", "/targets/ThreadX/Maxim", "@cmake-arm", "@cmake-ThreadX", "@cmake-ThreadX-Maxim" ],
+            "exclude": [ "@cmake-platforms", "@targets-ThreadX-vendors", "@clr-only" ]
+        },
+        "nanoBooter/ThreadX-MicroBit": {
+            "include": [ "@repo-build", "@kconfig-booter", "@src-booter", "/targets/ThreadX", "/targets/ThreadX/MicroBit", "@cmake-arm", "@cmake-ThreadX", "@cmake-ThreadX-MicroBit" ],
+            "exclude": [ "@cmake-platforms", "@targets-ThreadX-vendors", "@clr-only" ]
+        },
+        "nanoBooter/ThreadX-Nordic": {
+            "include": [ "@repo-build", "@kconfig-booter", "@src-booter", "/targets/ThreadX", "/targets/ThreadX/Nordic", "@cmake-arm", "@cmake-ThreadX" ],
+            "exclude": [ "@cmake-platforms", "@targets-ThreadX-vendors", "@clr-only" ]
+        },
+        "nanoBooter/ThreadX-RaspberryPi": {
+            "include": [ "@repo-build", "@kconfig-booter", "@src-booter", "/targets/ThreadX", "/targets/ThreadX/RaspberryPi", "@cmake-arm", "@cmake-ThreadX", "@cmake-ThreadX-RaspberryPi" ],
+            "exclude": [ "@cmake-platforms", "@targets-ThreadX-vendors", "@clr-only" ]
+        },
+        "nanoBooter/ThreadX-SiliconLabs": {
+            "include": [ "@repo-build", "@kconfig-booter", "@src-booter", "/targets/ThreadX", "/targets/ThreadX/SiliconLabs", "@cmake-arm", "@cmake-ThreadX", "@cmake-ThreadX-SiliconLabs", "@from-nanoCLR-for-nanoBooter-ThreadX-SiliconLabs" ],
+            "exclude": [ "@cmake-platforms", "@targets-ThreadX-vendors", "@clr-only" ]
+        },
+        "nanoBooter/ThreadX-ST": {
+            "include": [ "@repo-build", "@kconfig-booter", "@src-booter", "/targets/ThreadX", "/targets/ThreadX/ST", "@cmake-arm", "@cmake-ThreadX", "@cmake-ThreadX-ST" ],
+            "exclude": [ "@cmake-platforms", "@targets-ThreadX-vendors", "@clr-only" ]
+        }
+    }
+}
