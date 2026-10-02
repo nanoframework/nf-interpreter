@@ -128,6 +128,12 @@ config API_NANOFRAMEWORK_HARDWARE_ESP32_RMT
     depends on RTOS_ESP32
     default n
 
+config API_NANOFRAMEWORK_ESP32_CAMERA
+    bool "nanoFramework.Esp32.Camera"
+    depends on RTOS_ESP32
+    depends on TARGET_SERIES = "ESP32" || TARGET_SERIES = "ESP32_S3"
+    default n
+
 config API_NANOFRAMEWORK_HARDWARE_TI
     bool "nanoFramework.Hardware.TI"
     depends on RTOS_TI_SIMPLELINK
