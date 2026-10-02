@@ -38,11 +38,8 @@ option(API_nanoFramework.System.Security.Cryptography   "option for nanoFramewor
 # Esp32 only
 option(API_Hardware.Esp32                               "option for Hardware.Esp32")
 option(API_nanoFramework.Hardware.Esp32.Rmt             "option for nanoFramework.Hardware.Esp32.Rmt")
-<<<<<<< HEAD
 option(API_nanoFramework.EspNow                         "option for nanoFramework.EspNow")
-=======
 option(API_nanoFramework.Esp32.Camera                   "option for nanoFramework.Esp32.Camera")
->>>>>>> 2dd7cf9e0 (Changes to the CMake modules to add the camera assemblies and the IDF files.)
 option(API_nanoFramework.Networking.Thread              "option for nanoFramework.Networking.Thread API")
 
 # Stm32 only
@@ -257,16 +254,15 @@ if(API_nanoFramework.Hardware.Esp32.Rmt)
     PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32.Rmt")
 endif()
 
-<<<<<<< HEAD
 # nanoFramework.EspNow
 if(API_nanoFramework.EspNow)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("nanoFramework.EspNow")
-=======
+endif()
+
 # nanoFramework.Esp32.Camera
 if(API_nanoFramework.Esp32.Camera)
     PerformSettingsForApiEntry("nanoFramework.Esp32.Camera")
->>>>>>> 2dd7cf9e0 (Changes to the CMake modules to add the camera assemblies and the IDF files.)
 endif()
 
 # nanoFramework.Networking.Thread

@@ -1,11 +1,12 @@
-﻿#include "nano_esp32_cam.h"
+﻿// Copyright (c) .NET Foundation and Contributors
+// See LICENSE file in the project root for full license information.
+
+#include "nano_esp32_cam.h"
 
 #include <CPU_GPIO_decl.h>
 #include <esp_camera.h>
 #include <cstring>
 
-namespace
-{
 using Camera = Library_nano_esp32_cam_nanoFramework_Esp32_Camera_Esp32Camera;
 using Settings = Library_nano_esp32_cam_nanoFramework_Esp32_Camera_CameraConnectionSettings;
 
@@ -109,7 +110,6 @@ HRESULT SetSensorResult(int result)
 {
     return result == 0 ? S_OK : CLR_E_INVALID_PARAMETER;
 }
-} // namespace
 
 HRESULT Camera::NativeInit___VOID(CLR_RT_StackFrame &stack)
 {
