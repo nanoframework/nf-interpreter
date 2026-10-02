@@ -568,6 +568,10 @@ macro(nf_add_idf_as_library)
 
     nf_install_idf_component_from_registry(littlefs 97bf51ce-1daa-4369-81ec-eacbd8102815) 
 
+    if(API_nanoFramework.Esp32.Camera)
+        nf_install_idf_component_from_registry(esp32-camera d6e13e30-e4c0-46a6-b056-9d5832bb8a37)
+    endif()
+
     if(${TARGET_SERIES_SHORT} STREQUAL "esp32p4")
         # v1.6.3
         nf_install_idf_component_from_registry(esp_wifi_remote 3c98b2c9-11fb-4477-b80a-1aaa3536b46d)
@@ -700,6 +704,11 @@ macro(nf_add_idf_as_library)
     if(HAL_USE_THREAD_OPTION)
         list(APPEND IDF_COMPONENTS_TO_ADD openthread)
         list(APPEND IDF_LIBRARIES_TO_ADD idf::openthread)
+    endif()
+
+    if(API_nanoFramework.Esp32.Camera)
+        list(APPEND IDF_COMPONENTS_TO_ADD esp32-camera)
+        list(APPEND IDF_LIBRARIES_TO_ADD idf::esp32-camera)
     endif()
 
     # handle specifics for ESP32S2 series
