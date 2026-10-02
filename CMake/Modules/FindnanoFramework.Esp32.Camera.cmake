@@ -9,6 +9,9 @@ list(APPEND nanoFramework.Esp32.Camera_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/
 list(APPEND nanoFramework.Esp32.Camera_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Include)
 list(APPEND nanoFramework.Esp32.Camera_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/HAL/Include)
 list(APPEND nanoFramework.Esp32.Camera_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/Include)
+list(APPEND nanoFramework.Esp32.Camera_INCLUDE_DIRS ${IDF_PATH_CMAKED}/components/esp32-camera/driver/include)
+list(APPEND nanoFramework.Esp32.Camera_INCLUDE_DIRS ${IDF_PATH_CMAKED}/components/esp32-camera/conversions/include)
+list(APPEND nanoFramework.Esp32.Camera_INCLUDE_DIRS ${IDF_PATH_CMAKED}/components/esp_jpeg/include)
 list(APPEND nanoFramework.Esp32.Camera_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
 list(APPEND nanoFramework.Esp32.Camera_INCLUDE_DIRS ${TARGET_BASE_LOCATION}/nanoFramework.Esp32.Camera)
 

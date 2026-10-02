@@ -103,7 +103,11 @@ HRESULT Camera::NativeInit___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock *pThis = stack.This();
+    CLR_RT_HeapBlock *pThis = nullptr;
+    CLR_RT_HeapBlock *settings = nullptr;
+    camera_config_t config = {};
+
+    pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
     if (s_cameraInitialized)
@@ -111,10 +115,9 @@ HRESULT Camera::NativeInit___VOID(CLR_RT_StackFrame &stack)
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
 
-    CLR_RT_HeapBlock *settings = pThis[FIELD___cameraConnectionSettings].Dereference();
+    settings = pThis[FIELD___cameraConnectionSettings].Dereference();
     FAULT_ON_NULL(settings);
 
-    camera_config_t config = {};
     config.pin_pwdn = settings[Settings::FIELD___pinPowerDown].NumericByRef().s4;
     config.pin_reset = settings[Settings::FIELD___pinReset].NumericByRef().s4;
     config.pin_xclk = settings[Settings::FIELD___pinXclk].NumericByRef().s4;
@@ -204,6 +207,7 @@ HRESULT Camera::NativeCapture___SZARRAY_U1(CLR_RT_StackFrame &stack)
 HRESULT Camera::NativeCaptureToBuffer___I4__SZARRAY_U1(CLR_RT_StackFrame &stack)
 {
     camera_fb_t *frame = nullptr;
+    CLR_RT_HeapBlock_Array *destination = nullptr;
     NANOCLR_HEADER();
 
     if (!s_cameraInitialized)
@@ -211,7 +215,7 @@ HRESULT Camera::NativeCaptureToBuffer___I4__SZARRAY_U1(CLR_RT_StackFrame &stack)
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
 
-    CLR_RT_HeapBlock_Array *destination = stack.Arg1().DereferenceArray();
+    destination = stack.Arg1().DereferenceArray();
     FAULT_ON_NULL(destination);
 
     frame = esp_camera_fb_get();
@@ -254,12 +258,12 @@ HRESULT Camera::NativeSetFrameSize___VOID__I4(CLR_RT_StackFrame &stack)
     NANOCLR_HEADER();
 
     CLR_INT32 value = stack.Arg1().NumericByRef().s4;
+    sensor_t *sensor = nullptr;
     if (value < FRAMESIZE_96X96 || value >= FRAMESIZE_INVALID)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    sensor_t *sensor = nullptr;
     NANOCLR_CHECK_HRESULT(GetSensor(sensor));
     NANOCLR_CHECK_HRESULT(SetSensorResult(sensor->set_framesize(sensor, static_cast<framesize_t>(value))));
 
@@ -271,12 +275,12 @@ HRESULT Camera::NativeSetJpegQuality___VOID__I4(CLR_RT_StackFrame &stack)
     NANOCLR_HEADER();
 
     CLR_INT32 value = stack.Arg1().NumericByRef().s4;
+    sensor_t *sensor = nullptr;
     if (value < 0 || value > 63)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    sensor_t *sensor = nullptr;
     NANOCLR_CHECK_HRESULT(GetSensor(sensor));
     NANOCLR_CHECK_HRESULT(SetSensorResult(sensor->set_quality(sensor, value)));
 
@@ -310,12 +314,12 @@ HRESULT Camera::NativeSetBrightness___VOID__I4(CLR_RT_StackFrame &stack)
     NANOCLR_HEADER();
 
     CLR_INT32 value = stack.Arg1().NumericByRef().s4;
+    sensor_t *sensor = nullptr;
     if (value < -2 || value > 2)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    sensor_t *sensor = nullptr;
     NANOCLR_CHECK_HRESULT(GetSensor(sensor));
     NANOCLR_CHECK_HRESULT(SetSensorResult(sensor->set_brightness(sensor, value)));
 

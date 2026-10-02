@@ -570,6 +570,7 @@ macro(nf_add_idf_as_library)
 
     if(API_nanoFramework.Esp32.Camera)
         nf_install_idf_component_from_registry(esp32-camera d6e13e30-e4c0-46a6-b056-9d5832bb8a37)
+        nf_install_idf_component_from_registry(esp_jpeg 64a7c4fb-8c0e-4fdb-89b7-37759ff6ca27)
     endif()
 
     if(${TARGET_SERIES_SHORT} STREQUAL "esp32p4")
@@ -708,7 +709,9 @@ macro(nf_add_idf_as_library)
 
     if(API_nanoFramework.Esp32.Camera)
         list(APPEND IDF_COMPONENTS_TO_ADD esp32-camera)
+        list(APPEND IDF_COMPONENTS_TO_ADD esp_jpeg)
         list(APPEND IDF_LIBRARIES_TO_ADD idf::esp32-camera)
+        list(APPEND IDF_LIBRARIES_TO_ADD idf::esp_jpeg)
     endif()
 
     # handle specifics for ESP32S2 series
@@ -863,6 +866,10 @@ macro(nf_add_idf_as_library)
         PROJECT_VER ${BUILD_VERSION}
         PROJECT_DIR ${CMAKE_SOURCE_DIR}
     )
+
+    if(API_nanoFramework.Esp32.Camera)
+        target_link_libraries(__idf_esp32-camera PUBLIC idf::esp_jpeg)
+    endif()
 
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
