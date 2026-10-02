@@ -63,10 +63,22 @@ HRESULT ReservePin(int pin)
 HRESULT ReserveCameraPins(const camera_config_t &config)
 {
     const int pins[CameraPinCount] = {
-        config.pin_pwdn,     config.pin_reset, config.pin_xclk, config.pin_sccb_sda,
-        config.pin_sccb_scl, config.pin_d7,    config.pin_d6,   config.pin_d5,
-        config.pin_d4,       config.pin_d3,    config.pin_d2,   config.pin_d1,
-        config.pin_d0,       config.pin_vsync, config.pin_href, config.pin_pclk};
+        config.pin_pwdn,
+        config.pin_reset,
+        config.pin_xclk,
+        config.pin_sccb_sda,
+        config.pin_sccb_scl,
+        config.pin_d7,
+        config.pin_d6,
+        config.pin_d5,
+        config.pin_d4,
+        config.pin_d3,
+        config.pin_d2,
+        config.pin_d1,
+        config.pin_d0,
+        config.pin_vsync,
+        config.pin_href,
+        config.pin_pclk};
 
     s_reservedPinCount = 0;
     for (size_t index = 0; index < CameraPinCount; index++)
@@ -189,8 +201,7 @@ HRESULT Camera::NativeCapture___SZARRAY_U1(CLR_RT_StackFrame &stack)
 
     {
         CLR_RT_HeapBlock &top = stack.PushValueAndClear();
-        NANOCLR_CHECK_HRESULT(
-            CLR_RT_HeapBlock_Array::CreateInstance(top, frame->len, g_CLR_RT_WellKnownTypes.m_UInt8));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, frame->len, g_CLR_RT_WellKnownTypes.m_UInt8));
         memcpy(top.DereferenceArray()->GetFirstElement(), frame->buf, frame->len);
     }
 
