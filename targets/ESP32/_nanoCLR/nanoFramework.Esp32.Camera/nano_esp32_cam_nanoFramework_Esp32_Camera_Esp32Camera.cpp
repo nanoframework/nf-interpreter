@@ -14,9 +14,9 @@ constexpr ledc_timer_t CameraLedcTimer = LEDC_TIMER_3;
 constexpr ledc_channel_t CameraLedcChannel = LEDC_CHANNEL_7;
 constexpr size_t CameraPinCount = 16;
 
-bool s_cameraInitialized = false;
-int s_reservedPins[CameraPinCount];
-size_t s_reservedPinCount = 0;
+static bool s_cameraInitialized = false;
+static int s_reservedPins[CameraPinCount];
+static size_t s_reservedPinCount = 0;
 
 HRESULT MapEspError(esp_err_t error)
 {
