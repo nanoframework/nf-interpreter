@@ -5,6 +5,7 @@
 
 #include <CPU_GPIO_decl.h>
 #include <esp_camera.h>
+#include <targetPAL_Ledc.h>
 #include <cstring>
 
 typedef Library_nano_esp32_cam_nanoFramework_Esp32_Camera_Esp32Camera Camera;
@@ -15,6 +16,7 @@ constexpr ledc_channel_t CameraLedcChannel = LEDC_CHANNEL_7;
 constexpr size_t CameraPinCount = 16;
 
 static bool s_cameraInitialized = false;
+static bool s_cameraLedcReserved = false;
 static int s_reservedPins[CameraPinCount];
 static size_t s_reservedPinCount = 0;
 
@@ -42,6 +44,38 @@ void ReleasePins()
     while (s_reservedPinCount > 0)
     {
         CPU_GPIO_ReservePin(s_reservedPins[--s_reservedPinCount], false);
+    }
+}
+
+static void ReleaseCameraClock()
+{
+    if (s_cameraLedcReserved)
+    {
+        Esp32_Ledc_Release(LEDC_LOW_SPEED_MODE, CameraLedcChannel, Esp32LedcOwner::Camera);
+        s_cameraLedcReserved = false;
+    }
+}
+
+static esp_err_t CameraUninitialize()
+{
+    if (!s_cameraInitialized)
+    {
+        return ESP_OK;
+    }
+
+    esp_err_t result = esp_camera_deinit();
+    s_cameraInitialized = false;
+    ReleasePins();
+    ReleaseCameraClock();
+    return result;
+}
+
+static void CameraSoftRebootCleanup()
+{
+    esp_err_t result = CameraUninitialize();
+    if (result != ESP_OK && result != ESP_ERR_INVALID_STATE)
+    {
+        ESP_LOGE("Camera", "Failed to deinitialize during cleanup: %s", esp_err_to_name(result));
     }
 }
 
@@ -169,16 +203,31 @@ HRESULT Camera::NativeInit___VOID(CLR_RT_StackFrame &stack)
 
     NANOCLR_CHECK_HRESULT(ReserveCameraPins(config));
 
+#if !defined(CONFIG_IDF_TARGET_ESP32S3)
+    // ESP32-S3 generates XCLK with LCD_CAM instead of LEDC.
+    if (config.pin_xclk >= 0)
+    {
+        if (!Esp32_Ledc_Reserve(LEDC_LOW_SPEED_MODE, CameraLedcTimer, CameraLedcChannel, Esp32LedcOwner::Camera))
+        {
+            ReleasePins();
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+        }
+        s_cameraLedcReserved = true;
+    }
+#endif
+
     {
         esp_err_t result = esp_camera_init(&config);
         if (result != ESP_OK)
         {
             ReleasePins();
+            ReleaseCameraClock();
             NANOCLR_SET_AND_LEAVE(MapEspError(result));
         }
     }
 
     s_cameraInitialized = true;
+    HAL_AddSoftRebootHandler(CameraSoftRebootCleanup);
 
     NANOCLR_NOCLEANUP();
 }
@@ -345,9 +394,7 @@ HRESULT Camera::NativeDispose___VOID(CLR_RT_StackFrame &stack)
 
     if (s_cameraInitialized)
     {
-        esp_err_t result = esp_camera_deinit();
-        s_cameraInitialized = false;
-        ReleasePins();
+        esp_err_t result = CameraUninitialize();
 
         if (result != ESP_OK && result != ESP_ERR_INVALID_STATE)
         {

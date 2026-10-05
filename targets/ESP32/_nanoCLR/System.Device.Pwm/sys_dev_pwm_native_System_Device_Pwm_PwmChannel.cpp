@@ -6,9 +6,12 @@
 #include <sys_dev_pwm_native.h>
 #include <targetPAL.h>
 #include <Esp32_DeviceMapping.h>
+#include <targetPAL_Ledc.h>
 
 // Used to map a PWM channel number to a pin number for High and low speed channels
+#if SOC_LEDC_SUPPORT_HS_MODE
 static char HighSpeedPinMap[8] = {255, 255, 255, 255, 255, 255, 255, 255};
+#endif
 static char LowSpeedPinMap[8] = {255, 255, 255, 255, 255, 255, 255, 255};
 // Pin functions from PWM1 to PWM16
 static int PwmMapping[16] = {
@@ -55,6 +58,37 @@ esp_err_t SetDutyCycle(ledc_mode_t speed_mode, ledc_channel_t channel, uint32_t 
 using namespace sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers;
 
 bool isStarted;
+static bool s_pwmConfigured[LEDC_SPEED_MODE_MAX][LEDC_CHANNEL_MAX] = {};
+
+static void PwmUninitialize()
+{
+    for (int mode = 0; mode < LEDC_SPEED_MODE_MAX; mode++)
+    {
+#if SOC_LEDC_SUPPORT_HS_MODE
+        char *map = mode == LEDC_HIGH_SPEED_MODE ? HighSpeedPinMap : LowSpeedPinMap;
+#else
+        char *map = LowSpeedPinMap;
+#endif
+        for (int channel = 0; channel < LEDC_CHANNEL_MAX; channel++)
+        {
+            if (map[channel] != 255)
+            {
+                if (s_pwmConfigured[mode][channel])
+                {
+                    esp_err_t result = ledc_stop((ledc_mode_t)mode, (ledc_channel_t)channel, 0);
+                    if (result != ESP_OK)
+                    {
+                        ESP_LOGE("PWM", "Failed to stop channel %d during cleanup: %s", channel, esp_err_to_name(result));
+                    }
+                }
+                Esp32_Ledc_Release((ledc_mode_t)mode, (ledc_channel_t)channel, Esp32LedcOwner::Pwm);
+                map[channel] = 255;
+                s_pwmConfigured[mode][channel] = false;
+            }
+        }
+    }
+    isStarted = false;
+}
 
 //
 //  Look up Pin number to find channel, if create true and not present then add pin
@@ -64,15 +98,31 @@ int sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers::GetChannel(int pin, 
 {
     int channel = -1; // Return if not found
 
+    if (timerId < 0 || timerId >= 8)
+    {
+        return -1;
+    }
+
+    ledc_mode_t mode = GetSpeedMode(timerId);
+    ledc_timer_t timer = (ledc_timer_t)(timerId & 0x03);
+
     // Select map depending if high or low speed timers
-    char *pMap = (timerId > 3) ? LowSpeedPinMap : HighSpeedPinMap;
+#if SOC_LEDC_SUPPORT_HS_MODE
+    char *pMap = mode == LEDC_HIGH_SPEED_MODE ? HighSpeedPinMap : LowSpeedPinMap;
+#else
+    char *pMap = LowSpeedPinMap;
+#endif
     char *pMap2 = pMap;
 
     // look for pin in map
-    for (int index = 0; index < 8; index++, pMap++)
+    for (int index = 0; index < LEDC_CHANNEL_MAX; index++, pMap++)
     {
         if (*pMap == pin)
         {
+            if (!Esp32_Ledc_Reserve(mode, timer, (ledc_channel_t)index, Esp32LedcOwner::Pwm))
+            {
+                return -1;
+            }
             channel = index;
             break;
         }
@@ -81,12 +131,13 @@ int sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers::GetChannel(int pin, 
     if (create && channel == -1)
     {
         // if pin/channel not found then allocate one
-        for (int index = 0; index < 8; index++, pMap2++)
+        for (int index = 0; index < LEDC_CHANNEL_MAX; index++, pMap2++)
         {
-            if (*pMap2 == 255)
+            if (*pMap2 == 255 && Esp32_Ledc_Reserve(mode, timer, (ledc_channel_t)index, Esp32LedcOwner::Pwm))
             {
                 channel = index;
                 *pMap2 = pin;
+                HAL_AddSoftRebootHandler(PwmUninitialize);
                 break;
             }
         }
@@ -176,6 +227,7 @@ HRESULT sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers::ConfigureAndStar
 
     // Configure Channel which will also start it
     IDF_ERROR(ledc_channel_config(&ledc_conf));
+    s_pwmConfigured[mode][channel] = true;
 
     // Because it is started from the configure we optionally stop it and set idle level based on polarity
     if (noStart)
@@ -306,12 +358,6 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetDesire
 
     timer = (ledc_timer_t)(timerId & 0x03);
 
-#if SOC_LEDC_SUPPORT_HS_MODE
-    mode = (timerId <= 4) ? LEDC_HIGH_SPEED_MODE : LEDC_LOW_SPEED_MODE;
-#else
-    mode = LEDC_LOW_SPEED_MODE;
-#endif
-
     optimumDutyResolution = GetOptimumResolution(desiredFrequency);
 
     duty_res = (ledc_timer_bit_t)optimumDutyResolution;
@@ -380,7 +426,7 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetActive
 
     // Set the backing duty cycle field when it is zero and return
     // We need this as this native function is called before Init
-    if (!isStarted)
+    if (!isStarted || channel == -1)
     {
         pThis[FIELD___dutyCycle].NumericByRef().u4 = dutyCycle;
         NANOCLR_SET_AND_LEAVE(S_OK);
@@ -440,10 +486,14 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeStop___VO
 
     speed_mode = GetSpeedMode(timerId);
 
-    // FIX ME check result
     channel = (ledc_channel_t)GetChannel(pinNumber, timerId, false);
 
-    ledc_stop(speed_mode, channel, (uint32_t)polarity);
+    if (channel == -1)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+    }
+
+    IDF_ERROR(ledc_stop(speed_mode, channel, (uint32_t)polarity));
 
     isStarted = false;
 
@@ -455,6 +505,8 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::DisposeNative__
     int32_t timerId;
     int32_t pinNumber;
     char *pMap;
+    int channel;
+    ledc_mode_t mode;
 
     NANOCLR_HEADER();
 
@@ -466,15 +518,22 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::DisposeNative__
     pinNumber = pThis[FIELD___pinNumber].NumericByRef().s4;
 
     // Remove pin from pin/channel Map
-    pMap = (timerId > 3) ? LowSpeedPinMap : HighSpeedPinMap;
-
-    for (int index = 0; index < 8; index++, pMap++)
+    channel = GetChannel(pinNumber, timerId, false);
+    if (channel != -1)
     {
-        if (*pMap == pinNumber)
+        mode = GetSpeedMode(timerId);
+        if (s_pwmConfigured[mode][channel])
         {
-            *pMap = 255;
-            break;
+            IDF_ERROR(ledc_stop(mode, (ledc_channel_t)channel, 0));
         }
+        Esp32_Ledc_Release(mode, (ledc_channel_t)channel, Esp32LedcOwner::Pwm);
+        s_pwmConfigured[mode][channel] = false;
+#if SOC_LEDC_SUPPORT_HS_MODE
+        pMap = mode == LEDC_HIGH_SPEED_MODE ? HighSpeedPinMap : LowSpeedPinMap;
+#else
+        pMap = LowSpeedPinMap;
+#endif
+        pMap[channel] = 255;
     }
 
     NANOCLR_NOCLEANUP();
