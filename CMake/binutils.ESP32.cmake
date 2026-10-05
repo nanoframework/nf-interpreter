@@ -536,7 +536,16 @@ macro(nf_install_idf_component_from_registry component_name object_id)
     set(extractPath ${IDF_PATH_CMAKED}/components)
 
     if(NOT EXISTS ${destinationPath})
-        file(DOWNLOAD ${downloadUrl} ${archiveName})
+        file(DOWNLOAD ${downloadUrl} ${archiveName} STATUS downloadStatus)
+        list(GET downloadStatus 0 downloadStatusCode)
+        if(NOT downloadStatusCode EQUAL 0)
+            list(GET downloadStatus 1 downloadStatusMessage)
+            file(REMOVE ${archiveName})
+            message(FATAL_ERROR
+                "Failed to download component '${component_name}' from '${downloadUrl}' "
+                "(status ${downloadStatusCode}): ${downloadStatusMessage}")
+        endif()
+
         message(STATUS "Component archive '" ${component_name} "' downloaded")
 
         file(ARCHIVE_EXTRACT 
