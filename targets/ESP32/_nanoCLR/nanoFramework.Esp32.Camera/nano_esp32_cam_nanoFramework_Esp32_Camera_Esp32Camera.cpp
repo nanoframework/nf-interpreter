@@ -6,6 +6,7 @@
 #include <CPU_GPIO_decl.h>
 #include <esp_camera.h>
 #include <targetPAL_Ledc.h>
+#include <freertos/semphr.h>
 #include <cstring>
 
 typedef Library_nano_esp32_cam_nanoFramework_Esp32_Camera_Esp32Camera Camera;
@@ -19,6 +20,179 @@ static bool s_cameraInitialized = false;
 static bool s_cameraLedcReserved = false;
 static int s_reservedPins[CameraPinCount];
 static size_t s_reservedPinCount = 0;
+static TaskHandle_t s_captureTask = nullptr;
+static SemaphoreHandle_t s_captureRequest = nullptr;
+static SemaphoreHandle_t s_captureExited = nullptr;
+static portMUX_TYPE s_captureLock = portMUX_INITIALIZER_UNLOCKED;
+static camera_fb_t *s_captureFrame = nullptr;
+static bool s_captureComplete = false;
+static bool s_captureStop = false;
+static bool s_cameraStopping = false;
+static CLR_UINT32 s_cameraGeneration = 0;
+static CLR_RT_StackFrame *s_captureOwner = nullptr;
+static int s_captureOwnerPid = 0;
+
+// ESP-IDF task stack sizes are in bytes. Hardware testing must verify headroom on all camera targets.
+constexpr uint32_t CameraWorkerStackSize = 2048;
+
+static void CameraCaptureWorker(void *)
+{
+    for (;;)
+    {
+        xSemaphoreTake(s_captureRequest, portMAX_DELAY);
+
+        portENTER_CRITICAL(&s_captureLock);
+        bool stop = s_captureStop;
+        portEXIT_CRITICAL(&s_captureLock);
+        if (stop)
+        {
+            break;
+        }
+
+        camera_fb_t *frame = esp_camera_fb_get();
+
+        portENTER_CRITICAL(&s_captureLock);
+        s_captureFrame = frame;
+        s_captureComplete = true;
+        stop = s_captureStop;
+        portEXIT_CRITICAL(&s_captureLock);
+        Events_Set(SYSTEM_EVENT_FLAG_CAMERA);
+
+        if (stop)
+        {
+            break;
+        }
+    }
+
+    xSemaphoreGive(s_captureExited);
+    Events_Set(SYSTEM_EVENT_FLAG_CAMERA);
+    vTaskDelete(nullptr);
+}
+
+static bool CaptureComplete()
+{
+    portENTER_CRITICAL(&s_captureLock);
+    bool complete = s_captureComplete;
+    portEXIT_CRITICAL(&s_captureLock);
+    return complete;
+}
+
+static void ReleaseCapture()
+{
+    portENTER_CRITICAL(&s_captureLock);
+    camera_fb_t *frame = s_captureFrame;
+    s_captureFrame = nullptr;
+    s_captureComplete = false;
+    portEXIT_CRITICAL(&s_captureLock);
+
+    if (frame != nullptr)
+    {
+        esp_camera_fb_return(frame);
+    }
+    s_captureOwner = nullptr;
+    Events_Set(SYSTEM_EVENT_FLAG_CAMERA);
+}
+
+static bool CaptureOwnerIsAlive(CLR_RT_DblLinkedList &threads)
+{
+    NANOCLR_FOREACH_NODE(CLR_RT_Thread, thread, threads)
+    {
+        if (thread->m_pid == s_captureOwnerPid && !(thread->m_flags & CLR_RT_Thread::TH_F_Aborted) &&
+            thread->CurrentFrame() == s_captureOwner)
+        {
+            return true;
+        }
+    }
+    NANOCLR_FOREACH_NODE_END();
+    return false;
+}
+
+static HRESULT AcquireCameraFrame(CLR_RT_StackFrame &stack, camera_fb_t *&frame)
+{
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock hbTimeout;
+    CLR_INT64 *timeout;
+    bool eventResult = true;
+
+    if (!s_cameraInitialized || s_cameraStopping)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+    }
+
+    if (stack.m_customState == 0)
+    {
+        // The driver owns the capture timeout; only suspend the CLR caller while it runs.
+        hbTimeout.SetInteger((CLR_INT64)-1);
+        NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
+        stack.PushValueAndClear().SetInteger(s_cameraGeneration);
+    }
+    else
+    {
+        NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
+    }
+
+    if (stack.m_evalStack[1].NumericByRef().u4 != s_cameraGeneration)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+    }
+
+    for (;;)
+    {
+        if (stack.m_customState == 1)
+        {
+            // Reclaim a completed request if its managed caller was aborted while waiting.
+            if (s_captureOwner != nullptr && CaptureComplete() &&
+                !CaptureOwnerIsAlive(g_CLR_RT_ExecutionEngine.m_threadsReady) &&
+                !CaptureOwnerIsAlive(g_CLR_RT_ExecutionEngine.m_threadsWaiting))
+            {
+                ReleaseCapture();
+            }
+
+            if (s_captureOwner == nullptr)
+            {
+                s_captureOwner = &stack;
+                s_captureOwnerPid = stack.m_owningThread->m_pid;
+                stack.m_customState = 2;
+                xSemaphoreGive(s_captureRequest);
+            }
+        }
+
+        if (stack.m_customState == 2 && CaptureComplete())
+        {
+            portENTER_CRITICAL(&s_captureLock);
+            frame = s_captureFrame;
+            portEXIT_CRITICAL(&s_captureLock);
+            if (frame == nullptr)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
+            }
+            break;
+        }
+
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_Camera, eventResult));
+        if (!eventResult)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
+        }
+    }
+
+    stack.PopValue();
+    stack.PopValue();
+    stack.m_customState = 3;
+
+    NANOCLR_NOCLEANUP();
+}
+
+static void RequestCameraStop()
+{
+    s_cameraStopping = true;
+    portENTER_CRITICAL(&s_captureLock);
+    s_captureStop = true;
+    portEXIT_CRITICAL(&s_captureLock);
+    xSemaphoreGive(s_captureRequest);
+}
 
 HRESULT MapEspError(esp_err_t error)
 {
@@ -56,15 +230,30 @@ static void ReleaseCameraClock()
     }
 }
 
-static esp_err_t CameraUninitialize()
+static esp_err_t CameraUninitialize(bool workerExited = false)
 {
     if (!s_cameraInitialized)
     {
         return ESP_OK;
     }
 
+    RequestCameraStop();
+    // Soft reboot has no managed callers left to schedule. Wait for the worker to leave the driver.
+    if (!workerExited)
+    {
+        xSemaphoreTake(s_captureExited, portMAX_DELAY);
+    }
+    // The worker self-deletes after acknowledging exit; never delete a task running on another core.
+    s_captureTask = nullptr;
+    vSemaphoreDelete(s_captureRequest);
+    s_captureRequest = nullptr;
+    vSemaphoreDelete(s_captureExited);
+    s_captureExited = nullptr;
+    ReleaseCapture();
+
     esp_err_t result = esp_camera_deinit();
     s_cameraInitialized = false;
+    s_cameraStopping = false;
     ReleasePins();
     ReleaseCameraClock();
     return result;
@@ -131,7 +320,7 @@ HRESULT ReserveCameraPins(const camera_config_t &config)
 
 HRESULT GetSensor(sensor_t *&sensor)
 {
-    if (!s_cameraInitialized)
+    if (!s_cameraInitialized || s_cameraStopping)
     {
         return CLR_E_INVALID_OPERATION;
     }
@@ -228,6 +417,39 @@ HRESULT Camera::NativeInit___VOID(CLR_RT_StackFrame &stack)
     }
 
     s_cameraInitialized = true;
+    s_cameraGeneration++;
+    s_captureStop = false;
+    s_captureRequest = xSemaphoreCreateBinary();
+    s_captureExited = xSemaphoreCreateBinary();
+    if (s_captureRequest == nullptr || s_captureExited == nullptr ||
+        xTaskCreate(
+            CameraCaptureWorker,
+            "CameraCapture",
+            CameraWorkerStackSize,
+            nullptr,
+            uxTaskPriorityGet(nullptr),
+            &s_captureTask) != pdPASS)
+    {
+        if (s_captureRequest != nullptr)
+        {
+            vSemaphoreDelete(s_captureRequest);
+            s_captureRequest = nullptr;
+        }
+        if (s_captureExited != nullptr)
+        {
+            vSemaphoreDelete(s_captureExited);
+            s_captureExited = nullptr;
+        }
+        esp_err_t result = esp_camera_deinit();
+        if (result != ESP_OK && result != ESP_ERR_INVALID_STATE)
+        {
+            ESP_LOGE("Camera", "Failed to deinitialize after worker allocation failure: %s", esp_err_to_name(result));
+        }
+        s_cameraInitialized = false;
+        ReleasePins();
+        ReleaseCameraClock();
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
     HAL_AddSoftRebootHandler(CameraSoftRebootCleanup);
 
     NANOCLR_NOCLEANUP();
@@ -243,11 +465,7 @@ HRESULT Camera::NativeCapture___SZARRAY_U1(CLR_RT_StackFrame &stack)
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
 
-    frame = esp_camera_fb_get();
-    if (frame == nullptr)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
-    }
+    NANOCLR_CHECK_HRESULT(AcquireCameraFrame(stack, frame));
 
     {
         CLR_RT_HeapBlock &top = stack.PushValueAndClear();
@@ -257,9 +475,9 @@ HRESULT Camera::NativeCapture___SZARRAY_U1(CLR_RT_StackFrame &stack)
 
     NANOCLR_CLEANUP();
 
-    if (frame != nullptr)
+    if (hr != CLR_E_THREAD_WAITING && s_captureOwner == &stack)
     {
-        esp_camera_fb_return(frame);
+        ReleaseCapture();
     }
 
     NANOCLR_CLEANUP_END();
@@ -276,14 +494,16 @@ HRESULT Camera::NativeCaptureToBuffer___I4__SZARRAY_U1(CLR_RT_StackFrame &stack)
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
 
+    if (stack.Arg1().DereferenceArray() == nullptr)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_ARGUMENT_NULL);
+    }
+
+    NANOCLR_CHECK_HRESULT(AcquireCameraFrame(stack, frame));
+
+    // The GC may relocate the array while this caller is suspended.
     destination = stack.Arg1().DereferenceArray();
     FAULT_ON_NULL(destination);
-
-    frame = esp_camera_fb_get();
-    if (frame == nullptr)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
-    }
 
     if (destination->m_numOfElements < frame->len)
     {
@@ -295,9 +515,9 @@ HRESULT Camera::NativeCaptureToBuffer___I4__SZARRAY_U1(CLR_RT_StackFrame &stack)
 
     NANOCLR_CLEANUP();
 
-    if (frame != nullptr)
+    if (hr != CLR_E_THREAD_WAITING && s_captureOwner == &stack)
     {
-        esp_camera_fb_return(frame);
+        ReleaseCapture();
     }
 
     NANOCLR_CLEANUP_END();
@@ -391,17 +611,51 @@ HRESULT Camera::NativeDispose___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    (void)stack;
+    CLR_RT_HeapBlock hbTimeout;
+    CLR_INT64 *timeout;
+    bool eventResult = true;
 
-    if (s_cameraInitialized)
+    if (stack.m_customState == 0)
     {
-        esp_err_t result = CameraUninitialize();
-
-        if (result != ESP_OK && result != ESP_ERR_INVALID_STATE)
+        if (!s_cameraInitialized)
         {
-            NANOCLR_SET_AND_LEAVE(MapEspError(result));
+            NANOCLR_SET_AND_LEAVE(S_OK);
+        }
+
+        hbTimeout.SetInteger((CLR_INT64)-1);
+        NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
+        stack.PushValueAndClear().SetInteger(s_cameraGeneration);
+        RequestCameraStop();
+    }
+    else
+    {
+        NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
+    }
+
+    while (s_cameraInitialized && stack.m_evalStack[1].NumericByRef().u4 == s_cameraGeneration)
+    {
+        if (xSemaphoreTake(s_captureExited, 0) == pdTRUE)
+        {
+            esp_err_t result = CameraUninitialize(true);
+            stack.PopValue();
+            stack.PopValue();
+            if (result != ESP_OK && result != ESP_ERR_INVALID_STATE)
+            {
+                NANOCLR_SET_AND_LEAVE(MapEspError(result));
+            }
+            NANOCLR_SET_AND_LEAVE(S_OK);
+        }
+
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_Camera, eventResult));
+        if (!eventResult)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
         }
     }
+
+    stack.PopValue();
+    stack.PopValue();
 
     NANOCLR_NOCLEANUP();
 }
