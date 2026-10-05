@@ -4,7 +4,11 @@
 #include "nano_esp32_cam.h"
 
 #include <CPU_GPIO_decl.h>
+#include <driver/gpio.h>
 #include <esp_camera.h>
+#include <esp_chip_info.h>
+#include <esp_heap_caps.h>
+#include <esp_log.h>
 #include <targetPAL_Ledc.h>
 #include <freertos/semphr.h>
 #include <cstring>
@@ -208,8 +212,15 @@ HRESULT MapEspError(esp_err_t error)
             return CLR_E_INVALID_PARAMETER;
         case ESP_ERR_INVALID_STATE:
             return CLR_E_INVALID_OPERATION;
+        case ESP_ERR_NOT_FOUND:
+        case ESP_ERR_CAMERA_NOT_DETECTED:
+            return CLR_E_NOT_FOUND;
+        case ESP_ERR_NOT_SUPPORTED:
+            return CLR_E_NOT_SUPPORTED;
+        case ESP_ERR_CAMERA_FAILED_TO_SET_FRAME_SIZE:
+            return CLR_E_INVALID_PARAMETER;
         default:
-            return CLR_E_FAIL;
+            return CLR_E_IO;
     }
 }
 
@@ -303,13 +314,38 @@ HRESULT ReserveCameraPins(const camera_config_t &config)
         config.pin_vsync,
         config.pin_href,
         config.pin_pclk};
+    const char *roles[CameraPinCount] = {
+        "PWDN",
+        "RESET",
+        "XCLK",
+        "SCCB SDA",
+        "SCCB SCL",
+        "D7",
+        "D6",
+        "D5",
+        "D4",
+        "D3",
+        "D2",
+        "D1",
+        "D0",
+        "VSYNC",
+        "HREF",
+        "PCLK"};
 
     s_reservedPinCount = 0;
     for (size_t index = 0; index < CameraPinCount; index++)
     {
+        if ((pins[index] != -1 || index >= 5) &&
+            (!GPIO_IS_VALID_GPIO(pins[index]) || (index < 5 && !GPIO_IS_VALID_OUTPUT_GPIO(pins[index]))))
+        {
+            ESP_LOGE("Camera", "GPIO configuration failed: %s GPIO=%d", roles[index], pins[index]);
+            ReleasePins();
+            return CLR_E_INVALID_PARAMETER;
+        }
         HRESULT result = ReservePin(pins[index]);
         if (FAILED(result))
         {
+            ESP_LOGE("Camera", "GPIO reservation failed: %s GPIO=%d", roles[index], pins[index]);
             ReleasePins();
             return result;
         }
@@ -341,16 +377,34 @@ HRESULT Camera::NativeInit___VOID(CLR_RT_StackFrame &stack)
     CLR_RT_HeapBlock *pThis = nullptr;
     CLR_RT_HeapBlock *settings = nullptr;
     camera_config_t config = {};
+    esp_chip_info_t chip = {};
 
+    esp_chip_info(&chip);
+    ESP_LOGI(
+        "Camera",
+        "Production NativeInit: target=%s model=%d revision=%d cores=%d",
+        CONFIG_IDF_TARGET,
+        static_cast<int>(chip.model),
+        chip.revision,
+        chip.cores);
     pThis = stack.This();
+    if (pThis == nullptr)
+    {
+        ESP_LOGE("Camera", "Configuration failed: null camera instance");
+    }
     FAULT_ON_NULL(pThis);
 
     if (s_cameraInitialized)
     {
+        ESP_LOGE("Camera", "Instance check failed: a camera is already initialized");
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
 
     settings = pThis[FIELD___cameraConnectionSettings].Dereference();
+    if (settings == nullptr)
+    {
+        ESP_LOGE("Camera", "Configuration failed: null CameraConnectionSettings");
+    }
     FAULT_ON_NULL(settings);
 
     config.pin_pwdn = settings[Settings::FIELD___pinPowerDown].NumericByRef().s4;
@@ -385,10 +439,51 @@ HRESULT Camera::NativeInit___VOID(CLR_RT_StackFrame &stack)
     config.sccb_i2c_port = settings[Settings::FIELD___sccbI2cPort].NumericByRef().s4;
     config.jpeg_buffer_size = 0;
 
-    if (config.frame_size < FRAMESIZE_96X96 || config.frame_size >= FRAMESIZE_INVALID || config.fb_count < 1 ||
-        config.jpeg_quality < 0 || config.jpeg_quality > 63)
+    ESP_LOGI(
+        "Camera",
+        "Config: XCLK=%dHz frame=%d JPEG=%d buffers=%u location=%s grab=%d SCCB=%d/%d port=%d",
+        config.xclk_freq_hz,
+        static_cast<int>(config.frame_size),
+        config.jpeg_quality,
+        static_cast<unsigned>(config.fb_count),
+        config.fb_location == CAMERA_FB_IN_PSRAM ? "PSRAM" : "DRAM",
+        static_cast<int>(config.grab_mode),
+        config.pin_sccb_sda,
+        config.pin_sccb_scl,
+        config.sccb_i2c_port);
+    ESP_LOGI(
+        "Camera",
+        "Heap: PSRAM available=%d internal free=%u largest=%u PSRAM free=%u",
+        heap_caps_get_total_size(MALLOC_CAP_SPIRAM) != 0,
+        static_cast<unsigned>(heap_caps_get_free_size(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT)),
+        static_cast<unsigned>(heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT)),
+        static_cast<unsigned>(heap_caps_get_free_size(MALLOC_CAP_SPIRAM)));
+
+    if (config.frame_size < FRAMESIZE_96X96 || config.frame_size >= FRAMESIZE_INVALID ||
+        settings[Settings::FIELD___frameBufferCount].NumericByRef().s4 < 1 || config.xclk_freq_hz <= 0 ||
+        config.jpeg_quality < 0 || config.jpeg_quality > 63 ||
+        (settings[Settings::FIELD___frameBufferLocation].NumericByRef().s4 != FrameBufferLocation_Psram &&
+         settings[Settings::FIELD___frameBufferLocation].NumericByRef().s4 != FrameBufferLocation_Dram) ||
+        (settings[Settings::FIELD___grabMode].NumericByRef().s4 != GrabMode_WhenEmpty &&
+         settings[Settings::FIELD___grabMode].NumericByRef().s4 != GrabMode_Latest))
     {
+        ESP_LOGE(
+            "Camera",
+            "Configuration failed: invalid clock, frame size, buffer count/location, grab mode or quality");
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    if ((config.pin_sccb_sda == -1) != (config.pin_sccb_scl == -1) ||
+        (config.pin_sccb_sda == -1 && (config.sccb_i2c_port < 0 || config.sccb_i2c_port >= SOC_I2C_NUM)))
+    {
+        ESP_LOGE("Camera", "SCCB configuration failed: specify both pins or an existing valid I2C port");
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    if (config.fb_location == CAMERA_FB_IN_PSRAM && heap_caps_get_total_size(MALLOC_CAP_SPIRAM) == 0)
+    {
+        ESP_LOGE("Camera", "Framebuffer configuration failed: PSRAM requested but unavailable");
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
     }
 
     NANOCLR_CHECK_HRESULT(ReserveCameraPins(config));
@@ -399,6 +494,12 @@ HRESULT Camera::NativeInit___VOID(CLR_RT_StackFrame &stack)
     {
         if (!Esp32_Ledc_Reserve(LEDC_LOW_SPEED_MODE, CameraLedcTimer, CameraLedcChannel, Esp32LedcOwner::Camera))
         {
+            ESP_LOGE(
+                "Camera",
+                "LEDC reservation failed: mode=%d timer=%d channel=%d",
+                LEDC_LOW_SPEED_MODE,
+                CameraLedcTimer,
+                CameraLedcChannel);
             ReleasePins();
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
         }
@@ -407,9 +508,16 @@ HRESULT Camera::NativeInit___VOID(CLR_RT_StackFrame &stack)
 #endif
 
     {
+        ESP_LOGI("Camera", "Calling esp_camera_init");
         esp_err_t result = esp_camera_init(&config);
+        ESP_LOGI(
+            "Camera",
+            "esp_camera_init returned 0x%x (%s)",
+            static_cast<unsigned>(result),
+            esp_err_to_name(result));
         if (result != ESP_OK)
         {
+            ESP_LOGE("Camera", "Driver initialization failed; see camera/SCCB/LEDC driver diagnostics above");
             ReleasePins();
             ReleaseCameraClock();
             NANOCLR_SET_AND_LEAVE(MapEspError(result));
@@ -430,6 +538,7 @@ HRESULT Camera::NativeInit___VOID(CLR_RT_StackFrame &stack)
             uxTaskPriorityGet(nullptr),
             &s_captureTask) != pdPASS)
     {
+        ESP_LOGE("Camera", "Capture worker allocation failed");
         if (s_captureRequest != nullptr)
         {
             vSemaphoreDelete(s_captureRequest);
@@ -451,6 +560,7 @@ HRESULT Camera::NativeInit___VOID(CLR_RT_StackFrame &stack)
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
     }
     HAL_AddSoftRebootHandler(CameraSoftRebootCleanup);
+    ESP_LOGI("Camera", "Initialization complete");
 
     NANOCLR_NOCLEANUP();
 }

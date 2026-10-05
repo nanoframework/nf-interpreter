@@ -20,8 +20,8 @@ typedef enum __nfpack CameraSensor
 
 typedef enum __nfpack FrameBufferLocation
 {
-    FrameBufferLocation_Dram = 0,
-    FrameBufferLocation_Psram = 1,
+    FrameBufferLocation_Psram = 0,
+    FrameBufferLocation_Dram = 1,
 } FrameBufferLocation;
 
 typedef enum __nfpack FrameSize

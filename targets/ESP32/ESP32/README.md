@@ -9,6 +9,32 @@ Getting started guides and build instructions can also be found at the documenta
 - [Build instructions](https://docs.nanoframework.net/content/building/build-esp32.html)
 - [Getting started with managed code (C#)](https://docs.nanoframework.net/content/getting-started-guides/getting-started-managed.html)
 
+## Camera native contract and initialization
+
+Enable `CONFIG_API_NANOFRAMEWORK_ESP32_CAMERA` to include the production camera
+implementation. The native registration for `nanoFramework.Esp32.Camera` uses
+checksum `0x775EFC2E`, version `100.0.0.0`, and method slots 76-85. Compare both
+the registration table and header against the managed generated stubs when
+updating the assembly: matching the checksum alone does not verify method slots.
+The managed framebuffer-location values are PSRAM=0 and DRAM=1.
+
+Initialization logs `Production NativeInit`, the chip and camera configuration,
+available internal/PSRAM heap, resource-reservation failures, and the result of
+`esp_camera_init()` with its ESP-IDF error name. A missing entry log requires
+checking the flashed firmware and native method table before debugging hardware.
+Sensor-not-found, unsupported-sensor, allocation, timeout, and driver errors are
+reported as distinct CLR errors; consult the accompanying ESP-IDF logs to
+distinguish sensor/SCCB, clock, DMA, and framebuffer failures.
+
+For initial AI Thinker ESP32-CAM validation, use JPEG, QVGA maximum frame size,
+one framebuffer in DRAM, and `WhenEmpty` grab mode. The standard pin mapping is
+PWDN=32, RESET=-1, XCLK=0, SCCB SDA=26/SCL=27, D0-D7=5/18/19/21/36/39/34/35,
+VSYNC=25, HREF=23, and PCLK=22, with a 20 MHz XCLK. Confirm the log reports
+`frame=6`, `buffers=1`, `location=DRAM`, `grab=0`, then
+`esp_camera_init returned 0x0 (ESP_OK)` and `Initialization complete`.
+Also verify capture, disposal/reinitialization, and rejection of a second live
+camera instance on hardware. PSRAM is not required for this DRAM configuration.
+
 ## Camera and PWM resources
 
 The camera clock reserves low-speed LEDC timer 3 and channel 7 while the camera is

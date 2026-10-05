@@ -7,6 +7,13 @@
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
+    // Managed method slots 0-75 have no native handler.
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -89,6 +96,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nano_esp32_cam_nanoFramework_Esp32_Camera_Esp32Camera::NativeDispose___VOID,
     NULL,
 };
+
+static_assert(ARRAYSIZE(method_lookup) == 87, "Camera native method table must match the managed contract");
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Esp32_Camera =
 {
