@@ -196,7 +196,8 @@ HRESULT Camera::NativeInit___VOID(CLR_RT_StackFrame &stack)
     config.sccb_i2c_port = settings[Settings::FIELD___sccbI2cPort].NumericByRef().s4;
     config.jpeg_buffer_size = 0;
 
-    if (config.frame_size < FRAMESIZE_96X96 || config.frame_size >= FRAMESIZE_INVALID || config.fb_count < 1)
+    if (config.frame_size < FRAMESIZE_96X96 || config.frame_size >= FRAMESIZE_INVALID || config.fb_count < 1 ||
+        config.jpeg_quality < 0 || config.jpeg_quality > 63)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
