@@ -7,8 +7,8 @@
 #include <esp_camera.h>
 #include <cstring>
 
-using Camera = Library_nano_esp32_cam_nanoFramework_Esp32_Camera_Esp32Camera;
-using Settings = Library_nano_esp32_cam_nanoFramework_Esp32_Camera_CameraConnectionSettings;
+typedef Library_nano_esp32_cam_nanoFramework_Esp32_Camera_Esp32Camera Camera;
+typedef Library_nano_esp32_cam_nanoFramework_Esp32_Camera_CameraConnectionSettings Settings;
 
 constexpr ledc_timer_t CameraLedcTimer = LEDC_TIMER_3;
 constexpr ledc_channel_t CameraLedcChannel = LEDC_CHANNEL_7;
