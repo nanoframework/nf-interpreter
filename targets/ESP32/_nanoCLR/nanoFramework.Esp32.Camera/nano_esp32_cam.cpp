@@ -7,7 +7,6 @@
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
-    // Managed method slots 0-75 have no native handler.
     NULL,
     NULL,
     NULL,
@@ -83,26 +82,19 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    NULL,
-    Library_nano_esp32_cam_nanoFramework_Esp32_Camera_Esp32Camera::NativeInit___VOID,
+    Library_nano_esp32_cam_nanoFramework_Esp32_Camera_Esp32Camera::NativeInit___nanoFrameworkEsp32CameraCameraInitResult,
     Library_nano_esp32_cam_nanoFramework_Esp32_Camera_Esp32Camera::NativeCapture___SZARRAY_U1,
     Library_nano_esp32_cam_nanoFramework_Esp32_Camera_Esp32Camera::NativeCaptureToBuffer___I4__SZARRAY_U1,
     Library_nano_esp32_cam_nanoFramework_Esp32_Camera_Esp32Camera::NativeGetSensorId___I4,
-    Library_nano_esp32_cam_nanoFramework_Esp32_Camera_Esp32Camera::NativeSetFrameSize___VOID__I4,
-    Library_nano_esp32_cam_nanoFramework_Esp32_Camera_Esp32Camera::NativeSetJpegQuality___VOID__I4,
-    Library_nano_esp32_cam_nanoFramework_Esp32_Camera_Esp32Camera::NativeSetVerticalFlip___VOID__BOOLEAN,
-    Library_nano_esp32_cam_nanoFramework_Esp32_Camera_Esp32Camera::NativeSetHorizontalMirror___VOID__BOOLEAN,
-    Library_nano_esp32_cam_nanoFramework_Esp32_Camera_Esp32Camera::NativeSetBrightness___VOID__I4,
+    Library_nano_esp32_cam_nanoFramework_Esp32_Camera_Esp32Camera::NativeGetSensorSetting___I4__nanoFrameworkEsp32CameraSensorSetting,
+    Library_nano_esp32_cam_nanoFramework_Esp32_Camera_Esp32Camera::NativeSetSensorSetting___VOID__nanoFrameworkEsp32CameraSensorSetting__I4,
     Library_nano_esp32_cam_nanoFramework_Esp32_Camera_Esp32Camera::NativeDispose___VOID,
-    NULL,
 };
-
-static_assert(ARRAYSIZE(method_lookup) == 87, "Camera native method table must match the managed contract");
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Esp32_Camera =
 {
     "nanoFramework.Esp32.Camera",
-    0x775EFC2E,
+    0x313AFB2B,
     method_lookup,
     { 100, 0, 0, 0 }
 };

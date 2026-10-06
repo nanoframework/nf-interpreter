@@ -8,14 +8,53 @@
 #include <nanoCLR_Runtime.h>
 #include <nanoPackStruct.h>
 #include <corlib_native.h>
+#include <esp_camera.h>
+
+typedef enum __nfpack CameraInitResult
+{
+    CameraInitResult_Success = 0,
+    CameraInitResult_AlreadyInitialized = 1,
+    CameraInitResult_InvalidPin = 2,
+    CameraInitResult_PinUnavailable = 3,
+    CameraInitResult_InvalidSccbConfiguration = 4,
+    CameraInitResult_InvalidXclkFrequency = 5,
+    CameraInitResult_InvalidFrameSize = 6,
+    CameraInitResult_InvalidJpegQuality = 7,
+    CameraInitResult_InvalidFrameBufferCount = 8,
+    CameraInitResult_InvalidFrameBufferLocation = 9,
+    CameraInitResult_InvalidGrabMode = 10,
+    CameraInitResult_PsramUnavailable = 11,
+    CameraInitResult_ClockUnavailable = 12,
+    CameraInitResult_SensorNotDetected = 13,
+    CameraInitResult_SensorNotSupported = 14,
+    CameraInitResult_FailedToSetFrameSize = 15,
+    CameraInitResult_FailedToSetPixelFormat = 16,
+    CameraInitResult_OutOfMemory = 17,
+    CameraInitResult_DriverError = 18,
+} CameraInitResult;
 
 typedef enum __nfpack CameraSensor
 {
     CameraSensor_Unknown = 0,
+    CameraSensor_Ov9650 = 150,
+    CameraSensor_Ov7725 = 119,
     CameraSensor_Ov2640 = 38,
     CameraSensor_Ov3660 = 13920,
+    CameraSensor_Ov3640 = 13888,
     CameraSensor_Ov5640 = 22080,
+    CameraSensor_Ov7670 = 118,
+    CameraSensor_Nt99141 = 5136,
+    CameraSensor_Gc2145 = 8517,
+    CameraSensor_Gc032a = 9002,
     CameraSensor_Gc0308 = 155,
+    CameraSensor_Bf3005 = 48,
+    CameraSensor_Bf20a6 = 8358,
+    CameraSensor_Sc101iot = 55882,
+    CameraSensor_Sc030iot = 39494,
+    CameraSensor_Sc031gs = 49,
+    CameraSensor_MegaCcm = 926,
+    CameraSensor_Hm1055 = 2389,
+    CameraSensor_Hm0360 = 864,
 } CameraSensor;
 
 typedef enum __nfpack FrameBufferLocation
@@ -59,6 +98,15 @@ typedef enum __nfpack GrabMode
     GrabMode_Latest = 1,
 } GrabMode;
 
+typedef enum __nfpack SensorSetting
+{
+    SensorSetting_FrameSize = 0,
+    SensorSetting_Quality = 1,
+    SensorSetting_Brightness = 2,
+    SensorSetting_VFlip = 3,
+    SensorSetting_HMirror = 4,
+} SensorSetting;
+
 struct Library_nano_esp32_cam_nanoFramework_Esp32_Camera_CameraConnectionSettings
 {
     static const int FIELD___pinPowerDown = 1;
@@ -77,12 +125,13 @@ struct Library_nano_esp32_cam_nanoFramework_Esp32_Camera_CameraConnectionSetting
     static const int FIELD___pinVsync = 14;
     static const int FIELD___pinHref = 15;
     static const int FIELD___pinPclk = 16;
-    static const int FIELD___xclkFrequencyHz = 17;
-    static const int FIELD___frameBufferCount = 18;
-    static const int FIELD___maximumFrameSize = 19;
-    static const int FIELD___frameBufferLocation = 20;
-    static const int FIELD___grabMode = 21;
-    static const int FIELD___sccbI2cPort = 22;
+    static const int FIELD___xclkFreqHz = 17;
+    static const int FIELD___frameSize = 18;
+    static const int FIELD___jpegQuality = 19;
+    static const int FIELD___frameBufferCount = 20;
+    static const int FIELD___frameBufferLocation = 21;
+    static const int FIELD___grabMode = 22;
+    static const int FIELD___sccbI2cPort = 23;
 
     //--//
 };
@@ -90,27 +139,22 @@ struct Library_nano_esp32_cam_nanoFramework_Esp32_Camera_CameraConnectionSetting
 struct Library_nano_esp32_cam_nanoFramework_Esp32_Camera_Esp32Camera
 {
     static const int FIELD___syncLock = 1;
-    static const int FIELD___cameraConnectionSettings = 2;
+    static const int FIELD___connectionSettings = 2;
     static const int FIELD___disposed = 3;
     static const int FIELD___initialized = 4;
-    static const int FIELD___frameSize = 5;
-    static const int FIELD___jpegQuality = 6;
-    static const int FIELD___verticalFlip = 7;
-    static const int FIELD___horizontalMirror = 8;
-    static const int FIELD___brightness = 9;
 
-    NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
+    NANOCLR_NATIVE_DECLARE(NativeInit___nanoFrameworkEsp32CameraCameraInitResult);
     NANOCLR_NATIVE_DECLARE(NativeCapture___SZARRAY_U1);
     NANOCLR_NATIVE_DECLARE(NativeCaptureToBuffer___I4__SZARRAY_U1);
     NANOCLR_NATIVE_DECLARE(NativeGetSensorId___I4);
-    NANOCLR_NATIVE_DECLARE(NativeSetFrameSize___VOID__I4);
-    NANOCLR_NATIVE_DECLARE(NativeSetJpegQuality___VOID__I4);
-    NANOCLR_NATIVE_DECLARE(NativeSetVerticalFlip___VOID__BOOLEAN);
-    NANOCLR_NATIVE_DECLARE(NativeSetHorizontalMirror___VOID__BOOLEAN);
-    NANOCLR_NATIVE_DECLARE(NativeSetBrightness___VOID__I4);
+    NANOCLR_NATIVE_DECLARE(NativeGetSensorSetting___I4__nanoFrameworkEsp32CameraSensorSetting);
+    NANOCLR_NATIVE_DECLARE(NativeSetSensorSetting___VOID__nanoFrameworkEsp32CameraSensorSetting__I4);
     NANOCLR_NATIVE_DECLARE(NativeDispose___VOID);
 
     //--//
+
+    static void Uninitialize();
+    static HRESULT CaptureExecution(CLR_RT_StackFrame &stack, camera_fb_t *&frame);
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Esp32_Camera;
