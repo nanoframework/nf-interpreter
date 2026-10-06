@@ -60,7 +60,7 @@ using namespace sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers;
 bool isStarted;
 static bool s_pwmConfigured[LEDC_SPEED_MODE_MAX][LEDC_CHANNEL_MAX] = {};
 // number of PwmChannel instances using each channel (instances created for the same pin share the channel)
-static uint8_t s_pwmInstances[LEDC_SPEED_MODE_MAX][LEDC_CHANNEL_MAX] = {};
+static uint32_t s_pwmInstances[LEDC_SPEED_MODE_MAX][LEDC_CHANNEL_MAX] = {};
 
 static void PwmUninitialize()
 {
