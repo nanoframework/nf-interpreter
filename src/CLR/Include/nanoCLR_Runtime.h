@@ -2502,14 +2502,14 @@ struct CLR_RT_AttributeParser
         static const int c_NamedProperty = 3;
         static const int c_DefaultConstructor = 4;
 
-        int m_mode;
+        int m_mode{};
         // Declaration order below is load-bearing: CLR_RT_ProtectFromGC's constructor reads
         // m_value.IsForcedAlive(), so m_value has to be declared -- and zeroed -- before m_valueGC.
         CLR_RT_HeapBlock m_value{};
         CLR_RT_ProtectFromGC m_valueGC{m_value};
 
-        int m_pos;
-        const char *m_name;
+        int m_pos{};
+        const char *m_name{};
 
         //--//
 

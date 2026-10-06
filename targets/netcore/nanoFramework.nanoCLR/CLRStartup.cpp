@@ -10,7 +10,7 @@
 
 struct Settings
 {
-    CLR_SETTINGS m_clrOptions;
+    CLR_SETTINGS m_clrOptions{};
     CLR_RT_ParseOptions::BufferMap m_assemblies;
     bool m_fInitialized;
 #if defined(VIRTUAL_DEVICE)
@@ -168,7 +168,10 @@ struct Settings
         ByteAddress datByteAddress;
         unsigned int datSize = ROUNDTOMULTIPLE(static_cast<unsigned int>(*end - *start), CLR_UINT32);
 
-        if (BlockStorageList_FindDeviceForPhysicalAddress(&device, (unsigned int)(*start), &datByteAddress) &&
+        if (BlockStorageList_FindDeviceForPhysicalAddress(
+                &device,
+                static_cast<ByteAddress>(reinterpret_cast<uintptr_t>(*start)),
+                &datByteAddress) &&
             device != nullptr)
         {
             const DeviceBlockInfo *deviceInfo = BlockStorageDevice_GetDeviceInfo(device);

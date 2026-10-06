@@ -178,9 +178,9 @@ HRESULT CLR_RT_FileStream::AssignStorage(uint8_t *bufferIn, size_t sizeIn, uint8
     NANOCLR_HEADER();
 
     m_dataIn = bufferIn;
-    m_dataInSize = sizeIn;
+    m_dataInSize = static_cast<int>(sizeIn);
     m_dataOut = bufferOut;
-    m_dataOutSize = sizeOut;
+    m_dataOutSize = static_cast<int>(sizeOut);
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }

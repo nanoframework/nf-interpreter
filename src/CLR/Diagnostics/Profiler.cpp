@@ -65,7 +65,7 @@ void CLR_PRF_Profiler::SendMemoryLayout()
 #if defined(NANOCLR_64BIT_POINTERS)
     PackAndWriteBits((CLR_UINT32)((CLR_UINT64)s_CLR_RT_Heap.location >> 32));
 #endif
-    PackAndWriteBits((CLR_UINT32)s_CLR_RT_Heap.location);
+    PackAndWriteBits((CLR_UINT32)(uintptr_t)s_CLR_RT_Heap.location);
 
     PackAndWriteBits(s_CLR_RT_Heap.size);
 

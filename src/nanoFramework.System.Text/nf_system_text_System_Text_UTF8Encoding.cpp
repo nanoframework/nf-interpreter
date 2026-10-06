@@ -68,7 +68,7 @@ HRESULT Library_nf_system_text_System_Text_UTF8Encoding::GetBytes___I4__STRING__
 
     memcpy(pArrayBytes->GetElement(byteIdx), i, j - i);
 
-    stack.SetResult_I4(j - i);
+    stack.SetResult_I4(static_cast<CLR_INT32>(j - i));
 
     NANOCLR_NOCLEANUP();
 }

@@ -944,11 +944,11 @@ int Library_corlib_native_System_Number::Format_E(char *buffer, CLR_RT_HeapBlock
         // now the exponent
         if (formatChar == 'e')
         {
-            ret += snprintf(&buffer[ret], FORMAT_RESULT_BUFFER_SIZE - ret, "e%+.3d", exponent);
+            ret += static_cast<int>(snprintf(&buffer[ret], FORMAT_RESULT_BUFFER_SIZE - ret, "e%+.3d", exponent));
         }
         else
         {
-            ret += snprintf(&buffer[ret], FORMAT_RESULT_BUFFER_SIZE - ret, "E%+.3d", exponent);
+            ret += static_cast<int>(snprintf(&buffer[ret], FORMAT_RESULT_BUFFER_SIZE - ret, "E%+.3d", exponent));
         }
     }
 

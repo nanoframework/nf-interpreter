@@ -913,7 +913,7 @@ HRESULT Library_nf_native_system_math_System_Math::Truncate___STATIC__R8__R8(CLR
 
     double d = stack.Arg0().NumericByRefConst().r8;
     double res = 0.0;
-    modf(d, &res);
+    (void)modf(d, &res);
 
     stack.SetResult_R8(res);
 

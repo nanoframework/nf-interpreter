@@ -17,6 +17,12 @@
 
 //--//
 
+#if defined(_MSC_VER)
+// C26495: g_CLR_HW_Hardware lives in zero-initialized static storage and is reset with memset
+#pragma warning(push)
+#pragma warning(disable : 26495)
+#endif
+
 struct CLR_HW_Hardware
 {
     static const CLR_UINT32 c_Default_PowerLevel = PowerLevel__Sleep;
@@ -84,6 +90,10 @@ struct CLR_HW_Hardware
     HRESULT SpawnDispatcher();
     HRESULT TransferAllInterruptsToApplicationQueue();
 };
+
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 extern CLR_HW_Hardware g_CLR_HW_Hardware;
 
