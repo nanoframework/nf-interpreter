@@ -644,7 +644,7 @@ macro(nf_add_idf_as_library)
     )
 
     # Make temporary copy of sdkconfig.defaults.? file into build dir as we are going to make changes
-    set(SDKCONFIG_DEFAULTS_TEMP_FILE ${CMAKE_SOURCE_DIR}/build/sdkconfig.default)
+    set(SDKCONFIG_DEFAULTS_TEMP_FILE ${CMAKE_BINARY_DIR}/sdkconfig.default)
     file(WRITE ${SDKCONFIG_DEFAULTS_TEMP_FILE} ${SDKCONFIG_ORIGINAL_CONTENTS})
 
     # set list with the IDF components to add
