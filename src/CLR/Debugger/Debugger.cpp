@@ -3891,7 +3891,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_VirtualMethod(WP_Message *msg)
     NATIVE_PROFILE_CLR_DEBUGGER();
 
     auto *cmd = (CLR_DBG_Commands::Debugging_Resolve_VirtualMethod *)msg->m_payload;
-    CLR_DBG_Commands::Debugging_Resolve_VirtualMethod::Reply cmdReply;
+    CLR_DBG_Commands::Debugging_Resolve_VirtualMethod::Reply cmdReply{};
     CLR_RT_TypeDef_Index cls;
     CLR_RT_MethodDef_Index md;
     CLR_RT_HeapBlock *obj = HandleToHeapBlock(cmd->m_obj);

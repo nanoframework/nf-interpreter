@@ -31,12 +31,14 @@ uint8_t WP_TransmitMessage(WP_Message *message)
         std::memcpy(&data[sizeof(message->m_header)], message->m_payload, message->m_header.m_size);
     }
 
-    if (WireProtocolTransmitCallback)
+    if (WireProtocolTransmitCallback == nullptr)
     {
-        WireProtocolTransmitCallback(&data.front(), data.size());
+        return false;
     }
 
-    return data.size();
+    WireProtocolTransmitCallback(&data.front(), data.size());
+
+    return true;
 }
 
 void WP_CheckAvailableIncomingData()

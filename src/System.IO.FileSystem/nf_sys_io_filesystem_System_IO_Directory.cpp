@@ -23,7 +23,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::NativeGetChildren___ST
     bool *foundP = &found;
     void *findHandle = nullptr;
     int32_t itemsCount = 0;
-    FS_FILEINFO fileData;
+    FS_FILEINFO fileData{};
 
     CLR_RT_HeapBlock *pathEntry;
     CLR_RT_HeapBlock_String *hbPath;

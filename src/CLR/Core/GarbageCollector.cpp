@@ -240,20 +240,17 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
 
                     if (dt == DATATYPE_SZARRAY)
                     {
-                        CLR_RT_HeapBlock_Array *arr = (CLR_RT_HeapBlock_Array *)ptr;
+                        auto *arr = (CLR_RT_HeapBlock_Array *)ptr;
 
-                        if (arr != nullptr)
+                        dt = arr->m_typeOfElement;
+
+                        if (dt < DATATYPE_FIRST_INVALID)
                         {
-                            dt = arr->m_typeOfElement;
-
-                            if (dt < DATATYPE_FIRST_INVALID)
-                            {
-                                countArryBlocks[dt] += ptr->DataSize();
-                            }
-                            else
-                            {
-                                CLR_Debug::Printf("!!!!Unknown array type: %d\r\n", dt);
-                            }
+                            countArryBlocks[dt] += ptr->DataSize();
+                        }
+                        else
+                        {
+                            CLR_Debug::Printf("!!!!Unknown array type: %d\r\n", dt);
                         }
                     }
                 }
