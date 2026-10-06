@@ -112,7 +112,6 @@ HRESULT Library_nf_system_text_System_Text_UTF8Encoding::Helper__GetChars(CLR_RT
     CLR_INT32 byteIdx = fIndexed ? stack.Arg2().NumericByRef().s4 : 0;
     CLR_INT32 byteCnt = fIndexed ? stack.Arg3().NumericByRef().s4 : pArrayBytes->m_numOfElements;
 
-
     FAULT_ON_NULL(pArrayBytes);
 
     _ASSERTE(pArrayBytes->m_typeOfElement == DATATYPE_U1);
