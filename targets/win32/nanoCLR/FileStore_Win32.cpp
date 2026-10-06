@@ -11,10 +11,10 @@ HRESULT CLR_RT_FileStore::LoadFile(const wchar_t *szFile, CLR_RT_Buffer &vec)
 {
     NANOCLR_HEADER();
 
-    FILE *stream;
+    FILE *stream = nullptr;
     long size;
 
-    if (_wfopen_s(&stream, szFile, L"rb") != 0)
+    if (_wfopen_s(&stream, szFile, L"rb") != 0 || stream == nullptr)
     {
         wprintf(L"Cannot open '%s'!\n", szFile);
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
@@ -61,9 +61,9 @@ HRESULT CLR_RT_FileStore::SaveFile(const wchar_t *szFile, const CLR_RT_Buffer &v
 HRESULT CLR_RT_FileStore::SaveFile(const wchar_t *szFile, const CLR_UINT8 *buf, size_t size)
 {
     NANOCLR_HEADER();
-    FILE *stream;
+    FILE *stream = nullptr;
 
-    if (_wfopen_s(&stream, szFile, L"wb") != 0)
+    if (_wfopen_s(&stream, szFile, L"wb") != 0 || stream == nullptr)
     {
         wprintf(L"Cannot open '%s' for writing!\n", szFile);
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);

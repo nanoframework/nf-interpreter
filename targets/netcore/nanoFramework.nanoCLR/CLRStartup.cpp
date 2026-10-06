@@ -166,7 +166,7 @@ struct Settings
 
         BlockStorageDevice *device;
         ByteAddress datByteAddress;
-        unsigned int datSize = ROUNDTOMULTIPLE((unsigned int)(*end) - (unsigned int)(*start), CLR_UINT32);
+        unsigned int datSize = ROUNDTOMULTIPLE(static_cast<unsigned int>(*end - *start), CLR_UINT32);
 
         if (BlockStorageList_FindDeviceForPhysicalAddress(&device, (unsigned int)(*start), &datByteAddress) &&
             device != nullptr)
@@ -184,7 +184,7 @@ struct Settings
                     NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
                 }
                 *start = (char *)datAssembliesBuffer;
-                *end = (char *)((unsigned int)datAssembliesBuffer + (unsigned int)datSize);
+                *end = reinterpret_cast<char *>(datAssembliesBuffer) + datSize;
             }
         }
 

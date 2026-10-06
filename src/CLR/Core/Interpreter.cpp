@@ -2494,7 +2494,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         else
                         {
                             CLR_RT_TypeDef_Instance declType;
-                            NANOCLR_CHECK_HRESULT(calleeInst.GetDeclaringType(declType));
+                            if (!calleeInst.GetDeclaringType(declType))
+                            {
+                                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                            }
 
                             if (declType.target->dataType == DATATYPE_VALUETYPE)
                             {
