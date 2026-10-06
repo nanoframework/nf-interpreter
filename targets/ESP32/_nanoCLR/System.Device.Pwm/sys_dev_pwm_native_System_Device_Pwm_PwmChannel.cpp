@@ -59,6 +59,8 @@ using namespace sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers;
 
 bool isStarted;
 static bool s_pwmConfigured[LEDC_SPEED_MODE_MAX][LEDC_CHANNEL_MAX] = {};
+// number of PwmChannel instances using each channel (instances created for the same pin share the channel)
+static uint8_t s_pwmInstances[LEDC_SPEED_MODE_MAX][LEDC_CHANNEL_MAX] = {};
 
 static void PwmUninitialize()
 {
@@ -88,6 +90,7 @@ static void PwmUninitialize()
                 Esp32_Ledc_Release((ledc_mode_t)mode, (ledc_channel_t)channel, Esp32LedcOwner::Pwm);
                 map[channel] = 255;
                 s_pwmConfigured[mode][channel] = false;
+                s_pwmInstances[mode][channel] = 0;
             }
         }
     }
@@ -322,6 +325,9 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeInit___VO
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
+    // track this instance on the channel
+    s_pwmInstances[GetSpeedMode(timerId)][channel]++;
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -535,6 +541,13 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::DisposeNative__
     if (channel != -1)
     {
         mode = GetSpeedMode(timerId);
+
+        // keep the channel active while other instances are still using it
+        if (s_pwmInstances[mode][channel] > 0 && --s_pwmInstances[mode][channel] > 0)
+        {
+            NANOCLR_SET_AND_LEAVE(S_OK);
+        }
+
         if (s_pwmConfigured[mode][channel])
         {
             IDF_ERROR(ledc_stop(mode, (ledc_channel_t)channel, 0));
