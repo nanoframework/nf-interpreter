@@ -78,7 +78,11 @@ static void PwmUninitialize()
                     esp_err_t result = ledc_stop((ledc_mode_t)mode, (ledc_channel_t)channel, 0);
                     if (result != ESP_OK)
                     {
-                        ESP_LOGE("PWM", "Failed to stop channel %d during cleanup: %s", channel, esp_err_to_name(result));
+                        ESP_LOGE(
+                            "PWM",
+                            "Failed to stop channel %d during cleanup: %s",
+                            channel,
+                            esp_err_to_name(result));
                     }
                 }
                 Esp32_Ledc_Release((ledc_mode_t)mode, (ledc_channel_t)channel, Esp32LedcOwner::Pwm);
@@ -223,7 +227,16 @@ HRESULT sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers::ConfigureAndStar
     // Work out the duty Cycle for the current duty resolution
     dutyCycle = CalculateDuty(timerId, dutyCycle);
 
-    ledc_conf = {pinNumber, mode, channel, LEDC_INTR_DISABLE, timer_sel, dutyCycle, 0, LEDC_SLEEP_MODE_NO_ALIVE_NO_PD, (unsigned int)polarity};
+    ledc_conf = {
+        pinNumber,
+        mode,
+        channel,
+        LEDC_INTR_DISABLE,
+        timer_sel,
+        dutyCycle,
+        0,
+        LEDC_SLEEP_MODE_NO_ALIVE_NO_PD,
+        (unsigned int)polarity};
 
     // Configure Channel which will also start it
     IDF_ERROR(ledc_channel_config(&ledc_conf));
