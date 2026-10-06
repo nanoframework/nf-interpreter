@@ -68,7 +68,7 @@ HRESULT Library_nf_system_text_System_Text_UTF8Encoding::GetBytes___I4__STRING__
 
     memcpy(pArrayBytes->GetElement(byteIdx), i, j - i);
 
-    stack.SetResult_I4(j - i);
+    stack.SetResult_I4(static_cast<CLR_INT32>(j - i));
 
     NANOCLR_NOCLEANUP();
 }
@@ -111,7 +111,6 @@ HRESULT Library_nf_system_text_System_Text_UTF8Encoding::Helper__GetChars(CLR_RT
     CLR_RT_HeapBlock_Array *pArrayBytes = stack.Arg1().DereferenceArray();
     CLR_INT32 byteIdx = fIndexed ? stack.Arg2().NumericByRef().s4 : 0;
     CLR_INT32 byteCnt = fIndexed ? stack.Arg3().NumericByRef().s4 : pArrayBytes->m_numOfElements;
-
 
     FAULT_ON_NULL(pArrayBytes);
 

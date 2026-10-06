@@ -19,7 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Helpers\nanoprintf\nanoprintf.c" />
+    <ClCompile Include="..\Helpers\nanoprintf\nanoprintf.c">
+      <DisableSpecificWarnings>4146;4244;4267</DisableSpecificWarnings>
+    </ClCompile>
     <ClCompile Include="Cache.cpp" />
     <ClCompile Include="Checks.cpp" />
     <ClCompile Include="CLR_RT_DblLinkedList.cpp" />

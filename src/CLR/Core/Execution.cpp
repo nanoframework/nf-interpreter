@@ -2098,8 +2098,11 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
             }
             else
             {
-                HRESULT hrParam =
-                    ResolveGenericTypeParameter(*genericInstance, res.GenericParamPosition, realTypeDef, dt);
+                HRESULT hrParam = ResolveGenericTypeParameter(
+                    *genericInstance,
+                    static_cast<CLR_UINT8>(res.GenericParamPosition),
+                    realTypeDef,
+                    dt);
                 if (FAILED(hrParam))
                 {
                     if (allowUnresolvedVarFallback)

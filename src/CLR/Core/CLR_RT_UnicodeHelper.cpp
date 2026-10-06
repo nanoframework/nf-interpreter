@@ -834,10 +834,8 @@ void CLR_RT_UnicodeHelper::ConvertFromUTF8(const std::string &src, std::wstring 
 
 #endif
 
-UnicodeString::UnicodeString()
+UnicodeString::UnicodeString() : m_unicodeHelper{}, m_wCharArray(nullptr), m_length(0)
 {
-    m_wCharArray = nullptr;
-    m_length = 0;
 }
 
 UnicodeString::~UnicodeString()

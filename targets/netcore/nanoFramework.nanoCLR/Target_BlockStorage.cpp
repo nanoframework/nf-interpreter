@@ -477,7 +477,8 @@ bool BlockStorageStream_Read(BlockStorageStream *stream, unsigned char **buffer,
         if (deviceInfo->Attribute & MediaAttribute_SupportsXIP)
         {
             // XIP assumes contiguous USAGE blocks
-            *buffer = (unsigned char *)(BlockStorageStream_CurrentAddress(stream));
+            *buffer =
+                reinterpret_cast<unsigned char *>(static_cast<uintptr_t>(BlockStorageStream_CurrentAddress(stream)));
         }
         else
         {
@@ -486,7 +487,8 @@ bool BlockStorageStream_Read(BlockStorageStream *stream, unsigned char **buffer,
             if (stream->Flags & BLOCKSTORAGESTREAM_c_BlockStorageStream__MemoryMapped)
             {
                 // memory mapped region, get mapped address for read
-                *buffer = (unsigned char *)(BlockStorageStream_CurrentMappedAddress(stream));
+                *buffer = reinterpret_cast<unsigned char *>(
+                    static_cast<uintptr_t>(BlockStorageStream_CurrentMappedAddress(stream)));
             }
             else
             {

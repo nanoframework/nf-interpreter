@@ -40,7 +40,7 @@ void *CLR_RT_Memory::SubtractFromSystem(size_t len)
 
     if (len <= s_CLR_RT_Heap.size)
     {
-        s_CLR_RT_Heap.size -= (uintptr_t)len;
+        s_CLR_RT_Heap.size -= static_cast<unsigned int>(len);
 
         return &s_CLR_RT_Heap.location[s_CLR_RT_Heap.size];
     }

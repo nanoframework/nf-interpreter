@@ -222,7 +222,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::FindVolume(
         rootName++;
     }
 
-    rootNameLength = hal_strlen_s(rootName);
+    rootNameLength = static_cast<uint32_t>(hal_strlen_s(rootName));
 
     // Retrieve appropriate driver that handles this namespace
     if ((volume = FileSystemVolumeList::FindVolume(rootName, rootNameLength)) == nullptr)

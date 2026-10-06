@@ -4500,7 +4500,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     }
 
                     // Store the value into the actual array buffer
-                    NANOCLR_CHECK_HRESULT(evalPos[3].StoreToReference(evalPos[1], size));
+                    NANOCLR_CHECK_HRESULT(evalPos[3].StoreToReference(evalPos[1], static_cast<int>(size)));
 
                     break;
                 }

@@ -148,7 +148,7 @@ static HRESULT SetupWriteLine(CLR_RT_StackFrame &stack, char **buffer, uint32_t 
     (void)isNewAllocation;
 
     NANOCLR_HEADER();
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 static HRESULT PerformWriteOperation(const char *buffer, int32_t offset, int32_t count)
@@ -158,5 +158,5 @@ static HRESULT PerformWriteOperation(const char *buffer, int32_t offset, int32_t
     (void)count;
 
     NANOCLR_HEADER();
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }

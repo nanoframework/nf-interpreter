@@ -214,15 +214,20 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::CombinePaths(
         return CLR_E_PATH_TOO_LONG;
     }
 
-    strcat(outpath, path1);
+    // lengths were validated above, so append in place
+    char *dst = outpath + outputLength;
+
+    memcpy(dst, path1, path1Length);
+    dst += path1Length;
 
     // Add "\" to path if required
     if (addSeparator)
     {
-        strcat(outpath, "\\");
+        *dst++ = '\\';
     }
 
-    strcat(outpath, path2);
+    memcpy(dst, path2, path2Length);
+    dst[path2Length] = 0;
 
     return S_OK;
 }
