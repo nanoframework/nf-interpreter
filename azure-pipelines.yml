@@ -47,7 +47,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v5.5.4
+      ref: refs/tags/v5.5.5
     - repository: mscorlib
       type: github
       name: nanoframework/CoreLibrary
@@ -56,7 +56,7 @@ resources:
       type: github
       name: littlefs-project/littlefs
       endpoint: nanoframework
-      ref: refs/tags/v2.11.2
+      ref: refs/tags/v2.11.3
 
 jobs:
   ##############################
@@ -742,7 +742,7 @@ jobs:
       IDF_PATH: "$(Agent.BuildDirectory)/s/esp-idf"
       PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
       TargetPlatform: "esp32"
-      IDF_TAG: "v5.5.4"
+      IDF_TAG: "v5.5.5"
 
     steps:
       - checkout: self
