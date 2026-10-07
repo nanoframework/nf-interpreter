@@ -63,7 +63,23 @@ MCUboot rounds the swap trailer up to a whole logical sector, so the largest ima
 
 ## Update media (USB MSD)
 
-With `NF_FEATURE_MCUBOOT_HAS_USB_MSD` enabled (default in `defconfig`), before `boot_go()` the bootloader enumerates a USB mass storage device on OTG_HS (`USBHD2`, FatFs volume `E:`) and imports `nanoCLR-*.bin` / `nanoDeployment-*.bin` from its root directory into the matching secondary slot for a test swap (see `MCUboot/docs/upgrade-strategy.md`). Board side: `mcuboot_media_boot.c`. With no stick attached this adds up to ~1 s (`MCUBOOT_USB_MSD_ATTACH_TIMEOUT_MS`) to boot. PALX has no SD card, so USB MSD is the only update medium.
+With `NF_FEATURE_MCUBOOT_HAS_USB_MSD` enabled (default in `defconfig`), before `boot_go()` the bootloader enumerates a USB mass storage device on OTG_HS (`USBHD2`, FatFs volume `E:`) and imports `nanoCLR-*.bin` / `nanoDeployment-*.bin` from its root directory into the matching W25Q512 secondary slot for a test swap (see `MCUboot/docs/upgrade-strategy.md`). Board side: `mcuboot_media_boot.c`, engine in `MCUboot/common/MCUboot_media_import.c`. The stick stays a regular storage volume for the application; it is not a slot. PALX has no SD card, so USB MSD is the only update medium.
+
+| Item | Value |
+|---|---|
+| Files (root of the volume) | `nanoCLR-*.bin` → image 0, `nanoDeployment-*.bin` → image 1 (e.g. `nanoCLR-1.2.3.bin`); two separate signed files (`imgtool sign --header-size 0x400 --pad-header --slot-size <usable>`), no bundle. Several matches → the highest image version wins |
+| Placement | one logical sector in (`+0x40000`) as `MCUBOOT_SWAP_USING_OFFSET` requires; max file size = usable image size (768 kB / 512 kB) |
+| Image identity | the SHA-256 TLV of the image (verified against the bytes in flash), **not** the version number: a rebuilt image with an unchanged version is still imported. Files without a SHA-256 TLV are ignored |
+| After import | copy in flash hashed against the file's SHA-256 (mismatch → slot erased, file not tagged), slot marked pending (**test** swap; the app confirms), file kept, `<file>.used` gets a line `<STM32 UID hex> <version> <size> <sha256 first 16 hex>` |
+| Skipped (tagged) | the primary already holds the identical image · the identical image is already pending |
+| Skipped | `.used` already lists this device for that exact file **and** the primary holds a valid image (an erased/corrupt/random primary ignores the marker, so a re-flashed production board is updated again) · header/size invalid |
+| Deferred (not tagged, retried next boot) | MCUboot swap interrupted by a reset · revert in progress · unconfirmed test image in primary with an intact image to revert to (MCUboot reverts first) |
+| Replaced | an unconfirmed test image in primary with **no** valid image to revert to (MCUboot would otherwise revert to garbage) · a pending image that is invalid or different from the file |
+| Log | every outcome is one `media import: image N: …` line with its reason, plus the candidate's version, size and SHA-256 prefix |
+| Image 1 note | the deployment block storage spans the whole image 1 primary, header included: a raw (non-MCUboot) deployment from the debugger leaves no valid image there, so a stick left plugged in re-imports its `nanoDeployment-*.bin` on the next boot |
+| USB bring-up budget | nothing attached: gives up after `MCUBOOT_USB_MSD_ATTACH_TIMEOUT_MS` (1 s, judged on the live `HPRT.PCSTS` bit); device attached: up to `MCUBOOT_USB_MSD_ENUM_TIMEOUT_MS` (6 s) for enumeration + LUN ready. Outcome is logged either way |
+
+Signature verification is MCUboot's: a bad signature is caught by `boot_go()` and the secondary slot erased; the `.used` line prevents the same file from being staged again on this device (so an image that fails its test boot and is reverted is not retried in a loop).
 
 ## Serial recovery
 
