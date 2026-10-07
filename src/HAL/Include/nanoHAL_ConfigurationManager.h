@@ -53,6 +53,12 @@ extern "C"
 
     } UpdateConfigurationResult;
 
+#if defined(_MSC_VER)
+// C4200: flexible array members below are intentional (standard C, MSVC flags them in C++)
+#pragma warning(push)
+#pragma warning(disable : 4200)
+#endif
+
     // network interface configuration struct
     // declared with a flexible array member to allow N config blocks totally independent of compilation
     typedef struct HAL_CONFIGURATION_NETWORK
@@ -113,6 +119,10 @@ extern "C"
         HAL_Configuration_X509DeviceCertificate *Certificates[];
 
     } HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE;
+
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
     // target configuration storage struct
     // the memory allocation for these will have to be done as required according to the number and type of blocks found

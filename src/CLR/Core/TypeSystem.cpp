@@ -1086,7 +1086,10 @@ bool CLR_RT_TypeDef_Instance::InitializeFromReflection(const CLR_RT_ReflectionDe
                 return false;
             }
 
-            *levels = element.Levels;
+            if (levels)
+            {
+                *levels = element.Levels;
+            }
 
             // if this is a generic type, need to advance to get type
             if (element.DataType == DATATYPE_GENERICINST)
@@ -3091,7 +3094,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
                     CLR_RT_TypeSpec_Instance callerTypeSpec;
                     if (!callerTypeSpec.InitializeFromIndex(*caller->genericType))
                     {
-                        return false;
+                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
                     CLR_RT_SignatureParser::Element paramElement;
@@ -4563,19 +4566,22 @@ HRESULT CLR_RT_Assembly::ResolveMethodRef()
             if (typeSpecInstance.InitializeFromIndex(typeSpec) == false)
             {
 #if !defined(BUILD_RTM)
-                CLR_Debug::Printf("Unknown scope when resolving MethodRef: %08x '%s'\r\n", src->encodedOwner);
+                CLR_Debug::Printf(
+                    "Unknown scope when resolving MethodRef: %08x '%s'\r\n",
+                    src->encodedOwner,
+                    methodName);
 #endif
 
 #if defined(VIRTUAL_DEVICE)
                 NANOCLR_CHARMSG_SET_AND_LEAVE(
                     CLR_E_FAIL,
-                    "Unknown scope when resolving MethodRef: %08x\r\n",
+                    "Unknown scope when resolving MethodRef: %08x '%s'\r\n",
                     src->encodedOwner,
                     methodName);
 #else
                 NANOCLR_MSG1_SET_AND_LEAVE(
                     CLR_E_FAIL,
-                    L"Unknown scope when resolving MethodRef: %08x\r\n",
+                    L"Unknown scope when resolving MethodRef: %08x '%s'\r\n",
                     src->encodedOwner,
                     methodName);
 #endif
@@ -5713,10 +5719,7 @@ struct MethodIndexLookup
 };
 
 static const MethodIndexLookup c_MethodIndexLookup[] = {
-#define MIL(nm, type, method)                                                                                          \
-    {                                                                                                                  \
-        nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method                                           \
-    }
+#define MIL(nm, type, method) {nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method}
 
     // clang-format off
 

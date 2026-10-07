@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -202,7 +202,10 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::Close___VOID(CL
 
     NANOCLR_CLEANUP();
 
-    pThis[FIELD___fs].SetObjectReference(nullptr);
+    if (pThis != nullptr)
+    {
+        pThis[FIELD___fs].SetObjectReference(nullptr);
+    }
 
     NANOCLR_CLEANUP_END();
 }

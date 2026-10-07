@@ -650,9 +650,11 @@ macro(nf_add_idf_as_library)
     nf_install_idf_component_from_registry(littlefs 97bf51ce-1daa-4369-81ec-eacbd8102815) 
 
     if(${TARGET_SERIES_SHORT} STREQUAL "esp32p4")
-       nf_install_idf_component_from_registry(esp_wifi_remote c90c182f-b7fc-4a59-a445-96f712e36bb2)
-       nf_install_idf_component_from_registry(esp_hosted 2c2bb417-ac4a-415a-8bd8-d2437701bb5e)
-       endif()
+        # v1.6.3
+        nf_install_idf_component_from_registry(esp_wifi_remote 3c98b2c9-11fb-4477-b80a-1aaa3536b46d)
+        # v2.12.11
+        nf_install_idf_component_from_registry(esp_hosted 310ee40e-29c8-42de-9454-a52718131a30)
+    endif()
 
     # Set PYTHON to the ESP-IDF virtual environment
     # CMake falls back to the system Python which lacks the required ESP-IDF packages.
@@ -725,7 +727,7 @@ macro(nf_add_idf_as_library)
     )
 
     # Make temporary copy of sdkconfig.defaults.? file into build dir as we are going to make changes
-    set(SDKCONFIG_DEFAULTS_TEMP_FILE ${CMAKE_SOURCE_DIR}/build/sdkconfig.default)
+    set(SDKCONFIG_DEFAULTS_TEMP_FILE ${CMAKE_BINARY_DIR}/sdkconfig.default)
     file(WRITE ${SDKCONFIG_DEFAULTS_TEMP_FILE} ${SDKCONFIG_ORIGINAL_CONTENTS})
 
     # set list with the IDF components to add

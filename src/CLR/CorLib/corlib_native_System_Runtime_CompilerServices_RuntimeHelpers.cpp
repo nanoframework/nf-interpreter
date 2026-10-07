@@ -336,7 +336,7 @@ HRESULT Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::Ch
             }
             else if (element.DataType == DATATYPE_VAR)
             {
-                CLR_RT_SignatureParser::Element typeElement;
+                CLR_RT_SignatureParser::Element typeElement{};
 
                 // get the type from the caller's generic type
                 for (int paramIndex = 0; paramIndex <= element.GenericParamPosition; paramIndex++)

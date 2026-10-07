@@ -161,23 +161,29 @@
 #define PROHIBIT_ALL_CONSTRUCTORS(cls)                                                                                 \
   private:                                                                                                             \
     cls();                                                                                                             \
-    cls(cls &);                                                                                                        \
-    cls &operator=(const cls &)
+    cls(const cls &) = delete;                                                                                         \
+    cls &operator=(const cls &) = delete
 
+// C26495 suppressed: these types live in zero-initialized static storage and are reset with memset
+// clang-format off
 #define PROHIBIT_COPY_CONSTRUCTORS(cls)                                                                                \
   public:                                                                                                              \
+    __pragma(warning(push))                                                                                            \
+    __pragma(warning(disable : 26495))                                                                                 \
     cls()                                                                                                              \
     {                                                                                                                  \
     }                                                                                                                  \
+    __pragma(warning(pop))                                                                                             \
                                                                                                                        \
   private:                                                                                                             \
-    cls(cls &);                                                                                                        \
-    cls &operator=(const cls &)
+    cls(const cls &) = delete;                                                                                         \
+    cls &operator=(const cls &) = delete
+// clang-format on
 
 #define PROHIBIT_COPY_CONSTRUCTORS2(cls)                                                                               \
   private:                                                                                                             \
-    cls(cls &);                                                                                                        \
-    cls &operator=(const cls &)
+    cls(const cls &) = delete;                                                                                         \
+    cls &operator=(const cls &) = delete
 
 #define LONGLONGCONSTANT(v)  (v##I64)
 #define ULONGLONGCONSTANT(v) (v##UI64)
@@ -187,8 +193,8 @@
 #define PROHIBIT_ALL_CONSTRUCTORS(cls)                                                                                 \
   private:                                                                                                             \
     cls();                                                                                                             \
-    cls(cls &);                                                                                                        \
-    cls &operator=(const cls &)
+    cls(const cls &) = delete;                                                                                         \
+    cls &operator=(const cls &) = delete
 
 #define PROHIBIT_COPY_CONSTRUCTORS(cls)                                                                                \
   public:                                                                                                              \
@@ -197,13 +203,13 @@
     }                                                                                                                  \
                                                                                                                        \
   private:                                                                                                             \
-    cls(cls &);                                                                                                        \
-    cls &operator=(const cls &)
+    cls(const cls &) = delete;                                                                                         \
+    cls &operator=(const cls &) = delete
 
 #define PROHIBIT_COPY_CONSTRUCTORS2(cls)                                                                               \
   private:                                                                                                             \
-    cls(cls &);                                                                                                        \
-    cls &operator=(const cls &)
+    cls(const cls &) = delete;                                                                                         \
+    cls &operator=(const cls &) = delete
 
 #define LONGLONGCONSTANT(v)  (v##ll)
 #define ULONGLONGCONSTANT(v) (v##ull)

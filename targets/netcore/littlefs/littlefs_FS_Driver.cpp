@@ -64,7 +64,7 @@ HRESULT LITTLEFS_FS_Driver::Format(const VOLUME_ID *volume, const char *volumeLa
     // get littlefs instance
     fsDrive = hal_lfs_get_fs_from_index(volume->volumeId);
 
-    if (fsDrive)
+    if (fsDrive == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
     }

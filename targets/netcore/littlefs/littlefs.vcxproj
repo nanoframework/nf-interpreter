@@ -19,8 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(LITTLEFS_PATH)\lfs.c" />
-    <ClCompile Include="$(LITTLEFS_PATH)\lfs_util.c" />
+    <ClCompile Include="$(LITTLEFS_PATH)\lfs.c">
+      <DisableSpecificWarnings>4146;4244;4267;4996</DisableSpecificWarnings>
+    </ClCompile>
+    <ClCompile Include="$(LITTLEFS_PATH)\lfs_util.c">
+      <DisableSpecificWarnings>4146;4244;4267;4996</DisableSpecificWarnings>
+    </ClCompile>
     <ClCompile Include="hal_littlefs.c" />
     <ClCompile Include="littlefs_FS_Driver.cpp" />
   </ItemGroup>

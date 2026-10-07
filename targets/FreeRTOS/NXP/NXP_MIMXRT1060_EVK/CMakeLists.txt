@@ -36,8 +36,8 @@ target_compile_definitions(NF_NativeAssemblies PUBLIC -DCPU_MIMXRT1062CVL5A -DCP
 if(SRECORD_TOOL_AVAILABLE)
 
     nf_generate_hex_package(
-        ${CMAKE_SOURCE_DIR}/build/${NANOBOOTER_PROJECT_NAME}.hex
-        ${CMAKE_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.hex
-        ${CMAKE_SOURCE_DIR}/build/nanobooter-nanoclr.hex)
+        ${CMAKE_BINARY_DIR}/${NANOBOOTER_PROJECT_NAME}.hex
+        ${CMAKE_BINARY_DIR}/${NANOCLR_PROJECT_NAME}.hex
+        ${CMAKE_BINARY_DIR}/nanobooter-nanoclr.hex)
 
 endif()

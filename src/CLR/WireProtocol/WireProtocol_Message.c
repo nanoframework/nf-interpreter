@@ -15,6 +15,12 @@
 // from nanoHAL_Time.h (TIME_CONVERSION__TO_SECONDS)
 #define TIME_CONVERSION__TO_SYSTICKS 10000000
 
+#if defined(VIRTUAL_DEVICE)
+// from nanoHAL_Time.h, which isn't included for the virtual device
+// (without this prototype C assumes an int return and truncates the 64-bit time)
+uint64_t HAL_Time_SysTicksToTime(uint64_t sysTicks);
+#endif
+
 static uint16_t _lastOutboundMessage = 0;
 static uint64_t _receiveExpiryTicks;
 static uint8_t _rxState;

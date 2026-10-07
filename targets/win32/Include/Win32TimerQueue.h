@@ -134,7 +134,7 @@ class Timer
     Timer &operator=(const Timer &) = delete;
 
     // move copyable
-    Timer(Timer &&other) : hQueue(nullptr), hTimer(NULL), Period(0)
+    Timer(Timer &&other) noexcept : hQueue(nullptr), hTimer(nullptr), Period(0)
     {
         swap(hQueue, other.hQueue);
         swap(hTimer, other.hTimer);
@@ -144,7 +144,7 @@ class Timer
     }
 
     // move assignable
-    Timer &operator=(Timer &&other)
+    Timer &operator=(Timer &&other) noexcept
     {
         swap(hQueue, other.hQueue);
         swap(hTimer, other.hTimer);

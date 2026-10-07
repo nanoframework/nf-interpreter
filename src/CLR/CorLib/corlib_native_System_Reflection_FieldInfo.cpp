@@ -156,10 +156,13 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::GetCustomAttributesNa
     // get the caller field
     callerField = stack.This();
 
-    NANOCLR_CHECK_HRESULT(Library_corlib_native_System_Reflection_RuntimeFieldInfo::GetFieldDescriptor(
-        stack,
-        *callerField,
-        fieldDefinition));
+    if (Library_corlib_native_System_Reflection_RuntimeFieldInfo::GetFieldDescriptor(
+            stack,
+            *callerField,
+            fieldDefinition) == false)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_NULL_REFERENCE);
+    }
 
     // setup attribute enumerator
     CLR_RT_AttributeEnumerator attributeEnumerator;

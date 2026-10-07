@@ -109,7 +109,8 @@ bool FS_MountVolume(const char *rootName, uint32_t deviceFlags, const char *file
 
 void FS_UnmountVolume(const char *rootName)
 {
-    FileSystemVolume *volume = FileSystemVolumeList::FindVolume(rootName, hal_strlen_s(rootName));
+    FileSystemVolume *volume =
+        FileSystemVolumeList::FindVolume(rootName, static_cast<uint32_t>(hal_strlen_s(rootName)));
 
     if (volume)
     {
@@ -368,7 +369,7 @@ uint32_t FileSystemVolumeList::GetNextFreeVolumeId()
         volume = FileSystemVolumeList::GetNextVolume(*volume);
     }
 
-    return maxVolumeId + 1;
+    return static_cast<uint32_t>(maxVolumeId + 1);
 }
 
 bool FileSystemVolumeList::Contains(FileSystemVolume *fsv)

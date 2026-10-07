@@ -56,7 +56,7 @@ git pull origin 5.5.1
 cd /sources/lwip || exit 1
 git pull origin STABLE-2_1_3_RELEASE
 cd /sources/littlefs || exit 1
-git pull origin v2.11.2
+git pull origin v2.11.3
 # WHEN CHANGING THIS MAKE SURE TO UPDATE MCUBOOT_GIT_TAG IN CMake/Modules/FindMCUboot.cmake
 cd /sources/mcuboot || exit 1
 git fetch --depth=1 origin tag v2.4.0

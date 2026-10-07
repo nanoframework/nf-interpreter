@@ -380,6 +380,20 @@ CLR_RT_Thread::UnwindStack *CLR_RT_Thread::PushEH()
     }
 }
 
+static bool IsCallerFrame(CLR_RT_StackFrame *stack, CLR_RT_StackFrame *candidate)
+{
+    NANOCLR_FOREACH_NODE_BACKWARD__DIRECT(CLR_RT_StackFrame, caller, stack->Caller())
+    {
+        if (caller == candidate)
+        {
+            return true;
+        }
+    }
+    NANOCLR_FOREACH_NODE_BACKWARD_END();
+
+    return false;
+}
+
 void CLR_RT_Thread::PopEH_Inner(CLR_RT_StackFrame *stack, CLR_PMETADATA ip)
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -395,8 +409,8 @@ void CLR_RT_Thread::PopEH_Inner(CLR_RT_StackFrame *stack, CLR_PMETADATA ip)
             return;
 
         //
-        // No longer check for same stack since nested exceptions will have different
-        // stacks
+        // Keep popping entries for this stack frame and stale entries left behind by frames already unwound.
+        // Stop at an entry owned by a caller that is still executing (e.g. a finally or filter that called us).
         //
         while (m_nestedExceptionsPos > 0)
         {
@@ -407,6 +421,14 @@ void CLR_RT_Thread::PopEH_Inner(CLR_RT_StackFrame *stack, CLR_PMETADATA ip)
             //
             if (ip && (us.m_currentBlockStart <= ip && ip < us.m_currentBlockEnd))
                 break;
+
+            //
+            // Entry belongs to a caller frame that is still on the call chain, don't pop.
+            //
+            if (us.m_stack != NULL && us.m_stack != stack && IsCallerFrame(stack, us.m_stack))
+            {
+                break;
+            }
 
 #ifndef NANOCLR_NO_IL_INLINE
             if (stack->m_inlineFrame)
@@ -2494,7 +2516,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         else
                         {
                             CLR_RT_TypeDef_Instance declType;
-                            NANOCLR_CHECK_HRESULT(calleeInst.GetDeclaringType(declType));
+                            if (!calleeInst.GetDeclaringType(declType))
+                            {
+                                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                            }
 
                             if (declType.target->dataType == DATATYPE_VALUETYPE)
                             {
@@ -4497,7 +4522,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     }
 
                     // Store the value into the actual array buffer
-                    NANOCLR_CHECK_HRESULT(evalPos[3].StoreToReference(evalPos[1], size));
+                    NANOCLR_CHECK_HRESULT(evalPos[3].StoreToReference(evalPos[1], static_cast<int>(size)));
 
                     break;
                 }

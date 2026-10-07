@@ -65,7 +65,7 @@ void CLR_PRF_Profiler::SendMemoryLayout()
 #if defined(NANOCLR_64BIT_POINTERS)
     PackAndWriteBits((CLR_UINT32)((CLR_UINT64)s_CLR_RT_Heap.location >> 32));
 #endif
-    PackAndWriteBits((CLR_UINT32)s_CLR_RT_Heap.location);
+    PackAndWriteBits((CLR_UINT32)(uintptr_t)s_CLR_RT_Heap.location);
 
     PackAndWriteBits(s_CLR_RT_Heap.size);
 
@@ -528,7 +528,14 @@ void CLR_PRF_Profiler::DumpEndOfRefsList()
 void CLR_PRF_Profiler::DumpPointer(void *ptr)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    PackAndWriteBits((CLR_UINT32)((CLR_UINT8 *)ptr - s_CLR_RT_Heap.location));
+
+#if defined(NANOCLR_64BIT_POINTERS)
+    CLR_UINT64 ptrVAlue = ((CLR_UINT8 *)ptr - s_CLR_RT_Heap.m_location);
+    PackAndWriteBits((CLR_UINT32)(ptrVAlue >> 32));
+    PackAndWriteBits((CLR_UINT32)ptrVAlue);
+#else
+    PackAndWriteBits((CLR_UINT32)((CLR_UINT8 *)ptr - s_CLR_RT_Heap.m_location));
+#endif
 }
 
 void CLR_PRF_Profiler::DumpSingleReference(CLR_RT_HeapBlock *ptr)

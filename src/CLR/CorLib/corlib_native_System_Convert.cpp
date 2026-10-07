@@ -596,8 +596,8 @@ HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__S
     unsigned char *outArray = nullptr;
     char *outArrayWitLineBreak = nullptr;
     uint8_t *inArrayPointer = nullptr;
-    uint8_t lineBreakCount;
-    uint16_t offsetIndex = 0;
+    size_t lineBreakCount;
+    size_t offsetIndex = 0;
     size_t count = 0;
     int result;
 
@@ -761,8 +761,10 @@ HRESULT Library_corlib_native_System_Convert::FromBase64String___STATIC__SZARRAY
 
     // create heap block array instance with appropriate size (the length of the output array)
     // and type (byte which is uint8_t)
-    NANOCLR_CHECK_HRESULT(
-        CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), outputLength, g_CLR_RT_WellKnownTypes.UInt8));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
+        stack.PushValueAndClear(),
+        static_cast<CLR_UINT32>(outputLength),
+        g_CLR_RT_WellKnownTypes.UInt8));
 
     // get a pointer to the array in the heap block array just created
     returnArray = stack.TopValue().DereferenceArray()->GetFirstElement();

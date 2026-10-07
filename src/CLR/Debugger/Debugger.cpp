@@ -869,13 +869,13 @@ void CLR_DBG_Debugger::AccessMemory(
                             if (mode == AccessMemory_Check)
                             {
                                 // compute CRC32 of the memory segment
-                                crc32 = SUPPORT_ComputeCRC((const void *)accessAddress, NumOfBytes, crc32);
+                                crc32 = SUPPORT_ComputeCRC((const void *)(uintptr_t)accessAddress, NumOfBytes, crc32);
                                 *(CLR_DBG_Commands_Monitor_CheckMemory_Reply *)buf = crc32;
                             }
                             else
                             {
                                 // copy memory segment to buffer
-                                memcpy((unsigned char *)bufPtr, (const void *)accessAddress, NumOfBytes);
+                                memcpy((unsigned char *)bufPtr, (const void *)(uintptr_t)accessAddress, NumOfBytes);
                             }
                         }
                         else
@@ -924,7 +924,7 @@ void CLR_DBG_Debugger::AccessMemory(
                             if (mode == AccessMemory_Read && isMemoryMapped)
                             {
                                 // copy memory segment to buffer
-                                memcpy((unsigned char *)bufPtr, (const void *)accessAddress, NumOfBytes);
+                                memcpy((unsigned char *)bufPtr, (const void *)(uintptr_t)accessAddress, NumOfBytes);
 
                                 // done here
                                 return;
@@ -933,7 +933,7 @@ void CLR_DBG_Debugger::AccessMemory(
                             if (isMemoryMapped)
                             {
                                 // adjust buffer pointer to match access address
-                                bufPtr = (unsigned char *)accessAddress;
+                                bufPtr = (unsigned char *)(uintptr_t)accessAddress;
                             }
 
                             // compute CRC32 of the memory segment
@@ -1008,7 +1008,7 @@ void CLR_DBG_Debugger::AccessMemory(
 
         proceed = false;
         void *temp;
-        temp = (void *)sectAddr;
+        temp = (void *)(uintptr_t)sectAddr;
 
         switch (mode)
         {
@@ -1045,17 +1045,17 @@ void CLR_DBG_Debugger::AccessMemory(
                     break;
 
                 case AccessMemory_Read:
-                    memcpy(buf, (const void *)sectAddr, lengthInBytes);
+                    memcpy(buf, (const void *)(uintptr_t)sectAddr, lengthInBytes);
                     break;
 
                 case AccessMemory_Write:
                     unsigned char *memPtr;
-                    memPtr = (unsigned char *)sectAddr;
+                    memPtr = (unsigned char *)(uintptr_t)sectAddr;
                     memcpy(memPtr, buf, lengthInBytes);
                     break;
 
                 case AccessMemory_Erase:
-                    memPtr = (unsigned char *)sectAddr;
+                    memPtr = (unsigned char *)(uintptr_t)sectAddr;
                     if (lengthInBytes != 0)
                         memset(memPtr, 0xFF, lengthInBytes);
                     break;
@@ -2007,7 +2007,7 @@ static bool FillValues(
 
             if (text != nullptr)
             {
-                dst->m_charsInString = (CLR_UINT32)text;
+                dst->m_charsInString = (CLR_UINT32)(uintptr_t)text;
                 dst->m_bytesInString = (CLR_UINT32)hal_strlen_s(text);
 
                 hal_strncpy_s(
@@ -3910,7 +3910,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_VirtualMethod(WP_Message *msg)
     NATIVE_PROFILE_CLR_DEBUGGER();
 
     auto *cmd = (CLR_DBG_Commands::Debugging_Resolve_VirtualMethod *)msg->m_payload;
-    CLR_DBG_Commands::Debugging_Resolve_VirtualMethod::Reply cmdReply;
+    CLR_DBG_Commands::Debugging_Resolve_VirtualMethod::Reply cmdReply{};
     CLR_RT_TypeDef_Index cls;
     CLR_RT_MethodDef_Index md;
     CLR_RT_HeapBlock *obj = HandleToHeapBlock(cmd->m_obj);

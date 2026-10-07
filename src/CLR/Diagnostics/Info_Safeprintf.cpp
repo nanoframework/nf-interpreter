@@ -11,7 +11,7 @@ bool CLR_SafeSprintfV(char *&szBuffer, size_t &iBuffer, const char *format, va_l
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 
-    int chars = vsnprintf(szBuffer, iBuffer, format, arg);
+    int chars = static_cast<int>(vsnprintf(szBuffer, iBuffer, format, arg));
     bool fRes = (chars >= 0);
 
     if (fRes == false)

@@ -8,7 +8,7 @@
 
 void TimerCallback()
 {
-    GLOBAL_LOCK(irq);
+    GLOBAL_LOCK();
     HAL_COMPLETION::DequeueAndExec();
 }
 
