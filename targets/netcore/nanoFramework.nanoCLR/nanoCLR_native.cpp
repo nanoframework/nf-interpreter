@@ -200,7 +200,8 @@ bool nanoCLR_GetNativeAssemblyInformation(const CLR_UINT8 *data, size_t size)
         return false;
     }
 
-    const size_t requiredSize = g_CLR_InteropAssembliesCount * (5 * sizeof(CLR_UINT16) + 128);
+    // per-assembly layout: uint32_t contract hash + 128-byte name
+    const size_t requiredSize = g_CLR_InteropAssembliesCount * (sizeof(CLR_UINT32) + 128);
     if (size < requiredSize)
     {
         // Buffer too small
@@ -215,18 +216,6 @@ bool nanoCLR_GetNativeAssemblyInformation(const CLR_UINT8 *data, size_t size)
     {
         memcpy((void *)data, &g_CLR_InteropAssembliesNativeData[i]->m_checkSum, sizeof(CLR_UINT32));
         data += sizeof(CLR_UINT32);
-
-        memcpy((void *)data, &g_CLR_InteropAssembliesNativeData[i]->m_Version.majorVersion, sizeof(CLR_UINT16));
-        data += sizeof(CLR_UINT16);
-
-        memcpy((void *)data, &g_CLR_InteropAssembliesNativeData[i]->m_Version.minorVersion, sizeof(CLR_UINT16));
-        data += sizeof(CLR_UINT16);
-
-        memcpy((void *)data, &g_CLR_InteropAssembliesNativeData[i]->m_Version.buildNumber, sizeof(CLR_UINT16));
-        data += sizeof(CLR_UINT16);
-
-        memcpy((void *)data, &g_CLR_InteropAssembliesNativeData[i]->m_Version.revisionNumber, sizeof(CLR_UINT16));
-        data += sizeof(CLR_UINT16);
 
         hal_strcpy_s((char *)data, 128, g_CLR_InteropAssembliesNativeData[i]->m_szAssemblyName);
         data += 128;
