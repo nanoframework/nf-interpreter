@@ -236,6 +236,14 @@ struct Library_nf_system_collections_System_Collections_Stack
     //--//
 };
 
+struct Library_nf_system_collections_System_Collections_DictionaryEntry
+{
+    static const int FIELD__Key = 1;
+    static const int FIELD__Value = 2;
+
+    //--//
+};
+
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_System_Collections;
 
 #endif // NF_SYSTEM_COLLECTIONS_H

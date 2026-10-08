@@ -1004,6 +1004,68 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Spp_NordicSpp
     //--//
 };
 
+struct
+    Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_BluetoothLEAdvertisementPublisherStatusChangedEventArgs
+{
+    static const int FIELD___error = 1;
+    static const int FIELD___status = 2;
+    static const int FIELD___selectedTransmitPowerLevelInDBm = 3;
+
+    //--//
+};
+
+struct
+    Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattLocalCharacteristicParameters
+{
+    static const int FIELD___writeProtectionLevel = 1;
+    static const int FIELD___readProtectionLevel = 2;
+    static const int FIELD___userDescription = 3;
+    static const int FIELD___properties = 4;
+    static const int FIELD___staticValue = 5;
+    static const int FIELD___presentationFormats = 6;
+
+    //--//
+};
+
+struct
+    Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattSessionStatusChangedEventArgs
+{
+    static const int FIELD___status = 1;
+    static const int FIELD___bluetoothError = 2;
+
+    //--//
+};
+
+struct
+    Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_BluetoothLEAdvertisementWatcherStoppedEventArgs
+{
+    static const int FIELD___error = 1;
+
+    //--//
+};
+
+struct
+    Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattReadClientCharacteristicConfigurationDescriptorResult
+{
+    static const int FIELD___config = 1;
+    static const int FIELD___protocolError = 2;
+    static const int FIELD___status = 3;
+
+    //--//
+};
+
+struct
+    Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattServiceProviderAdvertisingParameters
+{
+    static const int FIELD___isDiscoverable = 1;
+    static const int FIELD___isConnectable = 2;
+    static const int FIELD___serviceData = 3;
+    static const int FIELD___advertisement = 4;
+    static const int FIELD___customAdvertisement = 5;
+
+    //--//
+};
+
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Device_Bluetooth;
 
 #include "sys_ble.h"

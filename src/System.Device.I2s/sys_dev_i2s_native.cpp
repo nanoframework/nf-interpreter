@@ -9,41 +9,18 @@
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
+    Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::NativeDispose___VOID,
+    Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::NativeInit___VOID,
     Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Read___VOID__SystemSpan_1,
     Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Write___VOID__SystemReadOnlySpan_1,
-    nullptr,
-    Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::NativeInit___VOID,
-    Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::NativeDispose___VOID,
-    nullptr,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_I2s =
 {
     "System.Device.I2s",
-    0xA4BE3501,
+    0xB51CBE98,
     method_lookup,
-    { 100, 2, 0, 1 }
+    ARRAYSIZE(method_lookup)
 };
 
 // clang-format on
