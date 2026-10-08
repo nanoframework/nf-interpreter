@@ -200,8 +200,6 @@ struct Library_corlib_native_System_String
 {
     static const int FIELD_STATIC__Empty = 2;
 
-#if (CONFIG_NF_FEATURE_SUPPORT_REFLECTION == TRUE)
-
     NANOCLR_NATIVE_DECLARE(CompareTo___I4__OBJECT);
     NANOCLR_NATIVE_DECLARE(get_Chars___CHAR__I4);
     NANOCLR_NATIVE_DECLARE(ToCharArray___SZARRAY_CHAR);
@@ -251,56 +249,6 @@ struct Library_corlib_native_System_String
     NANOCLR_NATIVE_DECLARE(Concat___STATIC__STRING__SZARRAY_STRING);
     NANOCLR_NATIVE_DECLARE(Format___STATIC__STRING__STRING__SZARRAY_OBJECT);
 
-#else
-
-    NANOCLR_NATIVE_DECLARE(CompareTo___I4__OBJECT);
-    NANOCLR_NATIVE_DECLARE(get_Chars___CHAR__I4);
-    NANOCLR_NATIVE_DECLARE(ToCharArray___SZARRAY_CHAR);
-    NANOCLR_NATIVE_DECLARE(ToCharArray___SZARRAY_CHAR__I4__I4);
-    NANOCLR_NATIVE_DECLARE(get_Length___I4);
-    NANOCLR_NATIVE_DECLARE(Split___SZARRAY_STRING__SZARRAY_CHAR);
-    NANOCLR_NATIVE_DECLARE(Split___SZARRAY_STRING__SZARRAY_CHAR__I4);
-    NANOCLR_NATIVE_DECLARE(Substring___STRING__I4);
-    NANOCLR_NATIVE_DECLARE(Substring___STRING__I4__I4);
-    NANOCLR_NATIVE_DECLARE(Trim___STRING);
-    NANOCLR_NATIVE_DECLARE(Trim___STRING__SZARRAY_CHAR);
-    NANOCLR_NATIVE_DECLARE(TrimStart___STRING__SZARRAY_CHAR);
-    NANOCLR_NATIVE_DECLARE(TrimEnd___STRING__SZARRAY_CHAR);
-    NANOCLR_NATIVE_DECLARE(_ctor___VOID__SZARRAY_CHAR__I4__I4);
-    NANOCLR_NATIVE_DECLARE(_ctor___VOID__SZARRAY_CHAR);
-    NANOCLR_NATIVE_DECLARE(_ctor___VOID__CHAR__I4);
-    NANOCLR_NATIVE_DECLARE(CompareTo___I4__STRING);
-    NANOCLR_NATIVE_DECLARE(IndexOf___I4__CHAR);
-    NANOCLR_NATIVE_DECLARE(IndexOf___I4__CHAR__I4);
-    NANOCLR_NATIVE_DECLARE(IndexOf___I4__CHAR__I4__I4);
-    NANOCLR_NATIVE_DECLARE(IndexOf___I4__STRING);
-    NANOCLR_NATIVE_DECLARE(IndexOf___I4__STRING__I4);
-    NANOCLR_NATIVE_DECLARE(IndexOf___I4__STRING__I4__I4);
-    NANOCLR_NATIVE_DECLARE(IndexOfAny___I4__SZARRAY_CHAR);
-    NANOCLR_NATIVE_DECLARE(IndexOfAny___I4__SZARRAY_CHAR__I4);
-    NANOCLR_NATIVE_DECLARE(IndexOfAny___I4__SZARRAY_CHAR__I4__I4);
-    NANOCLR_NATIVE_DECLARE(LastIndexOf___I4__CHAR);
-    NANOCLR_NATIVE_DECLARE(LastIndexOf___I4__CHAR__I4);
-    NANOCLR_NATIVE_DECLARE(LastIndexOf___I4__CHAR__I4__I4);
-    NANOCLR_NATIVE_DECLARE(LastIndexOfAny___I4__SZARRAY_CHAR);
-    NANOCLR_NATIVE_DECLARE(LastIndexOfAny___I4__SZARRAY_CHAR__I4);
-    NANOCLR_NATIVE_DECLARE(LastIndexOfAny___I4__SZARRAY_CHAR__I4__I4);
-    NANOCLR_NATIVE_DECLARE(LastIndexOf___I4__STRING);
-    NANOCLR_NATIVE_DECLARE(LastIndexOf___I4__STRING__I4);
-    NANOCLR_NATIVE_DECLARE(LastIndexOf___I4__STRING__I4__I4);
-    NANOCLR_NATIVE_DECLARE(ToLower___STRING);
-    NANOCLR_NATIVE_DECLARE(ToUpper___STRING);
-    NANOCLR_NATIVE_DECLARE(Equals___STATIC__BOOLEAN__STRING__STRING);
-    NANOCLR_NATIVE_DECLARE(op_Equality___STATIC__BOOLEAN__STRING__STRING);
-    NANOCLR_NATIVE_DECLARE(op_Inequality___STATIC__BOOLEAN__STRING__STRING);
-    NANOCLR_NATIVE_DECLARE(Compare___STATIC__I4__STRING__STRING);
-    NANOCLR_NATIVE_DECLARE(Concat___STATIC__STRING__STRING__STRING);
-    NANOCLR_NATIVE_DECLARE(Concat___STATIC__STRING__STRING__STRING__STRING);
-    NANOCLR_NATIVE_DECLARE(Concat___STATIC__STRING__STRING__STRING__STRING__STRING);
-    NANOCLR_NATIVE_DECLARE(Concat___STATIC__STRING__SZARRAY_STRING);
-    NANOCLR_NATIVE_DECLARE(Format___STATIC__STRING__STRING__SZARRAY_OBJECT);
-
-#endif
     //--//
 
     static const int c_IndexOf__SingleChar = 0x00000001;
@@ -402,9 +350,7 @@ struct Library_corlib_native_System_Array
     NANOCLR_NATIVE_DECLARE(System_Collections_IList_get_Item___OBJECT__I4);
     NANOCLR_NATIVE_DECLARE(System_Collections_IList_set_Item___VOID__I4__OBJECT);
     NANOCLR_NATIVE_DECLARE(get_Length___I4);
-#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
     NANOCLR_NATIVE_DECLARE(CreateInstance___STATIC__SystemArray__SystemType__I4);
-#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
     NANOCLR_NATIVE_DECLARE(Copy___STATIC__VOID__SystemArray__I4__SystemArray__I4__I4);
     NANOCLR_NATIVE_DECLARE(Clear___STATIC__VOID__SystemArray__I4__I4);
     NANOCLR_NATIVE_DECLARE(TrySzIndexOf___STATIC__BOOLEAN__SystemArray__I4__I4__OBJECT__BYREF_I4);
@@ -511,9 +457,15 @@ struct Library_corlib_native_System_Double
 
 struct Library_corlib_native_System_TimeSpan
 {
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+    static const int FIELD_STATIC__Zero = 8;
+    static const int FIELD_STATIC__MaxValue = 9;
+    static const int FIELD_STATIC__MinValue = 10;
+#else
     static const int FIELD_STATIC__Zero = 7;
     static const int FIELD_STATIC__MaxValue = 8;
     static const int FIELD_STATIC__MinValue = 9;
+#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
     static const int FIELD___ticks = 1;
 
@@ -543,9 +495,15 @@ struct Library_corlib_native_System_TimeSpan
 
 struct Library_corlib_native_System_DateTime
 {
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+    static const int FIELD_STATIC__MinValue = 11;
+    static const int FIELD_STATIC__MaxValue = 12;
+    static const int FIELD_STATIC__UnixEpoch = 13;
+#else
     static const int FIELD_STATIC__MinValue = 10;
     static const int FIELD_STATIC__MaxValue = 11;
     static const int FIELD_STATIC__UnixEpoch = 12;
+#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
     static const int FIELD___ticks = 1;
 
@@ -583,11 +541,9 @@ struct Library_corlib_native_System_Convert
 struct Library_corlib_native_System_Delegate
 {
     NANOCLR_NATIVE_DECLARE(Equals___BOOLEAN__OBJECT);
-#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
     NANOCLR_NATIVE_DECLARE(GetInvocationList___SZARRAY_SystemDelegate);
     NANOCLR_NATIVE_DECLARE(get_Method___SystemReflectionMethodInfo);
     NANOCLR_NATIVE_DECLARE(get_Target___OBJECT);
-#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
     NANOCLR_NATIVE_DECLARE(Combine___STATIC__SystemDelegate__SystemDelegate__SystemDelegate);
     NANOCLR_NATIVE_DECLARE(Remove___STATIC__SystemDelegate__SystemDelegate__SystemDelegate);
     NANOCLR_NATIVE_DECLARE(op_Equality___STATIC__BOOLEAN__SystemDelegate__SystemDelegate);
@@ -647,7 +603,11 @@ struct Library_corlib_native_System_Enum
 
 struct Library_corlib_native_System_EventArgs
 {
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+    static const int FIELD_STATIC__Empty = 14;
+#else
     static const int FIELD_STATIC__Empty = 13;
+#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
     //--//
 };
@@ -679,7 +639,11 @@ struct Library_corlib_native_System_Int16
 
 struct Library_corlib_native_System_Guid
 {
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+    static const int FIELD_STATIC__Empty = 15;
+#else
     static const int FIELD_STATIC__Empty = 14;
+#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
     static const int FIELD___data = 1;
 
@@ -705,9 +669,11 @@ struct Library_corlib_native_System_MulticastDelegate
 
 struct Library_corlib_native_System_Nullable_1
 {
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
     static const int FIELD__hasValue = 1;
     static const int FIELD__value = 2;
 
+#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
     //--//
 };
 
@@ -796,8 +762,10 @@ struct Library_corlib_native_System_ReadOnlySpan_1
 
 struct Library_corlib_native_System_Reflection_AssemblyName
 {
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
     static const int FIELD___assembly = 1;
 
+#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
     //--//
 };
 
@@ -811,6 +779,7 @@ struct Library_corlib_native_System_Reflection_ConstructorInfo
 
 struct Library_corlib_native_System_Reflection_MethodBase
 {
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
     static const int FIELD___token = 1;
 
     NANOCLR_NATIVE_DECLARE(get_Name___STRING);
@@ -823,6 +792,7 @@ struct Library_corlib_native_System_Reflection_MethodBase
     NANOCLR_NATIVE_DECLARE(Invoke___OBJECT__OBJECT__SZARRAY_OBJECT);
     NANOCLR_NATIVE_DECLARE(GetParametersNative___SZARRAY_SystemReflectionParameterInfo);
 
+#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
     //--//
 
 #if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
@@ -879,10 +849,7 @@ struct Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers
     NANOCLR_NATIVE_DECLARE(GetObjectValue___STATIC__OBJECT__OBJECT);
     NANOCLR_NATIVE_DECLARE(RunClassConstructor___STATIC__VOID__SystemRuntimeTypeHandle);
     NANOCLR_NATIVE_DECLARE(get_OffsetToStringData___STATIC__I4);
-
-#if (CONFIG_NF_FEATURE_SUPPORT_REFLECTION == TRUE)
     NANOCLR_NATIVE_DECLARE(IsReferenceOrContainsReferences___STATIC__BOOLEAN);
-#endif
 
     //--//
 
@@ -1059,9 +1026,6 @@ struct Library_corlib_native_System_Threading_Thread
     NANOCLR_NATIVE_DECLARE(Sleep___STATIC__VOID__I4);
     NANOCLR_NATIVE_DECLARE(SpinWait___STATIC__VOID__I4);
     NANOCLR_NATIVE_DECLARE(get_CurrentThread___STATIC__SystemThreadingThread);
-#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
-    NANOCLR_NATIVE_DECLARE(GetDomain___STATIC__SystemAppDomain);
-#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
     //--//
 
@@ -1075,7 +1039,11 @@ struct Library_corlib_native_System_Threading_Thread
 
 struct Library_corlib_native_System_Threading_Timeout
 {
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+    static const int FIELD_STATIC__InfiniteTimeSpan = 17;
+#else
     static const int FIELD_STATIC__InfiniteTimeSpan = 15;
+#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
     //--//
 };
@@ -1157,6 +1125,76 @@ struct Library_corlib_native_System_WeakReference
 
     //--//
 };
+
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+struct Library_corlib_native_System_Array__EmptyArray_1
+{
+    static const int FIELD_STATIC__Value = 7;
+
+    //--//
+};
+#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+struct Library_corlib_native_System_Collections_Generic_ICollectionDebugView_1
+{
+    static const int FIELD___collection = 1;
+
+    //--//
+};
+#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+struct Library_corlib_native_System_Diagnostics_DebuggerTypeProxyAttribute
+{
+    static const int FIELD___typeName = 1;
+    static const int FIELD___targetName = 2;
+    static const int FIELD___target = 3;
+
+    //--//
+};
+#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+struct Library_corlib_native_System_ReadOnlySpan_1__Enumerator
+{
+    static const int FIELD___span = 1;
+    static const int FIELD___index = 2;
+
+    //--//
+};
+#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+struct Library_corlib_native_System_Span_1__Enumerator
+{
+    static const int FIELD___span = 1;
+    static const int FIELD___index = 2;
+
+    //--//
+};
+#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+struct Library_corlib_native_System_SZGenericArrayEnumerator_1
+{
+    static const int FIELD_STATIC__Empty = 16;
+
+    static const int FIELD___array = 3;
+
+    //--//
+};
+#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+struct Library_corlib_native_System_SZGenericArrayEnumeratorBase
+{
+    static const int FIELD___index = 1;
+    static const int FIELD___endIndex = 2;
+
+    //--//
+};
+#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib;
 
