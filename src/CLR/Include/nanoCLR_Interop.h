@@ -18,7 +18,7 @@ extern HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION(HRESULT hr, const char *szFunc, c
 #define NANOCLR_LEAVE()                                                                                                \
     {                                                                                                                  \
         if (FAILED(hr))                                                                                                \
-            NANOCLR_DEBUG_PROCESS_EXCEPTION(hr, nullptr, nullptr, 0);                                                        \
+            NANOCLR_DEBUG_PROCESS_EXCEPTION(hr, nullptr, nullptr, 0);                                                  \
         goto nanoCLR_Cleanup;                                                                                          \
     }
 #define NANOCLR_RETURN() return hr
