@@ -18,6 +18,7 @@ steps:
         *.dfu
         *.uf2
         *.csv
+        native_assemblies.json
       TargetFolder: '$(Build.ArtifactStagingDirectory)/$(TargetPublishName)'
       flattenFolders: true
       ignoreMakeDirErrors: true

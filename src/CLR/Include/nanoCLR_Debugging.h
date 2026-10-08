@@ -242,11 +242,11 @@ struct CLR_DBG_Commands
         
         struct __nfpack NativeAssemblyDetails
         {
-            uint32_t CheckSum;
-            NFVersion Version;
+            uint32_t ContractHash;
             uint8_t AssemblyName[128];
-
         };
+
+        CT_ASSERT(sizeof(NativeAssemblyDetails) == 132)
 
         union ReplyUnion
         {

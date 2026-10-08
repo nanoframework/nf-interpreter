@@ -914,3 +914,86 @@ through a `Span<T>`/`ReadOnlySpan<T>`:**
 - Check that the shell's `StorageOwner()` was actually set (i.e. the
   constructor path went through the array-backed `CreateInstanceWithStorage`
   call, not the raw-pointer one, which intentionally has no owner).
+
+---
+
+## 17. Native method dispatch (PE format v2)
+
+Rationale for `MD_Native`, `CLR_RT_NativeAssemblyData` and the native-assembly
+wire records. Code: `CLR_RT_StackFrame::Push`/`PushInline`,
+`CLR_RECORD_METHODDEF::HasILBody`, `LoadAssembly` (`CLRStartup.cpp`, plus the
+netcore/posix/win32 copies), `GetInteropNativeAssemblies` (`Debugger.cpp`).
+
+### Dense native slots
+
+A MethodDef with `MD_Native` (`0x00008000`) has no IL body. Its `rva` is the
+**native slot index** into the assembly's `method_lookup[]`, not an offset into
+`TBL_ByteCode`. The Metadata Processor numbers the native methods densely, so
+`method_lookup[]` holds only native entries and no longer grows with every
+managed method of the assembly. Slots are assigned by ordinal sort of
+(stub class name, stub method name), so they don't depend on the order of types
+or methods in the PE.
+
+Previously the table was indexed by MethodDef index. Adding or removing *any*
+method (even a private managed helper) shifted the indexes, so the native table
+had to be regenerated whenever the managed assembly changed, and the table was
+mostly `nullptr`. With dense slots the native table only changes when the native
+surface changes.
+
+Dispatch rules:
+- Delegate `Invoke` is checked first, as before.
+- `MD_Native`: `rva < nativeCodeCount` and a non-null handler, otherwise
+  `CLR_E_NOT_SUPPORTED`. The bound comes from `m_nativeMethodsCount`, copied into
+  `CLR_RT_Assembly::nativeCodeCount` at load. There was no bounds check before.
+- No `MD_Native`: IL, or `CLR_E_NOT_SUPPORTED` if `rva == CLR_EmptyIndex`.
+
+Because a native row's `rva` is a slot index, **every reader of `rva` has to go
+through `HasILBody()`**. The one that matters most is `FindMethodBoundaries`:
+it computes a method's IL length from the next row's `rva`. If it read a native
+row's slot index as an offset, it would get a wrong end offset.
+
+The CLR only dispatches PEs from the v2 Metadata Processor. There is no
+compatibility path, and the `NFMRK2` marker was deliberately not bumped. An older
+PE that has native methods carries an old-style checksum, which never equals the
+new contract hash, so `LoadAssembly` rejects it with `CLR_E_ASSM_WRONG_CHECKSUM`.
+An older PE without native methods loads and runs, because it never reaches
+native dispatch.
+
+### Contract hash, not version
+
+`CLR_RT_NativeAssemblyData::m_checkSum` is the **native contract hash**
+(Metadata Processor tag `nfNativeContract/3`). It hashes everything native code
+is compiled against:
+- the native methods, with their stub signatures, in slot order;
+- the field layouts (`FIELD__` / `FIELD_STATIC__` constants: name, index and
+  type) of every class and struct in the assembly. Compiler-generated types
+  (closures, iterators, async state machines) are excluded.
+
+It doesn't change for managed-only methods, method bodies or type order.
+`FIELD_STATIC__` indexes are assembly-wide, so adding a static field anywhere
+(including a compiler-generated lambda cache in a non-excluded type) shifts the
+indexes of the types after it. That is a real native break, and the hash changes.
+`LoadAssembly` compares the hash with the PE's `nativeMethodsChecksum` and fails
+fast on a mismatch (Startup `CLAUDE.md`). An assembly without native methods has
+hash `0`.
+
+`m_Version` was removed. It held the managed assembly version at the time the
+stubs were generated, and nothing at runtime used it: binding goes by name +
+major.minor (`FindAssembly`) and native compatibility goes by the hash. Keeping
+it made a managed version bump look like a native change. It also gave tools a
+second, unreliable compatibility key, because two firmwares with the same
+version could have different native surfaces. Tools now use the hash only:
+- wire protocol `NativeAssemblyDetails` = `{ uint32 ContractHash; char Name[128]; }`,
+  132 bytes (`CT_ASSERT`). There is no ping flag for the format: tools derive it
+  from the nanoCLR version (major >= 2 means v2 records and v2 PEs);
+- the build writes `native_assemblies.json` (`FindNF_NativeAssemblies.cmake`)
+  with the name and hash of each assembly, and the mscorlib reflection variant.
+
+### Cross-assembly field layouts
+
+Stub `FIELD__` indexes include inherited fields. A type that derives from a type
+in another assembly (for example `SocketException : Exception`) therefore
+hard-codes the base's field count. When an assembly's contract hash changes, the
+stubs of every assembly with types that derive from its types must be
+regenerated in the same change. `scripts/Test-NativeFieldLayout.ps1` checks the
+pairs listed in `scripts/native-cross-assembly-bases.json`.
