@@ -63,48 +63,68 @@ option(API_Hardware.GiantGecko                          "option for Hardware.Gia
 ###################################
 
 #################################################################
-# macro to find the version of an API or Interop assembly
+# macro to find the native contract hash of an API or Interop assembly
+# parses the stub initializer:
+#   CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_<name> = { "<name>", 0x<hash>, method_lookup|nullptr, <count> };
+# each entry of NF_NativeAssemblies_MANIFEST is "<name>|0x<HASH>|<variant>" (variant empty except for mscorlib)
 macro(AddNativeAssemblyVersion apiNamespace apiNamespaceWithoutDots nativeAssemblySources)
+
+    set(_nativeAssemblyHashFound FALSE)
 
     # find the source file that contains the value of CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_${apiNamespaceWithoutDots}
     foreach(apiSourceFile ${nativeAssemblySources})
 
         file(READ "${apiSourceFile}" sourceCode)
 
-        string(REGEX MATCH "[ \t\r\n]+CLR_RT_NativeAssemblyData[ \t\r\n]+g_CLR_AssemblyNative_${apiNamespaceWithoutDots}[ \t\r\n]*=[^{]+{[^0]+0x([0-9A-Za-z]+)[^{]+{[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)" _ "${sourceCode}")
+        string(REGEX MATCH "[ \t\r\n]+CLR_RT_NativeAssemblyData[ \t\r\n]+g_CLR_AssemblyNative_${apiNamespaceWithoutDots}[ \t\r\n]*=[ \t\r\n]*{[ \t\r\n]*\"[^\"]*\"[ \t\r\n]*,[ \t\r\n]*0x([0-9A-Fa-f]+)[ \t\r\n]*,[ \t\r\n]*(method_lookup|nullptr|NULL)[ \t\r\n]*," _ "${sourceCode}")
 
         if(NOT "${CMAKE_MATCH_1}" STREQUAL "")
-            list(APPEND NF_NativeAssemblies_VERSIONS "${apiNamespace},${CMAKE_MATCH_2}.${CMAKE_MATCH_3}.${CMAKE_MATCH_4}.${CMAKE_MATCH_5},0x${CMAKE_MATCH_1}")
+            string(TOUPPER "${CMAKE_MATCH_1}" _nativeAssemblyHash)
+            list(APPEND NF_NativeAssemblies_MANIFEST "${apiNamespace}|0x${_nativeAssemblyHash}|")
+            set(_nativeAssemblyHashFound TRUE)
             break()
         endif()
 
     endforeach()
+
+    if(NOT _nativeAssemblyHashFound)
+        message(FATAL_ERROR "Couldn't find the CLR_RT_NativeAssemblyData initializer (native contract hash) for ${apiNamespace} in its native sources. Regenerate the stub with the Metadata Processor.")
+    endif()
 
 endmacro()
 #################################################################
 
 #################################################################
-# macro to find the version of the CorLib assembly
+# macro to find the native contract hash of the CorLib assembly
 macro(AddCorLibAssemblyVersion apiNamespace apiNamespaceWithoutDots nativeAssemblySources)
+
+    set(_nativeAssemblyHashFound FALSE)
 
     # find the source file that contains the value of CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_${apiNamespaceWithoutDots}
     foreach(apiSourceFile ${nativeAssemblySources})
 
         file(READ "${apiSourceFile}" sourceCode)
 
-        string(REGEX MATCH "[ \t\r\n]+CLR_RT_NativeAssemblyData[ \t\r\n]+g_CLR_AssemblyNative_${apiNamespaceWithoutDots}[ \t\r\n]*=[^{]+{[^0]+0x([0-9A-Za-z]+)[^0]+0x([0-9A-Za-z]+)[^{]+{[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)" _ "${sourceCode}")
+        string(REGEX MATCH "[ \t\r\n]+CLR_RT_NativeAssemblyData[ \t\r\n]+g_CLR_AssemblyNative_${apiNamespaceWithoutDots}[ \t\r\n]*=[ \t\r\n]*{[ \t\r\n]*\"[^\"]*\"[ \t\r\n]*,[^x]+0x([0-9A-Fa-f]+)[ \t\r\n]*,[^x]+0x([0-9A-Fa-f]+)[ \t\r\n]*," _ "${sourceCode}")
 
         if(NOT "${CMAKE_MATCH_1}" STREQUAL "")
             if (NF_FEATURE_SUPPORT_REFLECTION)
-                list(APPEND NF_NativeAssemblies_VERSIONS "${apiNamespace},${CMAKE_MATCH_3}.${CMAKE_MATCH_4}.${CMAKE_MATCH_5}.${CMAKE_MATCH_6},0x${CMAKE_MATCH_1}")
+                string(TOUPPER "${CMAKE_MATCH_1}" _nativeAssemblyHash)
+                list(APPEND NF_NativeAssemblies_MANIFEST "${apiNamespace}|0x${_nativeAssemblyHash}|reflection")
             else()
-                list(APPEND NF_NativeAssemblies_VERSIONS "${apiNamespace},${CMAKE_MATCH_3}.${CMAKE_MATCH_4}.${CMAKE_MATCH_5}.${CMAKE_MATCH_6},0x${CMAKE_MATCH_2}")
+                string(TOUPPER "${CMAKE_MATCH_2}" _nativeAssemblyHash)
+                list(APPEND NF_NativeAssemblies_MANIFEST "${apiNamespace}|0x${_nativeAssemblyHash}|noReflection")
             endif()
 
+            set(_nativeAssemblyHashFound TRUE)
             break()
         endif()
 
     endforeach()
+
+    if(NOT _nativeAssemblyHashFound)
+        message(FATAL_ERROR "Couldn't find the CLR_RT_NativeAssemblyData initializer (native contract hash) for ${apiNamespace} in its native sources. Regenerate the stub with the Metadata Processor.")
+    endif()
 
 endmacro()
 #################################################################
@@ -490,9 +510,45 @@ configure_file("${CMAKE_SOURCE_DIR}/InteropAssemblies/CLR_RT_InteropAssembliesTa
 # ... now add Interop Assemblies table to nanoCLR sources list
 list(APPEND NF_NativeAssemblies_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/CLR_RT_InteropAssembliesTable.cpp")
 
-# create a .csv file with native assembly versions in the output directory
-string(REPLACE ";" "\r\n" NF_NativeAssemblies_CSV "${NF_NativeAssemblies_VERSIONS}")
-file(WRITE "${CMAKE_BINARY_DIR}/native_assemblies.csv" "${NF_NativeAssemblies_CSV}")
+# create the firmware manifest with the native assemblies contract hashes in the output directory
+if(TARGET_NAME)
+    set(_manifestTarget "${TARGET_NAME}")
+else()
+    set(_manifestTarget "${TARGET_BOARD}")
+endif()
+
+set(NF_NativeAssemblies_JSON "{}")
+string(JSON NF_NativeAssemblies_JSON SET "${NF_NativeAssemblies_JSON}" "schemaVersion" "1")
+string(JSON NF_NativeAssemblies_JSON SET "${NF_NativeAssemblies_JSON}" "target" "\"${_manifestTarget}\"")
+string(JSON NF_NativeAssemblies_JSON SET "${NF_NativeAssemblies_JSON}" "nanoCLRVersion" "\"${NANOCLR_VERSION_MAJOR}.${NANOCLR_VERSION_MINOR}.${NANOCLR_VERSION_BUILD}.${NANOCLR_VERSION_REVISION}\"")
+
+set(_manifestAssemblies "[]")
+set(_manifestIndex 0)
+
+foreach(_manifestEntry ${NF_NativeAssemblies_MANIFEST})
+    string(REPLACE "|" ";" _manifestFields "${_manifestEntry}")
+    list(GET _manifestFields 0 _manifestName)
+    list(GET _manifestFields 1 _manifestHash)
+    list(LENGTH _manifestFields _manifestFieldsCount)
+
+    set(_manifestAssembly "{}")
+    string(JSON _manifestAssembly SET "${_manifestAssembly}" "name" "\"${_manifestName}\"")
+    string(JSON _manifestAssembly SET "${_manifestAssembly}" "contractHash" "\"${_manifestHash}\"")
+
+    if(_manifestFieldsCount GREATER 2)
+        list(GET _manifestFields 2 _manifestVariant)
+
+        if(NOT "${_manifestVariant}" STREQUAL "")
+            string(JSON _manifestAssembly SET "${_manifestAssembly}" "variant" "\"${_manifestVariant}\"")
+        endif()
+    endif()
+
+    string(JSON _manifestAssemblies SET "${_manifestAssemblies}" ${_manifestIndex} "${_manifestAssembly}")
+    math(EXPR _manifestIndex "${_manifestIndex} + 1")
+endforeach()
+
+string(JSON NF_NativeAssemblies_JSON SET "${NF_NativeAssemblies_JSON}" "nativeAssemblies" "${_manifestAssemblies}")
+file(WRITE "${CMAKE_BINARY_DIR}/native_assemblies.json" "${NF_NativeAssemblies_JSON}\n")
 
 # output the list of APIs included
 list(LENGTH apiListing apiListingLenght)

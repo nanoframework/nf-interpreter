@@ -3722,7 +3722,7 @@ bool CLR_RT_ExceptionHandler::ConvertFromEH(
             return false;
     }
 
-    if (owner.target->rva == CLR_EmptyIndex)
+    if (!owner.target->HasILBody())
         return false;
 
     m_ehType = eh.mode;
@@ -4160,6 +4160,23 @@ bool CLR_RT_Assembly::ResolveAssemblyRef(bool fOutput)
                         src->version.minorVersion,
                         src->version.buildNumber,
                         src->version.revisionNumber);
+
+                    if (target == nullptr)
+                    {
+                        // same name but major.minor mismatch: report what is deployed
+                        const CLR_RT_Assembly *deployed = g_CLR_RT_TypeSystem.FindAssembly(szName, nullptr, false);
+
+                        if (deployed != nullptr)
+                        {
+                            CLR_Debug::Printf(
+                                "    deployed '%s' is (%d.%d.%d.%d), major.minor must match\r\n",
+                                szName,
+                                deployed->header->version.majorVersion,
+                                deployed->header->version.minorVersion,
+                                deployed->header->version.buildNumber,
+                                deployed->header->version.revisionNumber);
+                        }
+                    }
                 }
 #endif
 
@@ -7064,7 +7081,7 @@ bool CLR_RT_Assembly::FindMethodBoundaries(CLR_INDEX i, CLR_OFFSET &start, CLR_O
     NATIVE_PROFILE_CLR_CORE();
     const CLR_RECORD_METHODDEF *p = GetMethodDef(i);
 
-    if (p->rva == CLR_EmptyIndex)
+    if (!p->HasILBody())
         return false;
 
     start = p->rva;
@@ -7080,7 +7097,8 @@ bool CLR_RT_Assembly::FindMethodBoundaries(CLR_INDEX i, CLR_OFFSET &start, CLR_O
             break;
         }
 
-        if (p->rva != CLR_EmptyIndex)
+        // native rows carry a slot index in rva, skip them
+        if (p->HasILBody())
         {
             end = p->rva;
             break;
@@ -7399,9 +7417,9 @@ CLR_RT_Assembly *CLR_RT_TypeSystem::FindAssembly(const char *szName, const CLR_R
                     return pASSM;
                 }
             }
-            // exact match was NOT required but still there version information,
-            // we will enforce only the first two number because (by convention)
-            // only the minor field is required to be bumped when native assemblies change CRC
+            // exact match was NOT required but there is version information: enforce major.minor only.
+            // A minor bump is a deliberate managed binary break; native compatibility is checked by the
+            // contract hash (nativeMethodsChecksum) at load, not by the version.
             else if (
                 ver->majorVersion == pASSM->header->version.majorVersion &&
                 ver->minorVersion == pASSM->header->version.minorVersion)

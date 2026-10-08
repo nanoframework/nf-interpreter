@@ -148,11 +148,11 @@ typedef CLR_RT_HeapBlock *UNSUPPORTED_TYPE;
 typedef HRESULT (*CLR_RT_MethodHandler)(CLR_RT_StackFrame &stack);
 
 struct CLR_RT_NativeAssemblyData
-
-{ // Assembly name or static name provided by driver developer to enable interrups.
+{
+    // Assembly name or static name provided by driver developer to enable interrupts.
     const char *m_szAssemblyName;
 
-    // Check sum for the assembly.
+    // Native contract hash. Must match the nativeMethodsChecksum of the managed assembly.
     unsigned int m_checkSum;
 
     // Pointer to array of functions that implement native methods.
@@ -160,8 +160,8 @@ struct CLR_RT_NativeAssemblyData
     // or function enabling Interrupts by user driver.
     const void *m_pNativeMethods;
 
-    // Assembly version
-    CLR_RECORD_VERSION m_Version;
+    // Number of entries in m_pNativeMethods (native slots). 0 for driver data.
+    CLR_UINT32 m_nativeMethodsCount;
 };
 
 // Looks up in interop assemblies table for assembly with specified name.
