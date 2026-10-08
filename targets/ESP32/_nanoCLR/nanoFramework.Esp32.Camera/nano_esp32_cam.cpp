@@ -81,7 +81,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    NULL,
     Library_nano_esp32_cam_nanoFramework_Esp32_Camera_Esp32Camera::NativeInit___nanoFrameworkEsp32CameraCameraInitResult,
     Library_nano_esp32_cam_nanoFramework_Esp32_Camera_Esp32Camera::NativeCapture___SZARRAY_U1,
     Library_nano_esp32_cam_nanoFramework_Esp32_Camera_Esp32Camera::NativeCaptureToBuffer___I4__SZARRAY_U1,
