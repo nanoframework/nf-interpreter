@@ -669,11 +669,9 @@ struct Library_corlib_native_System_MulticastDelegate
 
 struct Library_corlib_native_System_Nullable_1
 {
-#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
     static const int FIELD__hasValue = 1;
     static const int FIELD__value = 2;
 
-#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
     //--//
 };
 
