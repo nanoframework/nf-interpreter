@@ -9,22 +9,15 @@
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
     Library_nf_sys_io_hashing_System_IO_Hashing_Crc32::ComputeHash___STATIC__U4__U4__SystemSpan_1,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_System_IO_Hashing =
 {
     "nanoFramework.System.IO.Hashing",
-    0x236E73F7,
+    0x639F123B,
     method_lookup,
-    { 100, 2, 0, 1 }
+    ARRAYSIZE(method_lookup)
 };
 
 // clang-format on

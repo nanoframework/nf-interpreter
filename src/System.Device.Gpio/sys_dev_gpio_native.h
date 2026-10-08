@@ -109,6 +109,39 @@ struct Library_sys_dev_gpio_native_System_Device_Gpio_PinValuePair
     //--//
 };
 
+struct Library_sys_dev_gpio_native_System_Device_Gpio_PinValueChangedEventArgs
+{
+    // renamed backing field '<ChangeType>k__BackingField'
+    static const int FIELD__ChangeType = 3;
+    // renamed backing field '<PinNumber>k__BackingField'
+    static const int FIELD__PinNumber = 4;
+
+    //--//
+};
+
+struct Library_sys_dev_gpio_native_System_Device_Gpio_GpioPinEvent
+{
+    static const int FIELD__PinNumber = 3;
+    static const int FIELD__EventType = 4;
+
+    //--//
+};
+
+struct Library_sys_dev_gpio_native_System_Device_Gpio_GpioPinEventListener
+{
+    static const int FIELD___pinMap = 1;
+
+    //--//
+};
+
+struct Library_sys_dev_gpio_native_System_Device_Gpio_WaitForEventResult
+{
+    static const int FIELD__EventTypes = 1;
+    static const int FIELD__TimedOut = 2;
+
+    //--//
+};
+
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Gpio;
 
 #endif // SYS_DEV_GPIO_NATIVE_H
