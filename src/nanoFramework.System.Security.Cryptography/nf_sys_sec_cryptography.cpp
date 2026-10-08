@@ -9,48 +9,20 @@
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::EncryptAesEcb___SZARRAY_U1__SZARRAY_U1,
+    Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::DecryptAesCbc___SZARRAY_U1__SZARRAY_U1,
     Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::DecryptAesEcb___SZARRAY_U1__SZARRAY_U1,
     Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::EncryptAesCbc___SZARRAY_U1__SZARRAY_U1,
-    Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::DecryptAesCbc___SZARRAY_U1__SZARRAY_U1,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
+    Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::EncryptAesEcb___SZARRAY_U1__SZARRAY_U1,
     Library_nf_sys_sec_cryptography_System_Security_Cryptography_HMACSHA256::HashCore___STATIC__SZARRAY_U1__SZARRAY_U1__SZARRAY_U1,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
     Library_nf_sys_sec_cryptography_System_Security_Cryptography_HMACSHA512::HashCore___STATIC__SZARRAY_U1__SZARRAY_U1__SZARRAY_U1,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_System_Security_Cryptography =
 {
     "nanoFramework.System.Security.Cryptography",
-    0x727048B8,
+    0x23B6AE56,
     method_lookup,
-    { 100, 2, 0, 5 }
+    ARRAYSIZE(method_lookup)
 };
 
 // clang-format on

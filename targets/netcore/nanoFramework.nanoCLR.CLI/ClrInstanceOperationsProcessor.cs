@@ -138,13 +138,12 @@ namespace nanoFramework.nanoCLR.CLI
 
             // do some math to get a tidy output
             int maxAssemblyNameLength = nativeAssemblies.Max(assembly => assembly.Name.Length);
-            int maxAssemblyVersionLength = nativeAssemblies.Max(assembly => assembly.Version.ToString().Length);
 
             foreach (NativeAssemblyDetails assembly in from na in nativeAssemblies
                                                        orderby na.Name
                                                        select na)
             {
-                Console.WriteLine($"  {assembly.Name.PadRight(maxAssemblyNameLength)} v{assembly.Version.ToString().PadRight(maxAssemblyVersionLength)} 0x{assembly.CheckSum:X8}");
+                Console.WriteLine($"  {assembly.Name.PadRight(maxAssemblyNameLength)} 0x{assembly.CheckSum:X8}");
             }
         }
 

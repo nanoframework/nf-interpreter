@@ -9,23 +9,19 @@
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
-    nullptr,
-    nullptr,
     Library_nf_hardware_ti_native_nanoFramework_Hardware_TI_Power::ConfigureWakeupFromGpioPin___STATIC__VOID__SZARRAY_nanoFrameworkHardwareTIPowerPinWakeupConfig,
-    Library_nf_hardware_ti_native_nanoFramework_Hardware_TI_Power::get_SourceOfReset___STATIC__nanoFrameworkHardwareTIPowerResetSource,
     Library_nf_hardware_ti_native_nanoFramework_Hardware_TI_Power::NativeEnterShutdownMode___STATIC__VOID,
     Library_nf_hardware_ti_native_nanoFramework_Hardware_TI_Power::NativeEnterStandbyMode___STATIC__VOID__SystemTimeSpan,
-    nullptr,
-    nullptr,
+    Library_nf_hardware_ti_native_nanoFramework_Hardware_TI_Power::get_SourceOfReset___STATIC__nanoFrameworkHardwareTIPowerResetSource,
     Library_nf_hardware_ti_native_nanoFramework_Hardware_TI_Utilities::NativeGetIeeeAddress___STATIC__SZARRAY_U1,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_TI =
 {
     "nanoFramework.Hardware.TI",
-    0x8D473FC2,
+    0x82C91C2C,
     method_lookup,
-    { 100, 2, 0, 1 }
+    ARRAYSIZE(method_lookup)
 };
 
 // clang-format on

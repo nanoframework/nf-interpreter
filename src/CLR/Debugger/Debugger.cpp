@@ -1639,18 +1639,11 @@ static bool GetInteropNativeAssemblies(uint8_t *&data, uint32_t *size, uint32_t 
         // check if the assembly at this position it's on the requested range
         if (i >= startIndex && i < (startIndex + count))
         {
-            interopNativeAssemblies[index].CheckSum = g_CLR_InteropAssembliesNativeData[i]->m_checkSum;
+            interopNativeAssemblies[index].ContractHash = g_CLR_InteropAssembliesNativeData[i]->m_checkSum;
             hal_strcpy_s(
                 (char *)interopNativeAssemblies[index].AssemblyName,
                 ARRAYSIZE(interopNativeAssemblies[index].AssemblyName),
                 g_CLR_InteropAssembliesNativeData[i]->m_szAssemblyName);
-
-            NFVersion::Init(
-                interopNativeAssemblies[index].Version,
-                g_CLR_InteropAssembliesNativeData[i]->m_Version.majorVersion,
-                g_CLR_InteropAssembliesNativeData[i]->m_Version.minorVersion,
-                g_CLR_InteropAssembliesNativeData[i]->m_Version.buildNumber,
-                g_CLR_InteropAssembliesNativeData[i]->m_Version.revisionNumber);
 
             index++;
         }
@@ -3990,7 +3983,7 @@ bool CLR_DBG_Debugger::Debugging_Info_SetJMC_Method(const CLR_RT_MethodDef_Index
         return false;
     }
 
-    if (inst.target->rva == CLR_EmptyIndex)
+    if (!inst.target->HasILBody())
     {
         return false;
     }

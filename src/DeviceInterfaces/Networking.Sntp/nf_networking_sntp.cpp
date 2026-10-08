@@ -9,23 +9,22 @@
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
-    nullptr,
     Library_nf_networking_sntp_nanoFramework_Networking_Sntp::Start___STATIC__VOID,
     Library_nf_networking_sntp_nanoFramework_Networking_Sntp::Stop___STATIC__VOID,
     Library_nf_networking_sntp_nanoFramework_Networking_Sntp::UpdateNow___STATIC__VOID,
     Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_IsStarted___STATIC__BOOLEAN,
     Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_Server1___STATIC__STRING,
-    Library_nf_networking_sntp_nanoFramework_Networking_Sntp::set_Server1___STATIC__VOID__STRING,
     Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_Server2___STATIC__STRING,
+    Library_nf_networking_sntp_nanoFramework_Networking_Sntp::set_Server1___STATIC__VOID__STRING,
     Library_nf_networking_sntp_nanoFramework_Networking_Sntp::set_Server2___STATIC__VOID__STRING,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Networking_Sntp =
 {
     "nanoFramework.Networking.Sntp",
-    0x742C0B5C,
+    0xC0A61BC9,
     method_lookup,
-    { 100, 2, 0, 1 }
+    ARRAYSIZE(method_lookup)
 };
 
 // clang-format on

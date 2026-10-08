@@ -48,12 +48,12 @@ struct Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream
 {
     static const int FIELD_STATIC___streamCreated = 0;
 
-    static const int FIELD___streamIndex = 1;
-    static const int FIELD___useDeviceEventListener = 2;
-    static const int FIELD___disposed = 3;
-    static const int FIELD___writeTimeout = 4;
-    static const int FIELD___readTimeout = 5;
-    static const int FIELD__UsbDeviceConnectionChanged = 6;
+    static const int FIELD___streamIndex = 2;
+    static const int FIELD___useDeviceEventListener = 3;
+    static const int FIELD___disposed = 4;
+    static const int FIELD___writeTimeout = 5;
+    static const int FIELD___readTimeout = 6;
+    static const int FIELD__UsbDeviceConnectionChanged = 7;
 
     NANOCLR_NATIVE_DECLARE(Read___I4__SZARRAY_U1__I4__I4);
     NANOCLR_NATIVE_DECLARE(Write___VOID__SZARRAY_U1__I4__I4);

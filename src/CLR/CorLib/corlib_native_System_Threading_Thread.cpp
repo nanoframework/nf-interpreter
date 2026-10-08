@@ -506,25 +506,6 @@ HRESULT Library_corlib_native_System_Threading_Thread::get_CurrentThread___STATI
     NANOCLR_NOCLEANUP();
 }
 
-#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
-
-HRESULT Library_corlib_native_System_Threading_Thread::GetDomain___STATIC__SystemAppDomain(CLR_RT_StackFrame &stack)
-{
-    NATIVE_PROFILE_CLR_CORE();
-    NANOCLR_HEADER();
-
-#if !defined(NANOCLR_APPDOMAINS)
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-#else
-    CLR_RT_AppDomain *appDomain = g_CLR_RT_ExecutionEngine.GetCurrentAppDomain();
-
-    NANOCLR_CHECK_HRESULT(appDomain->GetManagedObject(stack.PushValue()));
-#endif
-
-    NANOCLR_NOCLEANUP();
-}
-#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
-
 //--//
 
 CLR_RT_ObjectToEvent_Source *Library_corlib_native_System_Threading_Thread::GetThreadReference(CLR_RT_StackFrame &stack)
