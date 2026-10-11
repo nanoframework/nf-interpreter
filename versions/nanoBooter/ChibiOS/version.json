@@ -203,8 +203,6 @@
     ":!/targets/ChibiOS/ST_NUCLEO64_F091RC/target_system_io_ports_config.h",
     ":!/targets/ChibiOS/ST_STM32F429I_DISCOVERY/managed_helpers",
     ":!/targets/ChibiOS/ST_STM32F429I_DISCOVERY/nanoCLR",
-    ":!/targets/ChibiOS/ST_STM32F429I_DISCOVERY/target_nf_device_can_config.cpp",
-    ":!/targets/ChibiOS/ST_STM32F429I_DISCOVERY/target_nf_device_can_config.h",
     ":!/targets/ChibiOS/ST_STM32F429I_DISCOVERY/target_nf_dev_onewire_config.cpp",
     ":!/targets/ChibiOS/ST_STM32F429I_DISCOVERY/target_nf_dev_onewire_config.h",
     ":!/targets/ChibiOS/ST_STM32F429I_DISCOVERY/target_system_device_adc_config.cpp",
