@@ -536,7 +536,16 @@ macro(nf_install_idf_component_from_registry component_name object_id)
     set(extractPath ${IDF_PATH_CMAKED}/components)
 
     if(NOT EXISTS ${destinationPath})
-        file(DOWNLOAD ${downloadUrl} ${archiveName})
+        file(DOWNLOAD ${downloadUrl} ${archiveName} STATUS downloadStatus)
+        list(GET downloadStatus 0 downloadStatusCode)
+        if(NOT downloadStatusCode EQUAL 0)
+            list(GET downloadStatus 1 downloadStatusMessage)
+            file(REMOVE ${archiveName})
+            message(FATAL_ERROR
+                "Failed to download component '${component_name}' from '${downloadUrl}' "
+                "(status ${downloadStatusCode}): ${downloadStatusMessage}")
+        endif()
+
         message(STATUS "Component archive '" ${component_name} "' downloaded")
 
         file(ARCHIVE_EXTRACT 
@@ -567,6 +576,11 @@ macro(nf_add_idf_as_library)
     endif()
 
     nf_install_idf_component_from_registry(littlefs 97bf51ce-1daa-4369-81ec-eacbd8102815) 
+
+    if(API_nanoFramework.Esp32.Camera)
+        nf_install_idf_component_from_registry(esp32-camera d6e13e30-e4c0-46a6-b056-9d5832bb8a37)
+        nf_install_idf_component_from_registry(esp_jpeg 64a7c4fb-8c0e-4fdb-89b7-37759ff6ca27)
+    endif()
 
     if(${TARGET_SERIES_SHORT} STREQUAL "esp32p4")
         # v1.6.3
@@ -700,6 +714,18 @@ macro(nf_add_idf_as_library)
     if(HAL_USE_THREAD_OPTION)
         list(APPEND IDF_COMPONENTS_TO_ADD openthread)
         list(APPEND IDF_LIBRARIES_TO_ADD idf::openthread)
+    endif()
+
+    if(API_nanoFramework.Esp32.Camera)
+        list(APPEND IDF_COMPONENTS_TO_ADD esp32-camera)
+        list(APPEND IDF_COMPONENTS_TO_ADD esp_jpeg)
+        list(APPEND IDF_LIBRARIES_TO_ADD idf::esp32-camera)
+        list(APPEND IDF_LIBRARIES_TO_ADD idf::esp_jpeg)
+
+        # Camera SCCB must use the same legacy I2C driver as the nanoFramework I2C APIs.
+        file(APPEND "${SDKCONFIG_DEFAULTS_TEMP_FILE}"
+            "\nCONFIG_SCCB_HARDWARE_I2C_DRIVER_NEW=n\n"
+            "CONFIG_SCCB_HARDWARE_I2C_DRIVER_LEGACY=y\n")
     endif()
 
     # handle specifics for ESP32S2 series
@@ -854,6 +880,20 @@ macro(nf_add_idf_as_library)
         PROJECT_VER ${BUILD_VERSION}
         PROJECT_DIR ${CMAKE_SOURCE_DIR}
     )
+
+    if(API_nanoFramework.Esp32.Camera)
+        idf_build_get_property(IDF_SDKCONFIG_FILE SDKCONFIG)
+        file(STRINGS "${IDF_SDKCONFIG_FILE}" CAMERA_NEW_I2C_DRIVER
+            REGEX "^CONFIG_SCCB_HARDWARE_I2C_DRIVER_NEW=y$")
+        if(CAMERA_NEW_I2C_DRIVER)
+            message(FATAL_ERROR
+                "The camera SCCB new I2C driver conflicts with nanoFramework's legacy I2C driver. "
+                "Delete '${IDF_SDKCONFIG_FILE}' and clean the build folder, then reconfigure "
+                "to apply CONFIG_SCCB_HARDWARE_I2C_DRIVER_LEGACY=y.")
+        endif()
+
+        target_link_libraries(__idf_esp32-camera PUBLIC idf::esp_jpeg)
+    endif()
 
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 

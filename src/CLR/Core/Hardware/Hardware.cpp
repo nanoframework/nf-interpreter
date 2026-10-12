@@ -173,6 +173,11 @@ void CLR_HW_Hardware::ProcessActivity()
         eventsCLR |= Event_EspNow;
     }
 
+    if (events & SYSTEM_EVENT_FLAG_CAMERA)
+    {
+        eventsCLR |= Event_Camera;
+    }
+
     if (events & SYSTEM_EVENT_FLAG_ONEWIRE_MASTER)
     {
         eventsCLR |= Event_OneWireHost;
