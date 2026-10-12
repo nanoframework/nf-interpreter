@@ -25,7 +25,6 @@
 #define CAMERA_CAPTURE_WORKER_TASK_STACK_SIZE 2048
 
 // priority of the capture worker task, above the CLR task so the frame hand-off isn't delayed
-// (same as the serial port, I2C slave and 1-Wire worker tasks)
 #define CAMERA_CAPTURE_WORKER_TASK_PRIORITY 12
 
 typedef Library_nano_esp32_cam_nanoFramework_Esp32_Camera_CameraConnectionSettings Settings;
