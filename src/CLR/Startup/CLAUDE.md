@@ -59,3 +59,14 @@ This means the TLV trailer that follows the signed payload is never examined and
 for a record, and an erased slot (`ih_magic == 0xFFFFFFFF`) is a clean "no deployment". A bounds
 check on each record's rounded size also prevents `GoodAssembly()` from CRC'ing past the end of an
 XIP/memory-mapped slot (`BlockStorageStream_Read` would otherwise silently clamp the read).
+
+## Native assembly binding
+
+`LoadAssembly` looks up the assembly's `CLR_RT_NativeAssemblyData` by name,
+compares `m_checkSum` with the PE's `nativeMethodsChecksum`, and fails fast on a
+mismatch. `m_checkSum` is the native contract hash (`nfNativeContract/3`): native
+method signatures in slot order, plus the field layouts of all non-compiler-generated
+classes and structs. It then stores
+`m_pNativeMethods` and `m_nativeMethodsCount` in the assembly. The count bounds
+the dense native-slot dispatch (`MD_Native`, see `src/CLR/Core/CLAUDE.md` §17).
+The netcore, posix and win32 `CLRStartup.cpp` copies must stay in step with this.

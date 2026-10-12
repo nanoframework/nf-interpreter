@@ -1374,6 +1374,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     const char *name;
 
     const CLR_RT_MethodHandler *nativeCode;
+    CLR_UINT32 nativeCodeCount;
 
     int tablesSize[TBL_Max];
 
