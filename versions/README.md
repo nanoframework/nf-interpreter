@@ -126,7 +126,7 @@ Both scripts run in CI and report issues as annotations in the build summary and
 
 | Check | Where | PR builds | Branch builds (develop, main, release, nightly) |
 |---|---|---|---|
-| `Update-PathFilters.ps1 -Check` | `Check_Code_Style` job | **error**: blocks all the firmware builds | not run |
+| `Update-PathFilters.ps1 -Check` | `Build_Pre_Checks` job | **error**: blocks all the firmware builds | not run |
 | `Test-BuildCoverage.ps1` | after the build step of every firmware job (`azure-pipelines-templates/check-version-coverage.yml`), for each image built | **error**: the job fails before packaging and publishing | **warning**: the job is marked as succeeded with issues, publishing isn't blocked |
 
 - The coverage check only covers the targets built in that run. A PR changing files under `versions/` (other than docs) triggers the core build, so the check runs.

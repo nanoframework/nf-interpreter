@@ -25,7 +25,7 @@ resources:
 
 jobs:
   ##############################
-  - job: Check_Build_Options
+  - job: Build_Pre_Checks
     pool:
       vmImage: "ubuntu-latest"
 
@@ -268,9 +268,9 @@ jobs:
   - job: Build_STM32_targets
     condition: >-
       or(
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], 'true'),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], 'true'),
-        contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
+        eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_ALL'], 'true'),
+        eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_CHIBIOS'], 'true'),
+        contains(dependencies.Build_Pre_Checks.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
         and(
           eq(variables['Build.Reason'], 'Manual'),
           or(
@@ -280,7 +280,7 @@ jobs:
         )
       )
     dependsOn:
-      - Check_Build_Options
+      - Build_Pre_Checks
 
     pool:
       vmImage: "ubuntu-latest"
@@ -349,9 +349,9 @@ jobs:
   - job: Build_ESP32_targets
     condition: >-
       or(
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], 'true'),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], 'true'),
-        contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
+        eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_ALL'], 'true'),
+        eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_ESP32'], 'true'),
+        contains(dependencies.Build_Pre_Checks.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
         and(
           eq(variables['Build.Reason'], 'Manual'),
           or(
@@ -362,7 +362,7 @@ jobs:
       )
 
     dependsOn:
-      - Check_Build_Options
+      - Build_Pre_Checks
 
     pool:
       vmImage: "ubuntu-latest"
@@ -653,9 +653,9 @@ jobs:
   - job: Build_TI_SimpleLink_targets
     condition: >-
       or(
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], 'true'),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], 'true'),
-        contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
+        eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_ALL'], 'true'),
+        eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_TI'], 'true'),
+        contains(dependencies.Build_Pre_Checks.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
         and(
           eq(variables['Build.Reason'], 'Manual'),
           or(
@@ -666,7 +666,7 @@ jobs:
       )
 
     dependsOn:
-      - Check_Build_Options
+      - Build_Pre_Checks
 
     pool:
       vmImage: "ubuntu-latest"
@@ -709,9 +709,9 @@ jobs:
   - job: Build_ThreadX_targets
     condition: >-
       or(
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], 'true'),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_THREADX'], 'true'),
-        contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
+        eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_ALL'], 'true'),
+        eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_THREADX'], 'true'),
+        contains(dependencies.Build_Pre_Checks.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
         and(
           eq(variables['Build.Reason'], 'Manual'),
           or(
@@ -722,7 +722,7 @@ jobs:
       )
 
     dependsOn:
-      - Check_Build_Options
+      - Build_Pre_Checks
 
     pool:
       vmImage: "ubuntu-latest"

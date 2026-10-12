@@ -60,7 +60,7 @@ resources:
 
 jobs:
   ##############################
-  - job: Check_Build_Options
+  - job: Build_Pre_Checks
     pool:
       vmImage: "ubuntu-latest"
 
@@ -330,6 +330,21 @@ jobs:
         name: TargetsToBuild
         displayName: Get targets to build
 
+      - task: PowerShell@2
+        displayName: Check version path filters are up to date
+        condition: >-
+          and(
+            succeeded(),
+            ne(variables['System.PullRequest.PullRequestId'], ''),
+            ne(variables['BuildOptions.SKIP_BUILD'], 'true')
+          )
+        inputs:
+          targetType: "inline"
+          pwsh: true
+          script: ./versions/Update-PathFilters.ps1 -Check
+          errorActionPreference: "stop"
+          failOnStderr: false
+
       - task: DotNetCoreCLI@2
         condition: eq( variables['StartReleaseCandidate'], true )
         displayName: Install NBGV tool
@@ -398,21 +413,21 @@ jobs:
   - job: Check_Code_Style
     condition: >-
       and(
-        ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], 'true'),
+        ne(dependencies.Build_Pre_Checks.outputs['BuildOptions.SKIP_BUILD'], 'true'),
         or(
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CORE'], true),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], true),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_THREADX'], true),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_POSIX'], true)
+          eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_CORE'], true),
+          eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_CHIBIOS'], true),
+          eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_ESP32'], true),
+          eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_FREERTOS'], true),
+          eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_TI'], true),
+          eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_THREADX'], true),
+          eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_WIN32'], true),
+          eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_POSIX'], true)
         )
       )
 
     dependsOn:
-      - Check_Build_Options
+      - Build_Pre_Checks
 
     pool:
       vmImage: "ubuntu-latest"
@@ -425,31 +440,22 @@ jobs:
       - template: azure-pipelines-templates/download-install-llvm.yml
       - template: azure-pipelines-templates/check-code-style.yml
 
-      - task: PowerShell@2
-        displayName: Check version path filters are up to date
-        condition: ne(variables['System.PullRequest.PullRequestId'], '')
-        inputs:
-          targetType: "inline"
-          pwsh: true
-          script: ./versions/Update-PathFilters.ps1 -Check
-          errorActionPreference: "stop"
-          failOnStderr: false
-
   ###############
   # STM32
   - job: Build_STM32_targets
     condition: >-
       or(
         and(
+          succeeded('Build_Pre_Checks'),
           succeeded('Check_Code_Style'),
-          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], 'true' ),
+          ne( dependencies.Build_Pre_Checks.outputs['BuildOptions.SKIP_BUILD'], 'true' ),
           or(
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CORE'], 'true'),
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], 'true')
+            eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_CORE'], 'true'),
+            eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_CHIBIOS'], 'true')
           ),
           or(
             ne(variables['RequiredBuildFlag'], 'BUILD_CHIBIOS'),
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], 'true')
+            eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_CHIBIOS'], 'true')
           )
         ),
         and(
@@ -462,7 +468,7 @@ jobs:
       )
 
     dependsOn:
-      - Check_Build_Options
+      - Build_Pre_Checks
       - Check_Code_Style
 
     pool:
@@ -527,11 +533,12 @@ jobs:
     condition: >-
       or(
         and(
+          succeeded('Build_Pre_Checks'),
           succeeded('Check_Code_Style'),
-          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+          ne( dependencies.Build_Pre_Checks.outputs['BuildOptions.SKIP_BUILD'], true ),
           or(
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true)
+            eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_CHIBIOS'], true)
           )
         ),
         and(
@@ -544,7 +551,7 @@ jobs:
       )
 
     dependsOn:
-      - Check_Build_Options
+      - Build_Pre_Checks
       - Check_Code_Style
 
     pool:
@@ -601,15 +608,16 @@ jobs:
     condition: >-
       or(
         and(
+          succeeded('Build_Pre_Checks'),
           succeeded('Check_Code_Style'),
-          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], 'true' ),
+          ne( dependencies.Build_Pre_Checks.outputs['BuildOptions.SKIP_BUILD'], 'true' ),
           or(
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CORE'], 'true'),
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], 'true')
+            eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_CORE'], 'true'),
+            eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_ESP32'], 'true')
           ),
           or(
             ne(variables['RequiredBuildFlag'], 'BUILD_ESP32'),
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], 'true')
+            eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_ESP32'], 'true')
           )
         ),
         and(
@@ -622,7 +630,7 @@ jobs:
       )
 
     dependsOn:
-      - Check_Build_Options
+      - Build_Pre_Checks
       - Check_Code_Style
 
     pool:
@@ -793,11 +801,12 @@ jobs:
     condition: >-
       or(
         and(
+          succeeded('Build_Pre_Checks'),
           succeeded('Check_Code_Style'),
-          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], 'true' ),
+          ne( dependencies.Build_Pre_Checks.outputs['BuildOptions.SKIP_BUILD'], 'true' ),
           or(
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CORE'], 'true'),
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], 'true')
+            eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_CORE'], 'true'),
+            eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_FREERTOS'], 'true')
           )
         ),
         and(
@@ -810,7 +819,7 @@ jobs:
       )
 
     dependsOn:
-      - Check_Build_Options
+      - Build_Pre_Checks
       - Check_Code_Style
 
     pool:
@@ -855,11 +864,12 @@ jobs:
     condition: >-
       or(
         and(
+          succeeded('Build_Pre_Checks'),
           succeeded('Check_Code_Style'),
-          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], 'true' ),
+          ne( dependencies.Build_Pre_Checks.outputs['BuildOptions.SKIP_BUILD'], 'true' ),
           or(
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CORE'], 'true'),
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], 'true')
+            eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_CORE'], 'true'),
+            eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_TI'], 'true')
           )
         ),
         and(
@@ -872,7 +882,7 @@ jobs:
       )
 
     dependsOn:
-      - Check_Build_Options
+      - Build_Pre_Checks
       - Check_Code_Style
 
     pool:
@@ -938,11 +948,12 @@ jobs:
     condition: >-
       or(
         and(
+          succeeded('Build_Pre_Checks'),
           succeeded('Check_Code_Style'),
-          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], 'true' ),
+          ne( dependencies.Build_Pre_Checks.outputs['BuildOptions.SKIP_BUILD'], 'true' ),
           or(
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CORE'], 'true'),
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_THREADX'], 'true')
+            eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_CORE'], 'true'),
+            eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_THREADX'], 'true')
           )
         ),
         and(
@@ -955,7 +966,7 @@ jobs:
       )
 
     dependsOn:
-      - Check_Build_Options
+      - Build_Pre_Checks
       - Check_Code_Style
 
     pool:
@@ -1011,11 +1022,12 @@ jobs:
     condition: >-
       or(
         and(
+          succeeded('Build_Pre_Checks'),
           succeeded('Check_Code_Style'),
-          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], 'true' ),
+          ne( dependencies.Build_Pre_Checks.outputs['BuildOptions.SKIP_BUILD'], 'true' ),
           or(
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CORE'], 'true'),
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], 'true')
+            eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_CORE'], 'true'),
+            eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_WIN32'], 'true')
           )
         ),
         and(
@@ -1028,7 +1040,7 @@ jobs:
       )
 
     dependsOn:
-      - Check_Build_Options
+      - Build_Pre_Checks
       - Check_Code_Style
 
     pool:
@@ -1259,12 +1271,13 @@ jobs:
     condition: >-
       or(
         and(
+          succeeded('Build_Pre_Checks'),
           succeeded('Check_Code_Style'),
-          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+          ne( dependencies.Build_Pre_Checks.outputs['BuildOptions.SKIP_BUILD'], true ),
           or(
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_POSIX'], true),
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true)
+            eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_POSIX'], true),
+            eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true)
           )
         ),
         and(
@@ -1278,7 +1291,7 @@ jobs:
       )
 
     dependsOn:
-      - Check_Build_Options
+      - Build_Pre_Checks
       - Check_Code_Style
 
     pool:
@@ -1426,19 +1439,21 @@ jobs:
     condition: >-
       or(
         and(
+          succeeded('Build_Pre_Checks'),
           succeeded('Check_Code_Style'),
-          ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], 'true'),
+          ne(dependencies.Build_Pre_Checks.outputs['BuildOptions.SKIP_BUILD'], 'true'),
           ne(variables['System.PullRequest.PullRequestId'], ''),
           or(
-            eq(dependencies.Check_Build_Options.outputs['BuildOptions.RUN_MSCORLIB_TESTS'], 'true'),
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], 'true')
+            eq(dependencies.Build_Pre_Checks.outputs['BuildOptions.RUN_MSCORLIB_TESTS'], 'true'),
+            eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], 'true')
           )
         ),
         and(
+          succeeded('Build_Pre_Checks'),
           succeeded('Check_Code_Style'),
-          ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], 'true'),
+          ne(dependencies.Build_Pre_Checks.outputs['BuildOptions.SKIP_BUILD'], 'true'),
           eq(variables['System.PullRequest.PullRequestId'], ''),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], 'true')
+          eq(dependencies.Build_Pre_Checks.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], 'true')
         ),        
         and(
           eq(variables['Build.Reason'], 'Manual'),
@@ -1450,7 +1465,7 @@ jobs:
       )
 
     dependsOn:
-      - Check_Build_Options
+      - Build_Pre_Checks
       - Check_Code_Style
       - Build_WIN32_nanoCLR
       - Build_POSIX_nanoCLR
@@ -1652,9 +1667,9 @@ jobs:
       or(
         and(
           succeeded('Build_WIN32_nanoCLR'),
-          ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], 'true'),
+          ne(dependencies.Build_Pre_Checks.outputs['BuildOptions.SKIP_BUILD'], 'true'),
           ne(variables['System.PullRequest.PullRequestId'], ''),
-          eq(dependencies.Check_Build_Options.outputs['BuildOptions.RUN_MSCORLIB_TESTS'], 'true')
+          eq(dependencies.Build_Pre_Checks.outputs['BuildOptions.RUN_MSCORLIB_TESTS'], 'true')
         ),
         and(
           eq(variables['Build.Reason'], 'Manual'),
@@ -1668,7 +1683,7 @@ jobs:
 
     dependsOn:
       - Build_WIN32_nanoCLR
-      - Check_Build_Options
+      - Build_Pre_Checks
 
     pool:
       vmImage: "windows-latest"
