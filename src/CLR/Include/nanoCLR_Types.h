@@ -1493,6 +1493,10 @@ struct CLR_RECORD_METHODDEF
     static const CLR_UINT32 MD_StaticConstructor = 0x00002000;
     static const CLR_UINT32 MD_Finalizer = 0x00004000;
 
+    /// @brief Method is implemented in native code. @ref rva holds the slot index in the assembly native method table.
+    ///
+    static const CLR_UINT32 MD_Native = 0x00008000;
+
     static const CLR_UINT32 MD_DelegateConstructor = 0x00010000;
     static const CLR_UINT32 MD_DelegateInvoke = 0x00020000;
     static const CLR_UINT32 MD_DelegateBeginInvoke = 0x00040000;
@@ -1520,7 +1524,8 @@ struct CLR_RECORD_METHODDEF
     ///
     CLR_STRING name;
 
-    /// @brief Offset into the IL byte code blob table for the opcodes of the method
+    /// @brief Offset into the IL byte code blob table for the opcodes of the method.
+    /// For methods with @ref MD_Native this is the native slot index instead.
     ///
     CLR_OFFSET rva;
 
@@ -1559,6 +1564,13 @@ struct CLR_RECORD_METHODDEF
     /// @brief Index into TBL_Signatures that describes the method itself
     ///
     CLR_SIG signature;
+
+    /// @brief True if @ref rva is an offset into the IL byte code table (not empty, not a native slot)
+    ///
+    bool HasILBody() const
+    {
+        return (rva != CLR_EmptyIndex) && ((flags & MD_Native) == 0);
+    }
 };
 
 CT_ASSERT(sizeof(CLR_RECORD_METHODDEF) == sizeOf_CLR_RECORD_METHODDEF)

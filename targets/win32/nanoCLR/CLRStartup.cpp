@@ -107,6 +107,7 @@ struct Settings : CLR_RT_ParseOptions
 
             // Assembly has valid pointer to table with native methods. Save it.
             assm->nativeCode = (const CLR_RT_MethodHandler *)pNativeAssmData->m_pNativeMethods;
+            assm->nativeCodeCount = pNativeAssmData->m_nativeMethodsCount;
         }
         g_CLR_RT_TypeSystem.Link(assm);
         NANOCLR_NOCLEANUP();

@@ -23,15 +23,7 @@ namespace nanoFramework.nanoCLR.Host
         }
 
         /// <summary>
-        /// Gets the version of the assembly.
-        /// </summary>
-        public Version Version
-        {
-            get;
-        }
-
-        /// <summary>
-        /// Gets the checksum of the assembly.
+        /// Gets the native contract hash of the assembly.
         /// </summary>
         public uint CheckSum
         {
@@ -65,7 +57,8 @@ namespace nanoFramework.nanoCLR.Host
             }
 
             // assembly data size is coming from debugger library: NativeAssemblyDetails.Size
-            const int assemblyDataSize = 4 + 4 * 2 + 128 * 1;
+            // v2 layout: uint32 contract hash + 128-byte name
+            const int assemblyDataSize = 4 + 128 * 1;
 
             byte[] data = new byte[numAssemblies * assemblyDataSize];
 
@@ -93,12 +86,6 @@ namespace nanoFramework.nanoCLR.Host
         private NativeAssemblyDetails(BinaryReader reader)
         {
             CheckSum = reader.ReadUInt32();
-            Version = new Version(
-                reader.ReadUInt16(),
-                reader.ReadUInt16(),
-                reader.ReadUInt16(),
-                reader.ReadUInt16()
-            );
             Name = GetZeroTerminatedString(reader.ReadBytes(128), true);
         }
         #endregion

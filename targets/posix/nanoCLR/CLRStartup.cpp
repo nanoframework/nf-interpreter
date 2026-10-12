@@ -121,6 +121,7 @@ struct Settings
             }
 
             assm->nativeCode = (const CLR_RT_MethodHandler *)pNativeAssmData->m_pNativeMethods;
+            assm->nativeCodeCount = pNativeAssmData->m_nativeMethodsCount;
         }
 
         g_CLR_RT_TypeSystem.Link(assm);
