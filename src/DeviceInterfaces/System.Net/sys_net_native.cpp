@@ -67,7 +67,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Net =
 {
     "System.Net",
-    0x3E998447,
+    0x5AD7808D,
     method_lookup,
     ARRAYSIZE(method_lookup)
 };

@@ -185,10 +185,10 @@ struct Library_nf_sys_io_filesystem_System_IO_DriveInfo
 
 struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_StorageEventManager
 {
-    static const int FIELD_STATIC__RemovableDeviceInserted = 0;
-    static const int FIELD_STATIC__RemovableDeviceRemoved = 1;
-    static const int FIELD_STATIC___drives = 2;
-    static const int FIELD_STATIC___sdCardList = 3;
+    static const int FIELD_STATIC__RemovableDeviceInserted = 2;
+    static const int FIELD_STATIC__RemovableDeviceRemoved = 3;
+    static const int FIELD_STATIC___drives = 4;
+    static const int FIELD_STATIC___sdCardList = 5;
 
     //--//
 };
@@ -224,10 +224,10 @@ struct Library_nf_sys_io_filesystem_System_IO_FileSystemManager__FileRecord
 
 struct Library_nf_sys_io_filesystem_System_IO_FileSystemManager
 {
-    static const int FIELD_STATIC___openFiles = 4;
-    static const int FIELD_STATIC___lockedDirs = 5;
-    static const int FIELD_STATIC___currentDirectoryRecord = 6;
-    static const int FIELD_STATIC__CurrentDirectory = 7;
+    static const int FIELD_STATIC___openFiles = 6;
+    static const int FIELD_STATIC___lockedDirs = 7;
+    static const int FIELD_STATIC___currentDirectoryRecord = 8;
+    static const int FIELD_STATIC__CurrentDirectory = 9;
 
     //--//
 };
@@ -248,7 +248,7 @@ struct Library_nf_sys_io_filesystem_System_IO_FileStream
 
 struct Library_nf_sys_io_filesystem_System_IO_File
 {
-    static const int FIELD_STATIC__EmptyBytes = 8;
+    static const int FIELD_STATIC__EmptyBytes = 10;
 
     //--//
 };
@@ -312,10 +312,10 @@ struct Library_nf_sys_io_filesystem_System_IO_NativeIO
 
 struct Library_nf_sys_io_filesystem_System_IO_Path
 {
-    static const int FIELD_STATIC__DirectorySeparatorChar = 9;
-    static const int FIELD_STATIC__AltDirectorySeparatorChar = 10;
-    static const int FIELD_STATIC__VolumeSeparatorChar = 11;
-    static const int FIELD_STATIC__PathSeparator = 12;
+    static const int FIELD_STATIC__DirectorySeparatorChar = 11;
+    static const int FIELD_STATIC__AltDirectorySeparatorChar = 12;
+    static const int FIELD_STATIC__VolumeSeparatorChar = 13;
+    static const int FIELD_STATIC__PathSeparator = 14;
 
     //--//
 };

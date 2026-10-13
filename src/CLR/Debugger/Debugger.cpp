@@ -1656,7 +1656,7 @@ static bool GetInteropNativeAssemblies(uint8_t *&data, uint32_t *size, uint32_t 
         // check if the assembly at this position it's on the requested range
         if (i >= startIndex && i < (startIndex + count))
         {
-            interopNativeAssemblies[index].ContractHash = g_CLR_InteropAssembliesNativeData[i]->m_checkSum;
+            interopNativeAssemblies[index].ContractHash = g_CLR_InteropAssembliesNativeData[i]->m_contractHash;
             hal_strcpy_s(
                 (char *)interopNativeAssemblies[index].AssemblyName,
                 ARRAYSIZE(interopNativeAssemblies[index].AssemblyName),

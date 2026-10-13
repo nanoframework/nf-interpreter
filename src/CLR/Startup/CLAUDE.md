@@ -46,7 +46,7 @@ On a failed load control falls through to the debugger loop and each failure is 
 ### Why an old (`NFMRK1`) record cannot be sized to skip past
 
 Even if we wanted to skip a foreign record, its size cannot be trusted through the V2 struct. The V1
-layout has an extra field after `nativeMethodsChecksum` and `TBL_Max = 16` (V2: 17), so
+layout has an extra field after `nativeContractHash` and `TBL_Max = 16` (V2: 17), so
 `startOfTables` begins at a different offset and V2's `TotalSize()` (`startOfTables[TBL_EndOfAssembly]`,
 index 17) reads V1's `numOfPatchedMethods`, which is `0`. Advancing by `ROUNDTOMULTIPLE(0,4)` would
 loop forever. Hence: classify, and fail-fast — never advance past a record that is not `Valid`.
@@ -63,10 +63,20 @@ XIP/memory-mapped slot (`BlockStorageStream_Read` would otherwise silently clamp
 ## Native assembly binding
 
 `LoadAssembly` looks up the assembly's `CLR_RT_NativeAssemblyData` by name,
-compares `m_checkSum` with the PE's `nativeMethodsChecksum`, and fails fast on a
-mismatch. `m_checkSum` is the native contract hash (`nfNativeContract/3`): native
+compares `m_contractHash` with the PE's `nativeContractHash`, and fails fast on a
+mismatch. `m_contractHash` is the native contract hash (`nfNativeContract/3`): native
 method signatures in slot order, plus the field layouts of all non-compiler-generated
 classes and structs. It then stores
 `m_pNativeMethods` and `m_nativeMethodsCount` in the assembly. The count bounds
 the dense native-slot dispatch (`MD_Native`, see `src/CLR/Core/CLAUDE.md` §17).
 The netcore, posix and win32 `CLRStartup.cpp` copies must stay in step with this.
+
+A mismatch prints the assembly name and both hashes, labelled as the deployed
+assembly (PE) and the firmware, so it is clear which side to update. The HRESULT
+stays `CLR_E_ASSM_WRONG_CHECKSUM`.
+
+On device only: if the PE has a non-zero `nativeContractHash` (it declares native
+methods) but the firmware has no `CLR_RT_NativeAssemblyData` for it, the load also
+fails fast with `CLR_E_ASSM_WRONG_CHECKSUM` instead of failing at the first native
+call. The virtual-device copies don't apply this rule: they may host assemblies
+without their native part.

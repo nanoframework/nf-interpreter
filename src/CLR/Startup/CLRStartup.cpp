@@ -97,22 +97,22 @@ struct Settings
         // native calls.
         if (pNativeAssmData != nullptr)
         {
-            // First verify that check sum in assembly object matches hardcoded check sum.
-            if (assm->header->nativeMethodsChecksum != pNativeAssmData->m_checkSum)
+            // First verify that the native contract hash in the assembly matches the one the firmware was built with.
+            if (assm->header->nativeContractHash != pNativeAssmData->m_contractHash)
             {
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf(
                     "\r\n\r\n***********************************************************************\r\n");
-                CLR_Debug::Printf("*                                                                     *\r\n");
-                CLR_Debug::Printf("* ERROR!!!!  Firmware version does not match managed code version!!!! *\r\n");
-                CLR_Debug::Printf("*                                                                     *\r\n");
-                CLR_Debug::Printf("*                                                                     *\r\n");
+                CLR_Debug::Printf("* ERROR: native contract mismatch for assembly '%s'\r\n", assm->name);
                 CLR_Debug::Printf(
-                    "* Invalid native checksum: %s 0x%08X!=0x%08X *\r\n",
-                    assm->name,
-                    assm->header->nativeMethodsChecksum,
-                    pNativeAssmData->m_checkSum);
-                CLR_Debug::Printf("*                                                                     *\r\n");
+                    "*   deployed assembly (PE): native contract hash 0x%08X\r\n",
+                    assm->header->nativeContractHash);
+                CLR_Debug::Printf(
+                    "*   firmware (nanoCLR)    : native contract hash 0x%08X\r\n",
+                    pNativeAssmData->m_contractHash);
+                CLR_Debug::Printf("* The assembly was built against a different native API than this firmware\r\n");
+                CLR_Debug::Printf("* implements. Deploy the assembly version that matches this firmware\r\n");
+                CLR_Debug::Printf("* (see native_assemblies.json) or update the firmware.\r\n");
                 CLR_Debug::Printf("***********************************************************************\r\n");
 #endif
 
@@ -122,6 +122,25 @@ struct Settings
             // Assembly has valid pointer to table with native methods. Save it.
             assm->nativeCode = (const CLR_RT_MethodHandler *)pNativeAssmData->m_pNativeMethods;
             assm->nativeCodeCount = pNativeAssmData->m_nativeMethodsCount;
+        }
+        else if (assm->header->nativeContractHash != 0)
+        {
+            // The assembly declares native methods (hash is 0 otherwise) but the firmware has no native
+            // implementation for it: fail now instead of at the first native call.
+#if !defined(BUILD_RTM)
+            CLR_Debug::Printf("\r\n\r\n***********************************************************************\r\n");
+            CLR_Debug::Printf(
+                "* ERROR: assembly '%s' requires native code this firmware does not include\r\n",
+                assm->name);
+            CLR_Debug::Printf(
+                "*   deployed assembly (PE): native contract hash 0x%08X\r\n",
+                assm->header->nativeContractHash);
+            CLR_Debug::Printf("*   firmware (nanoCLR)    : no native implementation for this assembly\r\n");
+            CLR_Debug::Printf("* Use a firmware that includes this assembly or deploy a build without it.\r\n");
+            CLR_Debug::Printf("***********************************************************************\r\n");
+#endif
+
+            NANOCLR_SET_AND_LEAVE(CLR_E_ASSM_WRONG_CHECKSUM);
         }
         g_CLR_RT_TypeSystem.Link(assm);
         NANOCLR_NOCLEANUP();

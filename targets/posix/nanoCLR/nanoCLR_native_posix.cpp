@@ -137,14 +137,7 @@ const char *nanoCLR_GetVersion()
     // The P/Invoke caller marshals the return as LPStr and calls CoTaskMemFree (= free on POSIX)
     // on the pointer after it copies the string.  We must therefore return a heap-allocated copy.
     char buffer[64];
-    snprintf(
-        buffer,
-        sizeof(buffer),
-        "%d.%d.%d.%d",
-        VERSION_MAJOR,
-        VERSION_MINOR,
-        VERSION_BUILD,
-        VERSION_REVISION);
+    snprintf(buffer, sizeof(buffer), "%d.%d.%d.%d", VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, VERSION_REVISION);
     return strdup(buffer); // caller frees via CoTaskMemFree / free()
 }
 
@@ -169,7 +162,7 @@ int32_t nanoCLR_GetNativeAssemblyInformation(uint8_t *data, size_t size)
 
     for (uint32_t i = 0; i < g_CLR_InteropAssembliesCount; i++)
     {
-        memcpy(data, &g_CLR_InteropAssembliesNativeData[i]->m_checkSum, sizeof(uint32_t));
+        memcpy(data, &g_CLR_InteropAssembliesNativeData[i]->m_contractHash, sizeof(uint32_t));
         data += sizeof(uint32_t);
 
         hal_strcpy_s((char *)data, 128, g_CLR_InteropAssembliesNativeData[i]->m_szAssemblyName);

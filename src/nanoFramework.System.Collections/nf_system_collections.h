@@ -114,7 +114,7 @@ struct Library_nf_system_collections_System_Collections_Generic_DictionaryValueC
 
 struct Library_nf_system_collections_System_Collections_Generic_HashHelpers
 {
-    static const int FIELD_STATIC__s_primes = 0;
+    static const int FIELD_STATIC__s_primes = 1;
 
     //--//
 };
@@ -146,7 +146,7 @@ struct Library_nf_system_collections_System_Collections_Generic_List_1__Enumerat
 
 struct Library_nf_system_collections_System_Collections_Generic_List_1
 {
-    static const int FIELD_STATIC__s_emptyArray = 1;
+    static const int FIELD_STATIC__s_emptyArray = 2;
 
     static const int FIELD___items = 1;
     static const int FIELD___size = 2;
@@ -157,7 +157,7 @@ struct Library_nf_system_collections_System_Collections_Generic_List_1
 
 struct Library_nf_system_collections_System_Collections_Hashtable
 {
-    static const int FIELD_STATIC___syncLock = 2;
+    static const int FIELD_STATIC___syncLock = 3;
 
     static const int FIELD___buckets = 1;
     static const int FIELD___loadsize = 2;

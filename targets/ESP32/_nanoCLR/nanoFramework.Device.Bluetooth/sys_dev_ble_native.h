@@ -361,9 +361,9 @@ struct
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothNanoDevice
 {
-    static const int FIELD_STATIC___deviceName = 0;
-    static const int FIELD_STATIC___appearance = 1;
-    static const int FIELD_STATIC___mode = 2;
+    static const int FIELD_STATIC___deviceName = 3;
+    static const int FIELD_STATIC___appearance = 4;
+    static const int FIELD_STATIC___mode = 5;
 
     NANOCLR_NATIVE_DECLARE(NativeInitilise___STATIC__VOID);
     NANOCLR_NATIVE_DECLARE(
@@ -505,7 +505,7 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattLocalCharacteristic
 {
-    static const int FIELD_STATIC__GattLocalCharacteristicIndex = 3;
+    static const int FIELD_STATIC__GattLocalCharacteristicIndex = 6;
 
     static const int FIELD___characteristicId = 1;
     static const int FIELD___descriptorNextID = 2;
@@ -604,10 +604,10 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_DevicePairing
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEServer
 {
-    static const int FIELD_STATIC___instance = 4;
-    static const int FIELD_STATIC___lock = 5;
-    static const int FIELD_STATIC___bluetoothEventManager = 6;
-    static const int FIELD_STATIC___services = 7;
+    static const int FIELD_STATIC___instance = 7;
+    static const int FIELD_STATIC___lock = 8;
+    static const int FIELD_STATIC___bluetoothEventManager = 9;
+    static const int FIELD_STATIC___services = 10;
 
     static const int FIELD___disposedValue = 1;
     static const int FIELD___pairing = 2;
@@ -618,7 +618,7 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEServ
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_BluetoothLEAdvertisementPublisher
 {
-    static const int FIELD_STATIC___advertisementInstance = 8;
+    static const int FIELD_STATIC___advertisementInstance = 11;
 
     static const int FIELD___advertisement = 1;
     static const int FIELD___status = 2;
@@ -791,7 +791,7 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEDevice
 {
-    static const int FIELD_STATIC___routingHandle = 9;
+    static const int FIELD_STATIC___routingHandle = 12;
 
     static const int FIELD___connectionStatus = 1;
     static const int FIELD___bluetoothAddress = 2;
@@ -882,12 +882,12 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEAdve
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothEventListener
 {
-    static const int FIELD_STATIC___server = 10;
-    static const int FIELD_STATIC___characteristicMap = 11;
-    static const int FIELD_STATIC___leDeviceMap = 12;
-    static const int FIELD_STATIC___watcher = 13;
-    static const int FIELD_STATIC___watcherEvent = 14;
-    static const int FIELD_STATIC___watcherQueue = 15;
+    static const int FIELD_STATIC___server = 13;
+    static const int FIELD_STATIC___characteristicMap = 14;
+    static const int FIELD_STATIC___leDeviceMap = 15;
+    static const int FIELD_STATIC___watcher = 16;
+    static const int FIELD_STATIC___watcherEvent = 17;
+    static const int FIELD_STATIC___watcherQueue = 18;
 
     //--//
 };
@@ -939,7 +939,7 @@ struct
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Utilities
 {
-    static const int FIELD_STATIC__baseUuid = 16;
+    static const int FIELD_STATIC__baseUuid = 19;
 
     //--//
 };

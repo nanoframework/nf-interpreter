@@ -1016,7 +1016,7 @@ struct CLR_RECORD_ASSEMBLY
     CLR_UINT32 assemblyCRC;
     CLR_UINT32 flags;
     //
-    CLR_UINT32 nativeMethodsChecksum;
+    CLR_UINT32 nativeContractHash;
     //
     CLR_RECORD_VERSION version;
     //
