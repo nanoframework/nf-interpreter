@@ -501,6 +501,66 @@ struct Settings
 
 static Settings s_ClrSettings;
 
+#if defined(CONFIG_NF_FEATURE_HAS_MCUBOOT) && CONFIG_NF_FEATURE_HAS_MCUBOOT
+
+// Timeout (seconds) from [DeploymentConfirmationTimeout] on the entry point, 0 when absent.
+// See MCUboot/docs/confirmation-timeout.md.
+static uint32_t ReadDeploymentConfirmationTimeout()
+{
+    CLR_RT_MethodDef_Instance entryPoint{};
+    CLR_RT_TypeDef_Index attributeIndex;
+    CLR_RT_TypeDef_Instance attributeType{};
+    CLR_RT_AttributeEnumerator enumerator{};
+
+    if (NANOCLR_INDEX_IS_INVALID(g_CLR_RT_TypeSystem.m_entryPoint) ||
+        !entryPoint.InitializeFromIndex(g_CLR_RT_TypeSystem.m_entryPoint) ||
+        (entryPoint.target->flags & CLR_RECORD_METHODDEF::MD_HasAttributes) == 0)
+    {
+        return 0;
+    }
+
+    if (!g_CLR_RT_TypeSystem.FindTypeDef(
+            "DeploymentConfirmationTimeoutAttribute",
+            "nanoFramework.Runtime.InFieldUpdate",
+            attributeIndex) ||
+        !attributeType.InitializeFromIndex(attributeIndex))
+    {
+        return 0;
+    }
+
+    enumerator.Initialize(entryPoint);
+
+    if (!enumerator.MatchNext(&attributeType, nullptr))
+    {
+        return 0;
+    }
+
+    CLR_RT_AttributeParser parser{};
+    CLR_RT_AttributeParser::Value *value;
+
+    if (FAILED(parser.Initialize(enumerator)) || FAILED(parser.Next(value)) || value == nullptr ||
+        value->m_mode != CLR_RT_AttributeParser::Value::c_ConstructorArgument)
+    {
+        return 0;
+    }
+
+    return value->m_value.NumericByRef().u4;
+}
+
+// An unconfirmed deployment that can't start will never confirm itself: reset so MCUboot reverts it.
+static void RevertUnconfirmedDeployment(HRESULT hr)
+{
+#if !defined(BUILD_RTM)
+    CLR_Debug::Printf("Unconfirmed deployment can't start (0x%08X), rebooting to revert it\r\n", (unsigned int)hr);
+#else
+    (void)hr;
+#endif
+
+    CPU_Reset();
+}
+
+#endif
+
 void ClrStartup(CLR_SETTINGS params)
 {
     NATIVE_PROFILE_CLR_STARTUP();
@@ -561,6 +621,28 @@ void ClrStartup(CLR_SETTINGS params)
 #endif
             if (SUCCEEDED(hr = s_ClrSettings.Load()))
             {
+#if defined(CONFIG_NF_FEATURE_HAS_MCUBOOT) && CONFIG_NF_FEATURE_HAS_MCUBOOT
+                // armed before Execute() so static constructors and the wait for a debugger are covered
+                if (nf_mcuboot_deploy_needs_confirmation())
+                {
+                    if (NANOCLR_INDEX_IS_INVALID(g_CLR_RT_TypeSystem.m_entryPoint))
+                    {
+                        RevertUnconfirmedDeployment(CLR_E_ENTRYPOINT_NOT_FOUND);
+                    }
+
+                    uint32_t confirmTimeout = ReadDeploymentConfirmationTimeout();
+
+                    if (nf_mcuboot_deploy_watchdog_arm(confirmTimeout))
+                    {
+#if !defined(BUILD_RTM)
+                        CLR_Debug::Printf(
+                            "Deployment must be confirmed within %u s or it will be reverted\r\n",
+                            (unsigned int)confirmTimeout);
+#endif
+                    }
+                }
+#endif
+
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf("Ready.\r\n");
 #endif
@@ -571,6 +653,12 @@ void ClrStartup(CLR_SETTINGS params)
                 CLR_Debug::Printf("Done.\r\n");
 #endif
             }
+#if defined(CONFIG_NF_FEATURE_HAS_MCUBOOT) && CONFIG_NF_FEATURE_HAS_MCUBOOT
+            else if (nf_mcuboot_deploy_needs_confirmation())
+            {
+                RevertUnconfirmedDeployment(hr);
+            }
+#endif
         }
 
         // process setting of power mode, if reboot was requested along with a power mode "higher" then

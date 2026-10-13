@@ -16,6 +16,7 @@
 
 #if CONFIG_NF_FEATURE_HAS_MCUBOOT
 #include <mcuboot_config/mcuboot_config.h>
+#include <MCUboot_StartupPolicy.h>
 #endif
 
 #define __min(a, b) (((a) < (b)) ? (a) : (b))
@@ -1568,6 +1569,14 @@ bool CLR_DBG_Debugger::Debugging_Execution_ChangeConditions(WP_Message *msg)
     {
         // update conditions
         g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions = newConditions;
+
+#if CONFIG_NF_FEATURE_HAS_MCUBOOT
+        // a debug session would be cut short by the deployment confirmation watchdog
+        if (newConditions & CLR_RT_ExecutionEngine::c_fDebugger_SourceLevelDebugging)
+        {
+            nf_mcuboot_deploy_watchdog_cancel();
+        }
+#endif
 
 #ifdef VIRTTUAL_DEVICE
         // fire event with update on debugger activity
@@ -4387,7 +4396,12 @@ bool CLR_DBG_Debugger::Monitor_ImageConfirm(WP_Message *msg)
     // imageIndex defaults to 0 (nanoCLR) when the payload is empty
     uint32_t imageIndex = (msg->m_header.m_size >= sizeof(Monitor_ImageConfirm_Command)) ? cmd->ImageIndex : 0;
 
-    if (boot_set_confirmed_multi((int)imageIndex) != 0)
+    // the deployment goes through nf_mcuboot_deploy_ok() so its confirmation watchdog is stopped
+    int confirmResult = (imageIndex == NF_MCUBOOT_IMAGE_DEPLOY)
+                            ? (nf_mcuboot_deploy_ok() == NF_MCUBOOT_SUCCESS ? 0 : -1)
+                            : boot_set_confirmed_multi((int)imageIndex);
+
+    if (confirmResult != 0)
     {
         cmdReply.ErrorCode = Monitor_Image_Error_Confirm;
     }

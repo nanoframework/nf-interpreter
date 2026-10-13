@@ -63,4 +63,86 @@ nf_mcuboot_error_t nf_mcuboot_startup_ok(void)
     return NF_MCUBOOT_SUCCESS;
 }
 
+// Deployment confirmation watchdog state. See MCUboot/docs/confirmation-timeout.md.
+// set once the watchdog was armed or cancelled in this power cycle: it never arms again after that
+static bool s_deploy_watchdog_settled = false;
+static bool s_deploy_watchdog_running = false;
+static uint32_t s_deploy_watchdog_seconds = 0;
+
+__attribute__((weak)) bool nf_mcuboot_confirm_timer_start(uint32_t seconds)
+{
+    (void)seconds;
+    return false;
+}
+
+__attribute__((weak)) void nf_mcuboot_confirm_timer_stop(void)
+{
+}
+
+static bool read_deploy_state(struct boot_swap_state *state)
+{
+    return boot_read_swap_state_by_id(FLASH_AREA_IMAGE_PRIMARY(NF_MCUBOOT_IMAGE_DEPLOY), state) == 0;
+}
+
+bool nf_mcuboot_deploy_needs_confirmation(void)
+{
+    struct boot_swap_state state;
+
+    return read_deploy_state(&state) && needs_confirmation(&state);
+}
+
+static void stop_deploy_watchdog(void)
+{
+    if (s_deploy_watchdog_running)
+    {
+        nf_mcuboot_confirm_timer_stop();
+        s_deploy_watchdog_running = false;
+    }
+}
+
+bool nf_mcuboot_deploy_watchdog_arm(uint32_t seconds)
+{
+    if (s_deploy_watchdog_settled || seconds == 0 || !nf_mcuboot_deploy_needs_confirmation())
+    {
+        return false;
+    }
+
+    s_deploy_watchdog_settled = true;
+    s_deploy_watchdog_seconds = seconds;
+    s_deploy_watchdog_running = nf_mcuboot_confirm_timer_start(seconds);
+
+    return s_deploy_watchdog_running;
+}
+
+void nf_mcuboot_deploy_watchdog_cancel(void)
+{
+    s_deploy_watchdog_settled = true;
+    stop_deploy_watchdog();
+}
+
+nf_mcuboot_error_t nf_mcuboot_deploy_ok(void)
+{
+    bool wasRunning = s_deploy_watchdog_running;
+    struct boot_swap_state state;
+
+    // stop before the trailer write so the reset can't land in the middle of it
+    stop_deploy_watchdog();
+
+    nf_mcuboot_error_t result = nf_mcuboot_confirm_image(NF_MCUBOOT_IMAGE_DEPLOY);
+
+    // a zero return from MCUboot alone doesn't mean image_ok is set
+    if (result == NF_MCUBOOT_SUCCESS && (!read_deploy_state(&state) || state.image_ok != BOOT_FLAG_SET))
+    {
+        result = NF_MCUBOOT_SYSTEM_ERROR;
+    }
+
+    if (result != NF_MCUBOOT_SUCCESS && wasRunning)
+    {
+        // keep the failsafe in place: the image is still unconfirmed
+        s_deploy_watchdog_running = nf_mcuboot_confirm_timer_start(s_deploy_watchdog_seconds);
+    }
+
+    return result;
+}
+
 #endif // CONFIG_NF_FEATURE_HAS_MCUBOOT

@@ -12,6 +12,7 @@
 #include <nanoHAL_v2.h>
 #include <nanoHAL_Time.h>
 #include <MCUboot_UpdateSession.h>
+#include <MCUboot_StartupPolicy.h>
 
 typedef Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_ImageInfo ImageInfo;
 typedef Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateSession UpdateSession;
@@ -286,9 +287,9 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
 {
     NANOCLR_HEADER();
 
+    // nf_mcuboot_deploy_ok() also stops the deployment confirmation watchdog
     // read the trailer back to report the actual state because a zero return alone does not mean the image is confirmed
-    bool success =
-        (boot_set_confirmed_multi(ImageType_Deployment) == 0) && Ifu_IsPrimaryConfirmed(ImageType_Deployment);
+    bool success = (nf_mcuboot_deploy_ok() == NF_MCUBOOT_SUCCESS) && Ifu_IsPrimaryConfirmed(ImageType_Deployment);
 
     stack.SetResult_Boolean(success);
 

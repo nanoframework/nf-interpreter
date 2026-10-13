@@ -42,6 +42,14 @@ record — old/foreign marker, bad CRC, structurally invalid size, native-checks
   next boot. Skip-and-continue could let a partial app run and confirm a broken bundle.
 
 On a failed load control falls through to the debugger loop and each failure is printed with its flash offset and HRESULT.
+Exception on MCUboot targets: if image 1 is unconfirmed (live trailer), a failed load or a missing entry point
+resets the device immediately so MCUboot reverts it instead of waiting for a power cycle.
+
+### Deployment confirmation timeout (MCUboot)
+
+After `Load()` and before `Execute()`, `ClrStartup` reads `[DeploymentConfirmationTimeout(seconds)]` from the
+entry point (only when image 1 is unconfirmed) and arms a one-shot reset timer. Details, cancel rules and
+platform hooks are in `MCUboot/docs/confirmation-timeout.md`.
 
 ### Why an old (`NFMRK1`) record cannot be sized to skip past
 
