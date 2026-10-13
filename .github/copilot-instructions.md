@@ -56,7 +56,7 @@ Kconfig*              # Kconfig configuration system (feature flags, APIs, RTOS,
 
 - **CMake 3.31+** and **Ninja** build system.
 - Cross-compilation toolchains (ARM GCC, Xtensa GCC, RISC-V GCC) depending on target.
-- Platform SDKs (ESP-IDF v5.5.4, ChibiOS, ThreadX, etc.).
+- Platform SDKs (ESP-IDF v5.5.5, ChibiOS, ThreadX, etc.).
 - Python 3 with `kconfiglib>=14.1.0` (from `requirements.txt`).
 - **Dev containers** are the recommended way to build. Pre-built images:
   - `ghcr.io/nanoframework/dev-container-all` (all platforms)
@@ -160,7 +160,7 @@ The project uses **Kconfig** (via Python `kconfiglib`) for feature and API confi
 - **RTOS selection**: `CONFIG_RTOS_ESP32`, `CONFIG_RTOS_CHIBIOS`, `CONFIG_RTOS_FREERTOS`, `CONFIG_RTOS_TI_SIMPLELINK`, `CONFIG_RTOS_THREADX`.
 - **API toggles**: `CONFIG_API_SYSTEM_DEVICE_GPIO=y`, `CONFIG_API_SYSTEM_NET=y`, etc.
 - **Feature flags**: `CONFIG_NF_FEATURE_DEBUGGER`, `CONFIG_NF_FEATURE_HAS_SDCARD`, `CONFIG_NF_FEATURE_USE_LITTLEFS`, etc.
-- **Build modes**: `CONFIG_NF_BUILD_RTM=y` for release builds (suppresses debug output).
+- **Build modes**: `CONFIG_NF_BUILD_RTM=y` (or `NF_BUILD_RTM` in Kconfig) enables the RTM (release) build. `nf_genconfig.py` mirrors this into `nf_config.h` as both `CONFIG_NF_BUILD_RTM` and a source-facing `BUILD_RTM` alias — C/C++ code gates on `#if defined(BUILD_RTM)`, never on `CONFIG_NF_BUILD_RTM` directly. This only applies to Kconfig-driven targets; `netcore`, `win32`, and `posix` build via MSBuild/plain CMake and never define `BUILD_RTM`.
 
 When modifying Kconfig files, respect the naming conventions:
 - `NF_FEATURE_HAS_*` — hardware capability is present.
@@ -205,4 +205,4 @@ Follow the PR template at `.github/PULL_REQUEST_TEMPLATE.md`:
 4. **Kconfig Python dependency**: The Kconfig system requires `kconfiglib` (`pip install kconfiglib`). This is needed for `cmake --preset` to work.
 5. **Submodules**: The repo has a submodule for community targets (`targets-community`). Clone with `--recurse-submodules` or run `git submodule update --init`.
 6. **File encoding**: Most files use UTF-8 with BOM and CRLF line endings (see `.editorconfig`). Kconfig files must NOT have BOM.
-7. **ESP32 targets**: ESP-IDF v5.5.4 is the pinned SDK version. The ESP32 build integrates with the IDF build system (idf.py/CMake).
+7. **ESP32 targets**: ESP-IDF v5.5.5 is the pinned SDK version. The ESP32 build integrates with the IDF build system (idf.py/CMake).

@@ -113,6 +113,7 @@ set(CHIBIOS_HAL_SRCS
     hal_queues.c
     hal_flash.c
     hal_mmcsd.c
+    hal_safety.c
     
     hal_adc.c
     hal_can.c

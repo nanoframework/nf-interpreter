@@ -16,9 +16,22 @@ extern "C"
 {
 #endif
 
+    // direction of the last operation on a file, files are opened in update mode and ANSI C
+    // requires a positioning call between a read and a write on such a stream
+    enum LITTLEFS_LastOperation
+    {
+        // no operation yet, or the file was just positioned: both directions are legal
+        LITTLEFS_LastOperation_None = 0,
+        // last operation was a read: a write needs a positioning call first
+        LITTLEFS_LastOperation_Read = 1,
+        // last operation was a write: a read needs a positioning call first
+        LITTLEFS_LastOperation_Write = 2,
+    };
+
     struct LITTLEFS_FileHandle
     {
         FILE *file;
+        LITTLEFS_LastOperation lastOp;
     };
 
     struct LITTLEFS_FindFileHandle
@@ -42,7 +55,7 @@ extern "C"
         static bool LoadMedia(const void *driverInterface);
         static STREAM_DRIVER_DETAILS *DriverDetails(const VOLUME_ID *volume);
 
-        static HRESULT Open(const VOLUME_ID *volume, const char *path, void *&handle);
+        static HRESULT Open(const VOLUME_ID *volume, const char *path, uint32_t access, void *&handle);
         static HRESULT Close(void *handle);
         static HRESULT Read(void *handle, uint8_t *buffer, int size, int *readsize);
         static HRESULT Write(void *handle, uint8_t *buffer, int size, int *writesize);

@@ -6,6 +6,16 @@
 include(binutils.common)
 include(binutils.ChibiOS)
 
+if(TARGET_HAS_WIFI)
+    set(TARGET_HAS_WIFI_ISM43362 TRUE)
+
+    add_compile_definitions(TARGET_HAS_WIFI_ISM43362)
+
+    include_directories(
+        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_WiFi
+        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_WiFi/inventek)
+endif()
+
 nf_setup_target_build(
     HAS_NANOBOOTER
 

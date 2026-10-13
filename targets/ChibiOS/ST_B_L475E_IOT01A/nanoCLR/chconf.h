@@ -243,9 +243,13 @@
  *
  * @note    The default is @p FALSE.
  * @note    Requires @p CH_CFG_USE_MUTEXES.
+ * @note    Enabled because the ported Inventek ISM43362 (ES-WIFI)
+ *          driver (targets/ChibiOS/_WiFi/inventek) was originally written against
+ *          ThreadX's TX_MUTEX, which supports recursive locking by the owning
+ *          thread out of the box.
  */
 #if !defined(CH_CFG_USE_MUTEXES_RECURSIVE)
-#define CH_CFG_USE_MUTEXES_RECURSIVE FALSE
+#define CH_CFG_USE_MUTEXES_RECURSIVE TRUE
 #endif
 
 /**

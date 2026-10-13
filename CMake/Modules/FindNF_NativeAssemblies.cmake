@@ -1,4 +1,4 @@
-﻿#
+#
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
@@ -38,6 +38,8 @@ option(API_nanoFramework.System.Security.Cryptography   "option for nanoFramewor
 # Esp32 only
 option(API_Hardware.Esp32                               "option for Hardware.Esp32")
 option(API_nanoFramework.Hardware.Esp32.Rmt             "option for nanoFramework.Hardware.Esp32.Rmt")
+option(API_nanoFramework.EspNow                         "option for nanoFramework.EspNow")
+option(API_nanoFramework.Esp32.Camera                   "option for nanoFramework.Esp32.Camera")
 option(API_nanoFramework.Networking.Thread              "option for nanoFramework.Networking.Thread API")
 
 # Stm32 only
@@ -250,6 +252,17 @@ endif()
 if(API_nanoFramework.Hardware.Esp32.Rmt)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32.Rmt")
+endif()
+
+# nanoFramework.EspNow
+if(API_nanoFramework.EspNow)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.EspNow")
+endif()
+
+# nanoFramework.Esp32.Camera
+if(API_nanoFramework.Esp32.Camera)
+    PerformSettingsForApiEntry("nanoFramework.Esp32.Camera")
 endif()
 
 # nanoFramework.Networking.Thread

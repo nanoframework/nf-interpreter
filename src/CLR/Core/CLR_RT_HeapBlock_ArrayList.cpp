@@ -169,6 +169,7 @@ HRESULT CLR_RT_HeapBlock_ArrayList::SetCapacity(CLR_UINT32 newCapacity)
         CLR_RT_HeapBlock newItemsHB;
         CLR_RT_HeapBlock_Array *newItems;
 
+        newItemsHB.SetObjectReference(NULL);
         CLR_RT_ProtectFromGC gc(newItemsHB);
 
         if (newCapacity < size)

@@ -8,7 +8,7 @@
 #include <hal_nf_community.h>
 #include <cmsis_os.h>
 
-#include "usbcfg.h"
+#include <serialcfg.h>
 #include <swo.h>
 #include <CLR_Startup_Thread.h>
 #include <WireProtocol_ReceiverThread.h>
@@ -79,16 +79,8 @@ int main(void)
     // this has to be called after osKernelInitialize, otherwise an hard fault will occur
     Target_ExternalMemoryInit();
 
-    //  Initializes a serial-over-USB CDC driver.
-    sduObjectInit(&SERIAL_DRIVER);
-    sduStart(&SERIAL_DRIVER, &serusbcfg);
-
-    // Activates the USB driver and then the USB bus pull-up on D+.
-    // Note, a delay is inserted in order to not have to disconnect the cable after a reset
-    usbDisconnectBus(serusbcfg.usbp);
-    chThdSleepMilliseconds(100);
-    usbStart(serusbcfg.usbp, &usbcfg);
-    usbConnectBus(serusbcfg.usbp);
+    // starts the serial driver
+    sdStart(&SERIAL_DRIVER, NULL);
 
     // create the receiver thread
     osThreadCreate(osThread(ReceiverThread), NULL);

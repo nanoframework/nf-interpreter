@@ -361,7 +361,8 @@
 #define STM32_SPI_SPI4_IRQ_PRIORITY    10
 #define STM32_SPI_SPI5_IRQ_PRIORITY    10
 #define STM32_SPI_SPI6_IRQ_PRIORITY    10
-#define STM32_SPI_DMA_ERROR_HOOK(spip) osalSysHalt("DMA failure")
+#define SPI_DRIVER_EXT_FIELDS volatile bool dmaError;
+#define STM32_SPI_DMA_ERROR_HOOK(spip) (spip)->dmaError = true
 
 /*
  * ST driver system settings.

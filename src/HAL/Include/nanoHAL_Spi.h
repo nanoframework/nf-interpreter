@@ -54,6 +54,9 @@ float nanoSPI_GetByteTime(uint32_t handle);
 
 void nanoSPI_Wait_Busy(uint32_t handle);
 
+// Abort an async transfer in progress, DMA is no longer using the transfer buffers when this returns
+void nanoSPI_Abort(uint32_t handle);
+
 // Execute a SPI write/read operation
 // if callback is null the operation will completed as part of the call
 // if callback is not null then the job will be queued and the callback called when completed

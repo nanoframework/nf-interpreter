@@ -191,8 +191,7 @@ struct Settings
 
             m_assemblies[key] = bufferSub;
 
-            header =
-                (CLR_RECORD_ASSEMBLY *)ROUNDTOMULTIPLE((uintptr_t)header + asmSize, CLR_UINT32);
+            header = (CLR_RECORD_ASSEMBLY *)ROUNDTOMULTIPLE((uintptr_t)header + asmSize, CLR_UINT32);
         }
 
         // Return S_OK even if some assemblies failed to parse – same behaviour
@@ -517,9 +516,7 @@ void nanoCLR_SetConfigureCallbackImpl(ConfigureRuntimeCallback cb)
 extern "C" void ClrStartup(CLR_SETTINGS params)
 {
     NATIVE_PROFILE_CLR_STARTUP();
-#if !defined(PLATFORM_POSIX_HOST) || !defined(__LP64__)
     ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(struct CLR_RT_HeapBlock));
-#endif
     bool softReboot;
 
     do

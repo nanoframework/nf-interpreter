@@ -45,6 +45,7 @@
 
 #include <nanoHAL.h>
 #include <Esp32_DeviceMapping.h>
+#include <freertos/semphr.h>
 
 #include <sys_dev_spi_native_target.h>
 
@@ -64,7 +65,6 @@ struct NF_PAL_SPI
     spi_transaction_t trans;
 
     int BusIndex;
-    SPI_OP_STATUS status; // Current status
     SPI_Callback callback;
 
     int32_t writeSize;
@@ -80,15 +80,111 @@ struct NF_PAL_SPI
     int32_t CurrentChipSelect;
     int32_t NumberSpiDeviceInUse;
     uint32_t Handle;
+
+    // serialises the users of this bus: the transfer state above belongs to whoever holds it
+    // an async transfer keeps holding it until the transfer completes and only the task that started it can release it
+    SemaphoreHandle_t BusMutex;
+    StaticSemaphore_t BusMutexBuffer;
+
+    // task that started the async transfer in progress, NULL if there is none
+    TaskHandle_t AsyncOwner;
+
+    // set from the transaction complete callback
+    volatile bool TransferComplete;
+
+    // true when the SPI bus was initialized here (it can be shared with other drivers, e.g. Ethernet)
+    bool BusInitializedByNf;
 };
 
 NF_PAL_SPI nf_pal_spi[2];
-bool haveAsyncTrans[2];
+
+// Convert an ESP-IDF error to HRESULT
+static HRESULT EspErrToHResult(esp_err_t err)
+{
+    switch (err)
+    {
+        case ESP_OK:
+            return S_OK;
+
+        case ESP_ERR_NO_MEM:
+            return CLR_E_OUT_OF_MEMORY;
+
+        case ESP_ERR_INVALID_ARG:
+            return CLR_E_INVALID_PARAMETER;
+
+        case ESP_ERR_NOT_SUPPORTED:
+            return CLR_E_NOT_SUPPORTED;
+
+        default:
+            return CLR_E_IO;
+    }
+}
+
+// Finish up a transfer that has ended (task context)
+// For half duplex, copy the read data from the allocated buffer and free the buffers used to spoof it as full duplex
+static void FinishTransfer(NF_PAL_SPI *pnf_pal_spi, esp_err_t result)
+{
+    if (!pnf_pal_spi->fullDuplex && pnf_pal_spi->readSize)
+    {
+        if (result == ESP_OK)
+        {
+            memcpy(
+                pnf_pal_spi->originalReadData,
+                pnf_pal_spi->readDataBuffer + pnf_pal_spi->writeSize + pnf_pal_spi->readOffset,
+                pnf_pal_spi->readSize);
+        }
+
+        heap_caps_free(pnf_pal_spi->writeDataBuffer);
+        heap_caps_free(pnf_pal_spi->readDataBuffer);
+
+        pnf_pal_spi->writeDataBuffer = NULL;
+        pnf_pal_spi->readDataBuffer = NULL;
+    }
+}
+
+// Completes the async transfer started by the calling task, if any, and releases the bus.
+// The bus mutex is owned by the task that took it, so only that task can release it. Any other task returns without
+// doing anything and gets the bus by taking the mutex, once the owner has released it.
+// Returns the result of the transfer.
+static esp_err_t CompleteAsyncTransfer(NF_PAL_SPI *pnf_pal_spi)
+{
+    if (pnf_pal_spi->AsyncOwner != xTaskGetCurrentTaskHandle())
+    {
+        return ESP_OK;
+    }
+
+    // wait for the transaction and get its result
+    spi_transaction_t *trans;
+    esp_err_t ret = spi_device_get_trans_result((spi_device_handle_t)pnf_pal_spi->Handle, &trans, portMAX_DELAY);
+
+    FinishTransfer(pnf_pal_spi, ret);
+
+    pnf_pal_spi->AsyncOwner = NULL;
+
+    spi_device_release_bus((spi_device_handle_t)pnf_pal_spi->Handle);
+    xSemaphoreGive(pnf_pal_spi->BusMutex);
+
+    return ret;
+}
+
+// Takes the bus mutex, after completing an async transfer that the calling task may still be holding it with
+// (otherwise this task would deadlock trying to take a mutex that it already holds)
+static void TakeBus(NF_PAL_SPI *pnf_pal_spi)
+{
+    CompleteAsyncTransfer(pnf_pal_spi);
+
+    xSemaphoreTake(pnf_pal_spi->BusMutex, portMAX_DELAY);
+}
 
 // Remove device from bus
 // return true of OK, false = error
 bool CPU_SPI_Remove_Device(uint32_t deviceHandle)
 {
+    if (deviceHandle == 0)
+    {
+        return false;
+    }
+
     // Find the bus
     int spiBus = -1;
     if (nf_pal_spi[0].Handle == deviceHandle)
@@ -105,14 +201,28 @@ bool CPU_SPI_Remove_Device(uint32_t deviceHandle)
         return false;
     }
 
+    NF_PAL_SPI *pnf_pal_spi = &nf_pal_spi[spiBus];
+    bool result = true;
+
+    // the device can't be removed while a transfer is using it
+    TakeBus(pnf_pal_spi);
+
     // We remove only if it's the last device
-    nf_pal_spi[spiBus].NumberSpiDeviceInUse--;
-    if (nf_pal_spi[spiBus].NumberSpiDeviceInUse == 0)
+    pnf_pal_spi->NumberSpiDeviceInUse--;
+    if (pnf_pal_spi->NumberSpiDeviceInUse == 0)
     {
-        return spi_bus_remove_device((spi_device_handle_t)deviceHandle) != ESP_OK;
+        result = spi_bus_remove_device((spi_device_handle_t)deviceHandle) == ESP_OK;
+
+        if (result)
+        {
+            // refuse transfers still waiting for the bus
+            pnf_pal_spi->Handle = 0;
+        }
     }
 
-    return true;
+    xSemaphoreGive(pnf_pal_spi->BusMutex);
+
+    return result;
 }
 
 // Initialise the physical SPI bus
@@ -120,8 +230,15 @@ bool CPU_SPI_Remove_Device(uint32_t deviceHandle)
 // return true of successful, false if error
 bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDeviceConfig)
 {
+    NF_PAL_SPI *pnf_pal_spi = &nf_pal_spi[busIndex];
+
+    if (pnf_pal_spi->BusMutex == NULL)
+    {
+        pnf_pal_spi->BusMutex = xSemaphoreCreateMutexStatic(&pnf_pal_spi->BusMutexBuffer);
+    }
+
     // Do we already initialized the SPI bus?
-    if (nf_pal_spi[busIndex].NumberSpiDeviceInUse > 0)
+    if (pnf_pal_spi->NumberSpiDeviceInUse > 0)
     {
         return true;
     }
@@ -177,7 +294,8 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
         // SPICOMMON_BUSFLAG_* flags
         flags : 0,
         isr_cpu_id : ESP_INTR_CPU_AFFINITY_AUTO,
-        intr_flags : ESP_INTR_FLAG_IRAM
+        // the interrupt is NOT flagged as IRAM safe, so it's held off while the flash cache is disabled:
+        intr_flags : 0
     };
 
     // Try with DMA first
@@ -206,10 +324,13 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
         ESP_LOGW(TAG, "SPI bus %d already initialized", busIndex);
     }
 
-    nf_pal_spi[busIndex].BusIndex = busIndex;
-    nf_pal_spi[busIndex].status = SPI_OP_STATUS::SPI_OP_READY;
+    pnf_pal_spi->BusIndex = busIndex;
 
-    haveAsyncTrans[busIndex] = false;
+    // only a bus initialized here is freed when uninitializing
+    if (ret == ESP_OK)
+    {
+        pnf_pal_spi->BusInitializedByNf = true;
+    }
 
     return true;
 }
@@ -217,53 +338,58 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
 // Uninitialise the bus
 bool CPU_SPI_Uninitialize(uint8_t busIndex)
 {
-#if defined(CONFIG_IDF_TARGET_ESP32S2)
-    esp_err_t ret = spi_bus_free((spi_host_device_t)(busIndex + SPI3_HOST));
-#else
-    // on all other series
-    esp_err_t ret = spi_bus_free((spi_host_device_t)(busIndex + SPI2_HOST));
-#endif
+    NF_PAL_SPI *pnf_pal_spi = &nf_pal_spi[busIndex];
+    esp_err_t ret = ESP_OK;
 
-    if (ret != ESP_OK)
+    if (pnf_pal_spi->BusMutex == NULL)
+    {
+        // this bus was never initialized
+        return true;
+    }
+
+    // can't free the bus while a transfer is using it
+    TakeBus(pnf_pal_spi);
+
+    // only free the bus if it was initialized here
+    if (pnf_pal_spi->BusInitializedByNf)
     {
 #if defined(CONFIG_IDF_TARGET_ESP32S2)
-        ESP_LOGE(TAG, "spi_bus_free bus %d esp_err %d", busIndex + SPI3_HOST, ret);
+        ret = spi_bus_free((spi_host_device_t)(busIndex + SPI3_HOST));
 #else
         // on all other series
-        ESP_LOGE(TAG, "spi_bus_free bus %d esp_err %d", busIndex + SPI2_HOST, ret);
+        ret = spi_bus_free((spi_host_device_t)(busIndex + SPI2_HOST));
 #endif
 
-        return false;
+        if (ret == ESP_OK)
+        {
+            pnf_pal_spi->BusInitializedByNf = false;
+        }
+        else
+        {
+#if defined(CONFIG_IDF_TARGET_ESP32S2)
+            ESP_LOGE(TAG, "spi_bus_free bus %d esp_err %d", busIndex + SPI3_HOST, ret);
+#else
+            // on all other series
+            ESP_LOGE(TAG, "spi_bus_free bus %d esp_err %d", busIndex + SPI2_HOST, ret);
+#endif
+        }
     }
-    return true;
+
+    xSemaphoreGive(pnf_pal_spi->BusMutex);
+
+    return ret == ESP_OK;
 }
 
 // Callback when a transaction has completed
-static void IRAM_ATTR spi_trans_ready(spi_transaction_t *trans)
+// For an async transfer this runs in the SPI interrupt, which isn't flagged as IRAM safe, so it doesn't run while the
+// flash cache is disabled. For a sync transfer it runs in the task calling spi_device_polling_transmit().
+// The transfer result is collected in task context (see CompleteAsyncTransfer).
+static void spi_trans_ready(spi_transaction_t *trans)
 {
     NF_PAL_SPI *pnf_pal_spi = (NF_PAL_SPI *)trans->user;
 
     if (pnf_pal_spi != &nf_pal_spi[0] && pnf_pal_spi != &nf_pal_spi[1])
         return;
-
-    pnf_pal_spi->status = SPI_OP_STATUS::SPI_OP_COMPLETE;
-
-    // Finish up half duplex, copy read data and deallocate buffer
-    if (!pnf_pal_spi->fullDuplex)
-    {
-        if (pnf_pal_spi->readSize)
-        {
-            // Copy the read data from allocated buffer
-            memcpy(
-                pnf_pal_spi->originalReadData,
-                pnf_pal_spi->readDataBuffer + pnf_pal_spi->writeSize + pnf_pal_spi->readOffset,
-                pnf_pal_spi->readSize);
-
-            // free up buffers use to spoof half duplex transaction while running full duplex
-            heap_caps_free(pnf_pal_spi->writeDataBuffer);
-            heap_caps_free(pnf_pal_spi->readDataBuffer);
-        }
-    }
 
     // if CS is to be controlled by the driver, set the GPIO
     if (pnf_pal_spi->CurrentChipSelect >= 0)
@@ -271,6 +397,8 @@ static void IRAM_ATTR spi_trans_ready(spi_transaction_t *trans)
         // de-assert pin based on CS active level
         CPU_GPIO_TogglePinState(pnf_pal_spi->CurrentChipSelect);
     }
+
+    pnf_pal_spi->TransferComplete = true;
 
     // fire callback for SPI transaction complete
     // only if callback set
@@ -358,7 +486,17 @@ HRESULT CPU_SPI_Add_Device(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig, uint
         return CLR_E_NOT_SUPPORTED;
     }
 
-    if (nf_pal_spi[spiDeviceConfig.Spi_Bus].NumberSpiDeviceInUse == 0)
+    NF_PAL_SPI *pnf_pal_spi = &nf_pal_spi[spiDeviceConfig.Spi_Bus];
+    HRESULT hr = S_OK;
+
+    if (pnf_pal_spi->BusMutex == NULL)
+    {
+        return CLR_E_INVALID_OPERATION;
+    }
+
+    TakeBus(pnf_pal_spi);
+
+    if (pnf_pal_spi->NumberSpiDeviceInUse == 0)
     {
         // Add device to bus
         spi_device_handle_t deviceHandle;
@@ -376,30 +514,38 @@ HRESULT CPU_SPI_Add_Device(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig, uint
         {
             ESP_LOGE(TAG, "Unable to init SPI device, esp_err %d", ret);
 
-            return S_FALSE;
+            handle = 0;
+            hr = EspErrToHResult(ret);
         }
-
-        handle = (uint32_t)deviceHandle;
-        nf_pal_spi[spiDeviceConfig.Spi_Bus].Handle = (uint32_t)deviceHandle;
+        else
+        {
+            handle = (uint32_t)deviceHandle;
+            pnf_pal_spi->Handle = (uint32_t)deviceHandle;
+        }
     }
     else
     {
-        handle = nf_pal_spi[spiDeviceConfig.Spi_Bus].Handle;
+        handle = pnf_pal_spi->Handle;
     }
 
-    nf_pal_spi[spiDeviceConfig.Spi_Bus].NumberSpiDeviceInUse++;
-    return S_OK;
+    if (hr == S_OK)
+    {
+        pnf_pal_spi->NumberSpiDeviceInUse++;
+    }
+
+    xSemaphoreGive(pnf_pal_spi->BusMutex);
+
+    return hr;
 }
 
+// Waits for an async transfer started by the calling task to complete and releases the bus.
+// This is also what aborting a transfer does on this platform (see CPU_SPI_Abort): the SPI driver can't abort a
+// transaction but, being the SPI master, it always completes after the programmed length.
 void CPU_SPI_Wait_Busy(uint32_t deviceHandle, SPI_DEVICE_CONFIGURATION &sdev)
 {
-    if (haveAsyncTrans[sdev.Spi_Bus])
-    {
-        spi_transaction_t *rtrans;
-        spi_device_get_trans_result((spi_device_handle_t)deviceHandle, &rtrans, portMAX_DELAY);
+    (void)deviceHandle;
 
-        haveAsyncTrans[sdev.Spi_Bus] = false;
-    }
+    CompleteAsyncTransfer(&nf_pal_spi[sdev.Spi_Bus]);
 }
 
 // Performs a read/write operation on 8-bit word data.
@@ -420,7 +566,7 @@ void CPU_SPI_Wait_Busy(uint32_t deviceHandle, SPI_DEVICE_CONFIGURATION &sdev)
 //  readSize
 //      The number of elements(8 or 16) to be read.
 //
-// return S_OK=Successful, Async started=CLR_BUSY, Error=CLR_E_OUT_OF_MEMORY, CLR_E_INVALID_PARAMETER, CLR_E_FAIL
+// return S_OK=Successful, Async started=CLR_BUSY, Error=CLR_E_OUT_OF_MEMORY, CLR_E_INVALID_PARAMETER, CLR_E_IO
 //
 HRESULT CPU_SPI_nWrite_nRead(
     uint32_t deviceHandle,
@@ -431,13 +577,17 @@ HRESULT CPU_SPI_nWrite_nRead(
     uint8_t *readData,
     int32_t readSize)
 {
+    NF_PAL_SPI *pnf_pal_spi = &nf_pal_spi[sdev.Spi_Bus];
+    uint8_t *writeDataBuffer = NULL;
+    uint8_t *readDataBuffer = NULL;
+    bool buffersAllocated = false;
+    bool busTaken = false;
+    bool busAcquired = false;
+    bool async = (wrc.callback != 0);
+    esp_err_t ret;
+
     NANOCLR_HEADER();
     {
-        uint8_t *writeDataBuffer = NULL;
-        uint8_t *readDataBuffer = NULL;
-        bool async = (wrc.callback != 0);
-        esp_err_t ret;
-
         // get data bit length
         int databitLength = wrc.Bits16ReadWrite ? 16 : 8;
 
@@ -483,8 +633,13 @@ HRESULT CPU_SPI_nWrite_nRead(
                 readDataBuffer = (unsigned char *)heap_caps_malloc(maxByteDatalength, MALLOC_CAP_DMA);
                 if (readDataBuffer == 0)
                 {
+                    heap_caps_free(writeDataBuffer);
+                    writeDataBuffer = NULL;
+
                     NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
                 }
+
+                buffersAllocated = true;
 
                 memset(writeDataBuffer, 0, maxByteDatalength);
                 memcpy(writeDataBuffer, writeData, writeSize);
@@ -492,7 +647,29 @@ HRESULT CPU_SPI_nWrite_nRead(
             }
         }
 
-        NF_PAL_SPI *pnf_pal_spi = &nf_pal_spi[sdev.Spi_Bus];
+        if (pnf_pal_spi->BusMutex == NULL)
+        {
+            // bus not initialized
+            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+        }
+
+        // take the bus before touching the PAL struct
+        TakeBus(pnf_pal_spi);
+        busTaken = true;
+
+        if (pnf_pal_spi->Handle != deviceHandle)
+        {
+            // the device has been removed from the bus
+            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+        }
+
+        // hold the bus against other devices on this SPI host (e.g. Ethernet) while CS is asserted
+        ret = spi_device_acquire_bus((spi_device_handle_t)deviceHandle, portMAX_DELAY);
+        if (ret != ESP_OK)
+        {
+            NANOCLR_SET_AND_LEAVE(EspErrToHResult(ret));
+        }
+        busAcquired = true;
 
         pnf_pal_spi->writeSize = writeSize;
         pnf_pal_spi->readSize = readSize;
@@ -503,9 +680,7 @@ HRESULT CPU_SPI_nWrite_nRead(
         pnf_pal_spi->readOffset = wrc.readOffset; // dummy bytes between write & read on half duplex
         pnf_pal_spi->callback = wrc.callback;
         pnf_pal_spi->CurrentChipSelect = wrc.DeviceChipSelect;
-
-        // Wait for any previously queued async transfer
-        CPU_SPI_Wait_Busy(deviceHandle, sdev);
+        pnf_pal_spi->TransferComplete = false;
 
         // Set up SPI Transaction
         spi_transaction_t *pTrans = &pnf_pal_spi->trans;
@@ -533,38 +708,20 @@ HRESULT CPU_SPI_nWrite_nRead(
         // Start asynchronous SPI transaction
         if (async)
         {
-            pnf_pal_spi->callback = wrc.callback;
+            // the bus stays held by this task until the transfer completes
+            pnf_pal_spi->AsyncOwner = xTaskGetCurrentTaskHandle();
 
             ret = spi_device_queue_trans((spi_device_handle_t)deviceHandle, pTrans, portMAX_DELAY);
             if (ret != ESP_OK)
             {
-                // Error so free up buffer if Half duplex
-                if (!wrc.fullDuplex && readSize != 0)
-                {
-                    // Clean up
-                    heap_caps_free(writeDataBuffer);
-                    heap_caps_free(readDataBuffer);
-                }
+                pnf_pal_spi->AsyncOwner = NULL;
 
-                switch (ret)
-                {
-                    case ESP_ERR_NO_MEM:
-                        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-
-                    case ESP_ERR_INVALID_ARG:
-                        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-
-                    case ESP_ERR_INVALID_STATE:
-                    default:
-                        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-                }
-            }
-            else
-            {
-                haveAsyncTrans[sdev.Spi_Bus] = true;
+                NANOCLR_SET_AND_LEAVE(EspErrToHResult(ret));
             }
 
-            pnf_pal_spi->status = SPI_OP_STATUS::SPI_OP_RUNNING;
+            buffersAllocated = false;
+            busAcquired = false;
+            busTaken = false;
 
             // Return Busy to indicate ASync call started and callback will be called on completion
             NANOCLR_SET_AND_LEAVE(CLR_E_BUSY);
@@ -575,24 +732,42 @@ HRESULT CPU_SPI_nWrite_nRead(
             // Use Polling method to start and wait to complete(quickest)
             ret = spi_device_polling_transmit((spi_device_handle_t)deviceHandle, pTrans);
 
-            pnf_pal_spi->status = SPI_OP_STATUS::SPI_OP_COMPLETE;
+            // copy the read data (half duplex) and free the buffers
+            FinishTransfer(pnf_pal_spi, ret);
+            buffersAllocated = false;
 
-            if (ret != ESP_OK)
-            {
-                if (!wrc.fullDuplex && readSize != 0)
-                {
-                    heap_caps_free(writeDataBuffer);
-                    heap_caps_free(readDataBuffer);
-                }
-                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-            }
-
-            // Finish up half duplex, done in callback
-            // frees buffer and copies read data
+            NANOCLR_SET_AND_LEAVE(EspErrToHResult(ret));
         }
     }
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_CLEANUP();
+
+    if (hr != CLR_E_BUSY)
+    {
+        // CS is de-asserted by the transaction complete callback, unless the transaction didn't run
+        if (busAcquired && !pnf_pal_spi->TransferComplete && wrc.DeviceChipSelect >= 0)
+        {
+            CPU_GPIO_SetPinState(wrc.DeviceChipSelect, (GpioPinValue)!wrc.ChipSelectActiveState);
+        }
+
+        if (buffersAllocated)
+        {
+            heap_caps_free(writeDataBuffer);
+            heap_caps_free(readDataBuffer);
+        }
+
+        if (busAcquired)
+        {
+            spi_device_release_bus((spi_device_handle_t)deviceHandle);
+        }
+
+        if (busTaken)
+        {
+            xSemaphoreGive(pnf_pal_spi->BusMutex);
+        }
+    }
+
+    NANOCLR_CLEANUP_END();
 }
 
 // Performs a read/write operation on 16-bit word data.
@@ -617,7 +792,18 @@ SPI_OP_STATUS CPU_SPI_OP_Status(uint8_t busIndex, uint32_t deviceHandle)
 
     NF_PAL_SPI *pnf_pal_spi = &nf_pal_spi[busIndex];
 
-    return pnf_pal_spi->status;
+    if (pnf_pal_spi->AsyncOwner == NULL)
+    {
+        return SPI_OP_STATUS::SPI_OP_READY;
+    }
+
+    if (!pnf_pal_spi->TransferComplete)
+    {
+        return SPI_OP_STATUS::SPI_OP_RUNNING;
+    }
+
+    // completed: collect the result and release the bus
+    return CompleteAsyncTransfer(pnf_pal_spi) == ESP_OK ? SPI_OP_STATUS::SPI_OP_COMPLETE : SPI_OP_STATUS::SPI_OP_FAILED;
 }
 
 // Return map of available SPI buses as a bit map

@@ -614,6 +614,11 @@ HRESULT CLR_RT_Thread::ProcessException_EndFilter()
     bool fBreakpointsDisabledSav = false;
 #endif
 
+    if (m_nestedExceptionsPos == 0)
+    {
+        return CLR_E_STACK_UNDERFLOW;
+    }
+
     CLR_RT_StackFrame *stack = CurrentFrame();
     CLR_INT32 choice = stack->PopValue().NumericByRef().s4;
 
@@ -700,6 +705,11 @@ HRESULT CLR_RT_Thread::ProcessException_EndFinally()
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
+
+    if (m_nestedExceptionsPos == 0)
+    {
+        return CLR_E_STACK_UNDERFLOW;
+    }
 
     CLR_RT_StackFrame *stack = CurrentFrame();
     UnwindStack &us = m_nestedExceptions[m_nestedExceptionsPos - 1];

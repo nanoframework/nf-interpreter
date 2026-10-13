@@ -432,6 +432,7 @@ HRESULT Library_nf_system_collections_System_Collections_Hashtable::Expand(CLR_R
     g_CLR_RT_TypeSystem.FindTypeDef("Bucket", "System.Collections", bucketTypeDef);
 
     // create a new array of <Bucket>
+    newBucketsHB.SetObjectReference(NULL);
     CLR_RT_ProtectFromGC gc(newBucketsHB);
 
     if (i == lenghtOfPrimes)

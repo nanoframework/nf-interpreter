@@ -15,6 +15,7 @@ nf_setup_target_build(
 
     CLR_EXTRA_COMPILE_DEFINITIONS
         -DDeviceFamily_CC13X2
+        -DRUNTIME_MEMORY_PROFILE__small=1
 
     CLR_LINKER_FILE 
         CC13x2_26x2_CLR

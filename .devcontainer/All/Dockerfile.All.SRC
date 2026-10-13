@@ -2,7 +2,7 @@
 # IDF MIGRATION CHECKLIST
 # When upgrading ESP-IDF to a new version, review and update the following:
 #
-# 1. ESP-IDF version: search for the git clone --branch tag below (currently v5.5.4)
+# 1. ESP-IDF version: search for the git clone --branch tag below (currently v5.5.5)
 # 2. ESP_PATCH_VER: the GCC toolchain patch version installed by IDF.
 #    After running install.sh in the new IDF, check the toolchain version at:
 #      ~/.espressif/tools/xtensa-esp-elf/ and ~/.espressif/tools/riscv32-esp-elf/
@@ -112,7 +112,7 @@ RUN git clone --branch v6.5.0.202601_rel --recursive https://github.com/eclipse-
 
 # Clone dependent repos (mbedtls, fatfs and littlefs)
 RUN git clone --branch R0.16 https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs \
-    && git clone --branch v2.11.2 https://github.com/littlefs-project/littlefs --depth 1 ./sources/littlefs \
+    && git clone --branch v2.11.3 https://github.com/littlefs-project/littlefs --depth 1 ./sources/littlefs \
     && git clone --branch mbedtls-3.6.7 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
     && cd ./sources/mbedtls \
     && git submodule update --init --recursive
@@ -126,7 +126,7 @@ RUN git clone --branch STABLE-2_1_3_RELEASE https://github.com/lwip-tcpip/lwip.g
 
 # Clone ESP-IDF
 # >>> IDF MIGRATION: update the branch tag to the new IDF version <<<
-RUN git clone --branch v5.5.4 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
+RUN git clone --branch v5.5.5 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
 
 # Clone what is needed for TI
 RUN git clone --branch 4.10.00.07 https://github.com/nanoframework/SimpleLink_CC32xx_SDK.git --depth 1 ./sources/SimpleLinkCC32 \

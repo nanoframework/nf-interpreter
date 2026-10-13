@@ -7,10 +7,8 @@
 #include <nanoHAL_Power.h>
 #include <nanoHAL_Time.h>
 
-#ifdef _WIN64
 #include <inttypes.h>
 #include <stdint.h>
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -181,15 +179,9 @@ HRESULT CLR_RT_ExecutionEngine::AllocateHeaps()
 
         CLR_Debug::Printf("Heap Cluster information\r\n");
 
-#ifdef _WIN64
-        CLR_Debug::Printf("Start:       0x%" PRIx64 "\r\n", heapFirstFree);
-        CLR_Debug::Printf("Free:        0x%" PRIx64 "\r\n", heapFree);
-        CLR_Debug::Printf("Block size:  %d\r\n", sizeof(struct CLR_RT_HeapBlock));
-#else
-        CLR_Debug::Printf("Start:       %08x\r\n", (size_t)heapFirstFree);
-        CLR_Debug::Printf("Free:        %08x\r\n", (size_t)heapFree);
-        CLR_Debug::Printf("Block size:  %d\r\n", sizeof(struct CLR_RT_HeapBlock));
-#endif
+        CLR_Debug::Printf("Start:       0x%" PRIxPTR "\r\n", (uintptr_t)heapFirstFree);
+        CLR_Debug::Printf("Free:        %08x\r\n", (unsigned int)heapFree);
+        CLR_Debug::Printf("Block size:  %d\r\n", (int)sizeof(struct CLR_RT_HeapBlock));
 
 #endif
         ///
@@ -638,9 +630,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute(wchar_t *entryPointArgs, int maxContextS
 
     NANOCLR_CHECK_HRESULT(WaitForDebugger());
 
-#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_EE_DBG_SET_MASK(StateProgramRunning, StateMask);
-#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Delegate::CreateInstance(ref, g_CLR_RT_TypeSystem.m_entryPoint, NULL));
 

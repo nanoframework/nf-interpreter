@@ -102,6 +102,11 @@ config API_NANOFRAMEWORK_SYSTEM_IO_HASHING
     bool "nanoFramework.System.IO.Hashing"
     default n
 
+config API_NANOFRAMEWORK_ESPNOW
+    bool "nanoFramework.EspNow"
+    depends on RTOS_ESP32
+    default n
+
 config API_NANOFRAMEWORK_NETWORKING_THREAD
     bool "nanoFramework.Networking.Thread"
     default n
@@ -121,6 +126,12 @@ config API_HARDWARE_ESP32
 config API_NANOFRAMEWORK_HARDWARE_ESP32_RMT
     bool "nanoFramework.Hardware.Esp32.Rmt"
     depends on RTOS_ESP32
+    default n
+
+config API_NANOFRAMEWORK_ESP32_CAMERA
+    bool "nanoFramework.Esp32.Camera"
+    depends on RTOS_ESP32
+    depends on TARGET_SERIES = "ESP32" || TARGET_SERIES = "ESP32_S2" || TARGET_SERIES = "ESP32_S3"
     default n
 
 config API_NANOFRAMEWORK_HARDWARE_TI

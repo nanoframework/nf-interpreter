@@ -31,19 +31,12 @@
 #   Tool and SDK source paths (ESP32_IDF_PATH, CHIBIOS_SOURCE_FOLDER, …)
 #
 
-# ── Build mode ────────────────────────────────────────────────────────────────
-# Build RTM (Release-to-Manufacturing) firmware — suppresses all debug output.
-# Default: n (debug build)
-CONFIG_NF_BUILD_RTM=n
-
 # ── CLR diagnostics ───────────────────────────────────────────────────────────
 # Disable all CLR trace messages and assertions.
-# Default: n
-CONFIG_NF_CLR_NO_TRACE=n
+# CONFIG_NF_CLR_NO_TRACE=n
 
 # Disable CLR IL inlining (useful when debugging managed code).
-# Default: n
-CONFIG_NF_CLR_NO_IL_INLINE=n
+# CONFIG_NF_CLR_NO_IL_INLINE=n
 
 # ── Hardware watchdog ─────────────────────────────────────────────────────────
 # Most boards enable the watchdog by default; uncomment to override.
@@ -51,17 +44,15 @@ CONFIG_NF_CLR_NO_IL_INLINE=n
 
 # ── Wire Protocol ─────────────────────────────────────────────────────────────
 # CRC32 integrity checking on Wire Protocol packets.
-# Default: n
-CONFIG_NF_WP_ENABLE_CRC32=n
+# CONFIG_NF_WP_ENABLE_CRC32=n
 
 # Wire Protocol trace flags — enable individually or use NF_WP_TRACE_ALL.
-# Default: all n
-CONFIG_NF_WP_TRACE_ERRORS=n
-CONFIG_NF_WP_TRACE_HEADERS=n
-CONFIG_NF_WP_TRACE_STATE=n
-CONFIG_NF_WP_TRACE_NODATA=n
-CONFIG_NF_WP_TRACE_VERBOSE=n
-CONFIG_NF_WP_TRACE_ALL=n
+# CONFIG_NF_WP_TRACE_ERRORS=n
+# CONFIG_NF_WP_TRACE_HEADERS=n
+# CONFIG_NF_WP_TRACE_STATE=n
+# CONFIG_NF_WP_TRACE_NODATA=n
+# CONFIG_NF_WP_TRACE_VERBOSE=n
+# CONFIG_NF_WP_TRACE_ALL=n
 
 # ── ChibiOS / STM32 ──────────────────────────────────────────────────────
 # ARM Cortex-M Single Wire Output (SWO) debug tracing.

@@ -319,6 +319,7 @@ bool CLR_RT_StackFrame::PushInline(
 
     // increment the evalPos pointer so that we don't corrupt the real stack
     evalPos++;
+    evalPos[0].SetObjectReference(NULL);
     assm = calleeInst.m_assm;
     ip = ipTmp;
 

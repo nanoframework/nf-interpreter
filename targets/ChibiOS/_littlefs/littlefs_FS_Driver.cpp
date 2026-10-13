@@ -165,7 +165,7 @@ HRESULT LITTLEFS_FS_Driver::GetVolumeLabel(const VOLUME_ID *volume, char *volume
 
 //--//
 
-HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, void *&handle)
+HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, uint32_t access, void *&handle)
 {
     NANOCLR_HEADER();
 
@@ -176,6 +176,7 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, void
     LITTLEFS_FileHandle *fileHandle = NULL;
     lfs_info info;
     int32_t flags;
+    uint32_t storedAttributes;
     char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
     bool fileExists = false;
 
@@ -232,13 +233,43 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, void
 
     if (fileExists)
     {
-        // file already exists, open for R/W
-        flags = LFS_O_RDWR;
+        // a read-only file can't be opened with write access
+        // (littlefs doesn't enforce this, the attribute is ours)
+        if ((access & FileAccess_Write) &&
+            lfs_getattr(
+                fileHandle->fs,
+                normalizedPath,
+                NANO_LITTLEFS_ATTRIBUTE,
+                &storedAttributes,
+                NANO_LITTLEFS_ATTRIBUTE_SIZE) >= LFS_ERR_OK &&
+            (storedAttributes & FileAttributes_ReadOnly))
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_UNAUTHORIZED_ACCESS);
+        }
+
+        // file already exists, open it
+        flags = 0;
     }
     else
     {
-        // file doesn't exist
-        flags = LFS_O_CREAT | LFS_O_RDWR;
+        // file doesn't exist, create it
+        flags = LFS_O_CREAT;
+    }
+
+    // open with the requested access
+    switch (access)
+    {
+        case FileAccess_Read:
+            flags |= LFS_O_RDONLY;
+            break;
+
+        case FileAccess_Write:
+            flags |= LFS_O_WRONLY;
+            break;
+
+        default:
+            flags |= LFS_O_RDWR;
+            break;
     }
 
     // need to use the alternative API to handle attributes
