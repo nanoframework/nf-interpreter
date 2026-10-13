@@ -152,8 +152,8 @@ struct CLR_RT_NativeAssemblyData
     // Assembly name or static name provided by driver developer to enable interrupts.
     const char *m_szAssemblyName;
 
-    // Native contract hash. Must match the nativeMethodsChecksum of the managed assembly.
-    unsigned int m_checkSum;
+    // Native contract hash. Must match the nativeContractHash of the managed assembly.
+    unsigned int m_contractHash;
 
     // Pointer to array of functions that implement native methods.
     // It could be different type of the function depending if it is assembly Interop Method

@@ -127,7 +127,7 @@ HRESULT Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDisp
     pNativeDriverData = GetAssemblyNativeData(driverName);
 
     // Validates check sum and presence of the structure.
-    if (pNativeDriverData == nullptr || pNativeDriverData->m_checkSum != DRIVER_INTERRUPT_METHODS_CHECKSUM)
+    if (pNativeDriverData == nullptr || pNativeDriverData->m_contractHash != DRIVER_INTERRUPT_METHODS_CHECKSUM)
     {
         NANOCLR_CHECK_HRESULT(CLR_E_DRIVER_NOT_REGISTERED);
     }

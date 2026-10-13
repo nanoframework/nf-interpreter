@@ -102,19 +102,20 @@ struct Settings
         pNativeAssmData = GetAssemblyNativeData(assm->name);
         if (pNativeAssmData != NULL)
         {
-            if (assm->header->nativeMethodsChecksum != pNativeAssmData->m_checkSum)
+            if (assm->header->nativeContractHash != pNativeAssmData->m_contractHash)
             {
                 CLR_Debug::Printf(
                     "\r\n\r\n***********************************************************************\r\n");
-                CLR_Debug::Printf("*                                                                     *\r\n");
-                CLR_Debug::Printf("* ERROR!!!!  Firmware version does not match managed code version!!!! *\r\n");
-                CLR_Debug::Printf("*                                                                     *\r\n");
+                CLR_Debug::Printf("* ERROR: native contract mismatch for assembly '%s'\r\n", assm->name);
                 CLR_Debug::Printf(
-                    "* Invalid native checksum: %s 0x%08X!=0x%08X *\r\n",
-                    assm->name,
-                    assm->header->nativeMethodsChecksum,
-                    pNativeAssmData->m_checkSum);
-                CLR_Debug::Printf("*                                                                     *\r\n");
+                    "*   deployed assembly (PE): native contract hash 0x%08X\r\n",
+                    assm->header->nativeContractHash);
+                CLR_Debug::Printf(
+                    "*   firmware (nanoCLR)    : native contract hash 0x%08X\r\n",
+                    pNativeAssmData->m_contractHash);
+                CLR_Debug::Printf("* The assembly was built against a different native API than this firmware\r\n");
+                CLR_Debug::Printf("* implements. Deploy the assembly version that matches this firmware\r\n");
+                CLR_Debug::Printf("* (see native_assemblies.json) or update the firmware.\r\n");
                 CLR_Debug::Printf("***********************************************************************\r\n");
 
                 NANOCLR_SET_AND_LEAVE(CLR_E_ASSM_WRONG_CHECKSUM);

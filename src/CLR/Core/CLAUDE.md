@@ -961,7 +961,7 @@ native dispatch.
 
 ### Contract hash, not version
 
-`CLR_RT_NativeAssemblyData::m_checkSum` is the **native contract hash**
+`CLR_RT_NativeAssemblyData::m_contractHash` is the **native contract hash**
 (Metadata Processor tag `nfNativeContract/3`). It hashes everything native code
 is compiled against:
 - the native methods, with their stub signatures, in slot order;
@@ -973,7 +973,7 @@ It doesn't change for managed-only methods, method bodies or type order.
 `FIELD_STATIC__` indexes are assembly-wide, so adding a static field anywhere
 (including a compiler-generated lambda cache in a non-excluded type) shifts the
 indexes of the types after it. That is a real native break, and the hash changes.
-`LoadAssembly` compares the hash with the PE's `nativeMethodsChecksum` and fails
+`LoadAssembly` compares the hash with the PE's `nativeContractHash` and fails
 fast on a mismatch (Startup `CLAUDE.md`). An assembly without native methods has
 hash `0`.
 
