@@ -137,14 +137,7 @@ const char *nanoCLR_GetVersion()
     // The P/Invoke caller marshals the return as LPStr and calls CoTaskMemFree (= free on POSIX)
     // on the pointer after it copies the string.  We must therefore return a heap-allocated copy.
     char buffer[64];
-    snprintf(
-        buffer,
-        sizeof(buffer),
-        "%d.%d.%d.%d",
-        VERSION_MAJOR,
-        VERSION_MINOR,
-        VERSION_BUILD,
-        VERSION_REVISION);
+    snprintf(buffer, sizeof(buffer), "%d.%d.%d.%d", VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, VERSION_REVISION);
     return strdup(buffer); // caller frees via CoTaskMemFree / free()
 }
 
