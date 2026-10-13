@@ -169,7 +169,7 @@ int32_t nanoCLR_GetNativeAssemblyInformation(uint8_t *data, size_t size)
 
     for (uint32_t i = 0; i < g_CLR_InteropAssembliesCount; i++)
     {
-        memcpy(data, &g_CLR_InteropAssembliesNativeData[i]->m_checkSum, sizeof(uint32_t));
+        memcpy(data, &g_CLR_InteropAssembliesNativeData[i]->m_contractHash, sizeof(uint32_t));
         data += sizeof(uint32_t);
 
         hal_strcpy_s((char *)data, 128, g_CLR_InteropAssembliesNativeData[i]->m_szAssemblyName);

@@ -7422,7 +7422,7 @@ CLR_RT_Assembly *CLR_RT_TypeSystem::FindAssembly(const char *szName, const CLR_R
             }
             // exact match was NOT required but there is version information: enforce major.minor only.
             // A minor bump is a deliberate managed binary break; native compatibility is checked by the
-            // contract hash (nativeMethodsChecksum) at load, not by the version.
+            // contract hash (nativeContractHash) at load, not by the version.
             else if (
                 ver->majorVersion == pASSM->header->version.majorVersion &&
                 ver->minorVersion == pASSM->header->version.minorVersion)
