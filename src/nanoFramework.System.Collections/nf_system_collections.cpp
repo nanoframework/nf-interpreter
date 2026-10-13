@@ -30,7 +30,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_System_Collections =
 {
     "nanoFramework.System.Collections",
-    0x9320E8C5,
+    0xD8CFAC0D,
     method_lookup,
     ARRAYSIZE(method_lookup)
 };

@@ -42,7 +42,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_FileSystem =
 {
     "System.IO.FileSystem",
-    0x7D3E9531,
+    0xD097302D,
     method_lookup,
     ARRAYSIZE(method_lookup)
 };
