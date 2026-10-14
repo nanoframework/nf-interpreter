@@ -89,10 +89,22 @@ UpdateSessionResult Ifu_SessionWrite(
     uint32_t len,
     uint32_t *nextOffset);
 
-// Verify the staged image (header, TLV structure, SHA-256) and, on success, mark it pending for a
-// test swap on the next reboot. Closes the session on every outcome except
-// UpdateSessionResult_Incomplete. outSnapshot (optional) receives the final session state.
-UpdateSessionResult Ifu_SessionComplete(uint8_t image, uint32_t token, Ifu_Session *outSnapshot);
+// Verify the staged image (header, TLV structure, SHA-256). On success, with requestUpdate, mark it
+// pending for a test swap on the next reboot; without it, leave it verified and waiting for
+// Ifu_RequestUpdate() (used to update both images together). Closes the session on every
+// outcome except UpdateSessionResult_Incomplete. outSnapshot (optional) receives the final session
+// state.
+UpdateSessionResult Ifu_SessionComplete(uint8_t image, uint32_t token, bool requestUpdate, Ifu_Session *outSnapshot);
+
+// Request the test swap of both images in one go, all or nothing. Each image must have been
+// verified by Ifu_SessionComplete(requestUpdate = false) since the CLR started, with nothing done to
+// its slot since (UpdateSessionResult_NoImage otherwise). Every image is verified again, then all
+// are marked pending - the highest image index first, so that power lost half way leaves at most
+// the deployment requested, which the nanoCLR it does not match rejects and reverts. If marking one
+// fails, the secondary slots already marked are erased (UpdateSessionResult_FlashError).
+// UpdateSessionResult_Busy while a session or an erase is under way on one of them,
+// UpdateSessionResult_SwapInFlight while one already has a swap pending (the images stay waiting).
+UpdateSessionResult Ifu_RequestUpdate(const uint8_t *images, uint32_t count);
 
 // Close the session. With eraseSlot the secondary slot is erased; without it the partial image
 // stays in place so Ifu_SessionResume() can pick it up later ("pause").

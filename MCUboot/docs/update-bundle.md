@@ -1,6 +1,6 @@
 # Update Bundle (`nanoUpdate-*.bin`)
 
-A single file that carries several signed MCUboot images, typically a nanoCLR (image 0) and
+A single file that carries both signed MCUboot images: a nanoCLR (image 0) and
 the deployment built for it (image 1). The bootloader imports it from an SD card or a USB
 mass storage device, exactly like the loose `nanoCLR-*.bin` / `nanoDeployment-*.bin` files
 (see `MCUboot/include/mcuboot_media_import.h`), but as one unit.
@@ -82,7 +82,9 @@ copy) and by MCUboot's signature check at swap time, as for any other staged ima
     the whole bundle is deferred to a later boot,
   - every image to stage is copied and hash checked before any of them is marked pending.
     If one copy fails, every secondary slot touched is erased and nothing is staged,
-  - all images are marked pending only after all of them landed intact.
+  - all images are marked pending only after all of them landed intact, the deployment first: if
+    power fails in between, only the deployment is pending, which rolls back on its own (and the
+    next boot imports the rest of the bundle, as it is not marked used yet).
 - **Used marker:** `<bundle name>.used`, with one stamp line per entry and per device, the
   same as for loose files. The file is never deleted, so one medium can update many devices.
 - If a bundle carries an image that was already staged from an earlier medium in the media

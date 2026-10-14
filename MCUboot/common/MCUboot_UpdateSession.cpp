@@ -48,8 +48,21 @@
 #define IFU_SCAN_CHUNK 256U
 
 static Ifu_Session s_sessions[MCUBOOT_IMAGE_NUMBER];
-// set while Ifu_EraseSecondary() is erasing an image's slot with no session open
-static bool s_eraseInFlight[MCUBOOT_IMAGE_NUMBER];
+// set while Ifu_EraseSecondary() or Ifu_RequestUpdate() works on an image's slot with no session open
+static bool s_slotBusy[MCUBOOT_IMAGE_NUMBER];
+
+// An image verified by Ifu_SessionComplete(requestUpdate = false) and waiting for Ifu_RequestUpdate().
+// RAM only: anything that touches the slot, and every CLR start, drops it. This is what stops
+// Ifu_RequestUpdate() from swapping in whatever else a secondary slot holds - after a swap that is
+// the previous image, which verifies just as well.
+typedef struct
+{
+    bool Valid;
+    uint32_t ImageOffset;
+    uint32_t TotalLength;
+} Ifu_StagedImage;
+
+static Ifu_StagedImage s_staged[MCUBOOT_IMAGE_NUMBER];
 static UpdateSessionResult s_lastStatus = UpdateSessionResult_Success;
 // Not cleared by Ifu_SessionResetAll(): keeping it monotonic across a CLR-only reboot means a
 // token can never be reused while anything might still be holding the previous one.
@@ -226,13 +239,14 @@ static UpdateSessionResult claim_session(
 
     // a session held by someone else, a flash operation in progress, or an erase in progress all
     // block us; the same owner re-opening replaces its own (possibly abandoned) session
-    if ((s->Open && (s->Owner != owner || s->WriteInFlight)) || s_eraseInFlight[image])
+    if ((s->Open && (s->Owner != owner || s->WriteInFlight)) || s_slotBusy[image])
     {
         Ifu_SessionUnlock();
         return UpdateSessionResult_Busy;
     }
 
     memset(s, 0, sizeof(*s));
+    s_staged[image].Valid = false;
     s->Open = true;
     s->WriteInFlight = true;
     s->Image = image;
@@ -699,7 +713,7 @@ static UpdateSessionResult verify_image(
     return UpdateSessionResult_Success;
 }
 
-UpdateSessionResult Ifu_SessionComplete(uint8_t image, uint32_t token, Ifu_Session *outSnapshot)
+UpdateSessionResult Ifu_SessionComplete(uint8_t image, uint32_t token, bool requestUpdate, Ifu_Session *outSnapshot)
 {
     const struct flash_area *fa = NULL;
     Ifu_Session *s = NULL;
@@ -742,8 +756,10 @@ UpdateSessionResult Ifu_SessionComplete(uint8_t image, uint32_t token, Ifu_Sessi
         flash_area_close(fa);
     }
 
-    // schedule a revertible test swap; the application confirms after it has validated itself
-    if (status == UpdateSessionResult_Success && boot_set_pending_multi(image, 0) != 0)
+    // request a revertible test swap; the application confirms after it has validated itself.
+    // Without requestUpdate the image is only verified, and Ifu_RequestUpdate() requests it later
+    // together with the other images it belongs with.
+    if (status == UpdateSessionResult_Success && requestUpdate && boot_set_pending_multi(image, 0) != 0)
     {
         status = UpdateSessionResult_FlashError;
     }
@@ -758,6 +774,13 @@ UpdateSessionResult Ifu_SessionComplete(uint8_t image, uint32_t token, Ifu_Sessi
         {
             s->HeaderKnown = true;
             s->Header = hdr;
+
+            if (!requestUpdate)
+            {
+                s_staged[image].Valid = true;
+                s_staged[image].ImageOffset = imageOffset;
+                s_staged[image].TotalLength = totalLength;
+            }
         }
 
         s->WriteInFlight = false;
@@ -832,13 +855,14 @@ UpdateSessionResult Ifu_EraseSecondary(uint8_t image)
 
     Ifu_SessionLock();
 
-    if (s_sessions[image].Open || s_eraseInFlight[image])
+    if (s_sessions[image].Open || s_slotBusy[image])
     {
         Ifu_SessionUnlock();
         return set_status(UpdateSessionResult_Busy);
     }
 
-    s_eraseInFlight[image] = true;
+    s_slotBusy[image] = true;
+    s_staged[image].Valid = false;
 
     Ifu_SessionUnlock();
 
@@ -856,7 +880,158 @@ UpdateSessionResult Ifu_EraseSecondary(uint8_t image)
 
     Ifu_SessionLock();
 
-    s_eraseInFlight[image] = false;
+    s_slotBusy[image] = false;
+
+    Ifu_SessionUnlock();
+
+    return set_status(status);
+}
+
+// Erase the secondary slot of every image in `mask` (a failed request must not leave any of them pending).
+static void erase_secondaries(uint32_t mask)
+{
+    for (uint8_t image = 0; image < MCUBOOT_IMAGE_NUMBER; image++)
+    {
+        const struct flash_area *fa = NULL;
+
+        if ((mask & (1U << image)) != 0U && open_secondary(image, &fa) == UpdateSessionResult_Success)
+        {
+            (void)flash_area_erase(fa, 0, fa->fa_size);
+            flash_area_close(fa);
+        }
+    }
+}
+
+UpdateSessionResult Ifu_RequestUpdate(const uint8_t *images, uint32_t count)
+{
+    uint32_t mask = 0U;
+    UpdateSessionResult status = UpdateSessionResult_Success;
+
+    if (images == NULL || count == 0U || count > MCUBOOT_IMAGE_NUMBER)
+    {
+        return set_status(UpdateSessionResult_BadArgument);
+    }
+
+    for (uint32_t i = 0; i < count; i++)
+    {
+        if (!image_valid(images[i]) || (mask & (1U << images[i])) != 0U)
+        {
+            return set_status(UpdateSessionResult_BadArgument);
+        }
+
+        mask |= 1U << images[i];
+    }
+
+    Ifu_SessionLock();
+
+    // every image must be idle and waiting, verified by Ifu_SessionComplete(requestUpdate = false)
+    for (uint8_t image = 0; image < MCUBOOT_IMAGE_NUMBER && status == UpdateSessionResult_Success; image++)
+    {
+        if ((mask & (1U << image)) == 0U)
+        {
+            continue;
+        }
+
+        if (s_sessions[image].Open || s_slotBusy[image])
+        {
+            status = UpdateSessionResult_Busy;
+        }
+        else if (!s_staged[image].Valid)
+        {
+            status = UpdateSessionResult_NoImage;
+        }
+    }
+
+    Ifu_StagedImage staged[MCUBOOT_IMAGE_NUMBER];
+
+    if (status == UpdateSessionResult_Success)
+    {
+        // keep sessions and erases off these slots until the request is through
+        for (uint8_t image = 0; image < MCUBOOT_IMAGE_NUMBER; image++)
+        {
+            if ((mask & (1U << image)) != 0U)
+            {
+                s_slotBusy[image] = true;
+                staged[image] = s_staged[image];
+            }
+        }
+    }
+
+    Ifu_SessionUnlock();
+
+    if (status != UpdateSessionResult_Success)
+    {
+        return set_status(status);
+    }
+
+    // check every image again before requesting any of them
+    for (uint8_t image = 0; image < MCUBOOT_IMAGE_NUMBER && status == UpdateSessionResult_Success; image++)
+    {
+        const struct flash_area *fa = NULL;
+        struct image_header hdr;
+
+        if ((mask & (1U << image)) == 0U)
+        {
+            continue;
+        }
+
+        if (boot_swap_type_multi(image) != BOOT_SWAP_TYPE_NONE)
+        {
+            status = UpdateSessionResult_SwapInFlight;
+            break;
+        }
+
+        status = open_secondary(image, &fa);
+
+        if (status == UpdateSessionResult_Success)
+        {
+            status = verify_image(fa, staged[image].ImageOffset, staged[image].TotalLength, &hdr);
+            flash_area_close(fa);
+        }
+    }
+
+    // Highest image index first, i.e. the deployment before the nanoCLR. If power fails between
+    // two of these, a deployment that was requested alone gets rejected by the nanoCLR it does not
+    // match and reverts; a nanoCLR requested alone would be kept with a deployment it can't load.
+    uint32_t requested = 0U;
+
+    for (int image = MCUBOOT_IMAGE_NUMBER - 1; image >= 0 && status == UpdateSessionResult_Success; image--)
+    {
+        if ((mask & (1U << image)) == 0U)
+        {
+            continue;
+        }
+
+        requested |= 1U << image;
+
+        if (boot_set_pending_multi(image, 0) != 0)
+        {
+            status = UpdateSessionResult_FlashError;
+        }
+    }
+
+    if (status == UpdateSessionResult_FlashError && requested != 0U)
+    {
+        // all or nothing: drop the images already requested (and the one that failed)
+        erase_secondaries(requested);
+    }
+
+    Ifu_SessionLock();
+
+    for (uint8_t image = 0; image < MCUBOOT_IMAGE_NUMBER; image++)
+    {
+        if ((mask & (1U << image)) != 0U)
+        {
+            s_slotBusy[image] = false;
+
+            // done with: requested, erased, or no longer verifying. Only a swap still in flight leaves
+            // the images waiting, to be requested again once it has gone through.
+            if (status != UpdateSessionResult_SwapInFlight)
+            {
+                s_staged[image].Valid = false;
+            }
+        }
+    }
 
     Ifu_SessionUnlock();
 
@@ -925,7 +1100,8 @@ void Ifu_SessionResetAll(void)
     // RAM state only. Flash is deliberately left alone: a paused download stays in the staging
     // slot and Ifu_SessionResume() picks it up again after the reboot.
     memset(s_sessions, 0, sizeof(s_sessions));
-    memset(s_eraseInFlight, 0, sizeof(s_eraseInFlight));
+    memset(s_slotBusy, 0, sizeof(s_slotBusy));
+    memset(s_staged, 0, sizeof(s_staged));
 
     s_lastStatus = UpdateSessionResult_Success;
 

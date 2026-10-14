@@ -118,7 +118,7 @@ Cost: no extra flash wear, no configuration record, works identically for every 
 
 ## Completion
 
-`Ifu_SessionComplete(image, token, out)`:
+`Ifu_SessionComplete(image, token, requestUpdate, out)`:
 
 1. `NextOffset == TotalLength`, else `IFU_E_INCOMPLETE` (session stays open).
 2. Re-read the header; locate the unprotected TLV info at `span`; require
@@ -126,8 +126,9 @@ Cost: no extra flash wear, no configuration record, works identically for every 
    `IMAGE_TLV_SHA256` → `IFU_E_BAD_TLV` on any structural problem.
 3. SHA-256 (tinycrypt, already part of the MCUboot tree) over `[0, span)` — exactly what
    `imgtool` hashes — compared with the TLV digest → `IFU_E_HASH_MISMATCH`.
-4. `boot_set_pending_multi(image, 0)`: a revertible test swap on the next reboot. Failure is
-   reported as `IFU_E_FLASH`.
+4. With `requestUpdate`: `boot_set_pending_multi(image, 0)`, a revertible test swap on the next
+   reboot. Failure is reported as `IFU_E_FLASH`. Without it the image is only recorded as
+   *waiting* (see below).
 
 The signature is still verified by MCUboot at boot. On a verification failure the slot is
 left as is; the caller decides between `Abort(erase)` and a fresh `Start`.
@@ -135,6 +136,36 @@ left as is; the caller decides between `Abort(erase)` and a fresh `Start`.
 Application flow for the deployment image:
 `Complete == Success` → `RequestReboot()` → MCUboot swaps → new application validates itself →
 `ConfirmDeploymentImage()`; without confirmation MCUboot reverts on the following reboot.
+
+## Requesting both images together
+
+A nanoCLR and the deployment built for it must not be swapped in one without the other. Completing
+them one after the other with `requestUpdate` leaves a window (the rest of the second download)
+in which a reboot swaps the first one in alone. So:
+
+1. Each image is completed with `requestUpdate = false`. The registry records it as waiting in
+   `s_staged[image]` (RAM: image offset and length). `Start`, `Resume`, `EraseSecondary` and
+   `Ifu_SessionResetAll()` (every CLR start) drop it.
+2. `Ifu_RequestUpdate(images, count)`, all or nothing:
+   - `BadArgument` for an empty or too long list, an unknown image or a duplicate;
+     `Busy` while a session or an erase is under way on one of them; `NoImage` unless every one
+     is waiting. Requiring the waiting record is deliberate: after a swap the secondary slot holds
+     the previous image, which verifies just as well, and must not be requested by accident.
+   - The images are claimed (`s_slotBusy`, the flag `EraseSecondary` uses) so no session or erase
+     can start on them meanwhile.
+   - Each one is checked for `boot_swap_type_multi() == NONE` (`SwapInFlight` otherwise, and the
+     images stay waiting) and verified again exactly as in `Complete`.
+   - All are marked pending, **highest image index first**. If power fails between two of
+     them only the deployment is pending; the old nanoCLR then rejects it (native contract) and,
+     the deployment being unconfirmed, the device resets and MCUboot reverts it. The opposite
+     order could leave the new nanoCLR with the old, confirmed deployment.
+   - If marking one fails (`IFU_E_FLASH`), the secondary slots already marked, and the failing
+     one, are erased: nothing is left pending.
+
+After the reboot the two images are kept or reverted as a pair, whatever staged them (this
+mechanism, the media importer, or two separate completions that reached the same reboot): see
+"Paired confirmation" in [confirmation-timeout.md](confirmation-timeout.md). The media importer
+marks bundle images pending in the same order.
 
 ## Concurrency
 
@@ -160,7 +191,7 @@ The wire format is unchanged; the device keeps the session on the host's behalf
 |---|---|
 | `Monitor_ImageWrite`, secondary slot, `Offset == 0` | `Ifu_SessionStart(image, IFU_OWNER_WIRE, TotalSize)` |
 | `Monitor_ImageWrite`, secondary slot, any chunk | `Offset` must equal the session's `NextOffset` (`Monitor_Image_Error_BadOffset`, reply carries the expected offset), then `Ifu_SessionWrite` |
-| `Monitor_ImageWrite`, last chunk (`NextOffset >= TotalSize`) | `Ifu_SessionComplete` (verifies and marks pending) |
+| `Monitor_ImageWrite`, last chunk (`NextOffset >= TotalSize`) | `Ifu_SessionComplete(…, requestUpdate = true, …)` (verifies and marks pending) |
 | `Monitor_ImageWrite`, primary slot | unchanged developer path: direct write at offset 0, no session |
 | `Monitor_ImageErase`, secondary slot | `Ifu_EraseSecondary` |
 
@@ -180,7 +211,9 @@ the `UpdateSessionResult` of its own registry call:
 | `StartUpdateSession(image, totalLength, out session)` → `UpdateSessionResult` | `Ifu_SessionStart(…, IFU_OWNER_MANAGED, …)`; `session` stored through the by-ref argument (`null` on failure) |
 | `ResumeUpdateSession(image, totalLength, expectedHeader, out session)` → `UpdateSessionResult` | `Ifu_SessionResume`; `session` as above |
 | `StoreImageChunk(session, data, offset, count)` → `UpdateSessionResult` (`Stream.Write` convention) | `Ifu_SessionWrite(data + offset, count)`; `NextOffset` written back into the object |
-| `CompleteUpdateSession(session)` → `UpdateSessionResult` | `Ifu_SessionComplete` |
+| `CompleteUpdateSession(session)` → `UpdateSessionResult` | managed overload of the next row with `requestUpdate = true` |
+| `CompleteUpdateSession(session, requestUpdate)` → `UpdateSessionResult` | `Ifu_SessionComplete(…, requestUpdate, …)` |
+| `RequestUpdate(params ImageType[] images)` → `UpdateSessionResult` | `Ifu_RequestUpdate` (`null` → `ArgumentNullException`; empty, too long or out-of-range list → `BadArgument`) |
 | `AbortUpdateSession(session, eraseSlot)` → `UpdateSessionResult` | `Ifu_SessionAbort` |
 | `EraseSecondaryImage(image)` → `UpdateSessionResult` | `Ifu_EraseSecondary` |
 | `GetUpdateSessionOwner(image)` | `Ifu_SessionOwner` |
@@ -204,7 +237,14 @@ Covered by the unit tests in the class library repository (hardware only, MCUboo
 session lifecycle and ownership, `Busy`/`BadToken`/`TooLarge`, `Stream.Write` argument
 semantics, first-chunk header validation, sequential position, pause/resume including a
 pause inside a run of 0xFF payload bytes, `HeaderMismatch`/`NoImage`, `Incomplete`/`BadTlv`/
-`HashMismatch`/`Success` with the pending flag, cross-thread ownership.
+`HashMismatch`/`Success` with the pending flag, cross-thread ownership, completion without
+requesting the update and `RequestUpdate` (`Success`, `NoImage` after a second request, a session,
+an erase or a completion that already requested it, `Busy`, `BadArgument`, `null`) - on the
+deployment slot only.
+
+Not covered automatically: `RequestUpdate` with the nanoCLR (the tests never touch the nanoCLR
+secondary slot) and the paired confirmation after the reboot (manual: stage both, request, reboot,
+check `GetStatus(NanoClr) == Testing` until `ConfirmDeploymentImage()`).
 
 Not covered automatically: reboot mid-session (manual: reset the board between chunks, then
 `Resume`), Wire Protocol collision (manual: `nanoff` write while a managed session is open →

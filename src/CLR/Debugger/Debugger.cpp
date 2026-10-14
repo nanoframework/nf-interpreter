@@ -4312,7 +4312,7 @@ bool CLR_DBG_Debugger::Monitor_ImageWrite(WP_Message *msg)
             // final chunk: verify the staged image and schedule a one-time test-swap on the next reboot
             if (status == UpdateSessionResult_Success && cmd->TotalSize > 0 && nextOffset >= cmd->TotalSize)
             {
-                status = Ifu_SessionComplete(cmd->ImageIndex, token, NULL);
+                status = Ifu_SessionComplete(cmd->ImageIndex, token, true, NULL);
             }
         }
 

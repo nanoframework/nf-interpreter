@@ -220,7 +220,7 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
 }
 
 HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::
-    CompleteUpdateSession___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSessionResult__nanoFrameworkRuntimeInFieldUpdateUpdateSession(
+    CompleteUpdateSession___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSessionResult__nanoFrameworkRuntimeInFieldUpdateUpdateSession__BOOLEAN(
         CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -228,6 +228,7 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
     CLR_RT_HeapBlock *pSession = NULL;
     uint8_t imageIndex = 0;
     uint32_t token = 0;
+    bool requestUpdate = (stack.Arg1().NumericByRef().u1 != 0);
     Ifu_Session snapshot;
     UpdateSessionResult result;
 
@@ -235,7 +236,7 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
 
     memset(&snapshot, 0, sizeof(snapshot));
 
-    result = Ifu_SessionComplete(imageIndex, token, &snapshot);
+    result = Ifu_SessionComplete(imageIndex, token, requestUpdate, &snapshot);
 
     if (result == UpdateSessionResult_Success)
     {
@@ -331,6 +332,42 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
     stack.SetResult_Boolean(success);
 
     NANOCLR_SET_AND_LEAVE(S_OK);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::
+    RequestUpdate___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSessionResult__SZARRAY_nanoFrameworkRuntimeInFieldUpdateImageType(
+        CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock_Array *images = stack.Arg0().DereferenceArray();
+    uint8_t list[MCUBOOT_IMAGE_NUMBER];
+    UpdateSessionResult result = UpdateSessionResult_BadArgument;
+
+    FAULT_ON_NULL_ARG(images);
+
+    // ImageType is an int-backed enum; an empty list, too many entries or an unknown image are BadArgument
+    if (images->m_numOfElements > 0 && images->m_numOfElements <= MCUBOOT_IMAGE_NUMBER &&
+        images->m_sizeOfElement == sizeof(CLR_INT32))
+    {
+        const CLR_INT32 *values = (const CLR_INT32 *)images->GetFirstElement();
+        bool inRange = true;
+
+        for (CLR_UINT32 i = 0; i < images->m_numOfElements; i++)
+        {
+            inRange = inRange && values[i] >= 0 && values[i] < MCUBOOT_IMAGE_NUMBER;
+            list[i] = (uint8_t)values[i];
+        }
+
+        if (inRange)
+        {
+            result = Ifu_RequestUpdate(list, images->m_numOfElements);
+        }
+    }
+
+    stack.SetResult_I4((CLR_INT32)result);
 
     NANOCLR_NOCLEANUP();
 }

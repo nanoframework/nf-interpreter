@@ -117,7 +117,7 @@ struct Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
     NANOCLR_NATIVE_DECLARE(
         StoreImageChunk___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSessionResult__nanoFrameworkRuntimeInFieldUpdateUpdateSession__SZARRAY_U1__I4__I4);
     NANOCLR_NATIVE_DECLARE(
-        CompleteUpdateSession___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSessionResult__nanoFrameworkRuntimeInFieldUpdateUpdateSession);
+        CompleteUpdateSession___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSessionResult__nanoFrameworkRuntimeInFieldUpdateUpdateSession__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(
         AbortUpdateSession___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSessionResult__nanoFrameworkRuntimeInFieldUpdateUpdateSession__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(
@@ -126,6 +126,8 @@ struct Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
     NANOCLR_NATIVE_DECLARE(RequestDeploymentRevert___STATIC__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(RequestClrRevert___STATIC__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(RequestReboot___STATIC__VOID);
+    NANOCLR_NATIVE_DECLARE(
+        RequestUpdate___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSessionResult__SZARRAY_nanoFrameworkRuntimeInFieldUpdateImageType);
 
     //--//
 

@@ -895,10 +895,12 @@ static void import_bundle_images(const mcuboot_media *media, const import_bundle
         copied[image] = true;
     }
 
-    // 4. all landed intact: mark them pending
-    for (image = 0; image < MCUBOOT_IMAGE_NUMBER && !failed; image++)
+    // 4. all landed intact: mark them pending, highest image index first (the deployment before the
+    // nanoCLR). If power fails half way, a deployment pending alone is rejected by the nanoCLR it does
+    // not match and reverts; a nanoCLR pending alone would be kept with a deployment it can't load.
+    for (int i = MCUBOOT_IMAGE_NUMBER - 1; i >= 0 && !failed; i--)
     {
-        if (copied[image] && set_pending(image, fa[image]) != 0)
+        if (copied[i] && set_pending((uint8_t)i, fa[i]) != 0)
         {
             failed = true;
         }

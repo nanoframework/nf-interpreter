@@ -100,6 +100,13 @@ unconfirmed (failed load, no entry point, timeout, reset, power cycle) reverts b
 An update of image 0 alone (deployment already confirmed, or a Wire Protocol deployment with no
 MCUboot trailer) is confirmed at startup as before.
 
+No flag is needed to tell a paired update from two unrelated ones: the trailers are the flag. It
+does not matter what staged the images - an update bundle on SD/USB, the managed
+`UpdateManager.RequestUpdate()` (see "Requesting both images together" in
+[session-update.md](session-update.md)), or two separate completions that reached the same reboot.
+What matters is that both are pending at the same reboot, which `RequestUpdate()` and the bundle
+importer guarantee and two separate completions don't.
+
 Note for debugging: after a paired update the CLR stays unconfirmed until the deployment is
 confirmed. A debug session cancels the countdown, but a reset before the application confirms
 reverts both images.
