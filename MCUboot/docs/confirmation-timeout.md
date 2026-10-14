@@ -85,9 +85,21 @@ is clamped to what `sysinterval_t` can hold.
 Other RTOSes can map these hooks onto FreeRTOS `xTimerCreate` or ThreadX `tx_timer_create` once
 MCUboot is enabled there.
 
-## Known limitation
+## Paired confirmation
 
-The CLR confirms image 0 before loading the deployment. Suppose image 0 and image 1 are updated
-together and the new deployment fails to load. Only image 1 reverts. The old deployment can then
-fail the native contract-hash check against the new CLR. No reset follows, because image 1 is
-confirmed by then.
+The CLR normally confirms image 0 at startup, before loading the deployment. When image 0 and
+image 1 were updated together (both unconfirmed in the power-on snapshot,
+`nf_mcuboot_clr_confirm_paired()`), that would let a failing new deployment revert alone, back to
+an old deployment that then fails the native contract-hash check against the new CLR, with no
+reset to follow because the old deployment is confirmed.
+
+So in that case image 0 is not confirmed at startup. `nf_mcuboot_deploy_ok()` confirms it right
+after image 1, and reports an error if that fails. Every outcome that leaves the deployment
+unconfirmed (failed load, no entry point, timeout, reset, power cycle) reverts both images.
+
+An update of image 0 alone (deployment already confirmed, or a Wire Protocol deployment with no
+MCUboot trailer) is confirmed at startup as before.
+
+Note for debugging: after a paired update the CLR stays unconfirmed until the deployment is
+confirmed. A debug session cancels the countdown, but a reset before the application confirms
+reverts both images.

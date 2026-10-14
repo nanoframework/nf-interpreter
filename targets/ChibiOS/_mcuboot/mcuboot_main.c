@@ -15,7 +15,8 @@
 //           If recovery is triggered, this never returns (device resets after image upload)
 //        e. Sweep removable update media (SD card / USB MSD) for signed images and stage
 //           them into the secondary slots (mcuboot_media_import_run), when enabled
-//        f. Run MCUboot (two boot_go_for_image_id passes) — only if recovery was not triggered
+//        f. Run MCUboot (two boot_go_for_image_id passes, nanoCLR then deployment) — only if
+//           recovery was not triggered
 //        g. Launch the selected image (do_boot)
 //
 // do_boot() performs the low-level Cortex image launch:
@@ -134,28 +135,13 @@ int main(void)
 #endif
 
     // Run MCUboot image validation and upgrade logic as two boot_go_for_image_id() passes -
-    // image 1 (deployment) first so a staged swap can complete, then image 0 (nanoCLR) for
-    // the actual boot decision, masked so a never-provisioned deploy_0 can't veto it. See
+    // image 0 (nanoCLR) first for the actual boot decision, then image 1 (deployment) so a
+    // staged swap can complete, masked so a never-provisioned deploy_0 can't veto the boot.
+    // The CLR goes first so that a reset during the deployment swap reverts the CLR and leaves
+    // the resumed deployment unconfirmed: the old CLR rejects it and it is reverted too. See
     // "Two-Pass Boot Sequence" in MCUboot/docs/multi-image-management.md for the full reasoning.
     struct boot_loader_state *bootState = boot_get_loader_state();
     struct boot_rsp rsp;
-
-#if (MCUBOOT_IMAGE_NUMBER > 1)
-    struct boot_rsp deployRsp;
-
-    boot_state_init(bootState);
-    FIH_DECLARE(deployResult, FIH_FAILURE);
-    FIH_CALL(boot_go_for_image_id, deployResult, &deployRsp, NF_MCUBOOT_IMAGE_DEPLOY);
-
-    // Deployment pass is not fatal: empty or invalid deploy_0 must not prevent nanoCLR from booting
-    if (FIH_NOT_EQ(deployResult, FIH_SUCCESS))
-    {
-        BOOT_LOG_ERR(
-            "Image %d boot pass failed (%d); continuing with nanoCLR pass",
-            NF_MCUBOOT_IMAGE_DEPLOY,
-            (int)deployResult);
-    }
-#endif
 
     boot_state_init(bootState);
     FIH_DECLARE(bootResult, FIH_FAILURE);
@@ -177,6 +163,24 @@ int main(void)
         }
 #endif
     }
+
+#if (MCUBOOT_IMAGE_NUMBER > 1)
+    // rsp.br_hdr points into the loader state, which the next boot_state_init() clears
+    struct image_header clrHeader = *rsp.br_hdr;
+    rsp.br_hdr = &clrHeader;
+
+    struct boot_rsp deployRsp;
+
+    boot_state_init(bootState);
+    FIH_DECLARE(deployResult, FIH_FAILURE);
+    FIH_CALL(boot_go_for_image_id, deployResult, &deployRsp, NF_MCUBOOT_IMAGE_DEPLOY);
+
+    // Deployment pass is not fatal: empty or invalid deploy_0 must not prevent nanoCLR from booting
+    if (FIH_NOT_EQ(deployResult, FIH_SUCCESS))
+    {
+        BOOT_LOG_ERR("Image %d boot pass failed (%d); booting nanoCLR", NF_MCUBOOT_IMAGE_DEPLOY, (int)deployResult);
+    }
+#endif
 
     // Launch the selected image
     do_boot(&rsp);

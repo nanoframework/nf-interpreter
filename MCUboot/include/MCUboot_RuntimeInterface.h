@@ -118,7 +118,9 @@ extern "C"
      *
      * @return NF_MCUBOOT_SUCCESS on success; NF_MCUBOOT_* error code on failure
      *
-     * @note This is a no-op if the CLR image is already confirmed or was not swapped.
+     * @note This is a no-op if the CLR image is already confirmed or was not swapped, and when it
+     *       was swapped together with the deployment (nf_mcuboot_clr_confirm_paired()): it is then
+     *       confirmed by nf_mcuboot_deploy_ok().
      */
     nf_mcuboot_error_t nf_mcuboot_startup_ok(void);
 

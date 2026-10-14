@@ -55,12 +55,31 @@ Image 1 (deployment) holds data the CLR reads, not firmware MCUboot can boot. A
 never-provisioned `deploy_0` must not be able to veto booting a valid nanoCLR, so each
 image needs its own pass with its own independent pass/fail outcome:
 
-* **Pass 1, image 1** — the update loop runs before the bootable-image check, so a staged
+* **Pass 1, image 0** — the actual boot decision. `deploy_0` is masked out of this pass, so
+  a never-provisioned or otherwise invalid deployment slot cannot veto a valid nanoCLR.
+  `rsp.br_hdr` points into the loader state, so the nanoCLR header is copied out before
+  pass 2 re-initialises that state.
+* **Pass 2, image 1** — the update loop runs before the bootable-image check, so a staged
   deployment in `deploy_1` is swapped into `deploy_0` even though the pass then reports
   failure (there being no bootable code in that slot). The result of this pass is
   deliberately discarded for that reason.
-* **Pass 2, image 0** — the actual boot decision. `deploy_0` is masked out of this pass, so
-  a never-provisioned or otherwise invalid deployment slot cannot veto a valid nanoCLR.
+
+### Why the nanoCLR pass runs first
+
+When both images are pending (e.g. an [update bundle](update-bundle.md)), the pair is not
+atomic: a reset after the first pass swapped its image, but before the second pass finished,
+makes MCUboot revert the first image on the next boot (it was test-swapped and never
+confirmed) while it resumes the second one. The order decides which half survives:
+
+| Order | Reset during the second swap ends with | Outcome |
+|---|---|---|
+| deployment, then nanoCLR | new nanoCLR, old deployment (confirmed by the revert) | the new CLR rejects the old deployment (native contract), nothing reverts it |
+| **nanoCLR, then deployment** | old nanoCLR, new deployment (unconfirmed) | the old CLR fails to load it and resets; MCUboot reverts it: old pair |
+
+The deployment is the only image whose rejection triggers a revert, so it has to be the one
+left unconfirmed. Together with the paired confirmation (see
+[confirmation-timeout.md](confirmation-timeout.md)) a CLR + deployment update either lands
+as a pair or rolls back as a pair.
 
 ### `boot_go_for_image_id()` and the image mask
 
@@ -82,7 +101,7 @@ matching `boot_state_clear()` call is not needed here: its body is entirely comp
 
 ### Consequence for signing
 
-Because image 0 is masked out during pass 1, its header is never read during that pass.
+Because image 0 is masked out during the deployment pass (pass 2), its header is never read during that pass.
 See [Why it does not work here](#why-it-does-not-work-here) for what that means for
 `IMAGE_TLV_DEPENDENCY`.
 

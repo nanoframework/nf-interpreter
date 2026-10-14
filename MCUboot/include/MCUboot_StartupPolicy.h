@@ -27,6 +27,15 @@ extern "C"
     void nf_mcuboot_startup_init(void);
 
     /**
+     * @brief True when image 0 and image 1 were both swapped in this boot and are still unconfirmed.
+     *
+     * They are then confirmed as a pair: nf_mcuboot_startup_ok() leaves image 0 alone and
+     * nf_mcuboot_deploy_ok() confirms it after image 1, so a deployment that is never confirmed
+     * reverts the CLR it was updated with. Based on the power-on snapshot.
+     */
+    bool nf_mcuboot_clr_confirm_paired(void);
+
+    /**
      * @brief True when the deployment image (image 1) in the primary slot is valid but not yet confirmed.
      *
      * Reads the live trailer, so a confirmation made after power-on is taken into account.
@@ -60,8 +69,9 @@ extern "C"
      *
      * Single confirmation path for image 1: stops the confirmation watchdog before the trailer write
      * and re-arms it when the confirmation fails. The trailer is read back to check image_ok.
+     * When nf_mcuboot_clr_confirm_paired() image 0 is confirmed right after image 1.
      *
-     * @return NF_MCUBOOT_SUCCESS when image 1 is confirmed; NF_MCUBOOT_* error code otherwise
+     * @return NF_MCUBOOT_SUCCESS when image 1 (and a paired image 0) is confirmed; NF_MCUBOOT_* error code otherwise
      */
     nf_mcuboot_error_t nf_mcuboot_deploy_ok(void);
 

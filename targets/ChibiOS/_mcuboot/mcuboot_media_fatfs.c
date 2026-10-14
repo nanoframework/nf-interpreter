@@ -102,12 +102,11 @@ static void fatfs_unmount(void *p)
     }
 }
 
-// n-th root-directory entry matching the image's pattern. Directories and names that do
-// not fit the caller's buffer are skipped (not counted).
-static int fatfs_find(void *p, uint8_t image, uint32_t n, char *name, size_t cap)
+// n-th root-directory entry matching `pattern`. Directories and names that do not fit the
+// caller's buffer are skipped (not counted).
+static int fatfs_find(void *p, const char *pattern, uint32_t n, char *name, size_t cap)
 {
     mcuboot_media_fatfs_ctx *ctx = (mcuboot_media_fatfs_ctx *)p;
-    const char *pattern = mcuboot_media_pattern_for_image(image);
     char root[8];
     DIR dir;
     FILINFO info;

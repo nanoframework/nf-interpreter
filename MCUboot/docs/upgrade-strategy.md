@@ -60,7 +60,8 @@ SD card and USB MSD are **not** secondary-slot media: MCUboot only ever swaps fr
 (Q)SPI secondary slot. They remain the regular storage volumes the application uses through
 the file system — when `NF_FEATURE_MCUBOOT_HAS_SDCARD` / `NF_FEATURE_MCUBOOT_HAS_USB_MSD` are
 enabled the bootloader additionally reads update files (`nanoCLR-*.bin`,
-`nanoDeployment-*.bin`) from their root directory and stages them into the secondary
+`nanoDeployment-*.bin`, or a `nanoUpdate-*.bin` bundle carrying both, see
+[update-bundle.md](update-bundle.md)) from their root directory and stages them into the secondary
 slot before running the swap logic (see `MCUboot/common/MCUboot_media_import.c` and section
 9.1 of `docs/mcuboot-stm32-porting-guide.md`). Measured cost on ORGPAL_PALTHREE (MinSizeRel):
 FatFs + SDC + import engine ≈ 8 kB, USB host + MSD ≈ 12 kB.

@@ -97,11 +97,10 @@ static bool build_path(const esp32_sd_ctx *ctx, const char *name, const char *su
     return (n > 0) && ((size_t)n < cap);
 }
 
-// n-th regular file in the mount point root matching the image's pattern.
-static int sd_find(void *p, uint8_t image, uint32_t n, char *name, size_t cap)
+// n-th regular file in the mount point root matching `pattern`.
+static int sd_find(void *p, const char *pattern, uint32_t n, char *name, size_t cap)
 {
     esp32_sd_ctx *ctx = (esp32_sd_ctx *)p;
-    const char *pattern = mcuboot_media_pattern_for_image(image);
     int rc = -1;
 
     if (pattern == NULL)

@@ -31,6 +31,16 @@
 //      a one-time test swap
 //   7. mark the file as consumed by this device
 //
+// Update bundle (nanoUpdate-*.bin): one file with a small manifest at offset 0 locating
+// several signed images (typically a nanoCLR and the deployment built for it). Format and
+// rules: MCUboot/docs/update-bundle.md. On each medium a valid bundle is looked for first;
+// the images it carries are then never taken from loose files on that medium. Its entries
+// go through steps 2-5 above exactly like loose files, but as a unit:
+//   - if any entry is deferred the whole bundle is deferred,
+//   - every entry to stage is copied and hash checked first; only when all of them landed
+//     intact are they marked pending (a failure leaves every slot touched erased),
+//   - the stamps of all entries go into the bundle's "used" marker.
+//
 // Every outcome is logged with its reason. Any failure along the way is logged and the
 // slot is left erased; boot continues with whatever the slots already held. MCUboot then
 // performs its regular swap/validate/revert cycle from the secondary slot, exactly as it
@@ -79,6 +89,31 @@ extern "C"
 #ifndef MCUBOOT_IMPORT_IMG1_PATTERN
 #define MCUBOOT_IMPORT_IMG1_PATTERN "nanoDeployment-*.bin"
 #endif
+#ifndef MCUBOOT_IMPORT_BUNDLE_PATTERN
+#define MCUBOOT_IMPORT_BUNDLE_PATTERN "nanoUpdate-*.bin"
+#endif
+
+// Update bundle manifest (little-endian, at file offset 0). See MCUboot/docs/update-bundle.md.
+#define MCUBOOT_BUNDLE_MARKER         "NFUPDATE"
+#define MCUBOOT_BUNDLE_MARKER_SIZE    8U
+#define MCUBOOT_BUNDLE_FORMAT_VERSION 1U
+
+    typedef struct __attribute__((packed))
+    {
+        uint8_t marker[MCUBOOT_BUNDLE_MARKER_SIZE]; // MCUBOOT_BUNDLE_MARKER, no terminator
+        uint16_t format_version;                    // MCUBOOT_BUNDLE_FORMAT_VERSION
+        uint16_t header_size;                       // bytes from 0 to the end of the entry table
+        uint8_t entry_count;                        // 1..MCUBOOT_IMAGE_NUMBER
+        uint8_t reserved[3];
+    } mcuboot_bundle_header;
+
+    typedef struct __attribute__((packed))
+    {
+        uint8_t image; // MCUboot image index
+        uint8_t reserved[3];
+        uint32_t offset; // of the signed image in the bundle file, multiple of 4
+        uint32_t size;   // of the signed image (header + payload + TLVs)
+    } mcuboot_bundle_entry;
 
 // Suffix appended to the update file name for the per-device "used" marker.
 #ifndef MCUBOOT_IMPORT_USED_SUFFIX
@@ -114,10 +149,10 @@ extern "C"
         // Unmount and release the medium/device before the bootloader hands off.
         void (*unmount)(void *ctx);
 
-        // Return in `name` the n-th (0-based) file in the root directory matching
-        // mcuboot_media_pattern_for_image(image). <0 when there is no n-th match
-        // (this ends the enumeration); a name that does not fit `cap` is skipped.
-        int (*find)(void *ctx, uint8_t image, uint32_t n, char *name, size_t cap);
+        // Return in `name` the n-th (0-based) file in the root directory matching `pattern`
+        // (one of the patterns above). <0 when there is no n-th match (this ends the
+        // enumeration); a name that does not fit `cap` is skipped.
+        int (*find)(void *ctx, const char *pattern, uint32_t n, char *name, size_t cap);
 
         // Open `name` for reading and return its size. <0 if it cannot be opened.
         int (*open)(void *ctx, const char *name, uint32_t *size);

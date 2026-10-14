@@ -614,6 +614,10 @@ void ClrStartup(CLR_SETTINGS params)
                         "CLR health checks passed but MCUboot confirm of image 0 failed (%d)\r\n",
                         (int)mcubootConfirmResult);
                 }
+                else if (nf_mcuboot_clr_confirm_paired())
+                {
+                    CLR_Debug::Printf("Image 0 updated with the deployment: confirmed together with it\r\n");
+                }
 #else
                 (void)mcubootConfirmResult;
 #endif

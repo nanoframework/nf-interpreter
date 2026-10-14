@@ -35,11 +35,20 @@ void nf_mcuboot_startup_init(void)
     s_boot_state_valid = (rc0 == 0) && (rc1 == 0);
 }
 
+// Both images were swapped in this boot and are still unconfirmed: they are kept or reverted as a
+// pair, so image 0 is confirmed by nf_mcuboot_deploy_ok() together with image 1. A deployment that
+// never confirms then reverts the CLR it came with, instead of leaving it with the old deployment.
+// See "Paired confirmation" in MCUboot/docs/confirmation-timeout.md.
+bool nf_mcuboot_clr_confirm_paired(void)
+{
+    return s_boot_state_valid && needs_confirmation(&s_clr_boot_state) && needs_confirmation(&s_deploy_boot_state);
+}
+
 nf_mcuboot_error_t nf_mcuboot_startup_ok(void)
 {
     if (s_boot_state_valid)
     {
-        if (needs_confirmation(&s_clr_boot_state))
+        if (needs_confirmation(&s_clr_boot_state) && !nf_mcuboot_clr_confirm_paired())
         {
             return nf_mcuboot_confirm_image(NF_MCUBOOT_IMAGE_CLR);
         }
@@ -136,10 +145,29 @@ nf_mcuboot_error_t nf_mcuboot_deploy_ok(void)
         result = NF_MCUBOOT_SYSTEM_ERROR;
     }
 
-    if (result != NF_MCUBOOT_SUCCESS && wasRunning)
+    if (result != NF_MCUBOOT_SUCCESS)
     {
-        // keep the failsafe in place: the image is still unconfirmed
-        s_deploy_watchdog_running = nf_mcuboot_confirm_timer_start(s_deploy_watchdog_seconds);
+        if (wasRunning)
+        {
+            // keep the failsafe in place: the image is still unconfirmed
+            s_deploy_watchdog_running = nf_mcuboot_confirm_timer_start(s_deploy_watchdog_seconds);
+        }
+
+        return result;
+    }
+
+    // image 0 was held back by nf_mcuboot_startup_ok() to be kept together with this deployment
+    if (nf_mcuboot_clr_confirm_paired())
+    {
+        if (boot_read_swap_state_by_id(FLASH_AREA_IMAGE_PRIMARY(NF_MCUBOOT_IMAGE_CLR), &state) != 0)
+        {
+            return NF_MCUBOOT_FLASH_MAP_ERROR;
+        }
+
+        if (needs_confirmation(&state))
+        {
+            result = nf_mcuboot_confirm_image(NF_MCUBOOT_IMAGE_CLR);
+        }
     }
 
     return result;

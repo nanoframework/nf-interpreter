@@ -26,14 +26,25 @@ static uint8_t s_chunk[MCUBOOT_IMPORT_CHUNK_SIZE];
 // Bytes of the SHA-256 shown in log output and stored in the "used" stamp.
 #define IMPORT_HASH_PREFIX_BYTES 8U
 
-// Best candidate found for an image on a medium.
+// Best candidate found for an image on a medium: a loose file, or an entry of a bundle.
 typedef struct
 {
     char name[MCUBOOT_MEDIA_NAME_MAX];
+    // size of the file `name`, checked again when the file is reopened for the copy
+    uint32_t fileSize;
+    // where the signed image starts in the file (0 for a loose file) and its size
+    uint32_t base;
     struct image_header hdr;
     uint32_t size;
     uint8_t hash[32];
 } import_candidate;
+
+// Best update bundle found on a medium. present[i] tells whether it carries image i.
+typedef struct
+{
+    bool present[MCUBOOT_IMAGE_NUMBER];
+    import_candidate entry[MCUBOOT_IMAGE_NUMBER];
+} import_bundle;
 
 // What to do with the candidate once the slots have been looked at.
 typedef enum
@@ -99,14 +110,20 @@ static bool header_is_sane(const struct image_header *hdr, uint32_t fileSize, ui
     return fileSize <= usable;
 }
 
-// Read the SHA-256 TLV from the unprotected TLV area of the open file. 0 on success.
-static int file_hash_tlv(const mcuboot_media *media, uint32_t size, const struct image_header *hdr, uint8_t hash[32])
+// Read the SHA-256 TLV from the unprotected TLV area of the image that starts at `base` in
+// the open file and spans `size` bytes. 0 on success.
+static int file_hash_tlv(
+    const mcuboot_media *media,
+    uint32_t base,
+    uint32_t size,
+    const struct image_header *hdr,
+    uint8_t hash[32])
 {
     uint32_t tlvOff = Ifu_ImageHashedSize(hdr);
     struct image_tlv_info info;
 
     if (tlvOff == 0 || tlvOff > size || size - tlvOff < sizeof(info) ||
-        media->ops->read(media->ctx, tlvOff, &info, sizeof(info)) != 0 || info.it_magic != IMAGE_TLV_INFO_MAGIC)
+        media->ops->read(media->ctx, base + tlvOff, &info, sizeof(info)) != 0 || info.it_magic != IMAGE_TLV_INFO_MAGIC)
     {
         return -1;
     }
@@ -123,7 +140,7 @@ static int file_hash_tlv(const mcuboot_media *media, uint32_t size, const struct
     {
         struct image_tlv tlv;
 
-        if (media->ops->read(media->ctx, pos, &tlv, sizeof(tlv)) != 0)
+        if (media->ops->read(media->ctx, base + pos, &tlv, sizeof(tlv)) != 0)
         {
             return -1;
         }
@@ -132,7 +149,7 @@ static int file_hash_tlv(const mcuboot_media *media, uint32_t size, const struct
 
         if (tlv.it_type == IMAGE_TLV_SHA256 && tlv.it_len == 32U && pos + 32U <= end)
         {
-            return media->ops->read(media->ctx, pos, hash, 32U);
+            return media->ops->read(media->ctx, base + pos, hash, 32U);
         }
 
         pos += tlv.it_len;
@@ -193,18 +210,77 @@ static bool build_stamp(char *out, size_t cap, const import_candidate *cand)
     return (n > 0) && ((size_t)n < cap);
 }
 
-// Enumerate the files matching the image's pattern and keep the valid one with the
+// Secondary slot geometry of `image`: where the image goes in the slot and how large it may be.
+// Returns false when the image has no secondary slot.
+static bool slot_geometry(uint8_t image, uint32_t *imageOff, uint32_t *usable)
+{
+    const struct flash_area *fa = NULL;
+
+    if (flash_area_open(FLASH_AREA_IMAGE_SECONDARY(image), &fa) != 0 || fa == NULL)
+    {
+        return false;
+    }
+
+    *imageOff = Ifu_ImageOffset(fa);
+    *usable = Ifu_UsableSize(fa);
+
+    flash_area_close(fa);
+
+    return true;
+}
+
+// Check the signed image that starts at `base` and spans `size` bytes of the open file `name`
+// and fill `cand` from it. Logs and returns false when it is not usable for `image`.
+static bool probe_image(
+    const mcuboot_media *media,
+    const char *name,
+    uint32_t fileSize,
+    uint32_t base,
+    uint32_t size,
+    uint8_t image,
+    uint32_t usable,
+    import_candidate *cand)
+{
+    bool ok = (size >= sizeof(cand->hdr)) && (media->ops->read(media->ctx, base, &cand->hdr, sizeof(cand->hdr)) == 0);
+
+    if (!ok || !header_is_sane(&cand->hdr, size, usable))
+    {
+        BOOT_LOG_WRN(
+            "media import: %s: %s ignored (not a valid image %u at +0x%x or larger than %u bytes)",
+            media->name,
+            name,
+            (unsigned)image,
+            (unsigned)base,
+            (unsigned)usable);
+        return false;
+    }
+
+    if (file_hash_tlv(media, base, size, &cand->hdr, cand->hash) != 0)
+    {
+        BOOT_LOG_WRN("media import: %s: %s ignored (image %u has no SHA-256 TLV)", media->name, name, (unsigned)image);
+        return false;
+    }
+
+    strcpy(cand->name, name);
+    cand->fileSize = fileSize;
+    cand->base = base;
+    cand->size = size;
+
+    return true;
+}
+
+// Enumerate the loose files matching the image's pattern and keep the valid one with the
 // highest version. Returns true when a candidate was found.
 static bool find_candidate(const mcuboot_media *media, uint8_t image, uint32_t usable, import_candidate *best)
 {
+    static import_candidate s_probe;
     bool found = false;
     char name[MCUBOOT_MEDIA_NAME_MAX];
+    const char *pattern = mcuboot_media_pattern_for_image(image);
 
-    for (uint32_t n = 0; media->ops->find(media->ctx, image, n, name, sizeof(name)) == 0; n++)
+    for (uint32_t n = 0; pattern != NULL && media->ops->find(media->ctx, pattern, n, name, sizeof(name)) == 0; n++)
     {
         uint32_t size = 0;
-        struct image_header hdr;
-        uint8_t hash[32];
 
         if (media->ops->open(media->ctx, name, &size) != 0)
         {
@@ -212,35 +288,13 @@ static bool find_candidate(const mcuboot_media *media, uint8_t image, uint32_t u
             continue;
         }
 
-        bool ok = (size >= sizeof(hdr)) && (media->ops->read(media->ctx, 0, &hdr, sizeof(hdr)) == 0);
-        bool sane = ok && header_is_sane(&hdr, size, usable);
-        bool hashed = sane && (file_hash_tlv(media, size, &hdr, hash) == 0);
+        bool valid = probe_image(media, name, size, 0, size, image, usable, &s_probe);
 
         media->ops->close(media->ctx);
 
-        if (!sane)
+        if (valid && (!found || version_cmp(&s_probe.hdr.ih_ver, &best->hdr.ih_ver) > 0))
         {
-            BOOT_LOG_WRN(
-                "media import: %s: %s ignored (not a valid image %u file or larger than %u bytes)",
-                media->name,
-                name,
-                (unsigned)image,
-                (unsigned)usable);
-            continue;
-        }
-
-        if (!hashed)
-        {
-            BOOT_LOG_WRN("media import: %s: %s ignored (no SHA-256 TLV)", media->name, name);
-            continue;
-        }
-
-        if (!found || version_cmp(&hdr.ih_ver, &best->hdr.ih_ver) > 0)
-        {
-            strcpy(best->name, name);
-            best->hdr = hdr;
-            best->size = size;
-            memcpy(best->hash, hash, sizeof(best->hash));
+            *best = s_probe;
             found = true;
         }
     }
@@ -248,18 +302,160 @@ static bool find_candidate(const mcuboot_media *media, uint8_t image, uint32_t u
     return found;
 }
 
-// Copy the candidate into the secondary slot of `image` and mark it pending.
-// Returns 0 on success; on failure the slot is left erased.
-static int stage_image(
+// Parse and check the manifest and every entry of the open bundle file `name`.
+// Returns false (and logs why) when the bundle cannot be used as a whole.
+static bool probe_bundle(const mcuboot_media *media, const char *name, uint32_t fileSize, import_bundle *bundle)
+{
+    mcuboot_bundle_header hdr;
+    mcuboot_bundle_entry entries[MCUBOOT_IMAGE_NUMBER];
+    const char *why = NULL;
+
+    memset(bundle, 0, sizeof(*bundle));
+
+    if (fileSize < sizeof(hdr) || media->ops->read(media->ctx, 0, &hdr, sizeof(hdr)) != 0 ||
+        memcmp(hdr.marker, MCUBOOT_BUNDLE_MARKER, MCUBOOT_BUNDLE_MARKER_SIZE) != 0)
+    {
+        why = "no bundle marker";
+    }
+    else if (hdr.format_version != MCUBOOT_BUNDLE_FORMAT_VERSION)
+    {
+        why = "unsupported format version";
+    }
+    else if (hdr.entry_count == 0 || hdr.entry_count > MCUBOOT_IMAGE_NUMBER)
+    {
+        why = "bad entry count";
+    }
+    else if (
+        hdr.header_size < sizeof(hdr) + hdr.entry_count * sizeof(mcuboot_bundle_entry) || hdr.header_size > fileSize ||
+        media->ops->read(media->ctx, sizeof(hdr), entries, hdr.entry_count * sizeof(mcuboot_bundle_entry)) != 0)
+    {
+        why = "bad header size";
+    }
+
+    for (uint32_t i = 0; why == NULL && i < hdr.entry_count; i++)
+    {
+        const mcuboot_bundle_entry *e = &entries[i];
+
+        if (e->image >= MCUBOOT_IMAGE_NUMBER || bundle->present[e->image])
+        {
+            why = "bad or duplicate image index";
+        }
+        else if (
+            e->offset < hdr.header_size || (e->offset % 4U) != 0 || e->size == 0 || e->offset > fileSize ||
+            e->size > fileSize - e->offset)
+        {
+            why = "entry out of bounds or misaligned";
+        }
+        else
+        {
+            for (uint32_t j = 0; j < i; j++)
+            {
+                if (e->offset < entries[j].offset + entries[j].size && entries[j].offset < e->offset + e->size)
+                {
+                    why = "entries overlap";
+                    break;
+                }
+            }
+        }
+
+        if (why != NULL)
+        {
+            break;
+        }
+
+        uint32_t imageOff = 0;
+        uint32_t usable = 0;
+
+        if (!slot_geometry(e->image, &imageOff, &usable))
+        {
+            why = "image has no secondary slot";
+            break;
+        }
+
+        if (!probe_image(media, name, fileSize, e->offset, e->size, e->image, usable, &bundle->entry[e->image]))
+        {
+            why = "invalid image entry";
+            break;
+        }
+
+        bundle->present[e->image] = true;
+    }
+
+    if (why != NULL)
+    {
+        BOOT_LOG_WRN("media import: %s: bundle %s ignored (%s)", media->name, name, why);
+        return false;
+    }
+
+    return true;
+}
+
+// Order bundles by the versions of their images, image 0 first. A missing image counts as 0.0.0+0.
+static int bundle_cmp(const import_bundle *a, const import_bundle *b)
+{
+    static const struct image_version none = {0};
+
+    for (uint8_t image = 0; image < MCUBOOT_IMAGE_NUMBER; image++)
+    {
+        int c = version_cmp(
+            a->present[image] ? &a->entry[image].hdr.ih_ver : &none,
+            b->present[image] ? &b->entry[image].hdr.ih_ver : &none);
+
+        if (c != 0)
+        {
+            return c;
+        }
+    }
+
+    return 0;
+}
+
+// Enumerate the bundle files and keep the valid one with the highest versions.
+// Returns true when a bundle was found.
+static bool find_bundle(const mcuboot_media *media, import_bundle *best)
+{
+    static import_bundle s_probe;
+    bool found = false;
+    char name[MCUBOOT_MEDIA_NAME_MAX];
+
+    for (uint32_t n = 0; media->ops->find(media->ctx, MCUBOOT_IMPORT_BUNDLE_PATTERN, n, name, sizeof(name)) == 0; n++)
+    {
+        uint32_t size = 0;
+
+        if (media->ops->open(media->ctx, name, &size) != 0)
+        {
+            BOOT_LOG_WRN("media import: %s: cannot open %s", media->name, name);
+            continue;
+        }
+
+        bool valid = probe_bundle(media, name, size, &s_probe);
+
+        media->ops->close(media->ctx);
+
+        if (valid && (!found || bundle_cmp(&s_probe, best) > 0))
+        {
+            *best = s_probe;
+            found = true;
+        }
+    }
+
+    return found;
+}
+
+// Copy the candidate into the secondary slot of `image` and check the copy against the
+// candidate's SHA-256. Does not mark it pending. Returns 0 on success; on failure the slot
+// is left erased.
+static int copy_image(
     const mcuboot_media *media,
     uint8_t image,
     const struct flash_area *fa,
     uint32_t imageOff,
     const import_candidate *cand)
 {
-    uint32_t size = 0;
+    uint32_t fileSize = 0;
+    uint32_t size = cand->size;
 
-    if (media->ops->open(media->ctx, cand->name, &size) != 0 || size != cand->size)
+    if (media->ops->open(media->ctx, cand->name, &fileSize) != 0 || fileSize != cand->fileSize)
     {
         BOOT_LOG_ERR("media import: image %u: cannot reopen %s", (unsigned)image, cand->name);
         media->ops->close(media->ctx);
@@ -286,7 +482,7 @@ static int stage_image(
             len = sizeof(s_chunk);
         }
 
-        if (media->ops->read(media->ctx, pos, s_chunk, len) != 0)
+        if (media->ops->read(media->ctx, cand->base + pos, s_chunk, len) != 0)
         {
             BOOT_LOG_ERR("media import: image %u: read failed at %u", (unsigned)image, (unsigned)pos);
             goto fail;
@@ -323,7 +519,18 @@ static int stage_image(
         return -1;
     }
 
-    // schedule a one-time test swap; the application confirms it after booting
+    return 0;
+
+fail:
+    media->ops->close(media->ctx);
+    (void)flash_area_erase(fa, 0, fa->fa_size);
+    return -1;
+}
+
+// Schedule a one-time test swap of the copied image; the application confirms it after
+// booting. Returns 0 on success; on failure the slot is left erased.
+static int set_pending(uint8_t image, const struct flash_area *fa)
+{
     if (boot_set_pending_multi(image, 0) != 0)
     {
         BOOT_LOG_ERR("media import: image %u: set pending failed", (unsigned)image);
@@ -332,11 +539,6 @@ static int stage_image(
     }
 
     return 0;
-
-fail:
-    media->ops->close(media->ctx);
-    (void)flash_area_erase(fa, 0, fa->fa_size);
-    return -1;
 }
 
 // Check an image area and report whether it holds an intact image identical to the candidate.
@@ -495,14 +697,56 @@ static import_action decide(
     }
 }
 
-// Handle one image index on one medium. Returns true when the image was staged.
+static void log_candidate(const mcuboot_media *media, uint8_t image, const import_candidate *cand)
+{
+    char hash[2 * IMPORT_HASH_PREFIX_BYTES + 1];
+
+    hash_prefix(cand->hash, hash);
+
+    BOOT_LOG_INF(
+        "media import: %s: image %u candidate %s+0x%x (%u.%u.%u+%u, %u bytes, sha256 %s)",
+        media->name,
+        (unsigned)image,
+        cand->name,
+        (unsigned)cand->base,
+        (unsigned)cand->hdr.ih_ver.iv_major,
+        (unsigned)cand->hdr.ih_ver.iv_minor,
+        (unsigned)cand->hdr.ih_ver.iv_revision,
+        (unsigned)cand->hdr.ih_ver.iv_build_num,
+        (unsigned)cand->size,
+        hash);
+}
+
+// Log a decision that leaves the slots untouched and record the file when asked to.
+static void apply_skip(
+    const mcuboot_media *media,
+    uint8_t image,
+    import_action action,
+    const char *reason,
+    const import_candidate *cand,
+    const char *stamp)
+{
+    if (action == IMPORT_DEFER)
+    {
+        BOOT_LOG_INF("media import: image %u: deferred to a later boot (%s)", (unsigned)image, reason);
+        return;
+    }
+
+    BOOT_LOG_INF("media import: image %u: skipped (%s)", (unsigned)image, reason);
+
+    if (action == IMPORT_SKIP_MARK && stamp != NULL && media->ops->mark_used(media->ctx, cand->name, stamp) != 0)
+    {
+        BOOT_LOG_WRN("media import: image %u: could not write used marker", (unsigned)image);
+    }
+}
+
+// Handle one image index on one medium from loose files. Returns true when the image was staged.
 static bool import_image(const mcuboot_media *media, uint8_t image)
 {
     static import_candidate s_cand;
     const struct flash_area *fa = NULL;
     bool staged = false;
     char stamp[MCUBOOT_MEDIA_STAMP_MAX];
-    char hash[2 * IMPORT_HASH_PREFIX_BYTES + 1];
     const char *reason = "";
 
     if (flash_area_open(FLASH_AREA_IMAGE_SECONDARY(image), &fa) != 0 || fa == NULL)
@@ -520,44 +764,15 @@ static bool import_image(const mcuboot_media *media, uint8_t image)
         goto done;
     }
 
-    hash_prefix(s_cand.hash, hash);
-
-    BOOT_LOG_INF(
-        "media import: %s: image %u candidate %s (%u.%u.%u+%u, %u bytes, sha256 %s)",
-        media->name,
-        (unsigned)image,
-        s_cand.name,
-        (unsigned)s_cand.hdr.ih_ver.iv_major,
-        (unsigned)s_cand.hdr.ih_ver.iv_minor,
-        (unsigned)s_cand.hdr.ih_ver.iv_revision,
-        (unsigned)s_cand.hdr.ih_ver.iv_build_num,
-        (unsigned)s_cand.size,
-        hash);
+    log_candidate(media, image, &s_cand);
 
     bool haveStamp = build_stamp(stamp, sizeof(stamp), &s_cand);
+    import_action action = decide(media, image, fa, imageOff, &s_cand, haveStamp ? stamp : NULL, &reason);
 
-    switch (decide(media, image, fa, imageOff, &s_cand, haveStamp ? stamp : NULL, &reason))
+    if (action != IMPORT_STAGE)
     {
-        case IMPORT_SKIP_MARK:
-            BOOT_LOG_INF("media import: image %u: skipped (%s)", (unsigned)image, reason);
-
-            if (haveStamp && media->ops->mark_used(media->ctx, s_cand.name, stamp) != 0)
-            {
-                BOOT_LOG_WRN("media import: image %u: could not write used marker", (unsigned)image);
-            }
-            goto done;
-
-        case IMPORT_SKIP:
-            BOOT_LOG_INF("media import: image %u: skipped (%s)", (unsigned)image, reason);
-            goto done;
-
-        case IMPORT_DEFER:
-            BOOT_LOG_INF("media import: image %u: deferred to a later boot (%s)", (unsigned)image, reason);
-            goto done;
-
-        case IMPORT_STAGE:
-        default:
-            break;
+        apply_skip(media, image, action, reason, &s_cand, haveStamp ? stamp : NULL);
+        goto done;
     }
 
     BOOT_LOG_INF(
@@ -566,7 +781,7 @@ static bool import_image(const mcuboot_media *media, uint8_t image)
         (unsigned)imageOff,
         reason);
 
-    if (stage_image(media, image, fa, imageOff, &s_cand) != 0)
+    if (copy_image(media, image, fa, imageOff, &s_cand) != 0 || set_pending(image, fa) != 0)
     {
         goto done;
     }
@@ -586,8 +801,164 @@ done:
     return staged;
 }
 
+// Handle the images carried by a bundle as one unit (see mcuboot_media_import.h).
+// Sets staged[image] for every image that was staged.
+static void import_bundle_images(const mcuboot_media *media, const import_bundle *bundle, bool staged[])
+{
+    const struct flash_area *fa[MCUBOOT_IMAGE_NUMBER] = {NULL};
+    uint32_t imageOff[MCUBOOT_IMAGE_NUMBER] = {0};
+    import_action action[MCUBOOT_IMAGE_NUMBER];
+    const char *reason[MCUBOOT_IMAGE_NUMBER] = {NULL};
+    static char s_stamp[MCUBOOT_IMAGE_NUMBER][MCUBOOT_MEDIA_STAMP_MAX];
+    bool haveStamp[MCUBOOT_IMAGE_NUMBER] = {false};
+    bool copied[MCUBOOT_IMAGE_NUMBER] = {false};
+    bool defer = false;
+    bool failed = false;
+    uint8_t image;
+
+    // 1. decide for every entry
+    for (image = 0; image < MCUBOOT_IMAGE_NUMBER; image++)
+    {
+        if (!bundle->present[image])
+        {
+            continue;
+        }
+
+        const import_candidate *cand = &bundle->entry[image];
+
+        log_candidate(media, image, cand);
+
+        if (flash_area_open(FLASH_AREA_IMAGE_SECONDARY(image), &fa[image]) != 0 || fa[image] == NULL)
+        {
+            // probe_bundle checked the slot exists, so this is a flash backend failure
+            fa[image] = NULL;
+            action[image] = IMPORT_DEFER;
+            reason[image] = "cannot open the secondary slot";
+            defer = true;
+            continue;
+        }
+
+        imageOff[image] = Ifu_ImageOffset(fa[image]);
+        haveStamp[image] = build_stamp(s_stamp[image], sizeof(s_stamp[image]), cand);
+        action[image] = decide(
+            media,
+            image,
+            fa[image],
+            imageOff[image],
+            cand,
+            haveStamp[image] ? s_stamp[image] : NULL,
+            &reason[image]);
+
+        if (action[image] == IMPORT_DEFER)
+        {
+            defer = true;
+        }
+    }
+
+    // 2. half a bundle is what a bundle exists to avoid: defer all of it
+    if (defer)
+    {
+        for (image = 0; image < MCUBOOT_IMAGE_NUMBER; image++)
+        {
+            if (bundle->present[image])
+            {
+                BOOT_LOG_INF(
+                    "media import: image %u: deferred to a later boot with its bundle (%s)",
+                    (unsigned)image,
+                    (action[image] == IMPORT_DEFER) ? reason[image] : "another image of the bundle is deferred");
+            }
+        }
+
+        goto done;
+    }
+
+    // 3. copy and check every image to stage before any of them is marked pending
+    for (image = 0; image < MCUBOOT_IMAGE_NUMBER && !failed; image++)
+    {
+        if (!bundle->present[image] || action[image] != IMPORT_STAGE)
+        {
+            continue;
+        }
+
+        BOOT_LOG_INF(
+            "media import: image %u: staging into secondary slot at +0x%x (%s)",
+            (unsigned)image,
+            (unsigned)imageOff[image],
+            reason[image]);
+
+        if (copy_image(media, image, fa[image], imageOff[image], &bundle->entry[image]) != 0)
+        {
+            failed = true;
+            break;
+        }
+
+        copied[image] = true;
+    }
+
+    // 4. all landed intact: mark them pending
+    for (image = 0; image < MCUBOOT_IMAGE_NUMBER && !failed; image++)
+    {
+        if (copied[image] && set_pending(image, fa[image]) != 0)
+        {
+            failed = true;
+        }
+    }
+
+    if (failed)
+    {
+        // erasing a secondary drops its trailer too, so nothing of the bundle is left pending
+        for (image = 0; image < MCUBOOT_IMAGE_NUMBER; image++)
+        {
+            if (copied[image])
+            {
+                (void)flash_area_erase(fa[image], 0, fa[image]->fa_size);
+            }
+        }
+
+        BOOT_LOG_ERR("media import: %s: bundle not staged, slots left erased", media->name);
+        goto done;
+    }
+
+    // 5. report and record every entry
+    for (image = 0; image < MCUBOOT_IMAGE_NUMBER; image++)
+    {
+        if (!bundle->present[image])
+        {
+            continue;
+        }
+
+        const import_candidate *cand = &bundle->entry[image];
+        const char *stamp = haveStamp[image] ? s_stamp[image] : NULL;
+
+        if (!copied[image])
+        {
+            apply_skip(media, image, action[image], reason[image], cand, stamp);
+            continue;
+        }
+
+        staged[image] = true;
+
+        BOOT_LOG_INF("media import: image %u: staged, pending test swap", (unsigned)image);
+
+        if (stamp != NULL && media->ops->mark_used(media->ctx, cand->name, stamp) != 0)
+        {
+            BOOT_LOG_WRN("media import: image %u: could not write used marker (read-only medium?)", (unsigned)image);
+        }
+    }
+
+done:
+    for (image = 0; image < MCUBOOT_IMAGE_NUMBER; image++)
+    {
+        if (fa[image] != NULL)
+        {
+            flash_area_close(fa[image]);
+        }
+    }
+}
+
 void mcuboot_media_import_run(void)
 {
+    static import_bundle s_bundle;
     uint32_t mediaCount = 0;
     const mcuboot_media *table = mcuboot_media_table(&mediaCount);
 
@@ -603,6 +974,7 @@ void mcuboot_media_import_run(void)
     for (uint32_t m = 0; m < mediaCount && pending > 0; m++)
     {
         const mcuboot_media *media = &table[m];
+        bool haveBundle = false;
 
         if (media->ops == NULL)
         {
@@ -617,9 +989,46 @@ void mcuboot_media_import_run(void)
 
         BOOT_LOG_INF("media import: %s: mounted, looking for update files", media->name);
 
+        // a bundle takes precedence over loose files for the images it carries; it is only
+        // considered while none of its images was staged from an earlier medium
+        if (find_bundle(media, &s_bundle))
+        {
+            haveBundle = true;
+
+            for (uint8_t image = 0; image < MCUBOOT_IMAGE_NUMBER; image++)
+            {
+                if (s_bundle.present[image] && imageDone[image])
+                {
+                    BOOT_LOG_INF(
+                        "media import: %s: bundle %s ignored (image %u already staged from another medium)",
+                        media->name,
+                        s_bundle.entry[image].name,
+                        (unsigned)image);
+                    haveBundle = false;
+                    break;
+                }
+            }
+        }
+
+        if (haveBundle)
+        {
+            bool staged[MCUBOOT_IMAGE_NUMBER] = {false};
+
+            import_bundle_images(media, &s_bundle, staged);
+
+            for (uint8_t image = 0; image < MCUBOOT_IMAGE_NUMBER; image++)
+            {
+                if (staged[image])
+                {
+                    imageDone[image] = true;
+                    pending--;
+                }
+            }
+        }
+
         for (uint8_t image = 0; image < MCUBOOT_IMAGE_NUMBER; image++)
         {
-            if (imageDone[image])
+            if (imageDone[image] || (haveBundle && s_bundle.present[image]))
             {
                 continue;
             }
