@@ -284,7 +284,7 @@ MCUboot knows exactly two slots per image (primary + secondary); the secondary s
 
 **QSPI flash** — same as SPI flash but accessed via the STM32 QUADSPI peripheral. Set `MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE` to match the device's erase unit. See ORGPAL_PALX (W25Q512) as a reference.
 
-When `mcuboot_ext_flash_init()` returns -1, MCUboot boots the primary slot directly without attempting an upgrade (graceful degradation).
+`mcuboot_ext_flash_init()` returns `MCUBOOT_EXT_FLASH_OK` (0) when the device is ready, `MCUBOOT_EXT_FLASH_NOT_FITTED` (1) when the board has no external flash by design (e.g. secondary slots on an SD card), and a negative value on failure. The bootloader calls it up to three times; if it still fails the failure is **fatal**: the bootloader logs the error, switches the LED heartbeat to the fast fatal cadence (50 ms) and halts without touching flash, entering recovery or booting. The watchdog, when enabled, is not fed, so it resets the device and the init is tried again. This is deliberate: without the secondary slots an interrupted swap can be neither resumed nor reverted, so booting on could leave the device in an unrecoverable state.
 
 ### 9.1 Update files on SD card / USB MSD
 
@@ -317,6 +317,18 @@ The specific GPIO port, pin number, and active polarity depend on the target boa
 ### 10.2 UART initialisation (`mcuboot_uart_init()`)
 
 The shared `mcuboot_serial_port.c` provides a weak default `mcuboot_uart_init()` that does nothing. Override it in `mcuboot_detect_pin.c` for boards that use UART for recovery. Configure the UART peripheral (port, pins, baud rate, alternate function) to match the board's intended recovery channel. See the existing targets for reference.
+
+### 10.3 Update guard
+
+Serial recovery uploads rewrite the secondary slot, so the bootloader does not honour the detection pin while an update is in flight. `mcuboot_update_in_progress()` (`MCUboot/common/MCUboot_UpdateGuard.c`) is checked before `mcuboot_serial_recovery_try()` and reports an update in flight when, for any image:
+
+- a swap was started and not completed (interrupted swap),
+- a swap is scheduled for the next boot (TEST / PERM staged), or an unconfirmed image in the primary slot is waiting to be reverted (its revert copy lives in the secondary slot),
+- the slot state cannot be read or classified (the guard fails closed).
+
+Recovery is available again after the next boot has completed the swap or confirmed/reverted the image. Recovery entered because no valid nanoCLR was found is not gated: it is the only way out in that case.
+
+It is built on MCUboot public APIs only (it does not use upstream `boot_check_for_updates()`). A platform can add its own veto by providing `mcuboot_update_guard_platform_veto()` (weak default: no veto).
 
 > **Note:** The full SMP serial recovery stack is a placeholder (`boot_serial_start()` loops forever). Recovery currently requires a JTAG reset. Full SMP implementation is deferred.
 
@@ -405,9 +417,10 @@ Before declaring a new board complete:
 - [ ] MCUboot binary fits within the bootloader partition (check `.map` file)
 - [ ] `static_assert` checks in `mcuboot_flash_layout.h` pass (compile-time)
 - [ ] `boot_serial_detect_pin()` returns correct value for button pressed/released
-- [ ] External storage initialises successfully (check `mcuboot_ext_flash_init()` return value via debugger)
+- [ ] External storage initialises successfully (`mcuboot_ext_flash_init()` returns `MCUBOOT_EXT_FLASH_OK`, or `MCUBOOT_EXT_FLASH_NOT_FITTED` on a board without external flash); a failure halts the bootloader with the fast LED heartbeat
 - [ ] A signed nanoCLR image boots correctly (`boot_go()` succeeds, `do_boot()` jumps to CLR)
 - [ ] Upgrade works: place signed upgrade image in secondary slot, reboot, verify MCUboot swaps images
 - [ ] After upgrade: reboot again, verify MCUboot confirms the new image (prevents rollback to old version)
 - [ ] Serial recovery detection pin correctly triggers recovery mode when held at power-on
+- [ ] Serial recovery is refused while a swap is interrupted, pending or an unconfirmed image is running
 - [ ] `MCUboot-flash-layout.md` is up to date with the actual slot constants

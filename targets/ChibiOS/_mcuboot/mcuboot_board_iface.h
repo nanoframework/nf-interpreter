@@ -21,10 +21,19 @@ extern "C"
     // an empty implementation.
     void mcuboot_target_init(void);
 
+    // Results of mcuboot_ext_flash_init().
+    // Anything other than the two values below is a failure and is fatal.
+    #define MCUBOOT_EXT_FLASH_OK         0
+    // The board has no external flash by design (secondary slots live elsewhere, e.g. on an SD card).
+    #define MCUBOOT_EXT_FLASH_NOT_FITTED 1
+
     // Initialise the external flash device.
-    // Called once from main() before boot_go().
-    // Should return 0 on success, negative on error (non-fatal: boot continues
-    // but may fail later if the external secondary slot is needed).
+    // Called from main() before anything touches the secondary slots, retried a few times to ride out
+    // a transient fault. Must be safe to call repeatedly.
+    // Returns MCUBOOT_EXT_FLASH_OK on success, MCUBOOT_EXT_FLASH_NOT_FITTED when the board has no
+    // external flash, and a negative value on failure. A failure is FATAL: without the secondary
+    // slots an interrupted swap can be neither resumed nor reverted, so the bootloader halts
+    // instead of booting on.
     int mcuboot_ext_flash_init(void);
 
     // Heartbeat blink cadence. Selected by the shared bootloader code; boards do not set it.
@@ -35,6 +44,9 @@ extern "C"
 
         // SMP serial recovery.
         MCUBOOT_HEARTBEAT_RECOVERY = 1,
+
+        // Fatal error, the bootloader is halted.
+        MCUBOOT_HEARTBEAT_FATAL = 2,
     } mcuboot_heartbeat_pattern_t;
 
     // Start the "bootloader is alive" LED heartbeat thread.

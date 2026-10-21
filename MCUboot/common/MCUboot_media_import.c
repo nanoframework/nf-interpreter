@@ -19,6 +19,7 @@
 
 #include <mcuboot_media_import.h>
 #include <MCUboot_ImageSlotInfo.h>
+#include <MCUboot_UpdateGuard.h>
 
 // Copy buffer shared by all media (the sweep is strictly sequential).
 static uint8_t s_chunk[MCUBOOT_IMPORT_CHUNK_SIZE];
@@ -587,8 +588,7 @@ static import_action decide(
         return IMPORT_SKIP;
     }
 
-    if (primaryState.magic == BOOT_MAGIC_GOOD && primaryState.copy_done == BOOT_FLAG_UNSET &&
-        primaryState.swap_type != BOOT_SWAP_TYPE_NONE)
+    if (mcuboot_swap_interrupted(&primaryState))
     {
         *reason = "interrupted swap, MCUboot has to finish it first";
         return IMPORT_DEFER;

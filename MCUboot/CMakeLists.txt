@@ -177,6 +177,7 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_main.c
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_serial_port.c
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_heartbeat.c
+        ${CMAKE_SOURCE_DIR}/MCUboot/common/MCUboot_UpdateGuard.c
 
         ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC/crt0_v7m.S
         ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC/crt1.c

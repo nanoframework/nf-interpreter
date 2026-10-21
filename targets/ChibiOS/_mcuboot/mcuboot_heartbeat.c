@@ -19,6 +19,7 @@
 // Toggle interval for each cadence, in milliseconds.
 #define HEARTBEAT_PERIOD_BOOT_MS     500
 #define HEARTBEAT_PERIOD_RECOVERY_MS 100
+#define HEARTBEAT_PERIOD_FATAL_MS    50
 
 // Read once per iteration by the heartbeat thread and written by
 // mcuboot_heartbeat_set_pattern(). A plain aligned word store, so no lock is required.
@@ -47,8 +48,20 @@ void mcuboot_heartbeat_start(void)
 
 void mcuboot_heartbeat_set_pattern(mcuboot_heartbeat_pattern_t pattern)
 {
-    s_heartbeat_period_ms =
-        (pattern == MCUBOOT_HEARTBEAT_RECOVERY) ? HEARTBEAT_PERIOD_RECOVERY_MS : HEARTBEAT_PERIOD_BOOT_MS;
+    switch (pattern)
+    {
+        case MCUBOOT_HEARTBEAT_RECOVERY:
+            s_heartbeat_period_ms = HEARTBEAT_PERIOD_RECOVERY_MS;
+            break;
+
+        case MCUBOOT_HEARTBEAT_FATAL:
+            s_heartbeat_period_ms = HEARTBEAT_PERIOD_FATAL_MS;
+            break;
+
+        default:
+            s_heartbeat_period_ms = HEARTBEAT_PERIOD_BOOT_MS;
+            break;
+    }
 }
 
 #else // CONFIG_NF_FEATURE_MCUBOOT_HEARTBEAT

@@ -45,7 +45,7 @@ int stm32FlashErase(uint32_t address);
 // separately by mcuboot_sdcard_init() in mcuboot_sdcard_boot.c.
 int mcuboot_ext_flash_init(void)
 {
-    return -1;
+    return MCUBOOT_EXT_FLASH_NOT_FITTED;
 }
 
 #endif // NF_MCUBOOT_BOOTLOADER
