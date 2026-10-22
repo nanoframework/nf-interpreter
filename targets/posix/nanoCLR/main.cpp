@@ -129,8 +129,7 @@ int main(int argc, char **argv)
         int hr = nanoCLR_LoadAssembly(wname.c_str(), data.data(), data.size());
         if (hr != 0)
         {
-            std::cerr << "error: failed to load '" << path
-                      << "' (hr=0x" << std::hex << hr << ")\n";
+            std::cerr << "error: failed to load '" << path << "' (hr=0x" << std::hex << hr << ")\n";
             if (data.size() >= 6 && std::memcmp(data.data(), "NFMRK1", 6) == 0)
             {
                 std::cerr << "error: legacy NFMRK1 assembly; this runtime requires NFMRK2.\n"
