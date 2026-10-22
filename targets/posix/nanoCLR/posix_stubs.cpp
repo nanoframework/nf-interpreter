@@ -135,7 +135,8 @@ const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[] = {
 #endif
     nullptr,
 };
-const uint16_t g_CLR_InteropAssembliesCount = ARRAYSIZE(g_CLR_InteropAssembliesNativeData) - 1; // exclude nullptr sentinel
+const uint16_t g_CLR_InteropAssembliesCount =
+    ARRAYSIZE(g_CLR_InteropAssembliesNativeData) - 1; // exclude nullptr sentinel
 
 // ---------------------------------------------------------------------------
 // Configuration Manager stubs.
