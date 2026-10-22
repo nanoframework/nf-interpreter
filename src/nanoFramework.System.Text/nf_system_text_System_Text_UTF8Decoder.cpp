@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -59,7 +59,7 @@ HRESULT Library_nf_system_text_System_Text_UTF8Decoder::
     uh.m_outputUTF16 = (CLR_UINT16 *)pArrayChars->GetElement(charIndex);
     uh.m_outputUTF16_size = charCount;
 
-    uh.ConvertFromUTF8(charCount, false, byteCount);
+    uh.ConvertFromUTF8( charCount, false, byteCount, stack.ArgN(7).NumericByRef().u1 != 0 );
 
     // Calculate return values
     byteUsed = (CLR_INT32)(uh.m_inputUTF8 - byteStart);

@@ -5,6 +5,9 @@
 //
 
 #include "sys_net_native.h"
+#if NANOCLR_HOST_LINUX
+#include <Target_Network.h>
+#endif
 
 HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::socket___STATIC__I4__I4__I4__I4(
     CLR_RT_StackFrame &stack)
@@ -150,6 +153,9 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::accept___STATIC_
 HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::
     getaddrinfo___STATIC__VOID__STRING__BYREF_STRING__BYREF_SZARRAY_SZARRAY_U1(CLR_RT_StackFrame &stack)
 {
+#if NANOCLR_HOST_LINUX
+    return LinuxNetwork_Resolve(stack);
+#else
     NATIVE_PROFILE_CLR_NETWORK();
     NANOCLR_HEADER();
 
@@ -291,6 +297,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::
         SOCK_freeaddrinfo(addr);
 
     NANOCLR_CLEANUP_END();
+#endif
 }
 
 HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::shutdown___STATIC__VOID__OBJECT__I4__BYREF_I4(
@@ -543,6 +550,11 @@ CLR_INT32 Library_sys_net_native_System_Net_Sockets_NativeSocket::Helper__Select
 
     res = SOCK_select(1, readfds, writefds, exceptfds, &timeval);
 
+    if (res == SOCK_SOCKET_ERROR)
+    {
+        return res;
+    }
+
     // socket is in the exception state (only return error if caller was NOT looking for the excepted state)
     if ((mode != 2) && (fdsExcept.fd_count != 0))
     {
@@ -748,7 +760,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::MarshalSockAddre
         dst->sin_port = SOCK_htons(port);
 
         // address already in network byte order
-        memcpy((int8_t *)&dst->sin_addr.S_un.S_addr, (int8_t *)&address, sizeof(address));
+        memcpy(&dst->sin_addr.S_un.S_addr, &address, sizeof(dst->sin_addr.S_un.S_addr));
 
         addrLenDst = sizeof(SOCK_sockaddr_in);
     }
@@ -777,9 +789,28 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::SendRecvHelper(
     bool fRes = true;
     CLR_INT32 totReadWrite;
     CLR_INT32 ret = 0;
+#if NANOCLR_HOST_LINUX
+    bool datagram = socket != nullptr &&
+                    socket[Library_sys_net_native_System_Net_Sockets_Socket::FIELD___socketType].NumericByRef().s4 ==
+                        SOCK_SOCK_DGRAM;
+    CLR_RT_HeapBlock *bufferObject = stack.Arg1().Dereference();
+    CLR_UINT32 bufferLength = 0;
+    FAULT_ON_NULL(bufferObject);
+    if (bufferObject->DataType() != DATATYPE_SZARRAY)
+    {
+        arrData = bufferObject[Library_corlib_native_System_Span_1::FIELD___array].DereferenceArray();
+        bufferLength = bufferObject[Library_corlib_native_System_Span_1::FIELD___length].NumericByRef().u4;
+    }
+    else
+    {
+        bufferLength = arrData->m_numOfElements;
+    }
+#endif
 
     FAULT_ON_NULL(socket);
+#if !NANOCLR_HOST_LINUX
     FAULT_ON_NULL(arrData);
+#endif
 
     handle = socket[FIELD__m_Handle].NumericByRef().s4;
 
@@ -791,7 +822,13 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::SendRecvHelper(
         NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
     }
 
+#if NANOCLR_HOST_LINUX
+    if (offset > bufferLength || count > bufferLength - offset ||
+        (arrData == nullptr ? bufferLength != 0
+                            : (bufferLength > arrData->m_numOfElements || arrData->m_sizeOfElement != 1)))
+#else
     if (offset + count > arrData->m_numOfElements)
+#endif
         NANOCLR_SET_AND_LEAVE(CLR_E_INDEX_OUT_OF_RANGE);
 
     // set timeout
@@ -810,10 +847,18 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::SendRecvHelper(
 
     totReadWrite = stack.m_evalStack[1].NumericByRef().s4;
 
+#if NANOCLR_HOST_LINUX
+    buf = arrData == nullptr ? nullptr : arrData->GetFirstElement() + offset + totReadWrite;
+#else
     buf = arrData->GetElement(offset + totReadWrite);
+#endif
     count -= totReadWrite;
 
+#if NANOCLR_HOST_LINUX
+    while (count > 0 || (datagram && totReadWrite == 0))
+#else
     while (count > 0)
+#endif
     {
         CLR_INT32 bytes = 0;
 
@@ -908,12 +953,21 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::SendRecvHelper(
             break;
         }
 
-        buf += bytes;
+        if (bytes > 0)
+        {
+            buf += bytes;
+        }
         totReadWrite += bytes;
         count -= bytes;
 
         stack.m_evalStack[1].NumericByRef().s4 = totReadWrite;
 
+#if NANOCLR_HOST_LINUX
+        if (datagram)
+        {
+            break;
+        }
+#endif
         // receive returns immediately after receiving bytes.
         if (!fSend && (totReadWrite > 0))
         {

@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -7,7 +7,7 @@
 // Calls through the public exported API — no direct CLR symbols.
 //
 // Usage:
-//   nanoFramework.nanoCLR.test [--assemblies] file1.pe [file2.pe ...]
+//   nanoFramework.nanoCLR.test [--ca-bundle path] [--assemblies] file1.pe [file2.pe ...]
 //
 // All positional arguments (and arguments after --assemblies) that end in
 // .pe are treated as managed assembly files to load before running the CLR.
@@ -15,6 +15,8 @@
 // Assemblies must be provided in dependency order (mscorlib.pe first).
 
 #include <cstring>
+#include <cerrno>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -77,9 +79,26 @@ int main(int argc, char **argv)
     // Accepts:  [--assemblies] file.pe file2.pe ...
     // The --assemblies flag is accepted but not required (mirrors nanoclr CLI).
     std::vector<std::string> peFiles;
+    const char *caBundlePath = nullptr;
 
     for (int i = 1; i < argc; i++)
     {
+        if (std::strcmp(argv[i], "--ca-bundle") == 0)
+        {
+#if NANOCLR_HOST_LINUX
+            if (caBundlePath != nullptr || i + 1 >= argc || argv[i + 1][0] == '\0' ||
+                std::strncmp(argv[i + 1], "--", 2) == 0)
+            {
+                std::cerr << "error: --ca-bundle requires one nonempty CA file path and may only be specified once\n";
+                return 1;
+            }
+            caBundlePath = argv[++i];
+            continue;
+#else
+            std::cerr << "error: --ca-bundle requires the Linux networking backend\n";
+            return 1;
+#endif
+        }
         if (std::strcmp(argv[i], "--assemblies") == 0)
             continue; // skip the flag itself
 
@@ -93,6 +112,12 @@ int main(int argc, char **argv)
         peFiles.push_back(arg);
     }
 
+    if (caBundlePath != nullptr && setenv("NANOCLR_CA_BUNDLE", caBundlePath, 1) != 0)
+    {
+        std::cerr << "error: cannot configure CA bundle: " << std::strerror(errno) << "\n";
+        return 1;
+    }
+
     // ── Load assemblies into the CLR before starting ─────────────────────────
     for (const auto &path : peFiles)
     {
@@ -104,7 +129,14 @@ int main(int argc, char **argv)
         int hr = nanoCLR_LoadAssembly(wname.c_str(), data.data(), data.size());
         if (hr != 0)
         {
-            std::cerr << "error: failed to load '" << path << "' (hr=0x" << std::hex << hr << ")\n";
+            std::cerr << "error: failed to load '" << path
+                      << "' (hr=0x" << std::hex << hr << ")\n";
+            if (data.size() >= 6 && std::memcmp(data.data(), "NFMRK1", 6) == 0)
+            {
+                std::cerr << "error: legacy NFMRK1 assembly; this runtime requires NFMRK2.\n"
+                          << "Rebuild all managed assemblies with the metadata processor and native "
+                             "contracts matching this interpreter branch.\n";
+            }
             return 1;
         }
 

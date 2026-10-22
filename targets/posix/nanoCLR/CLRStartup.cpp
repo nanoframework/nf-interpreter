@@ -56,6 +56,7 @@ struct Settings
     std::map<std::string, CLR_RT_Buffer *> m_assemblies;
     ConfigureRuntimeCallback m_configureRuntimeCallback;
     bool m_fInitialized;
+    bool m_engineCreated;
     bool m_configured;
 
     //--//
@@ -67,6 +68,7 @@ struct Settings
         m_clrOptions = params;
 
         NANOCLR_CHECK_HRESULT(CLR_RT_ExecutionEngine::CreateInstance());
+        m_engineCreated = true;
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf("Created EE.\r\n");
 #endif
@@ -160,10 +162,17 @@ struct Settings
     {
         NANOCLR_HEADER();
 
-        CLR_RT_Buffer *buffer = new CLR_RT_Buffer(data, data + size);
-        CLR_RECORD_ASSEMBLY *header = (CLR_RECORD_ASSEMBLY *)&(*buffer)[0];
+        CLR_RT_Buffer *buffer = nullptr;
+        CLR_RECORD_ASSEMBLY *header;
         std::string key;
 
+        if (data == nullptr || size < sizeof(CLR_RECORD_ASSEMBLY))
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_ASSM_UNSUPPORTED_FORMAT);
+        }
+
+        buffer = new CLR_RT_Buffer(data, data + size);
+        header = (CLR_RECORD_ASSEMBLY *)&(*buffer)[0];
         NANOCLR_CHECK_HRESULT(CheckAssemblyFormat(header));
 
         key = Char16ToString(name);
@@ -477,15 +486,19 @@ struct Settings
 
     void Cleanup()
     {
-        CLR_RT_ExecutionEngine::DeleteInstance();
+        if (m_engineCreated)
+        {
+            CLR_RT_ExecutionEngine::DeleteInstance();
 
-        memset(&g_CLR_RT_ExecutionEngine, 0, sizeof(g_CLR_RT_ExecutionEngine));
-        memset(&g_CLR_RT_WellKnownTypes, 0, sizeof(g_CLR_RT_WellKnownTypes));
-        memset(&g_CLR_RT_WellKnownMethods, 0, sizeof(g_CLR_RT_WellKnownMethods));
-        memset(&g_CLR_RT_TypeSystem, 0, sizeof(g_CLR_RT_TypeSystem));
-        memset(&g_CLR_RT_EventCache, 0, sizeof(g_CLR_RT_EventCache));
-        memset(&g_CLR_RT_GarbageCollector, 0, sizeof(g_CLR_RT_GarbageCollector));
-        memset(&g_CLR_HW_Hardware, 0, sizeof(g_CLR_HW_Hardware));
+            memset(&g_CLR_RT_ExecutionEngine, 0, sizeof(g_CLR_RT_ExecutionEngine));
+            memset(&g_CLR_RT_WellKnownTypes, 0, sizeof(g_CLR_RT_WellKnownTypes));
+            memset(&g_CLR_RT_WellKnownMethods, 0, sizeof(g_CLR_RT_WellKnownMethods));
+            memset(&g_CLR_RT_TypeSystem, 0, sizeof(g_CLR_RT_TypeSystem));
+            memset(&g_CLR_RT_EventCache, 0, sizeof(g_CLR_RT_EventCache));
+            memset(&g_CLR_RT_GarbageCollector, 0, sizeof(g_CLR_RT_GarbageCollector));
+            memset(&g_CLR_HW_Hardware, 0, sizeof(g_CLR_HW_Hardware));
+            m_engineCreated = false;
+        }
 
         for (auto &it : m_assemblies)
             delete it.second;
@@ -494,7 +507,7 @@ struct Settings
         m_fInitialized = false;
     }
 
-    Settings() : m_configureRuntimeCallback(nullptr), m_fInitialized(false), m_configured(false)
+    Settings() : m_configureRuntimeCallback(nullptr), m_fInitialized(false), m_engineCreated(false), m_configured(false)
     {
     }
 

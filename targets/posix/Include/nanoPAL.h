@@ -13,6 +13,10 @@
 #include <nanoPAL_COM.h>
 #include <nanoPAL_FileSystem.h>
 #include <nanoPAL_Time.h>
+#if NANOCLR_HOST_LINUX
+#define GLOBAL_LOCK_SOCKETS(x)
+#include <nanoPAL_Sockets.h>
+#endif
 
 // hal_strlen_s - mapped to strlen on all non-VIRTUAL_DEVICE builds
 #include <string.h>
