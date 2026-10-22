@@ -7,6 +7,87 @@
 #include <nanoHAL_v2.h>
 #include "Target_BlockStorage_iMXRTFlashDriver.h"
 
+// updates the end address of the used config data with the end address of the block, if that's higher
+static void UpdateConfigDataEnd(uint32_t *dataEnd, const void *block, uint32_t blockSize)
+{
+    uint32_t blockAddress = (uint32_t)block;
+    uint32_t configEnd = (uint32_t)&__nanoConfig_end__;
+
+    // a block can't go beyond the end of the config sector
+    uint32_t blockEnd = (blockSize > configEnd - blockAddress) ? configEnd : blockAddress + blockSize;
+
+    if (blockEnd > *dataEnd)
+    {
+        *dataEnd = blockEnd;
+    }
+}
+
+uint32_t GetExistingConfigSize()
+{
+    uint32_t dataEnd = (uint32_t)&__nanoConfig_start__;
+
+    // the size of the existing config is given by the highest end address of all the enumerated blocks
+    if (g_TargetConfiguration.NetworkInterfaceConfigs != NULL)
+    {
+        for (uint32_t i = 0; i < g_TargetConfiguration.NetworkInterfaceConfigs->Count; i++)
+        {
+            UpdateConfigDataEnd(
+                &dataEnd,
+                g_TargetConfiguration.NetworkInterfaceConfigs->Configs[i],
+                sizeof(HAL_Configuration_NetworkInterface));
+        }
+    }
+
+    if (g_TargetConfiguration.Wireless80211Configs != NULL)
+    {
+        for (uint32_t i = 0; i < g_TargetConfiguration.Wireless80211Configs->Count; i++)
+        {
+            UpdateConfigDataEnd(
+                &dataEnd,
+                g_TargetConfiguration.Wireless80211Configs->Configs[i],
+                sizeof(HAL_Configuration_Wireless80211));
+        }
+    }
+
+    if (g_TargetConfiguration.WirelessAPConfigs != NULL)
+    {
+        for (uint32_t i = 0; i < g_TargetConfiguration.WirelessAPConfigs->Count; i++)
+        {
+            UpdateConfigDataEnd(
+                &dataEnd,
+                g_TargetConfiguration.WirelessAPConfigs->Configs[i],
+                sizeof(HAL_Configuration_WirelessAP));
+        }
+    }
+
+    if (g_TargetConfiguration.CertificateStore != NULL)
+    {
+        for (uint32_t i = 0; i < g_TargetConfiguration.CertificateStore->Count; i++)
+        {
+            UpdateConfigDataEnd(
+                &dataEnd,
+                g_TargetConfiguration.CertificateStore->Certificates[i],
+                offsetof(HAL_Configuration_X509CaRootBundle, Certificate) +
+                    g_TargetConfiguration.CertificateStore->Certificates[i]->CertificateSize);
+        }
+    }
+
+    if (g_TargetConfiguration.DeviceCertificates != NULL)
+    {
+        for (uint32_t i = 0; i < g_TargetConfiguration.DeviceCertificates->Count; i++)
+        {
+            UpdateConfigDataEnd(
+                &dataEnd,
+                g_TargetConfiguration.DeviceCertificates->Certificates[i],
+                offsetof(HAL_Configuration_X509DeviceCertificate, Certificate) +
+                    g_TargetConfiguration.DeviceCertificates->Certificates[i]->CertificateSize);
+        }
+    }
+
+    // byte alignment
+    return dataEnd - (uint32_t)&__nanoConfig_start__;
+}
+
 // initialization of configuration manager
 void ConfigurationManager_Initialize()
 {
@@ -162,6 +243,27 @@ bool ConfigurationManager_GetConfigurationBlock(
         sizeOfBlock = offsetof(HAL_Configuration_X509CaRootBundle, Certificate);
         sizeOfBlock += ((HAL_Configuration_X509CaRootBundle *)blockAddress)->CertificateSize;
     }
+    else if (configuration == DeviceConfigurationOption_X509DeviceCertificates)
+    {
+        if (g_TargetConfiguration.DeviceCertificates->Count == 0 ||
+            (configurationIndex + 1) > g_TargetConfiguration.DeviceCertificates->Count)
+        {
+            return FALSE;
+        }
+
+        // get block address
+        blockAddress = (uint8_t *)g_TargetConfiguration.DeviceCertificates->Certificates[configurationIndex];
+
+        // set block size
+        // because X509 certificate has a variable length need to compute the block size in two steps
+        sizeOfBlock = offsetof(HAL_Configuration_X509DeviceCertificate, Certificate);
+        sizeOfBlock += ((HAL_Configuration_X509DeviceCertificate *)blockAddress)->CertificateSize;
+    }
+    else
+    {
+        // unknown or unsupported configuration option
+        return FALSE;
+    }
 
     // copy the config block content to the pointer in the argument
     memcpy(configurationBlock, blockAddress, sizeOfBlock);
@@ -281,6 +383,7 @@ bool ConfigurationManager_StoreConfigurationBlock(
         platform_free(g_TargetConfiguration.NetworkInterfaceConfigs);
         platform_free(g_TargetConfiguration.Wireless80211Configs);
         platform_free(g_TargetConfiguration.CertificateStore);
+        platform_free(g_TargetConfiguration.DeviceCertificates);
 
         // perform enumeration of configuration blocks
         ConfigurationManager_EnumerateConfigurationBlocks();
@@ -300,6 +403,9 @@ UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock(
     uint32_t blockOffset;
     uint8_t *blockAddressInCopy;
     uint32_t blockSize;
+    uint32_t oldBlockSize;
+    uint32_t oldTailOffset;
+    uint32_t newTailOffset;
     UpdateConfigurationResult success = UpdateConfigurationResult_Failed;
 
     // config sector size
@@ -324,6 +430,7 @@ UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock(
 
             // set block size, in case it's not already set
             blockSize = sizeof(HAL_Configuration_NetworkInterface);
+            oldBlockSize = blockSize;
 
             // make sure the config block marker is set
             memcpy(configurationBlock, c_MARKER_CONFIGURATION_NETWORK_V1, sizeof(c_MARKER_CONFIGURATION_NETWORK_V1));
@@ -337,6 +444,7 @@ UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock(
 
             // set block size, in case it's not already set
             blockSize = sizeof(HAL_Configuration_Wireless80211);
+            oldBlockSize = blockSize;
 
             // make sure the config block marker is set
             memcpy(
@@ -354,6 +462,10 @@ UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock(
             blockSize = offsetof(HAL_Configuration_X509CaRootBundle, Certificate);
             blockSize += ((HAL_Configuration_X509CaRootBundle *)configurationBlock)->CertificateSize;
 
+            // size of the block currently stored
+            oldBlockSize = offsetof(HAL_Configuration_X509CaRootBundle, Certificate);
+            oldBlockSize += g_TargetConfiguration.CertificateStore->Certificates[configurationIndex]->CertificateSize;
+
             // make sure the config block marker is set
             memcpy(
                 configurationBlock,
@@ -369,19 +481,76 @@ UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock(
             return UpdateConfigurationResult_Failed;
         }
 
+        // subtract the start address of config sector to get the offset
+        blockOffset = storageAddress - (uint32_t)&__nanoConfig_start__;
+
+        // sanity check of the new and current block sizes against the config sector
+        if (blockSize > (uint32_t)sizeOfConfigSector - blockOffset ||
+            oldBlockSize > (uint32_t)sizeOfConfigSector - blockOffset)
+        {
+            platform_free(configSectorCopy);
+
+            return UpdateConfigurationResult_Failed;
+        }
+
+        // the data following the block starts at the end of the block currently stored
+        oldTailOffset = blockOffset + oldBlockSize;
+        newTailOffset = oldTailOffset;
+
+        if (blockSize != oldBlockSize)
+        {
+            // certificate blocks have variable length, so the data following the block has to be moved
+            // to close or open the gap (byte alignment)
+            uint32_t usedSize = GetExistingConfigSize();
+            uint32_t shift;
+
+            if (usedSize < oldTailOffset)
+            {
+                usedSize = oldTailOffset;
+            }
+
+            if (usedSize > (uint32_t)sizeOfConfigSector)
+            {
+                usedSize = (uint32_t)sizeOfConfigSector;
+            }
+
+            if (blockSize > oldBlockSize)
+            {
+                shift = blockSize - oldBlockSize;
+
+                // check if the used data plus the size increase still fits in the config sector
+                if (shift > (uint32_t)sizeOfConfigSector - usedSize)
+                {
+                    platform_free(configSectorCopy);
+
+                    return UpdateConfigurationResult_Failed;
+                }
+
+                newTailOffset = oldTailOffset + shift;
+                memmove(configSectorCopy + newTailOffset, configSectorCopy + oldTailOffset, usedSize - oldTailOffset);
+            }
+            else
+            {
+                shift = oldBlockSize - blockSize;
+
+                newTailOffset = oldTailOffset - shift;
+                memmove(configSectorCopy + newTailOffset, configSectorCopy + oldTailOffset, usedSize - oldTailOffset);
+
+                // fill the space freed at the end with the erased flash value
+                memset(configSectorCopy + usedSize - shift, 0xFF, shift);
+            }
+        }
+
+        // set pointer to block to udpate
+        blockAddressInCopy = configSectorCopy + blockOffset;
+
+        // replace config block with new content by replacing memory
+        memcpy(blockAddressInCopy, configurationBlock, blockSize);
+
         // erase config sector
         if (iMXRTFlexSPIDriver_EraseBlock(NULL, (uint32_t)&__nanoConfig_start__) == TRUE)
         {
             // flash block is erased
-
-            // subtract the start address of config sector to get the offset
-            blockOffset = storageAddress - (uint32_t)&__nanoConfig_start__;
-
-            // set pointer to block to udpate
-            blockAddressInCopy = configSectorCopy + blockOffset;
-
-            // replace config block with new content by replacing memory
-            memcpy(blockAddressInCopy, configSectorCopy, blockSize);
 
             // copy the config block copy back to the config block storage
             if (iMXRTFlexSPIDriver_Write(
@@ -397,6 +566,19 @@ UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock(
 
         // free memory
         platform_free(configSectorCopy);
+
+        if (success == UpdateConfigurationResult_Success)
+        {
+            // blocks may have moved, so the configuration blocks have to be enumerated again
+            // free the current allocation(s)
+            platform_free(g_TargetConfiguration.NetworkInterfaceConfigs);
+            platform_free(g_TargetConfiguration.Wireless80211Configs);
+            platform_free(g_TargetConfiguration.CertificateStore);
+            platform_free(g_TargetConfiguration.DeviceCertificates);
+
+            // perform enumeration of configuration blocks
+            ConfigurationManager_EnumerateConfigurationBlocks();
+        }
     }
 
     return success;
