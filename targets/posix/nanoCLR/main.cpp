@@ -26,49 +26,48 @@
 
 namespace
 {
-    void PrintBanner()
+void PrintBanner()
+{
+    std::cout << ".NET nanoFramework nanoCLR " << NANOCLR_PLATFORM_NAME << " v" << NANOCLR_POSIX_VERSION_STRING << "\n";
+    std::cout << "Copyright (c) .NET Foundation and Contributors\n\n";
+}
+
+// Read a file into a byte vector. Returns false on error.
+bool ReadFile(const char *path, std::vector<uint8_t> &out)
+{
+    std::ifstream in(path, std::ios::binary | std::ios::ate);
+    if (!in.is_open())
     {
-        std::cout << ".NET nanoFramework nanoCLR " << NANOCLR_PLATFORM_NAME
-                  << " v" << NANOCLR_POSIX_VERSION_STRING << "\n";
-        std::cout << "Copyright (c) .NET Foundation and Contributors\n\n";
+        std::cerr << "error: cannot open '" << path << "'\n";
+        return false;
     }
 
-    // Read a file into a byte vector. Returns false on error.
-    bool ReadFile(const char *path, std::vector<uint8_t> &out)
+    auto size = in.tellg();
+    if (size <= 0)
     {
-        std::ifstream in(path, std::ios::binary | std::ios::ate);
-        if (!in.is_open())
-        {
-            std::cerr << "error: cannot open '" << path << "'\n";
-            return false;
-        }
-
-        auto size = in.tellg();
-        if (size <= 0)
-        {
-            std::cerr << "error: empty file '" << path << "'\n";
-            return false;
-        }
-
-        in.seekg(0);
-        out.resize(static_cast<size_t>(size));
-        const auto bytesToRead = static_cast<std::streamsize>(out.size());
-        if (!in.read(reinterpret_cast<char *>(out.data()), bytesToRead))
-        {
-            std::cerr << "error: failed to read '" << path << "'\n";
-            return false;
-        }
-
-        return true;
+        std::cerr << "error: empty file '" << path << "'\n";
+        return false;
     }
 
-    // Convert a narrow (ASCII) path to a char16_t string.
-    // char16_t matches the 2-byte UTF-16 LE units that nanoCLR_LoadAssembly expects
-    // (same layout as CharSet.Unicode marshalling from the C# host).
-    std::u16string ToChar16(const char *s)
+    in.seekg(0);
+    out.resize(static_cast<size_t>(size));
+    const auto bytesToRead = static_cast<std::streamsize>(out.size());
+    if (!in.read(reinterpret_cast<char *>(out.data()), bytesToRead))
     {
-        return std::u16string(s, s + std::strlen(s));
+        std::cerr << "error: failed to read '" << path << "'\n";
+        return false;
     }
+
+    return true;
+}
+
+// Convert a narrow (ASCII) path to a char16_t string.
+// char16_t matches the 2-byte UTF-16 LE units that nanoCLR_LoadAssembly expects
+// (same layout as CharSet.Unicode marshalling from the C# host).
+std::u16string ToChar16(const char *s)
+{
+    return std::u16string(s, s + std::strlen(s));
+}
 
 } // namespace
 
@@ -130,8 +129,7 @@ int main(int argc, char **argv)
         int hr = nanoCLR_LoadAssembly(wname.c_str(), data.data(), data.size());
         if (hr != 0)
         {
-            std::cerr << "error: failed to load '" << path
-                      << "' (hr=0x" << std::hex << hr << ")\n";
+            std::cerr << "error: failed to load '" << path << "' (hr=0x" << std::hex << hr << ")\n";
             if (data.size() >= 6 && std::memcmp(data.data(), "NFMRK1", 6) == 0)
             {
                 std::cerr << "error: legacy NFMRK1 assembly; this runtime requires NFMRK2.\n"
@@ -149,11 +147,11 @@ int main(int argc, char **argv)
 
     // ── Run the CLR ──────────────────────────────────────────────────────────
     NANO_CLR_SETTINGS settings{};
-    settings.MaxContextSwitches         = 50;
-    settings.WaitForDebugger            = false;
+    settings.MaxContextSwitches = 50;
+    settings.WaitForDebugger = false;
     settings.EnterDebuggerLoopAfterExit = false;
-    settings.PerformGarbageCollection   = false;
-    settings.PerformHeapCompaction      = false;
+    settings.PerformGarbageCollection = false;
+    settings.PerformHeapCompaction = false;
 
     nanoCLR_Run(settings);
 

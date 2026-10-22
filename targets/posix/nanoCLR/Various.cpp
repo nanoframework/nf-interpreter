@@ -107,41 +107,41 @@ void CPU_Shutdown()
 extern "C"
 {
 
-void CPU_SetPowerMode(PowerLevel_type powerLevel)
-{
-    (void)powerLevel;
-}
+    void CPU_SetPowerMode(PowerLevel_type powerLevel)
+    {
+        (void)powerLevel;
+    }
 
-void CPU_Sleep(SLEEP_LEVEL_type level, uint64_t wakeEvents)
-{
-    (void)level;
-    (void)wakeEvents;
-    std::this_thread::yield();
-}
+    void CPU_Sleep(SLEEP_LEVEL_type level, uint64_t wakeEvents)
+    {
+        (void)level;
+        (void)wakeEvents;
+        std::this_thread::yield();
+    }
 
-void RtosYield()
-{
-    std::this_thread::yield();
-}
+    void RtosYield()
+    {
+        std::this_thread::yield();
+    }
 
-void CPU_Reset()
-{
-    // On POSIX host, reset is equivalent to exit.
-    std::exit(0);
-}
+    void CPU_Reset()
+    {
+        // On POSIX host, reset is equivalent to exit.
+        std::exit(0);
+    }
 
-void HAL_AssertEx()
-{
-    // On POSIX host: print location then abort so the crash is visible in logs.
-    fputs("[POSIX] HAL_AssertEx() — assertion failed\n", stderr);
-    std::abort();
-}
+    void HAL_AssertEx()
+    {
+        // On POSIX host: print location then abort so the crash is visible in logs.
+        fputs("[POSIX] HAL_AssertEx() — assertion failed\n", stderr);
+        std::abort();
+    }
 
-bool LaunchProprietaryBootloader()
-{
-    // Not applicable on POSIX host.
-    return false;
-}
+    bool LaunchProprietaryBootloader()
+    {
+        // Not applicable on POSIX host.
+        return false;
+    }
 
 } // extern "C"
 

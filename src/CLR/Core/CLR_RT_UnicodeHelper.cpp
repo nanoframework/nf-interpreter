@@ -253,8 +253,7 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
             break;
         }
 
-        int continuationBytes =
-            (ch & 0xE0) == 0xC0 ? 1 : (ch & 0xF0) == 0xE0 ? 2 : (ch & 0xF8) == 0xF0 ? 3 : 0;
+        int continuationBytes = (ch & 0xE0) == 0xC0 ? 1 : (ch & 0xF0) == 0xE0 ? 2 : (ch & 0xF8) == 0xF0 ? 3 : 0;
         if (continuationBytes > iMaxBytes)
         {
             int available = 0;
