@@ -260,11 +260,10 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::
                     // allocate address and store into array
                     pAddress = (CLR_RT_HeapBlock *)hbAddresses.DereferenceArray()->GetElement(cAddresses);
 
-                    NANOCLR_CHECK_HRESULT(
-                        CLR_RT_HeapBlock_Array::CreateInstance(
-                            *pAddress,
-                            (CLR_UINT32)addrT->ai_addrlen,
-                            g_CLR_RT_WellKnownTypes.UInt8));
+                    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
+                        *pAddress,
+                        (CLR_UINT32)addrT->ai_addrlen,
+                        g_CLR_RT_WellKnownTypes.UInt8));
 
                     // copy address.
                     memcpy(pAddress->DereferenceArray()->GetFirstElement(), addrT->ai_addr, addrT->ai_addrlen);
