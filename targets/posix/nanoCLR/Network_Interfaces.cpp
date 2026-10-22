@@ -23,6 +23,11 @@ bool ReadDns(std::array<uint32_t, 2> &dns)
     FILE *file = fopen("/etc/resolv.conf", "r");
     if (file == nullptr)
     {
+        if (errno == ENOENT)
+        {
+            // No resolver configuration: report no DNS servers (0.0.0.0).
+            return true;
+        }
         perror("nanoCLR read /etc/resolv.conf");
         return false;
     }
