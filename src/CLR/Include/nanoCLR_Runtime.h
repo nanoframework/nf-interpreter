@@ -1102,7 +1102,7 @@ struct CLR_RT_UnicodeHelper
 
     //--//
 
-    bool ConvertFromUTF8(int iMaxChars, bool fJustMove, int iMaxBytes = -1);
+    bool ConvertFromUTF8(int iMaxChars, bool fJustMove, int iMaxBytes = -1, bool fFlush = true);
     bool ConvertToUTF8(int iMaxChars, bool fJustMove);
 
     bool MoveBackwardInUTF8(const char *utf8StringStart, int iMaxChars);
