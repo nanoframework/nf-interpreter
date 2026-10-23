@@ -18,7 +18,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v5.5.5
+      ref: refs/tags/v5.5.6
 
 # scheduled build
 # the schedule is defined at the AZDO web interface because of inconsistencies with time zones
@@ -388,6 +388,15 @@ jobs:
           PackageName: ESP32_PSRAM_REV3
           CMakePreset: ESP32_PSRAM_REV3
 
+        ESP32_CAM_REV3:
+          TargetBoard: ESP32
+          TargetSeries: "esp32"
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: ESP32_CAM_REV3
+          PackageName: ESP32_CAM_REV3
+          CMakePreset: ESP32_CAM_REV3
+
         ESP32_PSRAM_XTAL26_REV0:
           TargetBoard: ESP32
           TargetSeries: "esp32"
@@ -423,6 +432,33 @@ jobs:
           TargetName: ESP32_S2
           PackageName: ESP32_S2
           CMakePreset: ESP32_S2
+
+        ESP32_S2_CAM:
+          TargetBoard: ESP32_S2
+          TargetSeries: "esp32_s2"
+          BuildOptions:
+          IDF_Target: esp32s2
+          TargetName: ESP32_S2_CAM
+          PackageName: ESP32_S2_CAM
+          CMakePreset: ESP32_S2_CAM
+
+        ESP32_S3_QUAD_CAM:
+          TargetBoard: ESP32_S3
+          TargetSeries: "esp32s3"
+          BuildOptions:
+          IDF_Target: esp32s3
+          TargetName: ESP32_S3_QUAD_CAM
+          PackageName: ESP32_S3_QUAD_CAM
+          CMakePreset: ESP32_S3_QUAD_CAM
+
+        ESP32_S3_OCTAL_CAM:
+          TargetBoard: ESP32_S3
+          TargetSeries: "esp32s3"
+          BuildOptions:
+          IDF_Target: esp32s3
+          TargetName: ESP32_S3_OCTAL_CAM
+          PackageName: ESP32_S3_OCTAL_CAM
+          CMakePreset: ESP32_S3_OCTAL_CAM
 
         ESP32_BLE_REV3:
           TargetBoard: ESP32
@@ -603,7 +639,7 @@ jobs:
       IDF_PATH: "$(Agent.BuildDirectory)/s/esp-idf"
       PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
       TargetPlatform: "esp32"
-      IDF_TAG: "v5.5.5"
+      IDF_TAG: "v5.5.6"
 
     steps:
       - checkout: self

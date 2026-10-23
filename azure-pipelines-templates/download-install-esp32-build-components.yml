@@ -46,7 +46,8 @@ steps:
 
   - bash: |
       export IDF_TOOLS_PATH=$(Pipeline.Workspace)/.espressif
-      source $(Agent.BuildDirectory)/s/esp-idf/export.sh > /dev/null 2>&1
+      source $(Agent.BuildDirectory)/s/esp-idf/export.sh > /dev/null 2>&1 || exit $?
+      echo "##vso[task.setvariable variable=ESP_ROM_ELF_DIR]${ESP_ROM_ELF_DIR:?ESP-IDF export did not set ESP_ROM_ELF_DIR}"
       echo "$PATH" | tr ':' '\n' | tac | while IFS= read -r p; do
         echo "##vso[task.prependpath]$p"
       done
