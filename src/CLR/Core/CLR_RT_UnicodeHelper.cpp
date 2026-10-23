@@ -229,7 +229,7 @@ int CLR_RT_UnicodeHelper::CountNumberOfBytes(int max)
 #endif
 #endif
 
-bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iMaxBytes)
+bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iMaxBytes, bool fFlush)
 {
     NATIVE_PROFILE_CLR_CORE();
     const CLR_UINT8 *inputUTF8 = m_inputUTF8;
@@ -251,6 +251,33 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
         {
             // Treat embedded null as null terminator
             break;
+        }
+
+        int continuationBytes = (ch & 0xE0) == 0xC0 ? 1 : (ch & 0xF0) == 0xE0 ? 2 : (ch & 0xF8) == 0xF0 ? 3 : 0;
+        if (continuationBytes > iMaxBytes)
+        {
+            int available = 0;
+            while (available < iMaxBytes && UTF8_VALID_CONTINUATION(inputUTF8[available]))
+            {
+                available++;
+            }
+            bool validPrefix = available == iMaxBytes && ch >= 0xC2 && ch <= 0xF4;
+            if (available > 0)
+            {
+                validPrefix = validPrefix && !(ch == 0xE0 && inputUTF8[0] < 0xA0) &&
+                              !(ch == 0xED && inputUTF8[0] > 0x9F) && !(ch == 0xF0 && inputUTF8[0] < 0x90) &&
+                              !(ch == 0xF4 && inputUTF8[0] > 0x8F);
+            }
+            if (!fFlush && validPrefix)
+            {
+                // Leave a split character for the caller to retry with more bytes.
+                inputUTF8--;
+                res = false;
+                break;
+            }
+            inputUTF8 += available;
+            iMaxBytes -= available;
+            goto invalid_sequence;
         }
 
         // ASCII
@@ -276,14 +303,6 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
         // UTF-8 two bytes
         else if ((ch & 0xE0) == 0xC0)
         {
-            if (iMaxBytes < 1)
-            {
-                // Not enough bytes remaining - output replacement and don't advance
-                inputUTF8--;
-                iMaxBytes++;
-                goto invalid_sequence;
-            }
-
             CLR_UINT32 ch2 = (CLR_UINT32)inputUTF8[0]; // Lookahead without advancing
 
             if (!UTF8_VALID_CONTINUATION(ch2))
@@ -326,14 +345,6 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
         // UTF-8 three bytes
         else if ((ch & 0xF0) == 0xE0)
         {
-            if (iMaxBytes < 2)
-            {
-                // Not enough bytes remaining
-                inputUTF8--;
-                iMaxBytes++;
-                goto invalid_sequence;
-            }
-
             CLR_UINT32 ch2 = (CLR_UINT32)inputUTF8[0];
             CLR_UINT32 ch3 = (CLR_UINT32)inputUTF8[1];
             int validCount = 0;
@@ -391,15 +402,6 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
         // UTF-8 four bytes
         else if ((ch & 0xF8) == 0xF0)
         {
-            // Check if we have at least 3 continuation bytes
-            if (iMaxBytes < 3)
-            {
-                // Not enough bytes remaining
-                inputUTF8--;
-                iMaxBytes++;
-                goto invalid_sequence;
-            }
-
             // Look ahead at continuation bytes
             CLR_UINT32 ch2 = (CLR_UINT32)inputUTF8[0];
             CLR_UINT32 ch3 = (CLR_UINT32)inputUTF8[1];
