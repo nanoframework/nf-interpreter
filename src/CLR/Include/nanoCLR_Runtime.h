@@ -1102,7 +1102,7 @@ struct CLR_RT_UnicodeHelper
 
     //--//
 
-    bool ConvertFromUTF8(int iMaxChars, bool fJustMove, int iMaxBytes = -1);
+    bool ConvertFromUTF8(int iMaxChars, bool fJustMove, int iMaxBytes = -1, bool fFlush = true);
     bool ConvertToUTF8(int iMaxChars, bool fJustMove);
 
     bool MoveBackwardInUTF8(const char *utf8StringStart, int iMaxChars);
@@ -3987,6 +3987,7 @@ typedef enum Events
     Event_I2cSlave          = 0x00010000,
     Event_RmtRx             = 0x00020000,
     Event_EspNow            = 0x00040000,
+    Event_Camera            = 0x00080000,
     Event_AppDomain         = 0x02000000,
     Event_Socket            = 0x20000000,
     Event_IdleCPU           = 0x40000000,
