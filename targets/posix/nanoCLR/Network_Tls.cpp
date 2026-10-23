@@ -6,7 +6,6 @@
 #include <Target_Tls.h>
 
 #include <arpa/inet.h>
-#include <dlfcn.h>
 #include <mbedtls/ctr_drbg.h>
 #include <mbedtls/entropy.h>
 #include <mbedtls/error.h>
@@ -104,23 +103,6 @@ std::map<int, std::unique_ptr<Connection>> s_connections;
 std::shared_ptr<Certificates> s_caBundle;
 int64_t s_nextContext = 1;
 thread_local int s_tlsError = 0;
-
-// Resolve at library load so changing the working directory cannot change default trust.
-const std::string s_defaultBundlePath = [] {
-    Dl_info library = {};
-    if (dladdr(&s_tlsMutex, &library) == 0 || library.dli_fname == nullptr)
-    {
-        return std::string();
-    }
-    std::unique_ptr<char, decltype(&free)> path(realpath(library.dli_fname, nullptr), free);
-    if (!path)
-    {
-        return std::string();
-    }
-    std::string directory(path.get());
-    directory.erase(directory.find_last_of('/') + 1);
-    return directory + "../share/nanoFramework/ca-bundle.pem";
-}();
 
 int Failure(const char *operation, int error)
 {
@@ -296,10 +278,15 @@ std::shared_ptr<Certificates> ParseCertificates(const uint8_t *data, size_t leng
 std::shared_ptr<Certificates> ReadCaFile()
 {
     const char *configured = getenv("NANOCLR_CA_BUNDLE");
-    std::string path = configured != nullptr ? configured : s_defaultBundlePath;
+    if (configured == nullptr)
+    {
+        Failure("no trusted CA configured; supply a managed CA, NANOCLR_CA_BUNDLE or --ca-bundle", SOCK_EINVAL);
+        return nullptr;
+    }
+    std::string path(configured);
     if (path.empty())
     {
-        Failure(configured ? "empty NANOCLR_CA_BUNDLE" : "locating bundled CA store", SOCK_EINVAL);
+        Failure("empty NANOCLR_CA_BUNDLE", SOCK_EINVAL);
         return nullptr;
     }
     std::ifstream file(path, std::ios::binary | std::ios::ate);

@@ -241,13 +241,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
     nf_add_mbedtls_library()
     FetchContent_GetProperties(mbedtls)
-    target_link_libraries(nanoFramework.nanoCLR PRIVATE Threads::Threads mbedtls mbedx509 mbedcrypto ${CMAKE_DL_LIBS})
-    configure_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/../certificates/ca-bundle.pem
-        ${CMAKE_BINARY_DIR}/share/nanoFramework/ca-bundle.pem COPYONLY)
-    configure_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/../certificates/LICENSE-MPL-2.0.txt
-        ${CMAKE_BINARY_DIR}/share/nanoFramework/LICENSE-MPL-2.0.txt COPYONLY)
+    target_link_libraries(nanoFramework.nanoCLR PRIVATE Threads::Threads mbedtls mbedx509 mbedcrypto)
     configure_file(
         ${mbedtls_SOURCE_DIR}/LICENSE
         ${CMAKE_BINARY_DIR}/share/nanoFramework/LICENSE-mbedTLS.txt COPYONLY)

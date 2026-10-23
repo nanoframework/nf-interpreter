@@ -41,7 +41,7 @@ cmake --build build/posix
 ```
 
 Keep the generated `bin/`, `lib/` and `share/` directories together when deploying.
-`share/nanoFramework/` contains the default CA bundle and third-party licenses.
+`share/nanoFramework/` contains third-party licenses. No CA bundle is shipped.
 
 ## Configuration Options
 
@@ -222,9 +222,13 @@ Trust selection, in order:
    overriding `NANOCLR_CA_BUNDLE` for that process.
 4. Without the option, **`NANOCLR_CA_BUNDLE`** selects a CA file. This also works
    when another application loads the native runtime library.
-5. With neither option nor environment variable, the runtime loads the shipped
-   **`share/nanoFramework/ca-bundle.pem`**, relative to the loaded native library,
-   not the shell's working directory.
+
+The CA path is optional. With neither option nor environment variable, only
+certificates supplied by managed code (per connection or through the global
+bundle) can be used. Without any trust source, outgoing TLS fails explicitly;
+certificate verification is never disabled. No CA roots are embedded or shipped,
+and the host store is not used automatically. HTTPS servers do not require a CA
+path; they use their supplied server certificate and private key.
 
 For example, configure a PEM CA bundle using the environment:
 
@@ -245,8 +249,8 @@ Or add the option before the PE arguments in your launch command:
 The option is currently Linux-only, like application networking. Relative custom
 paths are resolved against the process's working directory. CA files may contain
 a PEM bundle or one DER certificate, up to 1 MiB. A missing, empty, malformed or
-unreadable selected file fails TLS explicitly: it never falls back to the shipped
-bundle or host store. Per-request certificates and the managed global bundle
+unreadable selected file fails TLS explicitly: it never falls back to another
+file or the host store. Per-request certificates and the managed global bundle
 take precedence over file configuration. File changes affect newly created TLS
 contexts; existing contexts retain their original trust.
 
@@ -270,7 +274,7 @@ using (HttpWebRequest request = (HttpWebRequest)WebRequest.Create("https://www.b
     request.ReadWriteTimeout = 30000;
 
     // Optional: the PEM contents of the CA certificate(s), not a file path.
-    // Omit this assignment to use the configured or shipped default CA bundle.
+    // Omit only if a CA file or managed global bundle is configured.
     request.HttpsAuthentCert = new X509Certificate(caPem);
 
     using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
@@ -377,19 +381,6 @@ which clients can connect. Servers do not request client certificates; mutual
 TLS requests are rejected rather than silently downgraded. For direct SslStream
 use, call `AuthenticateAsServer(identity, false, SslProtocols.None)`.
 Client-side certificate verification remains mandatory.
-
-### Default CA bundle provenance and updates
-
-The shipped bundle is curl's Mozilla CA extraction dated **2026-10-20**:
-[upstream bundle](https://curl.se/ca/cacert-2026-10-20.pem),
-[source and license information](https://curl.se/docs/caextract.html).
-Its SHA-256 is
-`796f1389bfea13c0ed78f663b765baaff54a508e5483786bd6ece73c5e3e3cbe`.
-It is distributed under MPL 2.0; its license and the mbedTLS license are copied
-alongside the bundle by CMake. No local machine's trust store is copied into it.
-This is a CA bundle, not a browser's complete trust-policy implementation.
-Maintainers must refresh the bundle for CA additions/distrust changes and keep
-the shared mbedTLS dependency pin current for security updates.
 
 ## Running Managed Applications
 
