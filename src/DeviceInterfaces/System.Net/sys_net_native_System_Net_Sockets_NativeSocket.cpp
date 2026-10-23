@@ -952,10 +952,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::SendRecvHelper(
             break;
         }
 
-        if (bytes > 0)
-        {
-            buf += bytes;
-        }
+        buf += bytes;
         totReadWrite += bytes;
         count -= bytes;
 

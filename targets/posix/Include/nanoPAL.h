@@ -14,7 +14,6 @@
 #include <nanoPAL_FileSystem.h>
 #include <nanoPAL_Time.h>
 #if NANOCLR_HOST_LINUX
-#define GLOBAL_LOCK_SOCKETS(x)
 #include <nanoPAL_Sockets.h>
 #endif
 
