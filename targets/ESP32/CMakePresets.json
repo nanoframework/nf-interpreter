@@ -40,6 +40,19 @@
             }
         },
         {
+            "name": "ESP32_CAM_REV3",
+            "inherits": [
+                "xtensa-esp32-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_CAM_REV3_defconfig"
+            }
+        },
+        {
             "name": "ESP32_PSRAM_REV3_IPV6",
             "inherits": [
                 "xtensa-esp32-preset",
@@ -261,6 +274,19 @@
             }
         },
         {
+            "name": "ESP32_S3_QUAD_CAM",
+            "inherits": [
+                "xtensa-esp32s3-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_S3_QUAD_CAM_defconfig"
+            }
+        },
+        {
             "name": "ESP32_S3_OCTAL",
             "inherits": [
                 "xtensa-esp32s3-preset",
@@ -271,6 +297,19 @@
             "cacheVariables": {
                 "TARGET_NAME": "${presetName}",
                 "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_S3_OCTAL_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_S3_OCTAL_CAM",
+            "inherits": [
+                "xtensa-esp32s3-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_S3_OCTAL_CAM_defconfig"
             }
         },
         {
@@ -493,6 +532,19 @@
                 "TARGET_NAME": "${presetName}",
                 "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_S2_defconfig"
             }
+        },
+        {
+            "name": "ESP32_S2_CAM",
+            "inherits": [
+                "xtensa-esp32s2-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_S2_CAM_defconfig"
+            }
         }
     ],
     "buildPresets": [
@@ -507,6 +559,12 @@
             "name": "ESP32_PSRAM_REV3",
             "displayName": "ESP32_PSRAM_REV3",
             "configurePreset": "ESP32_PSRAM_REV3"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_CAM_REV3",
+            "displayName": "ESP32_CAM_REV3",
+            "configurePreset": "ESP32_CAM_REV3"
         },
         {
             "inherits": "base-user",
@@ -600,9 +658,21 @@
         },
         {
             "inherits": "base-user",
+            "name": "ESP32_S3_QUAD_CAM",
+            "displayName": "ESP32_S3_QUAD_CAM",
+            "configurePreset": "ESP32_S3_QUAD_CAM"
+        },
+        {
+            "inherits": "base-user",
             "name": "ESP32_S3_OCTAL",
             "displayName": "ESP32_S3_OCTAL",
             "configurePreset": "ESP32_S3_OCTAL"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_S3_OCTAL_CAM",
+            "displayName": "ESP32_S3_OCTAL_CAM",
+            "configurePreset": "ESP32_S3_OCTAL_CAM"
         },
         {
             "inherits": "base-user",
@@ -705,6 +775,12 @@
             "name": "ESP32_S2",
             "displayName": "ESP32_S2",
             "configurePreset": "ESP32_S2"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_S2_CAM",
+            "displayName": "ESP32_S2_CAM",
+            "configurePreset": "ESP32_S2_CAM"
         },
         {
             "inherits": "base-user",

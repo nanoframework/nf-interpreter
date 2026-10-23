@@ -15,15 +15,93 @@
 
 uint8_t programWidth = 0;
 
+// gets the alignment required for the start address of a config block
+static uint32_t GetConfigBlockAlignment()
+{
+    // flash programming width, if set, otherwise default to byte alignment
+    return programWidth > 0 ? programWidth : 1U;
+}
+
+// updates the end address of the used config data with the end address of the block, if that's higher
+static void UpdateConfigDataEnd(uint32_t *dataEnd, const void *block, uint32_t blockSize)
+{
+    uint32_t blockAddress = (uint32_t)block;
+    uint32_t configEnd = (uint32_t)&__nanoConfig_end__;
+
+    // a block can't go beyond the end of the config sector
+    uint32_t blockEnd = (blockSize > configEnd - blockAddress) ? configEnd : blockAddress + blockSize;
+
+    if (blockEnd > *dataEnd)
+    {
+        *dataEnd = blockEnd;
+    }
+}
+
 uint32_t GetExistingConfigSize()
 {
-    uint32_t currentConfigSize = 0;
+    uint32_t alignment = GetConfigBlockAlignment();
+    uint32_t dataEnd = (uint32_t)&__nanoConfig_start__;
 
-    currentConfigSize =
-        g_TargetConfiguration.NetworkInterfaceConfigs->Count * sizeof(HAL_Configuration_NetworkInterface);
-    currentConfigSize += g_TargetConfiguration.Wireless80211Configs->Count * sizeof(HAL_Configuration_Wireless80211);
+    // the size of the existing config is given by the highest end address of all the enumerated blocks
+    if (g_TargetConfiguration.NetworkInterfaceConfigs != NULL)
+    {
+        for (uint32_t i = 0; i < g_TargetConfiguration.NetworkInterfaceConfigs->Count; i++)
+        {
+            UpdateConfigDataEnd(
+                &dataEnd,
+                g_TargetConfiguration.NetworkInterfaceConfigs->Configs[i],
+                sizeof(HAL_Configuration_NetworkInterface));
+        }
+    }
 
-    return currentConfigSize;
+    if (g_TargetConfiguration.Wireless80211Configs != NULL)
+    {
+        for (uint32_t i = 0; i < g_TargetConfiguration.Wireless80211Configs->Count; i++)
+        {
+            UpdateConfigDataEnd(
+                &dataEnd,
+                g_TargetConfiguration.Wireless80211Configs->Configs[i],
+                sizeof(HAL_Configuration_Wireless80211));
+        }
+    }
+
+    if (g_TargetConfiguration.WirelessAPConfigs != NULL)
+    {
+        for (uint32_t i = 0; i < g_TargetConfiguration.WirelessAPConfigs->Count; i++)
+        {
+            UpdateConfigDataEnd(
+                &dataEnd,
+                g_TargetConfiguration.WirelessAPConfigs->Configs[i],
+                sizeof(HAL_Configuration_WirelessAP));
+        }
+    }
+
+    if (g_TargetConfiguration.CertificateStore != NULL)
+    {
+        for (uint32_t i = 0; i < g_TargetConfiguration.CertificateStore->Count; i++)
+        {
+            UpdateConfigDataEnd(
+                &dataEnd,
+                g_TargetConfiguration.CertificateStore->Certificates[i],
+                offsetof(HAL_Configuration_X509CaRootBundle, Certificate) +
+                    g_TargetConfiguration.CertificateStore->Certificates[i]->CertificateSize);
+        }
+    }
+
+    if (g_TargetConfiguration.DeviceCertificates != NULL)
+    {
+        for (uint32_t i = 0; i < g_TargetConfiguration.DeviceCertificates->Count; i++)
+        {
+            UpdateConfigDataEnd(
+                &dataEnd,
+                g_TargetConfiguration.DeviceCertificates->Certificates[i],
+                offsetof(HAL_Configuration_X509DeviceCertificate, Certificate) +
+                    g_TargetConfiguration.DeviceCertificates->Certificates[i]->CertificateSize);
+        }
+    }
+
+    // round up to the target alignment
+    return ((dataEnd - (uint32_t)&__nanoConfig_start__ + alignment - 1) / alignment) * alignment;
 }
 
 // initialization of configuration manager
@@ -258,7 +336,7 @@ __nfweak bool ConfigurationManager_GetConfigurationBlock(
         sizeOfBlock = offsetof(HAL_Configuration_X509CaRootBundle, Certificate);
         sizeOfBlock += ((HAL_Configuration_X509CaRootBundle *)blockAddress)->CertificateSize;
     }
-    else if (configuration == DeviceConfigurationOption_X509CaRootBundle)
+    else if (configuration == DeviceConfigurationOption_X509DeviceCertificates)
     {
         if (g_TargetConfiguration.DeviceCertificates->Count == 0 ||
             (configurationIndex + 1) > g_TargetConfiguration.DeviceCertificates->Count)
@@ -273,6 +351,11 @@ __nfweak bool ConfigurationManager_GetConfigurationBlock(
         // because X509 certificate has a variable length need to compute the block size in two steps
         sizeOfBlock = offsetof(HAL_Configuration_X509DeviceCertificate, Certificate);
         sizeOfBlock += ((HAL_Configuration_X509DeviceCertificate *)blockAddress)->CertificateSize;
+    }
+    else
+    {
+        // unknown or unsupported configuration option
+        return FALSE;
     }
 
     // copy the config block content to the pointer in the argument
@@ -504,6 +587,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
         // free the current allocation(s)
         platform_free(g_TargetConfiguration.NetworkInterfaceConfigs);
         platform_free(g_TargetConfiguration.Wireless80211Configs);
+        platform_free(g_TargetConfiguration.WirelessAPConfigs);
         platform_free(g_TargetConfiguration.CertificateStore);
         platform_free(g_TargetConfiguration.DeviceCertificates);
 
