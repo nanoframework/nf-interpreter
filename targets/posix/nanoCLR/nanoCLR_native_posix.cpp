@@ -52,6 +52,15 @@ void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
 
     nanoHAL_Initialize();
 
+#if NANOCLR_HOST_LINUX
+    if (!Network_Initialize())
+    {
+        CLR_Debug::Printf("Failed to initialize Linux networking.\r\n");
+        nanoHAL_Uninitialize(false);
+        return;
+    }
+#endif
+
     BlockStorageList_Initialize();
     BlockStorage_AddDevices();
     BlockStorageList_InitializeDevices();
@@ -68,6 +77,11 @@ void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
     // managed host but are intentionally not forwarded here.
 
     ClrStartup(clrSettings);
+
+#if NANOCLR_HOST_LINUX
+    Network_Uninitialize();
+#endif
+    nanoHAL_Uninitialize(false);
 }
 
 // ── Assembly-loading API ─────────────────────────────────────────────────────

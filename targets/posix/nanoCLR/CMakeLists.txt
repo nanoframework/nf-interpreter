@@ -1,4 +1,4 @@
-#
+﻿#
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
@@ -229,6 +229,38 @@ add_library(nanoFramework.nanoCLR SHARED ${NANOCLR_POSIX_SOURCES})
 
 target_compile_features(nanoFramework.nanoCLR PRIVATE cxx_std_20)
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    find_package(Threads REQUIRED)
+    include(FetchContent)
+    include(${REPO_ROOT}/CMake/binutils.common.cmake)
+    set(ENABLE_TESTING OFF)
+    set(ENABLE_PROGRAMS OFF)
+    set(USE_STATIC_MBEDTLS_LIBRARY ON)
+    set(USE_SHARED_MBEDTLS_LIBRARY OFF)
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+    set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
+    nf_add_mbedtls_library()
+    FetchContent_GetProperties(mbedtls)
+    target_link_libraries(nanoFramework.nanoCLR PRIVATE Threads::Threads mbedtls mbedx509 mbedcrypto)
+    configure_file(
+        ${mbedtls_SOURCE_DIR}/LICENSE
+        ${CMAKE_BINARY_DIR}/share/nanoFramework/LICENSE-mbedTLS.txt COPYONLY)
+    target_sources(nanoFramework.nanoCLR PRIVATE
+        Network_Sockets.cpp
+        Network_Interfaces.cpp
+        Network_native.cpp
+        Network_Tls.cpp
+        Network_Tls_native.cpp
+        ${REPO_ROOT}/src/DeviceInterfaces/System.Net/sys_net_native.cpp
+        ${REPO_ROOT}/src/DeviceInterfaces/System.Net/sys_net_native_System_Net_IPAddress.cpp
+        ${REPO_ROOT}/src/DeviceInterfaces/System.Net/sys_net_native_System_Net_Sockets_NativeSocket.cpp
+        ${REPO_ROOT}/src/DeviceInterfaces/System.Net/sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate.cpp
+        ${REPO_ROOT}/src/DeviceInterfaces/System.Net/sys_net_native_System_Net_NetworkInformation_IPGlobalProperties_stubs.cpp
+        ${REPO_ROOT}/src/DeviceInterfaces/System.Net/sys_net_native_System_Net_NetworkInformation_Wireless80211Configuration_stubs.cpp
+        ${REPO_ROOT}/src/DeviceInterfaces/System.Net/sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration_stubs.cpp
+    )
+endif()
+
 target_include_directories(
     nanoFramework.nanoCLR
     PRIVATE
@@ -263,6 +295,7 @@ target_include_directories(
     ${REPO_ROOT}/src/System.Device.I2c
     ${REPO_ROOT}/src/System.Device.Spi
     ${REPO_ROOT}/src/System.IO.Ports
+    ${REPO_ROOT}/src/DeviceInterfaces/System.Net
 )
 
 # Determine platform-specific flags.
