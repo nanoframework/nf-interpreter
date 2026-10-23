@@ -23,6 +23,7 @@ set(MCUBOOT_EXTRA_SOURCES
     ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ORGPAL_PALX/MCUboot/mcuboot_target_init.c
     ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ORGPAL_PALX/MCUboot/mcuboot_heartbeat_led.c
     # ChibiOS USB HAL sources for USB CDC transport.
+    ${chibios_SOURCE_DIR}/os/hal/src/hal_safety.c
     ${chibios_SOURCE_DIR}/os/hal/src/hal_usb.c
     ${chibios_SOURCE_DIR}/os/hal/src/hal_serial_usb.c
     ${chibios_SOURCE_DIR}/os/hal/src/hal_buffers.c
