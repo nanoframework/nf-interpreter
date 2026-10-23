@@ -60,7 +60,7 @@ HRESULT Library_nf_system_text_System_Text_UTF8Decoder::Convert___VOID__SZARRAY_
     uh.m_outputUTF16      = (CLR_UINT16*)pArrayChars->GetElement( charIndex );
     uh.m_outputUTF16_size = charCount;
 
-    uh.ConvertFromUTF8( charCount, false, byteCount );
+    uh.ConvertFromUTF8(charCount, false, byteCount, stack.ArgN(7).NumericByRef().u1 != 0);
 
     // Calculate return values
     byteUsed  = (CLR_INT32)(uh.m_inputUTF8 - byteStart);
