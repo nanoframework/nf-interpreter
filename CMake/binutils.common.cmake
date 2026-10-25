@@ -707,6 +707,59 @@ macro(nf_setup_target_build_common)
 
 endmacro()
 
+# macro to clear the cached lists with the target sources and include directories
+# they are filled with list(APPEND) on cache variables, so on a reconfigure of an existing build
+# directory the append starts from what the previous run left in the cache: the lists gain another
+# copy of themselves every time and a source file removed from a CMakeLists is kept in the build
+# until that cache entry is deleted by hand
+# has to be called before adding the subdirectories that fill the lists
+macro(nf_clear_cached_target_lists)
+
+    foreach(LIST_NAME IN ITEMS
+        COMMON_PROJECT_SOURCES
+        NANOBOOTER_PROJECT_SOURCES
+        NANOCLR_PROJECT_INCLUDE_DIRS
+        NANOCLR_PROJECT_SOURCES
+        TARGET_CHIBIOS_COMMON_INCLUDE_DIRS
+        TARGET_CHIBIOS_COMMON_SOURCES
+        TARGET_CHIBIOS_NANOBOOTER_INCLUDE_DIRS
+        TARGET_CHIBIOS_NANOBOOTER_SOURCES
+        TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS
+        TARGET_CHIBIOS_NANOCLR_SOURCES
+        TARGET_ESP32_IDF_COMMON_INCLUDE_DIRS
+        TARGET_ESP32_IDF_COMMON_SOURCES
+        TARGET_ESP32_IDF_NANOCLR_INCLUDE_DIRS
+        TARGET_ESP32_IDF_NANOCLR_SOURCES
+        TARGET_ESP32_IDF_NETWORK_INCLUDE_DIRS
+        TARGET_ESP32_IDF_NETWORK_SOURCES
+        TARGET_FREERTOS_COMMON_INCLUDE_DIRS
+        TARGET_FREERTOS_COMMON_SOURCES
+        TARGET_FREERTOS_NANOBOOTER_INCLUDE_DIRS
+        TARGET_FREERTOS_NANOCLR_INCLUDE_DIRS
+        TARGET_FREERTOS_NANOCLR_SOURCES
+        TARGET_NXP_COMMON_INCLUDE_DIRS
+        TARGET_NXP_COMMON_SOURCES
+        TARGET_NXP_NANOBOOTER_INCLUDE_DIRS
+        TARGET_NXP_NANOBOOTER_SOURCES
+        TARGET_NXP_NANOCLR_INCLUDE_DIRS
+        TARGET_NXP_NANOCLR_SOURCES
+        TARGET_THREADX_COMMON_INCLUDE_DIRS
+        TARGET_THREADX_COMMON_SOURCES
+        TARGET_THREADX_NANOBOOTER_INCLUDE_DIRS
+        TARGET_THREADX_NANOBOOTER_SOURCES
+        TARGET_THREADX_NANOCLR_INCLUDE_DIRS
+        TARGET_THREADX_NANOCLR_SOURCES
+        TARGET_TI_SimpleLink_COMMON_INCLUDE_DIRS
+        TARGET_TI_SimpleLink_COMMON_SOURCES
+        TARGET_TI_SimpleLink_NANOCLR_INCLUDE_DIRS
+        TARGET_TI_SimpleLink_NANOCLR_SOURCES)
+
+        unset(${LIST_NAME} CACHE)
+
+    endforeach()
+
+endmacro()
+
 # macro to clear binary files related with nanoBooter from output
 # to make sure that the build file it's up to date
 macro(nf_clear_common_output_files_nanobooter)
