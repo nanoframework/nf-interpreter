@@ -55,6 +55,7 @@ struct Context
     std::shared_ptr<Certificates> certificates;
     std::shared_ptr<Certificates> identity;
     bool server = false;
+    bool verifyPeer = true;
 
     Context()
     {
@@ -81,6 +82,7 @@ struct Connection
     std::shared_ptr<Context> settings;
     mbedtls_ssl_context session;
     std::vector<uint8_t> pendingWrite;
+    int transportError = 0;
     bool ready = false;
     bool closed = false;
     bool failed = false;
@@ -323,9 +325,17 @@ int Receive(void *opaque, unsigned char *buffer, size_t length)
 {
     auto &connection = *static_cast<Connection *>(opaque);
     int result = SOCK_recv(connection.socket, reinterpret_cast<char *>(buffer), std::min(length, size_t(INT_MAX)), 0);
-    return result >= 0                               ? result
-           : SOCK_getlasterror() == SOCK_EWOULDBLOCK ? MBEDTLS_ERR_SSL_WANT_READ
-                                                     : MBEDTLS_ERR_SSL_INTERNAL_ERROR;
+    if (result >= 0)
+    {
+        return result;
+    }
+    int error = SOCK_getlasterror();
+    if (error == SOCK_EWOULDBLOCK)
+    {
+        return MBEDTLS_ERR_SSL_WANT_READ;
+    }
+    connection.transportError = error;
+    return MBEDTLS_ERR_SSL_INTERNAL_ERROR;
 }
 
 int Send(void *opaque, const unsigned char *buffer, size_t length)
@@ -333,9 +343,17 @@ int Send(void *opaque, const unsigned char *buffer, size_t length)
     auto &connection = *static_cast<Connection *>(opaque);
     int result =
         SOCK_send(connection.socket, reinterpret_cast<const char *>(buffer), std::min(length, size_t(INT_MAX)), 0);
-    return result >= 0                               ? result
-           : SOCK_getlasterror() == SOCK_EWOULDBLOCK ? MBEDTLS_ERR_SSL_WANT_WRITE
-                                                     : MBEDTLS_ERR_SSL_INTERNAL_ERROR;
+    if (result >= 0)
+    {
+        return result;
+    }
+    int error = SOCK_getlasterror();
+    if (error == SOCK_EWOULDBLOCK)
+    {
+        return MBEDTLS_ERR_SSL_WANT_WRITE;
+    }
+    connection.transportError = error;
+    return MBEDTLS_ERR_SSL_INTERNAL_ERROR;
 }
 
 int VerifyIp(void *opaque, mbedtls_x509_crt *certificate, int depth, uint32_t *flags)
@@ -373,8 +391,12 @@ int TranslateResult(Connection &connection, int result)
         return Failure("closed socket", SOCK_ENOTSOCK);
     }
     connection.failed = true;
+    if (connection.transportError != 0)
+    {
+        return Failure("socket I/O", connection.transportError);
+    }
     uint32_t flags = mbedtls_ssl_get_verify_result(&connection.session);
-    if (!connection.settings->server && flags != 0 && flags != UINT32_MAX)
+    if (!connection.settings->server && connection.settings->verifyPeer && flags != 0 && flags != UINT32_MAX)
     {
         char message[512] = {};
         mbedtls_x509_crt_verify_info(message, sizeof(message), "", flags);
@@ -395,7 +417,7 @@ void ReadDate(const mbedtls_x509_time &value, DATE_TIME_INFO &result)
 }
 } // namespace
 
-int LinuxTls_CreateContext(int protocols, const uint8_t *ca, size_t length)
+int LinuxTls_CreateContext(int protocols, const uint8_t *ca, size_t length, bool verifyPeer)
 {
     std::lock_guard<std::mutex> lock(s_tlsMutex);
     auto context = MakeContext(protocols, false);
@@ -403,16 +425,24 @@ int LinuxTls_CreateContext(int protocols, const uint8_t *ca, size_t length)
     {
         return LinuxTls_Error;
     }
-    context->certificates = ca != nullptr || length != 0 ? ParseCertificates(ca, length) : s_caBundle;
-    if (!context->certificates && ca == nullptr && length == 0 && !s_caBundle)
+    context->verifyPeer = verifyPeer;
+    if (verifyPeer)
     {
-        context->certificates = ReadCaFile();
+        context->certificates = ca != nullptr || length != 0 ? ParseCertificates(ca, length) : s_caBundle;
+        if (!context->certificates && ca == nullptr && length == 0 && !s_caBundle)
+        {
+            context->certificates = ReadCaFile();
+        }
+        if (!context->certificates)
+        {
+            return LinuxTls_Error;
+        }
+        mbedtls_ssl_conf_ca_chain(&context->config, &context->certificates->chain, nullptr);
     }
-    if (!context->certificates)
+    else
     {
-        return LinuxTls_Error;
+        mbedtls_ssl_conf_authmode(&context->config, MBEDTLS_SSL_VERIFY_NONE);
     }
-    mbedtls_ssl_conf_ca_chain(&context->config, &context->certificates->chain, nullptr);
     int id = static_cast<int>(s_nextContext++);
     s_contexts.emplace(id, std::move(context));
     return id;
@@ -494,7 +524,7 @@ int Handshake(int context, int socket, const char *host, bool server)
             in_addr address;
             bool numeric = inet_pton(AF_INET, host, &address) == 1;
             result = mbedtls_ssl_set_hostname(&connection->session, numeric ? nullptr : host);
-            if (numeric)
+            if (numeric && connection->settings->verifyPeer)
             {
                 // Validate IP SANs separately so an IP literal is never sent as DNS SNI.
                 mbedtls_ssl_set_verify(&connection->session, VerifyIp, connection.get());

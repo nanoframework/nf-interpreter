@@ -20,12 +20,12 @@ HRESULT NativeTls::
     CLR_RT_HeapBlock *ca = stack.Arg3().Dereference();
     CLR_RT_HeapBlock_Array *data = nullptr;
     int context;
-    if ((verification != 0 && verification != 2 && verification != 4 && verification != 6) ||
+    if ((verification != 0 && verification != 1 && verification != 2 && verification != 4 && verification != 6) ||
         stack.Arg2().Dereference() != nullptr || stack.Arg4().NumericByRef().u1 != 0)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
     }
-    if (ca != nullptr)
+    if (ca != nullptr && verification != 1)
     {
         data = ca[ManagedCertificate::FIELD___certificate].DereferenceArray();
         FAULT_ON_NULL_ARG(data);
@@ -37,7 +37,8 @@ HRESULT NativeTls::
     context = LinuxTls_CreateContext(
         stack.Arg0().NumericByRef().s4,
         data == nullptr ? nullptr : data->GetFirstElement(),
-        data == nullptr ? 0 : data->m_numOfElements);
+        data == nullptr ? 0 : data->m_numOfElements,
+        verification != 1);
     if (context < 0)
     {
         NANOCLR_CHECK_HRESULT(ThrowCryptographicError(stack, LinuxTls_LastError()));
@@ -205,7 +206,13 @@ HRESULT NativeTls::ReadWriteHelper(CLR_RT_StackFrame &stack, bool write)
         result = write ? LinuxTls_Write(handle, buffer, length - total) : LinuxTls_Read(handle, buffer, length - total);
         if (result == LinuxTls_Error)
         {
-            NANOCLR_CHECK_HRESULT(ThrowCryptographicError(stack, LinuxTls_LastError()));
+            int error = LinuxTls_LastError();
+            if (error > 0)
+            {
+                NativeSocket::ThrowError(stack, error);
+                NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
+            }
+            NANOCLR_CHECK_HRESULT(ThrowCryptographicError(stack, error));
         }
         if (result == LinuxTls_WantRead || result == LinuxTls_WantWrite)
         {

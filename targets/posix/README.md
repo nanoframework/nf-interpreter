@@ -85,6 +85,13 @@ Supported in this first implementation:
 - Common integer socket options: reuse address, keepalive, broadcast, don't route,
   inline out-of-band data, send/receive buffer sizes, accept status, socket error,
   TCP no-delay, IPv4 TTL/TOS; `FIONREAD`/`Socket.Available`.
+- `Linger`/`DontLinger` socket options translated to Linux `SO_LINGER`.
+  Scalar `Linger` values are timeouts in seconds; zero enables an abortive close
+  (including when passed as `false` through the managed Boolean overload).
+  Set `DontLinger` to `true` to disable lingering. Getting `Linger` returns the
+  timeout, while getting `DontLinger` reports whether lingering is disabled.
+  The `Linger` byte-array overload also accepts the two 32-bit fields
+  (enabled flag, timeout in seconds). Negative timeouts are rejected.
 - TLS clients and HTTPS servers using statically linked mbedTLS, TLS 1.2/1.3, configurable CA trust
   or explicit managed CA certificates/bundles; see [Linux TLS](#linux-tls).
 
@@ -205,9 +212,19 @@ enable debugger/wire-protocol transport.
 Linux TLS uses the repository-pinned mbedTLS, the host clock and operating-system
 entropy. It does not automatically load the host's certificate store.
 For outgoing client connections, chain verification, validity dates and the
-requested DNS hostname/IP identity are always checked. SNI is sent for DNS names.
-TLS 1.0/1.1 and client-side `SslVerification.NoVerification` are explicitly unsupported;
-`SslProtocols.None` negotiates TLS 1.2/1.3.
+requested DNS hostname/IP identity are checked by default. SNI is sent for DNS names.
+`SslProtocols.None` negotiates TLS 1.2/1.3; TLS 1.0/1.1 are unsupported.
+
+Explicitly setting `SslStream.SslVerification = SslVerification.NoVerification`
+before `AuthenticateAsClient` disables certificate chain, date and hostname/IP
+verification for that context only. This mode does not load or require CA roots,
+and ignores managed CA certificates/bundles and configured CA files. DNS SNI is
+still sent. **Use this only for testing or deliberately unauthenticated TLS: the
+connection remains encrypted but is vulnerable to impersonation and man-in-the-middle
+attacks.** The default and all other supported verification modes still require
+valid trust; errors never automatically switch to `NoVerification`.
+Transport failures during TLS reads/writes retain their socket error codes and
+raise `SocketException`; TLS protocol/cryptographic failures raise `CryptographicException`.
 
 Trust selection, in order:
 
@@ -225,8 +242,8 @@ Trust selection, in order:
 
 The CA path is optional. With neither option nor environment variable, only
 certificates supplied by managed code (per connection or through the global
-bundle) can be used. Without any trust source, outgoing TLS fails explicitly;
-certificate verification is never disabled. No CA roots are embedded or shipped,
+bundle) can be used. Without any trust source, verified outgoing TLS fails explicitly;
+certificate verification is only disabled by explicit `NoVerification`. No CA roots are embedded or shipped,
 and the host store is not used automatically. HTTPS servers do not require a CA
 path; they use their supplied server certificate and private key.
 
@@ -380,7 +397,8 @@ The outgoing CA bundle setting does **not** supply a server identity or configur
 which clients can connect. Servers do not request client certificates; mutual
 TLS requests are rejected rather than silently downgraded. For direct SslStream
 use, call `AuthenticateAsServer(identity, false, SslProtocols.None)`.
-Client-side certificate verification remains mandatory.
+Client-side certificate verification remains the default; only an explicit
+`SslVerification.NoVerification` setting disables it.
 
 ## Running Managed Applications
 

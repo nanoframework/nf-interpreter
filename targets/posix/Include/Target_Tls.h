@@ -11,7 +11,7 @@ constexpr int LinuxTls_Error = -1;
 constexpr int LinuxTls_WantRead = -2;
 constexpr int LinuxTls_WantWrite = -3;
 
-int LinuxTls_CreateContext(int protocols, const uint8_t *ca, size_t length);
+int LinuxTls_CreateContext(int protocols, const uint8_t *ca, size_t length, bool verifyPeer);
 int LinuxTls_CreateServerContext(
     int protocols,
     const uint8_t *certificate,

@@ -438,6 +438,9 @@ int NativeOption(int level, int option, int &nativeLevel)
             return SO_ACCEPTCONN;
         case SOCK_SOCKO_ERROR:
             return SO_ERROR;
+        case SOCK_SOCKO_LINGER:
+        case SOCK_SOCKO_DONTLINGER:
+            return SO_LINGER;
         default:
             return Fail(SOCK_ENOPROTOOPT);
     }
@@ -938,6 +941,50 @@ int SOCK_setsockopt(int handle, int level, int option, const char *value, int le
     {
         return Fail(s_lastError, entry);
     }
+    if (nativeLevel == SOL_SOCKET && nativeOption == SO_LINGER)
+    {
+        linger nativeValue = {};
+        if (value == nullptr)
+        {
+            return Fail(SOCK_EINVAL, entry);
+        }
+        if (option == SOCK_SOCKO_LINGER && length == sizeof(nativeValue))
+        {
+            memcpy(&nativeValue, value, sizeof(nativeValue));
+            nativeValue.l_onoff = nativeValue.l_onoff != 0;
+        }
+        else if (length == sizeof(int))
+        {
+            int scalarValue;
+            memcpy(&scalarValue, value, sizeof(scalarValue));
+            if (option == SOCK_SOCKO_LINGER)
+            {
+                // The managed scalar is a timeout in seconds, not an enable flag.
+                nativeValue.l_onoff = 1;
+                nativeValue.l_linger = scalarValue;
+            }
+            else
+            {
+                socklen_t size = sizeof(nativeValue);
+                if (RecordResult(*entry, getsockopt(entry->descriptor, SOL_SOCKET, SO_LINGER, &nativeValue, &size)) < 0)
+                {
+                    return SOCK_SOCKET_ERROR;
+                }
+                nativeValue.l_onoff = scalarValue == 0;
+            }
+        }
+        else
+        {
+            return Fail(SOCK_EINVAL, entry);
+        }
+        if (nativeValue.l_linger < 0)
+        {
+            return Fail(SOCK_EINVAL, entry);
+        }
+        return RecordResult(
+            *entry,
+            setsockopt(entry->descriptor, SOL_SOCKET, SO_LINGER, &nativeValue, sizeof(nativeValue)));
+    }
     if (value == nullptr || length != sizeof(int))
     {
         return Fail(SOCK_EINVAL, entry);
@@ -966,6 +1013,28 @@ int SOCK_getsockopt(int handle, int level, int option, char *value, int *length)
     if (value == nullptr || length == nullptr || *length < static_cast<int>(sizeof(int)))
     {
         return Fail(SOCK_EINVAL, entry);
+    }
+    if (nativeLevel == SOL_SOCKET && nativeOption == SO_LINGER)
+    {
+        linger nativeValue = {};
+        socklen_t size = sizeof(nativeValue);
+        int result = RecordResult(*entry, getsockopt(entry->descriptor, SOL_SOCKET, SO_LINGER, &nativeValue, &size));
+        if (result == 0)
+        {
+            if (option == SOCK_SOCKO_LINGER && *length >= static_cast<int>(sizeof(nativeValue)))
+            {
+                memcpy(value, &nativeValue, sizeof(nativeValue));
+                *length = sizeof(nativeValue);
+            }
+            else
+            {
+                // Managed GetSocketOption negates DontLinger's enable flag.
+                int scalarValue = option == SOCK_SOCKO_LINGER ? nativeValue.l_linger : nativeValue.l_onoff != 0;
+                memcpy(value, &scalarValue, sizeof(scalarValue));
+                *length = sizeof(scalarValue);
+            }
+        }
+        return result;
     }
     int nativeValue = 0;
     socklen_t size = sizeof(nativeValue);
