@@ -444,7 +444,7 @@ HRESULT Library_nano_esp32_cam_nanoFramework_Esp32_Camera_Esp32Camera::NativeCap
     {
         // the frame buffer is owned by the driver, so allocating the array (and a possible GC run) doesn't affect it
         CLR_RT_HeapBlock &top = stack.PushValueAndClear();
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, frame->len, g_CLR_RT_WellKnownTypes.m_UInt8));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, frame->len, g_CLR_RT_WellKnownTypes.UInt8));
 
         memcpy(top.DereferenceArray()->GetFirstElement(), frame->buf, frame->len);
     }
