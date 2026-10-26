@@ -18,6 +18,7 @@
 
 import sys
 import os
+import tempfile
 import kconfiglib
 
 # Resolve type constants — esp_kconfiglib (used inside ESP-IDF virtualenvs)
@@ -49,18 +50,15 @@ def main():
     kconf = kconfiglib.Kconfig(kconfig_root, warn_to_stderr=False)
     kconf.load_config(dot_config)
 
-    # Remove any stale nf_config.h before writing.
-    if os.path.exists(header_file):
-        os.remove(header_file)
+    # Generate separately so unchanged output keeps its modification time.
+    with tempfile.TemporaryDirectory() as temp_dir:
+        autoconf_file = os.path.join(temp_dir, "autoconf.h")
+        kconf.write_autoconf(autoconf_file)
+        with open(autoconf_file, "r") as f:
+            content = f.read()
 
-    # Write the standard autoconf header (enabled symbols only)
-    kconf.write_autoconf(header_file)
-
-    # Append #define CONFIG_X 0 for every bool/tristate symbol that is
+    # Add #define CONFIG_X 0 for every bool/tristate symbol that is
     # disabled so that #if CONFIG_X is always well-defined (-Werror=undef).
-    with open(header_file, "r") as f:
-        content = f.read()
-
     defined = set()
     for line in content.splitlines():
         if line.startswith("#define CONFIG_"):
@@ -74,20 +72,26 @@ def main():
                 disabled.append(name)
 
     if disabled:
-        with open(header_file, "a") as f:
-            f.write("\n/* Disabled Kconfig symbols — defined as 0 for -Werror=undef compatibility */\n")
-            for name in disabled:
-                f.write(f"#define {name} 0\n")
+        content += "\n/* Disabled Kconfig symbols — defined as 0 for -Werror=undef compatibility */\n"
+        for name in disabled:
+            content += f"#define {name} 0\n"
 
     # Emit source-facing aliases for Kconfig switches whose historical
     # preprocessor name in the C/C++ source differs from CONFIG_<sym>.
     # Keeps the source unchanged while making nf_config.h the single
     # source of truth for the RTM build flag.
-    with open(header_file, "a") as f:
-        f.write("\n/* Source-facing aliases */\n")
-        f.write("#if CONFIG_NF_BUILD_RTM\n")
-        f.write("#define BUILD_RTM 1\n")
-        f.write("#endif\n")
+    content += "\n/* Source-facing aliases */\n"
+    content += "#if CONFIG_NF_BUILD_RTM\n"
+    content += "#define BUILD_RTM 1\n"
+    content += "#endif\n"
+
+    if os.path.exists(header_file):
+        with open(header_file, "r") as f:
+            if f.read() == content:
+                return
+
+    with open(header_file, "w") as f:
+        f.write(content)
 
 if __name__ == "__main__":
     main()
