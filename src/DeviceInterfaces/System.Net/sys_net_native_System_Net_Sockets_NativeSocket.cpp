@@ -549,11 +549,6 @@ CLR_INT32 Library_sys_net_native_System_Net_Sockets_NativeSocket::Helper__Select
 
     res = SOCK_select(1, readfds, writefds, exceptfds, &timeval);
 
-    if (res == SOCK_SOCKET_ERROR)
-    {
-        return res;
-    }
-
     // socket is in the exception state (only return error if caller was NOT looking for the excepted state)
     if ((mode != 2) && (fdsExcept.fd_count != 0))
     {
