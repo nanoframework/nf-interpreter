@@ -50,7 +50,7 @@
             "launchCompleteCommand": "exec-continue",
             "debugServerPath": "<absolute-path-to-openocd-mind-the-forward-slashes>/bin/openocd.exe",
             "debugServerArgs": "-s \"<absolute-path-to-openocd-mind-the-forward-slashes>/scripts/\" -f board/stm32429i_eval_stlink.cfg",
-            "serverStarted": "Info\\ :\\ [\\w\\d\\.]*:\\ hardware",
+            "serverStarted": "Listening on port 3333 for gdb connections",
             "filterStderr": true,
             "externalConsole": true,
             "cwd": "${cwd}"
@@ -104,7 +104,7 @@
             "launchCompleteCommand": "exec-continue",
             "debugServerPath": "<absolute-path-to-openocd-mind-the-forward-slashes>/bin/openocd.exe",
             "debugServerArgs": "-s \"<absolute-path-to-openocd-mind-the-forward-slashes>/scripts/\" -f board/stm32429i_eval_stlink.cfg",
-            "serverStarted": "Info\\ :\\ [\\w\\d\\.]*:\\ hardware",
+            "serverStarted": "Listening on port 3333 for gdb connections",
             "filterStderr": true,
             "externalConsole": true,
             "cwd": "${cwd}"
