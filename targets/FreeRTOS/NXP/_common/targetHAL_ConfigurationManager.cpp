@@ -88,6 +88,30 @@ uint32_t GetExistingConfigSize()
     return dataEnd - (uint32_t)&__nanoConfig_start__;
 }
 
+// gets the size of the configuration block to be stored, 0 for configuration options that can't be updated
+static uint32_t GetConfigurationBlockSize(void *configurationBlock, DeviceConfigurationOption configuration)
+{
+    switch (configuration)
+    {
+        case DeviceConfigurationOption_Network:
+            return sizeof(HAL_Configuration_NetworkInterface);
+
+        case DeviceConfigurationOption_Wireless80211Network:
+            return sizeof(HAL_Configuration_Wireless80211);
+
+        case DeviceConfigurationOption_X509CaRootBundle:
+            return offsetof(HAL_Configuration_X509CaRootBundle, Certificate) +
+                   ((HAL_Configuration_X509CaRootBundle *)configurationBlock)->CertificateSize;
+
+        case DeviceConfigurationOption_X509DeviceCertificates:
+            return offsetof(HAL_Configuration_X509DeviceCertificate, Certificate) +
+                   ((HAL_Configuration_X509DeviceCertificate *)configurationBlock)->CertificateSize;
+
+        default:
+            return 0;
+    }
+}
+
 // initialization of configuration manager
 void ConfigurationManager_Initialize()
 {
@@ -411,13 +435,22 @@ UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock(
     // config sector size
     int sizeOfConfigSector = (uint32_t)&__nanoConfig_end__ - (uint32_t)&__nanoConfig_start__;
 
+    // the copy only has to hold the config data in use plus room for the block being stored, as it can grow
+    // there is no need to copy the whole config sector, which can be larger than the available heap
+    uint32_t copySize = GetExistingConfigSize() + GetConfigurationBlockSize(configurationBlock, configuration);
+
+    if (copySize > (uint32_t)sizeOfConfigSector)
+    {
+        copySize = (uint32_t)sizeOfConfigSector;
+    }
+
     // allocate memory from CRT heap
-    uint8_t *configSectorCopy = (uint8_t *)platform_malloc(sizeOfConfigSector);
+    uint8_t *configSectorCopy = (uint8_t *)platform_malloc(copySize);
 
     if (configSectorCopy != NULL)
     {
-        // copy config sector from flash to RAM
-        memcpy(configSectorCopy, &__nanoConfig_start__, sizeOfConfigSector);
+        // copy config data in use from flash to RAM
+        memcpy(configSectorCopy, &__nanoConfig_start__, copySize);
 
         // find out the address for the config block to update in the configSectorCopy
         // because we are copying back the config block to flash and just replacing the config block content
@@ -484,9 +517,8 @@ UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock(
         // subtract the start address of config sector to get the offset
         blockOffset = storageAddress - (uint32_t)&__nanoConfig_start__;
 
-        // sanity check of the new and current block sizes against the config sector
-        if (blockSize > (uint32_t)sizeOfConfigSector - blockOffset ||
-            oldBlockSize > (uint32_t)sizeOfConfigSector - blockOffset)
+        // sanity check of the block offset and of the new and current block sizes against the config data copy
+        if (blockOffset > copySize || blockSize > copySize - blockOffset || oldBlockSize > copySize - blockOffset)
         {
             platform_free(configSectorCopy);
 
@@ -509,17 +541,18 @@ UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock(
                 usedSize = oldTailOffset;
             }
 
-            if (usedSize > (uint32_t)sizeOfConfigSector)
+            if (usedSize > copySize)
             {
-                usedSize = (uint32_t)sizeOfConfigSector;
+                usedSize = copySize;
             }
 
             if (blockSize > oldBlockSize)
             {
                 shift = blockSize - oldBlockSize;
 
-                // check if the used data plus the size increase still fits in the config sector
-                if (shift > (uint32_t)sizeOfConfigSector - usedSize)
+                // check if the used data plus the size increase still fits in the config data copy
+                // (which is capped to the config sector size)
+                if (shift > copySize - usedSize)
                 {
                     platform_free(configSectorCopy);
 
@@ -556,7 +589,7 @@ UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock(
             if (iMXRTFlexSPIDriver_Write(
                     NULL,
                     (uint32_t)&__nanoConfig_start__,
-                    sizeOfConfigSector,
+                    copySize,
                     (unsigned char *)configSectorCopy,
                     false))
             {
