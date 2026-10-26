@@ -587,7 +587,7 @@ int SOCK_accept(int handle, SOCK_sockaddr *address, int *length)
     auto entry = FindSocket(handle);
     if (entry == nullptr)
     {
-        return SOCK_SOCKET_ERROR;
+        return Fail(SOCK_EBADF);
     }
     sockaddr_in native;
     socklen_t size = sizeof(native);
@@ -612,7 +612,7 @@ int SOCK_close(int handle)
     auto entry = FindSocket(handle);
     if (entry == nullptr)
     {
-        return SOCK_SOCKET_ERROR;
+        return Fail(SOCK_EBADF);
     }
     int result = RecordResult(*entry, close(entry->descriptor));
     s_sockets.erase(handle);
@@ -627,7 +627,7 @@ int SOCK_shutdown(int handle, int how)
     auto entry = FindSocket(handle);
     if (entry == nullptr)
     {
-        return SOCK_SOCKET_ERROR;
+        return Fail(SOCK_EBADF);
     }
     if (how < 0 || how > 2)
     {
@@ -644,7 +644,7 @@ int SOCK_sendto(int handle, const char *buffer, int length, int flags, const SOC
     auto entry = FindSocket(handle);
     if (entry == nullptr)
     {
-        return SOCK_SOCKET_ERROR;
+        return Fail(SOCK_EBADF);
     }
     int nativeFlags = TranslateFlags(flags);
     sockaddr_in native;
@@ -675,7 +675,7 @@ int SOCK_recvfrom(int handle, char *buffer, int length, int flags, SOCK_sockaddr
     auto entry = FindSocket(handle);
     if (entry == nullptr)
     {
-        return SOCK_SOCKET_ERROR;
+        return Fail(SOCK_EBADF);
     }
     int nativeFlags = TranslateFlags(flags);
     if (nativeFlags < 0 || length < 0)
@@ -712,7 +712,7 @@ int SOCK_getsockname(int handle, SOCK_sockaddr *address, int *length)
     auto entry = FindSocket(handle);
     if (entry == nullptr)
     {
-        return SOCK_SOCKET_ERROR;
+        return Fail(SOCK_EBADF);
     }
     sockaddr_in native;
     socklen_t size = sizeof(native);
@@ -726,7 +726,7 @@ int SOCK_getpeername(int handle, SOCK_sockaddr *address, int *length)
     auto entry = FindSocket(handle);
     if (entry == nullptr)
     {
-        return SOCK_SOCKET_ERROR;
+        return Fail(SOCK_EBADF);
     }
     sockaddr_in native;
     socklen_t size = sizeof(native);
@@ -740,7 +740,7 @@ int SOCK_ioctl(int handle, int command, int *data)
     auto entry = FindSocket(handle);
     if (entry == nullptr)
     {
-        return SOCK_SOCKET_ERROR;
+        return Fail(SOCK_EBADF);
     }
     if (data == nullptr)
     {
@@ -787,7 +787,11 @@ int SOCK_getsocklasterror(int handle)
     return s_lastError;
 }
 
-int SOCK_select(int, SOCK_fd_set *readfds, SOCK_fd_set *writefds, SOCK_fd_set *exceptfds, const SOCK_timeval *timeout)
+static int SelectSockets(
+    SOCK_fd_set *readfds,
+    SOCK_fd_set *writefds,
+    SOCK_fd_set *exceptfds,
+    const SOCK_timeval *timeout)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
     if (s_workerFailed)
@@ -823,7 +827,7 @@ int SOCK_select(int, SOCK_fd_set *readfds, SOCK_fd_set *writefds, SOCK_fd_set *e
         auto entry = FindSocket(handle);
         if (entry == nullptr)
         {
-            return SOCK_SOCKET_ERROR;
+            return Fail(SOCK_EBADF);
         }
         descriptors.push_back({entry->descriptor, interest, 0});
     }
@@ -900,13 +904,33 @@ int SOCK_select(int, SOCK_fd_set *readfds, SOCK_fd_set *writefds, SOCK_fd_set *e
     return count;
 }
 
+int SOCK_select(int, SOCK_fd_set *readfds, SOCK_fd_set *writefds, SOCK_fd_set *exceptfds, const SOCK_timeval *timeout)
+{
+    int result = SelectSockets(readfds, writefds, exceptfds, timeout);
+
+    if (result == SOCK_SOCKET_ERROR)
+    {
+        // Callers inspect the sets even when select fails, so report nothing ready. Otherwise the caller's
+        // untouched sets would read as an exception and the error stored by Fail() could be overwritten.
+        for (SOCK_fd_set *set : {readfds, writefds, exceptfds})
+        {
+            if (set != nullptr)
+            {
+                set->fd_count = 0;
+            }
+        }
+    }
+
+    return result;
+}
+
 int SOCK_setsockopt(int handle, int level, int option, const char *value, int length)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
     auto entry = FindSocket(handle);
     if (entry == nullptr)
     {
-        return SOCK_SOCKET_ERROR;
+        return Fail(SOCK_EBADF);
     }
     int nativeLevel;
     int nativeOption = NativeOption(level, option, nativeLevel);
@@ -931,7 +955,7 @@ int SOCK_getsockopt(int handle, int level, int option, char *value, int *length)
     auto entry = FindSocket(handle);
     if (entry == nullptr)
     {
-        return SOCK_SOCKET_ERROR;
+        return Fail(SOCK_EBADF);
     }
     int nativeLevel;
     int nativeOption = NativeOption(level, option, nativeLevel);
