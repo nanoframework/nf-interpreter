@@ -54,7 +54,7 @@ def main():
     with tempfile.TemporaryDirectory() as temp_dir:
         autoconf_file = os.path.join(temp_dir, "autoconf.h")
         kconf.write_autoconf(autoconf_file)
-        with open(autoconf_file, "r") as f:
+        with open(autoconf_file, "r", encoding="utf-8") as f:
             content = f.read()
 
     # Add #define CONFIG_X 0 for every bool/tristate symbol that is
@@ -86,11 +86,11 @@ def main():
     content += "#endif\n"
 
     if os.path.exists(header_file):
-        with open(header_file, "r") as f:
+        with open(header_file, "r", encoding="utf-8") as f:
             if f.read() == content:
                 return
 
-    with open(header_file, "w") as f:
+    with open(header_file, "w", encoding="utf-8") as f:
         f.write(content)
 
 if __name__ == "__main__":
