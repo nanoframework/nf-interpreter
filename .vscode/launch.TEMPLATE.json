@@ -26,7 +26,7 @@
             "launchCompleteCommand": "exec-continue",
             "debugServerPath": "<absolute-path-to-esp32-openocd-mind-the-forward-slashes>/bin/openocd.exe",
             "debugServerArgs": "-s \"<absolute-path-to-esp32-openocd-mind-the-forward-slashes>/share/openocd/scripts/\" -f interface/<interface-config-file>.cfg -f board/<board-config-file>.cfg",
-            "serverStarted": "Info\\ :\\ [\\w\\d\\.]*:\\ hardware",
+            "serverStarted": "Listening on port 3333 for gdb connections",
             "filterStderr": true,
             "externalConsole": true,
             "cwd": "${cwd}",
@@ -62,7 +62,7 @@
             "launchCompleteCommand": "exec-continue",
             "debugServerPath": "<absolute-path-to-esp32-openocd-mind-the-forward-slashes>/bin/openocd.exe",
             "debugServerArgs": "-s \"<absolute-path-to-esp32-openocd-mind-the-forward-slashes>/share/openocd/scripts/\" -f interface/<interface-config-file>.cfg -f board/<board-config-file>.cfg",
-            "serverStarted": "Info\\ :\\ [\\w\\d\\.]*:\\ hardware",
+            "serverStarted": "Listening on port 3333 for gdb connections",
             "filterStderr": true,
             "externalConsole": true,
             "cwd": "${cwd}"
@@ -94,7 +94,7 @@
             "program": "${workspaceRoot}/build/nanoCLR.elf",
 
             "launchCompleteCommand": "None",
-            "serverStarted": "Info\\ :\\ [\\w\\d\\.]*:\\ hardware",
+            "serverStarted": "Listening on port 3333 for gdb connections",
             "filterStderr": true,
             "externalConsole": true,
             "cwd": "${cwd}"
