@@ -233,22 +233,6 @@ The above .NET nanoFramework interpreter builds include support for the class li
   * [CMake files for the build system](CMake)
 </details>
 
-## Reusing downloaded build dependencies
-
-When cleaning the build directory or switching targets, preserve the complete `build/_deps`
-directory, including its `*-subbuild` directories. CMake uses those directories to remember
-which repositories it has already cloned. The build selects `CMP0168 OLD` to keep this
-bookkeeping with the dependencies rather than under `build/CMakeFiles`, where
-`cmake --fresh` would remove it.
-This uses CMake's legacy sub-build implementation; the compatibility policy may
-need revisiting when upgrading to a CMake version that removes it.
-
-Changing from the newer FetchContent layout may repopulate dependencies once. Subsequent
-fresh configurations can reuse the preserved cache. Dependency versions remain controlled
-by their declared Git revisions; `UPDATE_DISCONNECTED ON` does not automatically pull
-upstream branch changes. Messages saying a dependency is "from GitHub repo" identify its
-source, not necessarily a new download.
-
 ## Feedback and documentation
 
 For documentation, providing feedback, issues and finding out how to contribute please refer to the [Home repo](https://github.com/nanoframework/Home).
