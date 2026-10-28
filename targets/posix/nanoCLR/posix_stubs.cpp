@@ -111,6 +111,9 @@ extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Gpio;
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_I2c;
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Spi;
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_Ports;
+#if NANOCLR_HOST_LINUX
+extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Net;
+#endif
 
 const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[] = {
     &g_CLR_AssemblyNative_mscorlib,
@@ -127,9 +130,13 @@ const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[] = {
     &g_CLR_AssemblyNative_System_Device_I2c,
     &g_CLR_AssemblyNative_System_Device_Spi,
     &g_CLR_AssemblyNative_System_IO_Ports,
+#if NANOCLR_HOST_LINUX
+    &g_CLR_AssemblyNative_System_Net,
+#endif
     nullptr,
 };
-const uint16_t g_CLR_InteropAssembliesCount = ARRAYSIZE(g_CLR_InteropAssembliesNativeData) - 1; // exclude nullptr sentinel
+const uint16_t g_CLR_InteropAssembliesCount =
+    ARRAYSIZE(g_CLR_InteropAssembliesNativeData) - 1; // exclude nullptr sentinel
 
 // ---------------------------------------------------------------------------
 // Configuration Manager stubs.
