@@ -67,17 +67,29 @@ bool IsMarkerMatched(void *header, const void *marker, size_t len)
 bool SyncToMessageStart()
 {
     uint32_t len;
+    uint32_t headerSize = sizeof(_inboundMessage.m_header);
 
     while (true)
     {
-        len = sizeof(_inboundMessage.m_header) - _size;
-
-        if (len <= 0)
+        if (_size > headerSize)
         {
-            break;
+            TRACE(
+                TRACE_ERRORS,
+                "RxError: Invalid receive size while syncing to packet start (%u > %u)\n",
+                _size,
+                headerSize);
+            return false;
         }
 
-        size_t lenCmp = min(len, sizeof(((WP_Packet *)0)->m_signature));
+        len = headerSize - _size;
+
+        if (len == 0)
+        {
+            TRACE(TRACE_ERRORS, "RxError: Packet marker not found while resyncing to message start\n");
+            return false;
+        }
+
+        size_t lenCmp = min((size_t)len, sizeof(((WP_Packet *)0)->m_signature));
 
         if (IsMarkerMatched(&_inboundMessage.m_header, MARKER_DEBUGGER_V1, lenCmp) ||
             IsMarkerMatched(&_inboundMessage.m_header, MARKER_PACKET_V1, lenCmp))
@@ -91,7 +103,8 @@ bool SyncToMessageStart()
         size_t moveLength = len - 1;
 
         // Ensure that the memory regions do not exceed allocated bounds
-        if ((src + moveLength >= (uint8_t *)&_inboundMessage + sizeof(_inboundMessage)) ||
+        if (moveLength > sizeof(_inboundMessage.m_header) - 1 ||
+            (src + moveLength >= (uint8_t *)&_inboundMessage + sizeof(_inboundMessage)) ||
             (dst + moveLength >= (uint8_t *)&_inboundMessage + sizeof(_inboundMessage)))
         {
             return false;
@@ -101,11 +114,14 @@ bool SyncToMessageStart()
         memmove(dst, src, moveLength);
 
         // Update pointer and expected size
-        _pos--;
+        if (_pos != NULL)
+        {
+            _pos--;
+        }
         _size++;
 
         // Sanity checks
-        if (_size > sizeof(_inboundMessage.m_header) || _pos < (uint8_t *)&_inboundMessage.m_header)
+        if (_size > headerSize || (_pos != NULL && _pos < (uint8_t *)&_inboundMessage.m_header))
         {
             return false;
         }
