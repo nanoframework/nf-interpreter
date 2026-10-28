@@ -73,7 +73,11 @@ bool SyncToMessageStart()
     {
         if (_size > headerSize)
         {
-            TRACE(TRACE_ERRORS, "RxError: Invalid receive size while syncing to packet start (%u > %u)\n", _size, headerSize);
+            TRACE(
+                TRACE_ERRORS,
+                "RxError: Invalid receive size while syncing to packet start (%u > %u)\n",
+                _size,
+                headerSize);
             return false;
         }
 
