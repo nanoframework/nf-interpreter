@@ -110,7 +110,7 @@ typedef unsigned char u_char;
 typedef unsigned short u_short;
 typedef unsigned int u_int;
 typedef unsigned long u_long;
-typedef unsigned __int64 u_int64;
+typedef uint64_t u_int64;
 //
 //
 // unspecified
@@ -614,7 +614,7 @@ bool SOCKETS_UpgradeToSsl(
     uint32_t caCertLen,
     const uint8_t *pDeviceCert,
     uint32_t deviceCertLen,
-    LPCSTR szTargetHost);
+    const char *szTargetHost);
 bool SOCKETS_IsUsingSsl(int32_t ComPortNum);
 
 void SOCKETS_CloseConnections();
