@@ -4723,10 +4723,13 @@ HRESULT CLR_RT_Assembly::ResolveMethodRef()
                 methodName);
 #endif
 
-            while (NANOCLR_INDEX_IS_VALID(typeDefInstance))
+            // walk the hierarchy on a copy: typeDefInstance must stay valid for the error message below
+            CLR_RT_TypeDef_Instance searchInstance = typeDefInstance;
+
+            while (NANOCLR_INDEX_IS_VALID(searchInstance))
             {
-                if (typeDefInstance.assembly
-                        ->FindMethodDef(typeDefInstance.target, methodName, this, src->signature, dst->target))
+                if (searchInstance.assembly
+                        ->FindMethodDef(searchInstance.target, methodName, this, src->signature, dst->target))
                 {
                     fGot = true;
 
@@ -4736,34 +4739,31 @@ HRESULT CLR_RT_Assembly::ResolveMethodRef()
                     break;
                 }
 
-                typeDefInstance.SwitchToParent();
+                searchInstance.SwitchToParent();
             }
 
             if (fGot == false)
             {
 #if !defined(BUILD_RTM)
-                const CLR_RECORD_TYPEDEF *qTD = typeDefInstance.target;
-                CLR_RT_Assembly *qASSM = typeDefInstance.assembly;
-
                 CLR_Debug::Printf(
                     "Unknown MethodRef: %s.%s.%s\r\n",
-                    qASSM->GetString(qTD->nameSpace),
-                    qASSM->GetString(qTD->name),
+                    typeDefInstance.assembly->GetString(typeDefInstance.target->nameSpace),
+                    typeDefInstance.assembly->GetString(typeDefInstance.target->name),
                     methodName);
 #endif
 #if defined(VIRTUAL_DEVICE)
                 NANOCLR_CHARMSG_SET_AND_LEAVE(
                     CLR_E_FAIL,
                     "Unknown MethodRef: %s.%s.%s\r\n",
-                    qASSM->GetString(qTD->nameSpace),
-                    qASSM->GetString(qTD->name),
+                    typeDefInstance.assembly->GetString(typeDefInstance.target->nameSpace),
+                    typeDefInstance.assembly->GetString(typeDefInstance.target->name),
                     methodName);
 #else
                 NANOCLR_MSG1_SET_AND_LEAVE(
                     CLR_E_FAIL,
                     L"Unknown MethodRef: %s.%s.%s\r\n",
-                    qASSM->GetString(qTD->NameSpace),
-                    qASSM->GetString(qTD->Name),
+                    typeDefInstance.assembly->GetString(typeDefInstance.target->nameSpace),
+                    typeDefInstance.assembly->GetString(typeDefInstance.target->name),
                     methodName);
 #endif
             }
@@ -4774,7 +4774,7 @@ HRESULT CLR_RT_Assembly::ResolveMethodRef()
                 char *szBuffer = rgBuffer;
                 size_t iBuffer = MAXSTRLEN(rgBuffer);
 
-                g_CLR_RT_TypeSystem.BuildTypeName(typeDefInstance, szBuffer, iBuffer);
+                g_CLR_RT_TypeSystem.BuildTypeName(searchInstance, szBuffer, iBuffer);
                 rgBuffer[MAXSTRLEN(rgBuffer)] = 0;
 
                 CLR_Debug::Printf("        [%04X] Resolving '%s' from '%s'\r\n", i, methodName, rgBuffer);
