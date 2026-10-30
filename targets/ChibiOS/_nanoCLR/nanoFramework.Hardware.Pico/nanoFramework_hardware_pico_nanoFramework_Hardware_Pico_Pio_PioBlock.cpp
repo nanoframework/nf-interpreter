@@ -103,6 +103,7 @@ HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioB
 
     CLR_RT_HeapBlock *program;
     CLR_RT_HeapBlock_Array *instructions;
+    uint32_t programSlots;
     int block, length, offset;
 
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -125,6 +126,13 @@ HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioB
         offset > static_cast<int>(RP_PIO_NUM_INSTR_MEM) - length)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+    }
+
+    programSlots = (UINT32_MAX >> (RP_PIO_NUM_INSTR_MEM - length)) << offset;
+
+    if ((pioGetImemAllocatedMask(RP_PIO_BLOCK(block)) & programSlots) != programSlots)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
 
     pioProgramUnload(RP_PIO_BLOCK(block), offset, length);
