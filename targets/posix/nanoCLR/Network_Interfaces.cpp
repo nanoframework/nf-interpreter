@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <Target_Network.h>
+#include <Host_Network.h>
 
 #include <arpa/inet.h>
 #include <ifaddrs.h>
@@ -53,7 +53,7 @@ bool ReadDns(std::array<uint32_t, 2> &dns)
     return success;
 }
 
-bool ReadGateways(std::vector<LinuxNetworkInterface> &interfaces)
+bool ReadGateways(std::vector<HostNetworkInterface> &interfaces)
 {
     FILE *file = fopen("/proc/net/route", "r");
     if (file == nullptr)
@@ -98,7 +98,7 @@ bool ReadGateways(std::vector<LinuxNetworkInterface> &interfaces)
 }
 } // namespace
 
-int LinuxNetwork_ListInterfaces(std::vector<LinuxNetworkInterface> &interfaces)
+int HostNetwork_ListInterfaces(std::vector<HostNetworkInterface> &interfaces)
 {
     interfaces.clear();
     ifaddrs *addresses;
@@ -107,7 +107,7 @@ int LinuxNetwork_ListInterfaces(std::vector<LinuxNetworkInterface> &interfaces)
         perror("nanoCLR enumerate interfaces");
         return -1;
     }
-    std::map<uint32_t, LinuxNetworkInterface> entries;
+    std::map<uint32_t, HostNetworkInterface> entries;
     bool success = true;
     for (auto current = addresses; current != nullptr; current = current->ifa_next)
     {

@@ -5,6 +5,7 @@
 //
 #include "stdafx.h"
 #include "nanoCLR_native.h"
+#include <Host_Network.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -311,6 +312,7 @@ struct Settings
 
     void Cleanup()
     {
+        SOCKETS_CloseConnections();
         CLR_RT_ExecutionEngine::DeleteInstance();
 
         memset(&g_CLR_RT_ExecutionEngine, 0, sizeof(g_CLR_RT_ExecutionEngine));

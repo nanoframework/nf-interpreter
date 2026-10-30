@@ -3,9 +3,10 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <Target_Network.h>
-#include <Target_Tls.h>
+#include <Host_Network.h>
+#include <Host_Tls.h>
 
+#if !defined(_WIN32)
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <netdb.h>
@@ -14,6 +15,7 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#endif
 
 #include <algorithm>
 #include <cerrno>
@@ -33,9 +35,22 @@ namespace
 constexpr size_t c_maxSockets = 128;
 constexpr size_t c_maxResolverJobs = 16;
 
+#if defined(_WIN32)
+using NativeSocket = SOCKET;
+using NativePoll = WSAPOLLFD;
+using NativeLength = int;
+constexpr NativeSocket c_invalidSocket = INVALID_SOCKET;
+static_assert(FD_SETSIZE > c_maxSockets, "The readiness worker also needs a wake socket.");
+#else
+using NativeSocket = int;
+using NativePoll = pollfd;
+using NativeLength = socklen_t;
+constexpr NativeSocket c_invalidSocket = -1;
+#endif
+
 struct SocketEntry
 {
-    int descriptor;
+    NativeSocket descriptor;
     bool datagram;
     short interest = 0;
     int lastError = 0;
@@ -60,7 +75,7 @@ std::map<int, std::shared_ptr<ResolveJob>> s_jobs;
 std::deque<std::shared_ptr<ResolveJob>> s_resolverQueue;
 std::thread s_socketThread;
 std::thread s_resolverThread;
-int s_wakePipe[2] = {-1, -1};
+NativeSocket s_wakePipe[2] = {c_invalidSocket, c_invalidSocket};
 int64_t s_nextSocket = 1;
 int64_t s_nextJob = 1;
 bool s_running = false;
@@ -70,6 +85,10 @@ thread_local int s_lastError = 0;
 
 int MapError(int error)
 {
+#if defined(_WIN32)
+    // nanoFramework socket error codes use the Winsock numbering.
+    return error == WSAEINPROGRESS ? SOCK_EWOULDBLOCK : error;
+#else
     switch (error)
     {
         case 0:
@@ -143,6 +162,124 @@ int MapError(int error)
         default:
             return SOCK_SYSCALLFAILURE;
     }
+#endif
+}
+
+int NativeError()
+{
+#if defined(_WIN32)
+    return WSAGetLastError();
+#else
+    return errno;
+#endif
+}
+
+int CloseSocket(NativeSocket socket)
+{
+#if defined(_WIN32)
+    return closesocket(socket);
+#else
+    return close(socket);
+#endif
+}
+
+int NativePollSockets(NativePoll *descriptors, size_t count, int timeout)
+{
+#if defined(_WIN32)
+    if (count == 0)
+    {
+        return 0;
+    }
+    fd_set readers, writers, exceptions;
+    FD_ZERO(&readers);
+    FD_ZERO(&writers);
+    FD_ZERO(&exceptions);
+    for (size_t i = 0; i < count; ++i)
+    {
+        descriptors[i].revents = 0;
+        if ((descriptors[i].events & POLLIN) != 0)
+        {
+            FD_SET(descriptors[i].fd, &readers);
+        }
+        if ((descriptors[i].events & POLLOUT) != 0)
+        {
+            FD_SET(descriptors[i].fd, &writers);
+        }
+        FD_SET(descriptors[i].fd, &exceptions);
+    }
+    timeval wait = {timeout / 1000, (timeout % 1000) * 1000};
+    int result = select(0, &readers, &writers, &exceptions, timeout < 0 ? nullptr : &wait);
+    if (result > 0)
+    {
+        for (size_t i = 0; i < count; ++i)
+        {
+            if (FD_ISSET(descriptors[i].fd, &readers))
+            {
+                descriptors[i].revents |= POLLIN;
+            }
+            if (FD_ISSET(descriptors[i].fd, &writers))
+            {
+                descriptors[i].revents |= POLLOUT;
+            }
+            if (FD_ISSET(descriptors[i].fd, &exceptions))
+            {
+                descriptors[i].revents |= POLLPRI | POLLERR;
+            }
+        }
+    }
+    return result;
+#else
+    return poll(descriptors, count, timeout);
+#endif
+}
+
+int NativeGetOption(NativeSocket socket, int level, int option, void *value, NativeLength *length)
+{
+    return getsockopt(socket, level, option, static_cast<char *>(value), length);
+}
+
+int NativeSetOption(NativeSocket socket, int level, int option, const void *value, NativeLength length)
+{
+    return setsockopt(socket, level, option, static_cast<const char *>(value), length);
+}
+
+NativeSocket OpenSocket(int type, int protocol)
+{
+#if defined(_WIN32)
+    SOCKET socket = WSASocketW(AF_INET, type, protocol, nullptr, 0, WSA_FLAG_NO_HANDLE_INHERIT);
+    if (socket != INVALID_SOCKET)
+    {
+        u_long nonblocking = 1;
+        if (ioctlsocket(socket, FIONBIO, &nonblocking) != 0)
+        {
+            int error = WSAGetLastError();
+            closesocket(socket);
+            WSASetLastError(error);
+            return INVALID_SOCKET;
+        }
+    }
+    return socket;
+#else
+    return socket(AF_INET, type | SOCK_NONBLOCK | SOCK_CLOEXEC, protocol);
+#endif
+}
+
+bool OpenWakeSockets()
+{
+#if defined(_WIN32)
+    s_wakePipe[0] = OpenSocket(SOCK_DGRAM, IPPROTO_UDP);
+    s_wakePipe[1] = OpenSocket(SOCK_DGRAM, IPPROTO_UDP);
+    sockaddr_in address = {};
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    int length = sizeof(address);
+    return s_wakePipe[0] != INVALID_SOCKET && s_wakePipe[1] != INVALID_SOCKET &&
+           bind(s_wakePipe[0], reinterpret_cast<sockaddr *>(&address), sizeof(address)) == 0 &&
+           getsockname(s_wakePipe[0], reinterpret_cast<sockaddr *>(&address), &length) == 0 &&
+           connect(s_wakePipe[1], reinterpret_cast<sockaddr *>(&address), length) == 0;
+#else
+    return pipe2(s_wakePipe, O_NONBLOCK | O_CLOEXEC) == 0;
+#endif
 }
 
 int Fail(int error, SocketEntry *entry = nullptr)
@@ -168,7 +305,7 @@ SocketEntry *FindSocket(int handle)
 
 int RecordResult(SocketEntry &entry, int result)
 {
-    entry.lastError = result < 0 ? MapError(errno) : 0;
+    entry.lastError = result < 0 ? MapError(NativeError()) : 0;
     s_lastError = entry.lastError;
     return result;
 }
@@ -179,11 +316,15 @@ void WakeWorker()
     int result;
     do
     {
+#if defined(_WIN32)
+        result = send(s_wakePipe[1], &value, 1, 0);
+#else
         result = write(s_wakePipe[1], &value, 1);
-    } while (result < 0 && errno == EINTR);
-    if (result < 0 && errno != EAGAIN)
+#endif
+    } while (result < 0 && MapError(NativeError()) == SOCK_EINTR);
+    if (result < 0 && MapError(NativeError()) != SOCK_EWOULDBLOCK)
     {
-        perror("nanoCLR network wake");
+        fprintf(stderr, "nanoCLR network wake failed (%d)\n", NativeError());
     }
 }
 
@@ -198,11 +339,11 @@ int RecordIoResult(SocketEntry &entry, int result, short interest)
     return result;
 }
 
-int AddSocket(int descriptor, bool datagram = false)
+int AddSocket(NativeSocket descriptor, bool datagram = false)
 {
     if (s_sockets.size() >= c_maxSockets || s_nextSocket > INT_MAX)
     {
-        close(descriptor);
+        CloseSocket(descriptor);
         return Fail(SOCK_EMFILE);
     }
     int handle = static_cast<int>(s_nextSocket++);
@@ -261,7 +402,7 @@ void SocketWorker()
 {
     for (;;)
     {
-        std::vector<pollfd> descriptors;
+        std::vector<NativePoll> descriptors;
         std::vector<int> handles;
         {
             std::lock_guard<std::mutex> lock(s_mutex);
@@ -280,14 +421,21 @@ void SocketWorker()
             }
         }
 
-        int result = poll(descriptors.data(), descriptors.size(), -1);
+        int result = NativePollSockets(descriptors.data(), descriptors.size(), -1);
         if (result < 0)
         {
-            if (errno == EINTR)
+            if (MapError(NativeError()) == SOCK_EINTR)
             {
                 continue;
             }
-            perror("nanoCLR network poll");
+#if defined(_WIN32)
+            // A socket may have closed after the worker took its descriptor snapshot.
+            if (NativeError() == WSAENOTSOCK)
+            {
+                continue;
+            }
+#endif
+            fprintf(stderr, "nanoCLR network poll failed (%d)\n", NativeError());
             {
                 std::lock_guard<std::mutex> lock(s_mutex);
                 s_workerFailed = true;
@@ -298,7 +446,11 @@ void SocketWorker()
         if (descriptors[0].revents != 0)
         {
             char buffer[128];
+#if defined(_WIN32)
+            while (recv(s_wakePipe[0], buffer, sizeof(buffer), 0) > 0)
+#else
             while (read(s_wakePipe[0], buffer, sizeof(buffer)) > 0)
+#endif
             {
             }
         }
@@ -350,7 +502,9 @@ void ResolverWorker()
         hints.ai_flags = AI_CANONNAME;
         addrinfo *addresses = nullptr;
         int result = getaddrinfo(job->name.c_str(), nullptr, &hints, &addresses);
+#if !defined(_WIN32)
         int systemError = errno;
+#endif
         std::vector<SOCK_sockaddr_in> converted;
         std::string canonicalName = job->name;
         for (auto address = addresses; address != nullptr; address = address->ai_next)
@@ -381,7 +535,9 @@ void ResolverWorker()
             job->error = result == 0            ? 0
                          : result == EAI_AGAIN  ? SOCK_TRY_AGAIN
                          : result == EAI_MEMORY ? SOCK_ENOBUFS
+#if !defined(_WIN32)
                          : result == EAI_SYSTEM ? MapError(systemError)
+#endif
                                                 : SOCK_HOST_NOT_FOUND;
             if (job->error == 0 && job->addresses.empty())
             {
@@ -454,9 +610,29 @@ bool Network_Initialize()
     {
         return !s_stopping && !s_workerFailed;
     }
-    if (pipe2(s_wakePipe, O_NONBLOCK | O_CLOEXEC) < 0)
+#if defined(_WIN32)
+    WSADATA data;
+    int startupError = WSAStartup(MAKEWORD(2, 2), &data);
+    if (startupError != 0)
     {
-        perror("nanoCLR network pipe");
+        fprintf(stderr, "nanoCLR WSAStartup failed (%d)\n", startupError);
+        return false;
+    }
+#endif
+    if (!OpenWakeSockets())
+    {
+        fprintf(stderr, "nanoCLR network wake initialization failed (%d)\n", NativeError());
+        for (auto &socket : s_wakePipe)
+        {
+            if (socket != c_invalidSocket)
+            {
+                CloseSocket(socket);
+                socket = c_invalidSocket;
+            }
+        }
+#if defined(_WIN32)
+        WSACleanup();
+#endif
         return false;
     }
     s_stopping = false;
@@ -479,11 +655,11 @@ bool Network_Initialize()
 
 void SOCKETS_CloseConnections()
 {
-    LinuxTls_Reset();
+    HostTls_Reset();
     std::lock_guard<std::mutex> lock(s_mutex);
     for (auto &[handle, entry] : s_sockets)
     {
-        close(entry.descriptor);
+        CloseSocket(entry.descriptor);
     }
     s_sockets.clear();
     for (auto &[id, job] : s_jobs)
@@ -521,9 +697,12 @@ bool Network_Uninitialize()
     }
     SOCKETS_CloseConnections();
     std::lock_guard<std::mutex> lock(s_mutex);
-    close(s_wakePipe[0]);
-    close(s_wakePipe[1]);
-    s_wakePipe[0] = s_wakePipe[1] = -1;
+    CloseSocket(s_wakePipe[0]);
+    CloseSocket(s_wakePipe[1]);
+    s_wakePipe[0] = s_wakePipe[1] = c_invalidSocket;
+#if defined(_WIN32)
+    WSACleanup();
+#endif
     s_running = false;
     return true;
 }
@@ -544,9 +723,9 @@ int SOCK_socket(int family, int type, int protocol)
     {
         return Fail(SOCK_EPROTONOSUPPORT);
     }
-    int descriptor =
-        socket(AF_INET, (type == SOCK_SOCK_STREAM ? SOCK_STREAM : SOCK_DGRAM) | SOCK_NONBLOCK | SOCK_CLOEXEC, protocol);
-    return descriptor < 0 ? Fail(MapError(errno)) : AddSocket(descriptor, type == SOCK_SOCK_DGRAM);
+    NativeSocket descriptor = OpenSocket(type == SOCK_SOCK_STREAM ? SOCK_STREAM : SOCK_DGRAM, protocol);
+    return descriptor == c_invalidSocket ? Fail(MapError(NativeError()))
+                                         : AddSocket(descriptor, type == SOCK_SOCK_DGRAM);
 }
 
 int SOCK_bind(int handle, const SOCK_sockaddr *address, int length)
@@ -593,16 +772,38 @@ int SOCK_accept(int handle, SOCK_sockaddr *address, int *length)
         return Fail(SOCK_EBADF);
     }
     sockaddr_in native;
-    socklen_t size = sizeof(native);
-    int descriptor =
+    NativeLength size = sizeof(native);
+    NativeSocket descriptor =
+#if defined(_WIN32)
+        accept(entry->descriptor, reinterpret_cast<sockaddr *>(&native), &size);
+    int result = descriptor == INVALID_SOCKET ? -1 : 0;
+    if (result == 0)
+    {
+        u_long nonblocking = 1;
+        if (ioctlsocket(descriptor, FIONBIO, &nonblocking) != 0)
+        {
+            int error = WSAGetLastError();
+            CloseSocket(descriptor);
+            return Fail(MapError(error), entry);
+        }
+        if (!SetHandleInformation(reinterpret_cast<HANDLE>(descriptor), HANDLE_FLAG_INHERIT, 0))
+        {
+            fprintf(stderr, "nanoCLR accepted socket inheritance failed (%lu)\n", GetLastError());
+            CloseSocket(descriptor);
+            return Fail(SOCK_SYSCALLFAILURE, entry);
+        }
+    }
+    if (RecordIoResult(*entry, result, POLLIN) < 0)
+#else
         accept4(entry->descriptor, reinterpret_cast<sockaddr *>(&native), &size, SOCK_NONBLOCK | SOCK_CLOEXEC);
     if (RecordIoResult(*entry, descriptor, POLLIN) < 0)
+#endif
     {
         return SOCK_SOCKET_ERROR;
     }
     if (address != nullptr && !FromNativeAddress(native, address, length))
     {
-        close(descriptor);
+        CloseSocket(descriptor);
         return Fail(s_lastError, entry);
     }
     return AddSocket(descriptor);
@@ -610,14 +811,14 @@ int SOCK_accept(int handle, SOCK_sockaddr *address, int *length)
 
 int SOCK_close(int handle)
 {
-    LinuxTls_Close(handle);
+    HostTls_Close(handle);
     std::lock_guard<std::mutex> lock(s_mutex);
     auto entry = FindSocket(handle);
     if (entry == nullptr)
     {
         return Fail(SOCK_EBADF);
     }
-    int result = RecordResult(*entry, close(entry->descriptor));
+    int result = RecordResult(*entry, CloseSocket(entry->descriptor));
     s_sockets.erase(handle);
     WakeWorker();
     Events_Set(SYSTEM_EVENT_FLAG_SOCKET);
@@ -655,13 +856,22 @@ int SOCK_sendto(int handle, const char *buffer, int length, int flags, const SOC
     {
         return Fail(length < 0 ? SOCK_EINVAL : s_lastError, entry);
     }
+    const char empty = 0;
+    if (length == 0 && buffer == nullptr)
+    {
+        buffer = &empty;
+    }
     return RecordIoResult(
         *entry,
         sendto(
             entry->descriptor,
             buffer,
             length,
-            nativeFlags | MSG_NOSIGNAL,
+            nativeFlags
+#if !defined(_WIN32)
+                | MSG_NOSIGNAL
+#endif
+            ,
             address == nullptr ? nullptr : reinterpret_cast<sockaddr *>(&native),
             address == nullptr ? 0 : sizeof(native)),
         POLLOUT);
@@ -685,12 +895,21 @@ int SOCK_recvfrom(int handle, char *buffer, int length, int flags, SOCK_sockaddr
     {
         return Fail(length < 0 ? SOCK_EINVAL : s_lastError, entry);
     }
+    if ((nativeFlags & MSG_DONTROUTE) != 0)
+    {
+        return Fail(SOCK_EOPNOTSUPP, entry);
+    }
     if (address != nullptr && (addressLength == nullptr || *addressLength < static_cast<int>(sizeof(SOCK_sockaddr_in))))
     {
         return Fail(SOCK_EFAULT, entry);
     }
     sockaddr_in native;
-    socklen_t size = sizeof(native);
+    NativeLength size = sizeof(native);
+    char empty;
+    if (length == 0 && buffer == nullptr)
+    {
+        buffer = &empty;
+    }
     int result = recvfrom(entry->descriptor, buffer, length, nativeFlags, reinterpret_cast<sockaddr *>(&native), &size);
     if ((result < 0 || (result == 0 && !entry->datagram && length > 0)) && entry->pendingError != 0)
     {
@@ -718,7 +937,7 @@ int SOCK_getsockname(int handle, SOCK_sockaddr *address, int *length)
         return Fail(SOCK_EBADF);
     }
     sockaddr_in native;
-    socklen_t size = sizeof(native);
+    NativeLength size = sizeof(native);
     int result = RecordResult(*entry, getsockname(entry->descriptor, reinterpret_cast<sockaddr *>(&native), &size));
     return result < 0 || !FromNativeAddress(native, address, length) ? Fail(s_lastError, entry) : 0;
 }
@@ -732,7 +951,7 @@ int SOCK_getpeername(int handle, SOCK_sockaddr *address, int *length)
         return Fail(SOCK_EBADF);
     }
     sockaddr_in native;
-    socklen_t size = sizeof(native);
+    NativeLength size = sizeof(native);
     int result = RecordResult(*entry, getpeername(entry->descriptor, reinterpret_cast<sockaddr *>(&native), &size));
     return result < 0 || !FromNativeAddress(native, address, length) ? Fail(s_lastError, entry) : 0;
 }
@@ -758,7 +977,17 @@ int SOCK_ioctl(int handle, int command, int *data)
     {
         return Fail(SOCK_EOPNOTSUPP, entry);
     }
+#if defined(_WIN32)
+    u_long available = 0;
+    int result = RecordResult(*entry, ioctlsocket(entry->descriptor, FIONREAD, &available));
+    if (result == 0)
+    {
+        *data = static_cast<int>((std::min)(available, static_cast<u_long>(INT_MAX)));
+    }
+    return result;
+#else
     return RecordResult(*entry, ioctl(entry->descriptor, FIONREAD, data));
+#endif
 }
 
 int SOCK_getlasterror()
@@ -766,7 +995,7 @@ int SOCK_getlasterror()
     return s_lastError;
 }
 
-bool LinuxNetwork_ArmSocket(int handle, bool write)
+bool HostNetwork_ArmSocket(int handle, bool write)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
     auto entry = FindSocket(handle);
@@ -824,7 +1053,7 @@ static int SelectSockets(
     {
         return Fail(SOCK_EINVAL);
     }
-    std::vector<pollfd> descriptors;
+    std::vector<NativePoll> descriptors;
     for (auto [handle, interest] : interests)
     {
         auto entry = FindSocket(handle);
@@ -837,11 +1066,11 @@ static int SelectSockets(
     int result;
     do
     {
-        result = poll(descriptors.data(), descriptors.size(), 0);
-    } while (result < 0 && errno == EINTR);
+        result = NativePollSockets(descriptors.data(), descriptors.size(), 0);
+    } while (result < 0 && MapError(NativeError()) == SOCK_EINTR);
     if (result < 0)
     {
-        return Fail(MapError(errno));
+        return Fail(MapError(NativeError()));
     }
     std::map<int, short> ready;
     size_t index = 0;
@@ -853,10 +1082,10 @@ static int SelectSockets(
         if ((events & (POLLERR | POLLOUT | POLLHUP)) != 0 && (entry.connecting || (events & POLLERR) != 0))
         {
             int error = 0;
-            socklen_t size = sizeof(error);
-            if (getsockopt(entry.descriptor, SOL_SOCKET, SO_ERROR, &error, &size) < 0)
+            NativeLength size = sizeof(error);
+            if (NativeGetOption(entry.descriptor, SOL_SOCKET, SO_ERROR, &error, &size) < 0)
             {
-                error = errno;
+                error = NativeError();
             }
             if (error != 0)
             {
@@ -944,14 +1173,17 @@ int SOCK_setsockopt(int handle, int level, int option, const char *value, int le
     if (nativeLevel == SOL_SOCKET && nativeOption == SO_LINGER)
     {
         linger nativeValue = {};
+        int timeout = 0;
         if (value == nullptr)
         {
             return Fail(SOCK_EINVAL, entry);
         }
-        if (option == SOCK_SOCKO_LINGER && length == sizeof(nativeValue))
+        if (option == SOCK_SOCKO_LINGER && length == 2 * sizeof(int))
         {
-            memcpy(&nativeValue, value, sizeof(nativeValue));
-            nativeValue.l_onoff = nativeValue.l_onoff != 0;
+            int enabled;
+            memcpy(&enabled, value, sizeof(enabled));
+            memcpy(&timeout, value + sizeof(int), sizeof(timeout));
+            nativeValue.l_onoff = enabled != 0;
         }
         else if (length == sizeof(int))
         {
@@ -961,29 +1193,37 @@ int SOCK_setsockopt(int handle, int level, int option, const char *value, int le
             {
                 // The managed scalar is a timeout in seconds, not an enable flag.
                 nativeValue.l_onoff = 1;
-                nativeValue.l_linger = scalarValue;
+                timeout = scalarValue;
             }
             else
             {
-                socklen_t size = sizeof(nativeValue);
-                if (RecordResult(*entry, getsockopt(entry->descriptor, SOL_SOCKET, SO_LINGER, &nativeValue, &size)) < 0)
+                NativeLength size = sizeof(nativeValue);
+                if (RecordResult(
+                        *entry,
+                        NativeGetOption(entry->descriptor, SOL_SOCKET, SO_LINGER, &nativeValue, &size)) < 0)
                 {
                     return SOCK_SOCKET_ERROR;
                 }
                 nativeValue.l_onoff = scalarValue == 0;
+                timeout = nativeValue.l_linger;
             }
         }
         else
         {
             return Fail(SOCK_EINVAL, entry);
         }
-        if (nativeValue.l_linger < 0)
+        if (timeout < 0
+#if defined(_WIN32)
+            || timeout > USHRT_MAX
+#endif
+        )
         {
             return Fail(SOCK_EINVAL, entry);
         }
+        nativeValue.l_linger = static_cast<decltype(nativeValue.l_linger)>(timeout);
         return RecordResult(
             *entry,
-            setsockopt(entry->descriptor, SOL_SOCKET, SO_LINGER, &nativeValue, sizeof(nativeValue)));
+            NativeSetOption(entry->descriptor, SOL_SOCKET, SO_LINGER, &nativeValue, sizeof(nativeValue)));
     }
     if (value == nullptr || length != sizeof(int))
     {
@@ -993,7 +1233,7 @@ int SOCK_setsockopt(int handle, int level, int option, const char *value, int le
     memcpy(&nativeValue, value, sizeof(nativeValue));
     return RecordResult(
         *entry,
-        setsockopt(entry->descriptor, nativeLevel, nativeOption, &nativeValue, sizeof(nativeValue)));
+        NativeSetOption(entry->descriptor, nativeLevel, nativeOption, &nativeValue, sizeof(nativeValue)));
 }
 
 int SOCK_getsockopt(int handle, int level, int option, char *value, int *length)
@@ -1017,14 +1257,16 @@ int SOCK_getsockopt(int handle, int level, int option, char *value, int *length)
     if (nativeLevel == SOL_SOCKET && nativeOption == SO_LINGER)
     {
         linger nativeValue = {};
-        socklen_t size = sizeof(nativeValue);
-        int result = RecordResult(*entry, getsockopt(entry->descriptor, SOL_SOCKET, SO_LINGER, &nativeValue, &size));
+        NativeLength size = sizeof(nativeValue);
+        int result =
+            RecordResult(*entry, NativeGetOption(entry->descriptor, SOL_SOCKET, SO_LINGER, &nativeValue, &size));
         if (result == 0)
         {
-            if (option == SOCK_SOCKO_LINGER && *length >= static_cast<int>(sizeof(nativeValue)))
+            if (option == SOCK_SOCKO_LINGER && *length >= 2 * static_cast<int>(sizeof(int)))
             {
-                memcpy(value, &nativeValue, sizeof(nativeValue));
-                *length = sizeof(nativeValue);
+                int fields[] = {nativeValue.l_onoff != 0, nativeValue.l_linger};
+                memcpy(value, fields, sizeof(fields));
+                *length = sizeof(fields);
             }
             else
             {
@@ -1037,8 +1279,9 @@ int SOCK_getsockopt(int handle, int level, int option, char *value, int *length)
         return result;
     }
     int nativeValue = 0;
-    socklen_t size = sizeof(nativeValue);
-    int result = RecordResult(*entry, getsockopt(entry->descriptor, nativeLevel, nativeOption, &nativeValue, &size));
+    NativeLength size = sizeof(nativeValue);
+    int result =
+        RecordResult(*entry, NativeGetOption(entry->descriptor, nativeLevel, nativeOption, &nativeValue, &size));
     if (result == 0)
     {
         if (nativeOption == SO_ERROR && nativeLevel == SOL_SOCKET)
@@ -1066,21 +1309,22 @@ HRESULT SOCK_IPV4AddressFromString(const char *text, uint64_t *address)
 const char *SOCK_IPV4AddressToString(uint32_t address)
 {
     thread_local char buffer[INET_ADDRSTRLEN];
-    in_addr native{address};
+    in_addr native = {};
+    native.s_addr = address;
     return inet_ntop(AF_INET, &native, buffer, sizeof(buffer));
 }
 
-int LinuxNetwork_IsAvailable()
+int HostNetwork_IsAvailable()
 {
-    std::vector<LinuxNetworkInterface> interfaces;
-    if (LinuxNetwork_ListInterfaces(interfaces) < 0)
+    std::vector<HostNetworkInterface> interfaces;
+    if (HostNetwork_ListInterfaces(interfaces) < 0)
     {
         return -1;
     }
     return std::any_of(interfaces.begin(), interfaces.end(), [](const auto &entry) { return entry.available; }) ? 1 : 0;
 }
 
-int LinuxNetwork_StartResolve(const char *name)
+int HostNetwork_StartResolve(const char *name)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
     if (!s_running || s_stopping)
@@ -1104,7 +1348,7 @@ int LinuxNetwork_StartResolve(const char *name)
     return id;
 }
 
-void LinuxNetwork_CancelResolve(int request)
+void HostNetwork_CancelResolve(int request)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
     auto job = s_jobs.find(request);
@@ -1119,7 +1363,7 @@ void LinuxNetwork_CancelResolve(int request)
     }
 }
 
-int LinuxNetwork_CompleteResolve(int request, SOCK_addrinfo **result)
+int HostNetwork_CompleteResolve(int request, SOCK_addrinfo **result)
 {
     std::lock_guard<std::mutex> lock(s_mutex);
     auto found = s_jobs.find(request);
@@ -1145,7 +1389,12 @@ int LinuxNetwork_CompleteResolve(int request, SOCK_addrinfo **result)
         if (node != nullptr)
         {
             node->ai_addr = static_cast<SOCK_sockaddr *>(malloc(sizeof(address)));
-            node->ai_canonname = strdup(job->canonicalName.c_str());
+            size_t nameLength = job->canonicalName.size() + 1;
+            node->ai_canonname = static_cast<char *>(malloc(nameLength));
+            if (node->ai_canonname != nullptr)
+            {
+                memcpy(node->ai_canonname, job->canonicalName.c_str(), nameLength);
+            }
         }
         if (node == nullptr || node->ai_addr == nullptr || node->ai_canonname == nullptr)
         {

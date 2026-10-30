@@ -6,6 +6,7 @@
 #include "stdafx.h"
 
 #include "nanoCLR_native.h"
+#include <Host_Network.h>
 #include <nanoCLR_Application.h>
 #include <target_common.h>
 #include <iostream>
@@ -103,6 +104,12 @@ void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
 
     // initialize nanoHAL
     nanoHAL_Initialize();
+    if (!Network_Initialize())
+    {
+        CLR_Debug::Printf("Failed to initialize Windows networking.\r\n");
+        nanoHAL_Uninitialize(false);
+        return;
+    }
 
     // take care of block storage here as we are RAM based
     BlockStorageList_Initialize();
@@ -119,6 +126,7 @@ void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
     clrSettings.PerformHeapCompaction = nanoClrSettings.PerformHeapCompaction;
 
     ClrStartup(clrSettings);
+    Network_Uninitialize();
 
 #if !defined(BUILD_RTM)
     CLR_Debug::Printf("Exiting.\r\n");

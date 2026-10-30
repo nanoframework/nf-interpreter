@@ -5,14 +5,24 @@
 
 #pragma once
 
+#if defined(_WIN32)
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <Windows.h>
+#endif
+
 #include <nanoHAL.h>
 #include <nanoPAL_Events.h>
+#if defined(_WIN32)
+#include <nanoPAL_Sockets.h>
+#else
 #include <nanoPAL.h>
+#endif
 #include <array>
 #include <string>
 #include <vector>
 
-struct LinuxNetworkInterface
+struct HostNetworkInterface
 {
     uint32_t index = 0;
     std::string name;
@@ -25,12 +35,12 @@ struct LinuxNetworkInterface
     bool available = false;
 };
 
-int LinuxNetwork_ListInterfaces(std::vector<LinuxNetworkInterface> &interfaces);
+int HostNetwork_ListInterfaces(std::vector<HostNetworkInterface> &interfaces);
 
-int LinuxNetwork_StartResolve(const char *name);
-int LinuxNetwork_CompleteResolve(int request, SOCK_addrinfo **result);
-void LinuxNetwork_CancelResolve(int request);
-int LinuxNetwork_IsAvailable();
+int HostNetwork_StartResolve(const char *name);
+int HostNetwork_CompleteResolve(int request, SOCK_addrinfo **result);
+void HostNetwork_CancelResolve(int request);
+int HostNetwork_IsAvailable();
 
 struct CLR_RT_StackFrame;
-HRESULT LinuxNetwork_Resolve(CLR_RT_StackFrame &stack);
+HRESULT HostNetwork_Resolve(CLR_RT_StackFrame &stack);

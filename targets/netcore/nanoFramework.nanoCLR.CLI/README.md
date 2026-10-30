@@ -92,6 +92,19 @@ They are found in the output folder of a Visual Studio project (typically `bin\D
 nanoclr run --assemblies "C:\nano\my_nice_project\bin\Debug\mscorlib.pe" "C:\nano\my_nice_project\bin\Debug\my_nice_project.pe"
 ```
 
+### Application networking and TLS
+
+Windows application sockets use native Winsock and mbedTLS for TLS 1.2/1.3.
+No separate network plugin or enable flag is required. This is independent of
+the serial/named-pipe/TCP connection used by the debugger.
+
+Use `--ca-bundle C:\certificates\roots.pem` on the `run` verb to select a CA file
+for outgoing TLS, overriding `NANOCLR_CA_BUNDLE`. Managed per-connection CA
+certificates or a managed global CA bundle take precedence over the file.
+No roots are shipped and the Windows certificate store is not automatically used.
+The option is optional when the application supplies its own trust.
+See [Windows networking](../README.md) for build prerequisites and limitations.
+
 ### Specify Serial Port
 
 This option specifies the COM port that will be used to expose the virtual nanoCLR that will be running. It requires a previous setup of a Virtual Serial Port (see [Create Virtual Serial port](#create-virtual-serial-port)).

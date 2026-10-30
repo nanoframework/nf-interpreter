@@ -20,6 +20,22 @@ namespace nanoFramework.nanoCLR.CLI
         {
             Program.ProcessVerbosityOptions(options.Verbosity);
 
+            if (options.CaBundle != null)
+            {
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                    && !RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    throw new CLIException(ExitCode.E9000, "--ca-bundle requires a Windows or Linux networking backend.");
+                }
+
+                if (string.IsNullOrWhiteSpace(options.CaBundle))
+                {
+                    throw new CLIException(ExitCode.E9000, "--ca-bundle requires a non-empty certificate file path.");
+                }
+
+                Environment.SetEnvironmentVariable("NANOCLR_CA_BUNDLE", Path.GetFullPath(options.CaBundle));
+            }
+
             nanoCLRHostBuilder hostBuilder;
 
             // are we to use a local DLL?

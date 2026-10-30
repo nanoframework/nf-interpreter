@@ -246,11 +246,11 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         ${mbedtls_SOURCE_DIR}/LICENSE
         ${CMAKE_BINARY_DIR}/share/nanoFramework/LICENSE-mbedTLS.txt COPYONLY)
     target_sources(nanoFramework.nanoCLR PRIVATE
-        Network_Sockets.cpp
         Network_Interfaces.cpp
-        Network_native.cpp
-        Network_Tls.cpp
-        Network_Tls_native.cpp
+        ${REPO_ROOT}/src/PAL/Network/Network_Sockets.cpp
+        ${REPO_ROOT}/src/PAL/Network/Network_native.cpp
+        ${REPO_ROOT}/src/PAL/Network/Network_Tls.cpp
+        ${REPO_ROOT}/src/PAL/Network/Network_Tls_native.cpp
         ${REPO_ROOT}/src/DeviceInterfaces/System.Net/sys_net_native.cpp
         ${REPO_ROOT}/src/DeviceInterfaces/System.Net/sys_net_native_System_Net_IPAddress.cpp
         ${REPO_ROOT}/src/DeviceInterfaces/System.Net/sys_net_native_System_Net_Sockets_NativeSocket.cpp
@@ -283,6 +283,7 @@ target_include_directories(
     ${REPO_ROOT}/src/CLR/Helpers/Base64
     ${REPO_ROOT}/src/HAL/Include
     ${REPO_ROOT}/src/PAL/Include
+    ${REPO_ROOT}/src/PAL/Network
     ${REPO_ROOT}/src/nanoFramework.Runtime.Native
     ${REPO_ROOT}/src/nanoFramework.Runtime.Events
     ${REPO_ROOT}/src/nanoFramework.System.Collections
@@ -315,6 +316,7 @@ set(NANOCLR_POSIX_COMMON_DEFINITIONS
     NANOCLR_HOST_POSIX=1
     NANOCLR_HOST_APPLE=${NANOCLR_HOST_APPLE}
     NANOCLR_HOST_LINUX=${NANOCLR_HOST_LINUX}
+    NANOCLR_HOST_NETWORKING=${NANOCLR_HOST_LINUX}
     NANOCLR_HOST_WINDOWS=0
     NANOCLR_POSIX_VERSION_STRING="${PROJECT_VERSION}"
     NANOCLR_PLATFORM_NAME="${NANOCLR_PLATFORM_NAME}"
