@@ -3,15 +3,15 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <Target_Network.h>
+#include <Host_Network.h>
 #include <sys_net_native.h>
 
 namespace
 {
-std::vector<LinuxNetworkInterface> s_interfaces;
+std::vector<HostNetworkInterface> s_interfaces;
 using ManagedInterface = Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface;
 
-HRESULT PopulateInterface(CLR_RT_HeapBlock &reference, const LinuxNetworkInterface &interface)
+HRESULT PopulateInterface(CLR_RT_HeapBlock &reference, const HostNetworkInterface &adapter)
 {
     NANOCLR_HEADER();
 
@@ -22,23 +22,23 @@ HRESULT PopulateInterface(CLR_RT_HeapBlock &reference, const LinuxNetworkInterfa
     CLR_RT_HeapBlock *object = reference.Dereference();
     FAULT_ON_NULL(object);
 
-    object[ManagedInterface::FIELD___interfaceIndex].SetInteger(interface.index);
-    object[ManagedInterface::FIELD___ipv4Address].SetInteger(interface.address);
-    object[ManagedInterface::FIELD___ipv4NetMask].SetInteger(interface.netmask);
-    object[ManagedInterface::FIELD___ipv4GatewayAddress].SetInteger(interface.gateway);
-    object[ManagedInterface::FIELD___ipv4dnsAddress1].SetInteger(interface.dns[0]);
-    object[ManagedInterface::FIELD___ipv4dnsAddress2].SetInteger(interface.dns[1]);
-    object[ManagedInterface::FIELD___networkInterfaceType].SetInteger(interface.type);
+    object[ManagedInterface::FIELD___interfaceIndex].SetInteger(adapter.index);
+    object[ManagedInterface::FIELD___ipv4Address].SetInteger(adapter.address);
+    object[ManagedInterface::FIELD___ipv4NetMask].SetInteger(adapter.netmask);
+    object[ManagedInterface::FIELD___ipv4GatewayAddress].SetInteger(adapter.gateway);
+    object[ManagedInterface::FIELD___ipv4dnsAddress1].SetInteger(adapter.dns[0]);
+    object[ManagedInterface::FIELD___ipv4dnsAddress2].SetInteger(adapter.dns[1]);
+    object[ManagedInterface::FIELD___networkInterfaceType].SetInteger(adapter.type);
     object[ManagedInterface::FIELD___specificConfigId].SetInteger(static_cast<CLR_UINT32>(UINT32_MAX));
-    // Linux owns address assignment; do not claim a DHCP/static policy we cannot discover.
+    // The host owns address assignment; do not claim a DHCP/static policy we cannot discover.
     object[ManagedInterface::FIELD___startupAddressMode].SetInteger(static_cast<CLR_UINT8>(0));
     object[ManagedInterface::FIELD___automaticDns].SetBoolean(false);
 
     NANOCLR_CHECK_HRESULT(
-        CLR_RT_HeapBlock_Array::CreateInstance(array, interface.mac.size(), g_CLR_RT_WellKnownTypes.UInt8));
-    if (!interface.mac.empty())
+        CLR_RT_HeapBlock_Array::CreateInstance(array, adapter.mac.size(), g_CLR_RT_WellKnownTypes.UInt8));
+    if (!adapter.mac.empty())
     {
-        memcpy(array.DereferenceArray()->GetFirstElement(), interface.mac.data(), interface.mac.size());
+        memcpy(array.DereferenceArray()->GetFirstElement(), adapter.mac.data(), adapter.mac.size());
     }
     reference.Dereference()[ManagedInterface::FIELD___macAddress].SetObjectReference(array.DereferenceArray());
 
@@ -57,7 +57,7 @@ HRESULT PopulateInterface(CLR_RT_HeapBlock &reference, const LinuxNetworkInterfa
 }
 } // namespace
 
-HRESULT LinuxNetwork_Resolve(CLR_RT_StackFrame &stack)
+HRESULT HostNetwork_Resolve(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -75,7 +75,7 @@ HRESULT LinuxNetwork_Resolve(CLR_RT_StackFrame &stack)
 
     if (stack.m_customState == 1)
     {
-        request = LinuxNetwork_StartResolve(name);
+        request = HostNetwork_StartResolve(name);
         if (request < 0)
         {
             Library_sys_net_native_System_Net_Sockets_NativeSocket::ThrowError(stack, SOCK_getlasterror());
@@ -93,7 +93,7 @@ HRESULT LinuxNetwork_Resolve(CLR_RT_StackFrame &stack)
             Library_sys_net_native_System_Net_Sockets_NativeSocket::ThrowError(stack, SOCK_ETIMEDOUT);
             NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
         }
-        result = LinuxNetwork_CompleteResolve(request, &addresses);
+        result = HostNetwork_CompleteResolve(request, &addresses);
         if (result == 0)
         {
             break;
@@ -154,7 +154,7 @@ HRESULT LinuxNetwork_Resolve(CLR_RT_StackFrame &stack)
     SOCK_freeaddrinfo(addresses);
     if (request > 0 && hr != CLR_E_THREAD_WAITING && hr != CLR_E_RESCHEDULE)
     {
-        LinuxNetwork_CancelResolve(request);
+        HostNetwork_CancelResolve(request);
     }
 
     NANOCLR_CLEANUP_END();
@@ -164,7 +164,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::G
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    int available = LinuxNetwork_IsAvailable();
+    int available = HostNetwork_IsAvailable();
     if (available < 0)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
@@ -186,7 +186,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::
 HRESULT ManagedInterface::GetNetworkInterfaceCount___STATIC__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    if (LinuxNetwork_ListInterfaces(s_interfaces) < 0)
+    if (HostNetwork_ListInterfaces(s_interfaces) < 0)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
@@ -221,18 +221,18 @@ HRESULT ManagedInterface::InitializeNetworkInterfaceSettings___VOID(CLR_RT_Stack
     NANOCLR_HEADER();
     CLR_RT_HeapBlock *object = stack.This();
     CLR_UINT32 index;
-    std::vector<LinuxNetworkInterface> interfaces;
+    std::vector<HostNetworkInterface> interfaces;
     FAULT_ON_NULL(object);
     index = object[FIELD___interfaceIndex].NumericByRef().u4;
-    if (LinuxNetwork_ListInterfaces(interfaces) < 0)
+    if (HostNetwork_ListInterfaces(interfaces) < 0)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
-    for (const auto &interface : interfaces)
+    for (const auto &adapter : interfaces)
     {
-        if (interface.index == index)
+        if (adapter.index == index)
         {
-            NANOCLR_CHECK_HRESULT(PopulateInterface(stack.Arg0(), interface));
+            NANOCLR_CHECK_HRESULT(PopulateInterface(stack.Arg0(), adapter));
             NANOCLR_SET_AND_LEAVE(S_OK);
         }
     }

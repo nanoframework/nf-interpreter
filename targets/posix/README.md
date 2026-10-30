@@ -56,6 +56,12 @@ Keep the generated `bin/`, `lib/` and `share/` directories together when deployi
 
 ## Linux Networking (including WSL)
 
+The socket scheduler, resolver, managed networking bridge and mbedTLS
+implementation live in [`src/PAL/Network`](../../src/PAL/Network).
+They are also compiled by the
+[Windows netcore virtual device](../netcore/README.md), using Winsock and Windows
+adapter enumeration. Linux continues to use its native sockets and resolver.
+
 Linux builds register `System.Net` and use the Linux socket API directly. No plugin,
 embedded TCP/IP stack, desktop .NET relay, root privileges, or network-interface
 configuration is required. The application uses the host's network namespace,

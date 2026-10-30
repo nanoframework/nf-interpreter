@@ -305,9 +305,6 @@
     <ProjectReference Include="..\..\..\src\DeviceInterfaces\Networking.Sntp\Networking.Sntp.vcxproj">
       <Project>{84c62efc-dba2-4d47-bb81-322e8902c6d6}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\src\DeviceInterfaces\System.Net\System.Net.vcxproj">
-      <Project>{87b3b6fb-ae1f-4777-abbf-3e42e0deb336}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\src\nanoFramework.ResourceManager\nanoFramework.ResourceManager.vcxproj">
       <Project>{4f6dd35b-a0c8-47ee-880a-1224fade9276}</Project>
     </ProjectReference>
@@ -345,6 +342,7 @@
       <Project>{5b70a795-a6f2-44df-8566-5d68d9e892db}</Project>
     </ProjectReference>
   </ItemGroup>
+  <Import Project="Network.targets" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

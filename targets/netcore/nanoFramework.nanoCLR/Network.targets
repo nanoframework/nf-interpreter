@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <HostNetworkRoot>$(MSBuildThisFileDirectory)..\..\..\src\PAL\Network\</HostNetworkRoot>
+    <HostNetworkSources>$(MSBuildThisFileDirectory)..\..\..\src\DeviceInterfaces\System.Net\</HostNetworkSources>
+    <MbedTlsBuildDir>$(BuildDir)mbedtls\$(Platform)\</MbedTlsBuildDir>
+    <MbedTlsInstallDir>$(MbedTlsBuildDir)install\$(Configuration)\</MbedTlsInstallDir>
+    <MbedTlsGenerator Condition="'$(MbedTlsGenerator)' == '' and '$(VisualStudioVersion)' == '18.0'">Visual Studio 18 2026</MbedTlsGenerator>
+    <MbedTlsGenerator Condition="'$(MbedTlsGenerator)' == ''">Visual Studio 17 2022</MbedTlsGenerator>
+    <MbedTlsArchitecture Condition="'$(Platform)' == 'x64'">x64</MbedTlsArchitecture>
+    <MbedTlsArchitecture Condition="'$(Platform)' == 'Win32'">Win32</MbedTlsArchitecture>
+    <CMakeExecutable Condition="'$(CMakeExecutable)' == '' and Exists('$(VSInstallDir)Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe')">$(VSInstallDir)Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe</CMakeExecutable>
+    <CMakeExecutable Condition="'$(CMakeExecutable)' == ''">cmake</CMakeExecutable>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions>NANOCLR_HOST_NETWORKING=1;NANOCLR_HOST_WINDOWS=1;FD_SETSIZE=256;WIN32_LEAN_AND_MEAN;NOMINMAX;_WIN32_WINNT=0x0602;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory);$(HostNetworkRoot);$(HostNetworkSources);$(MbedTlsInstallDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(MbedTlsInstallDir)lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ws2_32.lib;iphlpapi.lib;bcrypt.lib;mbedtls.lib;mbedx509.lib;mbedcrypto.lib;everest.lib;p256m.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <HostNetworkCompile Include="$(HostNetworkRoot)Network_Sockets.cpp" />
+    <HostNetworkCompile Include="$(HostNetworkRoot)Network_native.cpp" />
+    <HostNetworkCompile Include="$(HostNetworkRoot)Network_Tls.cpp" />
+    <HostNetworkCompile Include="$(HostNetworkRoot)Network_Tls_native.cpp" />
+    <HostNetworkCompile Include="$(MSBuildThisFileDirectory)Network_Interfaces.cpp" />
+    <HostNetworkCompile Include="$(HostNetworkSources)sys_net_native.cpp" />
+    <HostNetworkCompile Include="$(HostNetworkSources)sys_net_native_System_Net_IPAddress.cpp" />
+    <HostNetworkCompile Include="$(HostNetworkSources)sys_net_native_System_Net_Sockets_NativeSocket.cpp" />
+    <HostNetworkCompile Include="$(HostNetworkSources)sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate.cpp" />
+    <HostNetworkCompile Include="$(HostNetworkSources)sys_net_native_System_Net_NetworkInformation_IPGlobalProperties_stubs.cpp" />
+    <HostNetworkCompile Include="$(HostNetworkSources)sys_net_native_System_Net_NetworkInformation_Wireless80211Configuration_stubs.cpp" />
+    <HostNetworkCompile Include="$(HostNetworkSources)sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration_stubs.cpp" />
+    <ClCompile Include="@(HostNetworkCompile)">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ForcedIncludeFiles>$(MSBuildThisFileDirectory)stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+  </ItemGroup>
+  <Target Name="BuildHostMbedTls" BeforeTargets="ClCompile">
+    <Error Condition="'$(MbedTlsArchitecture)' == ''" Text="Windows host networking supports Win32 and x64." />
+    <Exec Command="&quot;$(CMakeExecutable)&quot; -S &quot;$(MSBuildThisFileDirectory)..&quot; -B &quot;$(MbedTlsBuildDir).&quot; -G &quot;$(MbedTlsGenerator)&quot; -A $(MbedTlsArchitecture) -T $(PlatformToolset) -DMBEDTLS_SOURCE=&quot;$(MBEDTLS_SOURCE)&quot;" />
+    <Exec Command="&quot;$(CMakeExecutable)&quot; --build &quot;$(MbedTlsBuildDir).&quot; --config $(Configuration)" />
+    <Exec Command="&quot;$(CMakeExecutable)&quot; --install &quot;$(MbedTlsBuildDir).&quot; --config $(Configuration) --prefix &quot;$(MbedTlsInstallDir).&quot;" />
+    <MakeDir Directories="$(OutDir)share\nanoFramework" />
+    <Copy SourceFiles="$(MbedTlsInstallDir)share\nanoFramework\LICENSE-mbedTLS.txt" DestinationFolder="$(OutDir)share\nanoFramework" />
+  </Target>
+</Project>
