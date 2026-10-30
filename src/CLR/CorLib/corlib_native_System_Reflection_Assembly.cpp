@@ -274,6 +274,45 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::
     NANOCLR_CLEANUP_END();
 }
 
+// Checks that the assembly image described by its header exactly fills the byte array,
+// before any size or table offset from the header is trusted.
+// Prevents reads past the end of the array and rejects trailing data not covered by the assembly CRC.
+static bool AssemblyImageFitsArray(CLR_RT_HeapBlock_Array *array)
+{
+    CLR_UINT32 length = array->m_numOfElements;
+
+    if (length < sizeof(CLR_RECORD_ASSEMBLY))
+    {
+        return false;
+    }
+
+    const CLR_RECORD_ASSEMBLY *header = (const CLR_RECORD_ASSEMBLY *)array->GetFirstElement();
+
+    if (!header->GoodHeader() || header->TotalSize() != length)
+    {
+        return false;
+    }
+
+    if (header->startOfTables[0] < sizeof(CLR_RECORD_ASSEMBLY))
+    {
+        return false;
+    }
+
+    for (int tbl = 0; tbl < TBL_EndOfAssembly; tbl++)
+    {
+        CLR_OFFSET_LONG start = header->startOfTables[tbl];
+        CLR_OFFSET_LONG end = header->startOfTables[tbl + 1];
+
+        // tables are aligned, in order, and their padding lies within the table
+        if ((start % sizeof(CLR_UINT32)) != 0 || start > end || header->paddingOfTables[tbl] > (end - start))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 HRESULT Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemReflectionAssembly__SZARRAY_U1(
     CLR_RT_StackFrame &stack)
 {
@@ -288,7 +327,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemR
     CLR_RT_HeapBlock hbTimeout;
 
     CLR_INT64 *timeoutTicks;
-    bool eventResult = true;
+    bool waitForStaticConstructors = true;
 
     array = stack.Arg0().DereferenceArray();
     FAULT_ON_NULL(array);
@@ -304,7 +343,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemR
     // parsing step only required in the first step
     if (stack.m_customState == 1)
     {
-        if (header->GoodAssembly())
+        if (AssemblyImageFitsArray(array) && header->GoodAssembly())
         {
             //
             // Sorry, you'll have to reboot to load this assembly.
@@ -337,7 +376,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemR
             else
             {
                 // no need to execute static constructors
-                eventResult = false;
+                waitForStaticConstructors = false;
             }
 
             // push assembly index onto the eval stack
@@ -354,7 +393,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemR
 
     assm = g_CLR_RT_TypeSystem.m_assemblies[assemblyIndex.Assembly() - 1];
 
-    while (eventResult)
+    while (waitForStaticConstructors)
     {
         if (assm->m_flags & CLR_RT_Assembly::StaticConstructorsExecuted)
         {
@@ -362,16 +401,13 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemR
             break;
         }
 
-        // non-blocking wait allowing other threads to run while we wait for the Tx operation to complete
-        NANOCLR_CHECK_HRESULT(
-            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_NoEvent, eventResult))
+        bool eventResult;
 
-        // check for failure
-        if (!eventResult)
-        {
-            // can't happen!
-            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-        }
+        // Poll constructor completion; assembly resolution is not part of the wait interval.
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.InitTimeout(*timeoutTicks, hbTimeout.NumericByRef().s8));
+
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_NoEvent, eventResult));
     }
 
     // pop assembly index from stack
