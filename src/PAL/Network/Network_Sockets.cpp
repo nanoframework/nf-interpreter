@@ -724,7 +724,8 @@ int SOCK_socket(int family, int type, int protocol)
         return Fail(SOCK_EPROTONOSUPPORT);
     }
     NativeSocket descriptor = OpenSocket(type == SOCK_SOCK_STREAM ? SOCK_STREAM : SOCK_DGRAM, protocol);
-    return descriptor == c_invalidSocket ? Fail(MapError(NativeError())) : AddSocket(descriptor, type == SOCK_SOCK_DGRAM);
+    return descriptor == c_invalidSocket ? Fail(MapError(NativeError()))
+                                         : AddSocket(descriptor, type == SOCK_SOCK_DGRAM);
 }
 
 int SOCK_bind(int handle, const SOCK_sockaddr *address, int length)
@@ -1197,7 +1198,9 @@ int SOCK_setsockopt(int handle, int level, int option, const char *value, int le
             else
             {
                 NativeLength size = sizeof(nativeValue);
-                if (RecordResult(*entry, NativeGetOption(entry->descriptor, SOL_SOCKET, SO_LINGER, &nativeValue, &size)) < 0)
+                if (RecordResult(
+                        *entry,
+                        NativeGetOption(entry->descriptor, SOL_SOCKET, SO_LINGER, &nativeValue, &size)) < 0)
                 {
                     return SOCK_SOCKET_ERROR;
                 }
@@ -1255,7 +1258,8 @@ int SOCK_getsockopt(int handle, int level, int option, char *value, int *length)
     {
         linger nativeValue = {};
         NativeLength size = sizeof(nativeValue);
-        int result = RecordResult(*entry, NativeGetOption(entry->descriptor, SOL_SOCKET, SO_LINGER, &nativeValue, &size));
+        int result =
+            RecordResult(*entry, NativeGetOption(entry->descriptor, SOL_SOCKET, SO_LINGER, &nativeValue, &size));
         if (result == 0)
         {
             if (option == SOCK_SOCKO_LINGER && *length >= 2 * static_cast<int>(sizeof(int)))
@@ -1276,7 +1280,8 @@ int SOCK_getsockopt(int handle, int level, int option, char *value, int *length)
     }
     int nativeValue = 0;
     NativeLength size = sizeof(nativeValue);
-    int result = RecordResult(*entry, NativeGetOption(entry->descriptor, nativeLevel, nativeOption, &nativeValue, &size));
+    int result =
+        RecordResult(*entry, NativeGetOption(entry->descriptor, nativeLevel, nativeOption, &nativeValue, &size));
     if (result == 0)
     {
         if (nativeOption == SO_ERROR && nativeLevel == SOL_SOCKET)

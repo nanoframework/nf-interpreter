@@ -46,9 +46,7 @@ int HostNetwork_ListInterfaces(std::vector<HostNetworkInterface> &interfaces)
         HostNetworkInterface entry;
         entry.index = adapter->IfIndex;
         entry.name = adapter->AdapterName;
-        entry.type = adapter->IfType == IF_TYPE_ETHERNET_CSMACD ? 6
-                     : adapter->IfType == IF_TYPE_IEEE80211    ? 71
-                                                              : 1;
+        entry.type = adapter->IfType == IF_TYPE_ETHERNET_CSMACD ? 6 : adapter->IfType == IF_TYPE_IEEE80211 ? 71 : 1;
         entry.mac.assign(adapter->PhysicalAddress, adapter->PhysicalAddress + adapter->PhysicalAddressLength);
         for (auto address = adapter->FirstUnicastAddress; address != nullptr; address = address->Next)
         {
