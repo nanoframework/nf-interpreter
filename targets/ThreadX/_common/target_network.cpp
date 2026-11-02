@@ -297,7 +297,14 @@ int Network_Interface_Start_Connect(int index, const char *ssid, const char *pas
     }
 
     // the worker connects with these credentials, stored or not
-    NF_Wireless_SetRequestedProfile(wirelessConfig);
+    if (!NF_Wireless_SetRequestedProfile(wirelessConfig))
+    {
+        // profile has the password, clear it before releasing the memory
+        memset(wirelessConfig, 0, sizeof(HAL_Configuration_Wireless80211));
+        platform_free(wirelessConfig);
+
+        return SOCK_SOCKET_ERROR;
+    }
 
     NF_ConnectInProgress = true;
     // queue request to connect WiFi, with the Id of the station profile

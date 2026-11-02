@@ -31,7 +31,7 @@ static void ReleaseProfile(HAL_Configuration_Wireless80211 *profile)
     }
 }
 
-void NF_Wireless_SetRequestedProfile(const HAL_Configuration_Wireless80211 *profile)
+bool NF_Wireless_SetRequestedProfile(const HAL_Configuration_Wireless80211 *profile)
 {
     TX_INTERRUPT_SAVE_AREA
 
@@ -49,6 +49,8 @@ void NF_Wireless_SetRequestedProfile(const HAL_Configuration_Wireless80211 *prof
     TX_RESTORE
 
     ReleaseProfile(previous);
+
+    return copy != NULL;
 }
 
 static HAL_Configuration_Wireless80211 *TakeRequestedProfile()

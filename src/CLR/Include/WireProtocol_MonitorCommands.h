@@ -49,6 +49,13 @@ typedef enum AccessMemory_Operations
 
 } AccessMemory_Operations;
 
+// true if [location, location + length) overlaps [regionStart, regionEnd)
+// computed in 64 bits so that the end of the range can't wrap around
+static inline bool AccessMemory_OverlapsRegion(uint32_t location, uint32_t length, uint32_t regionStart, uint32_t regionEnd)
+{
+    return (uint64_t)location < (uint64_t)regionEnd && (uint64_t)location + length > (uint64_t)regionStart;
+}
+
 typedef enum MemoryMap_Options
 {
     Monitor_MemoryMap_c_RAM     = 0x00000001,

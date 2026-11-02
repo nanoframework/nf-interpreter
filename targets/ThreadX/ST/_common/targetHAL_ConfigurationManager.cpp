@@ -965,7 +965,7 @@ static bool WriteConfigurationImage(uint32_t offset, const uint8_t *data, uint32
     if (eraseFirst)
     {
         // erase all the blocks of the configuration region
-        DeviceBlockInfo *blockInfo = STM32FlashDriver_GetDeviceInfo(nullptr);
+        DeviceBlockInfo *blockInfo = BlockStorageDevice_GetDeviceInfo(BlockStorageList_GetFirstDevice());
         uint32_t start = (uint32_t)&__nanoConfig_start__;
         uint32_t end = (uint32_t)&__nanoConfig_end__;
         BlockRegionInfo *region = nullptr;

@@ -3,6 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
+#include <string.h>
 #include <nanoWeak.h>
 #include "WireProtocol_MonitorCommands.h"
 #include <nanoPAL_BlockStorage.h>
@@ -96,9 +97,15 @@ int Monitor_ReadMemory(WP_Message *message)
         len = sizeof(buf);
     uint32_t errorCode;
 
-    AccessMemory(cmd->address, len, buf, AccessMemory_Read, &errorCode);
+    bool readOk = AccessMemory(cmd->address, len, buf, AccessMemory_Read, &errorCode);
 
-    WP_ReplyToCommand(message, true, false, buf, len);
+    if (!readOk)
+    {
+        // never send uninitialized or partial data when the read is refused or fails
+        memset(buf, 0, sizeof(buf));
+    }
+
+    WP_ReplyToCommand(message, readOk, false, buf, len);
 
     return true;
 }

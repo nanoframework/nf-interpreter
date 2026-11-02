@@ -31,7 +31,7 @@ extern "C"
 
     // sets the profile the next connect request uses (a copy is kept), so an application can connect with credentials
     // that aren't stored
-    void NF_Wireless_SetRequestedProfile(const HAL_Configuration_Wireless80211 *profile);
+    bool NF_Wireless_SetRequestedProfile(const HAL_Configuration_Wireless80211 *profile);
     int NF_Wireless_Open(HAL_Configuration_NetworkInterface *config);
     bool NF_Wireless_Close();
 
