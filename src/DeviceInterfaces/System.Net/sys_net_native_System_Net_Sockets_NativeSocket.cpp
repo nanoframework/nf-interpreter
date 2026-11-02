@@ -5,8 +5,10 @@
 //
 
 #include "sys_net_native.h"
-#if defined(NANOCLR_HOST_NETWORKING) && NANOCLR_HOST_NETWORKING
-#include <Host_Network.h>
+
+// Host-OS sockets use asynchronous DNS and preserve UDP datagram boundaries.
+#if defined(NANOCLR_USE_HOST_OS_SOCKETS) && NANOCLR_USE_HOST_OS_SOCKETS
+#include <Target_Network.h>
 #endif
 
 HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::socket___STATIC__I4__I4__I4__I4(
@@ -153,7 +155,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::accept___STATIC_
 HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::
     getaddrinfo___STATIC__VOID__STRING__BYREF_STRING__BYREF_SZARRAY_SZARRAY_U1(CLR_RT_StackFrame &stack)
 {
-#if defined(NANOCLR_HOST_NETWORKING) && NANOCLR_HOST_NETWORKING
+#if defined(NANOCLR_USE_HOST_OS_SOCKETS) && NANOCLR_USE_HOST_OS_SOCKETS
     return HostNetwork_Resolve(stack);
 #else
     NATIVE_PROFILE_CLR_NETWORK();
@@ -783,7 +785,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::SendRecvHelper(
     bool fRes = true;
     CLR_INT32 totReadWrite;
     CLR_INT32 ret = 0;
-#if defined(NANOCLR_HOST_NETWORKING) && NANOCLR_HOST_NETWORKING
+#if defined(NANOCLR_USE_HOST_OS_SOCKETS) && NANOCLR_USE_HOST_OS_SOCKETS
     bool datagram = socket != nullptr &&
                     socket[Library_sys_net_native_System_Net_Sockets_Socket::FIELD___socketType].NumericByRef().s4 ==
                         SOCK_SOCK_DGRAM;
@@ -802,7 +804,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::SendRecvHelper(
 #endif
 
     FAULT_ON_NULL(socket);
-#if !defined(NANOCLR_HOST_NETWORKING) || !NANOCLR_HOST_NETWORKING
+#if !defined(NANOCLR_USE_HOST_OS_SOCKETS) || !NANOCLR_USE_HOST_OS_SOCKETS
     FAULT_ON_NULL(arrData);
 #endif
 
@@ -816,7 +818,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::SendRecvHelper(
         NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
     }
 
-#if defined(NANOCLR_HOST_NETWORKING) && NANOCLR_HOST_NETWORKING
+#if defined(NANOCLR_USE_HOST_OS_SOCKETS) && NANOCLR_USE_HOST_OS_SOCKETS
     if (offset > bufferLength || count > bufferLength - offset ||
         (arrData == nullptr ? bufferLength != 0
                             : (bufferLength > arrData->m_numOfElements || arrData->m_sizeOfElement != 1)))
@@ -841,14 +843,14 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::SendRecvHelper(
 
     totReadWrite = stack.m_evalStack[1].NumericByRef().s4;
 
-#if defined(NANOCLR_HOST_NETWORKING) && NANOCLR_HOST_NETWORKING
+#if defined(NANOCLR_USE_HOST_OS_SOCKETS) && NANOCLR_USE_HOST_OS_SOCKETS
     buf = arrData == nullptr ? nullptr : arrData->GetFirstElement() + offset + totReadWrite;
 #else
     buf = arrData->GetElement(offset + totReadWrite);
 #endif
     count -= totReadWrite;
 
-#if defined(NANOCLR_HOST_NETWORKING) && NANOCLR_HOST_NETWORKING
+#if defined(NANOCLR_USE_HOST_OS_SOCKETS) && NANOCLR_USE_HOST_OS_SOCKETS
     while (count > 0 || (datagram && totReadWrite == 0))
 #else
     while (count > 0)
@@ -953,7 +955,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::SendRecvHelper(
 
         stack.m_evalStack[1].NumericByRef().s4 = totReadWrite;
 
-#if defined(NANOCLR_HOST_NETWORKING) && NANOCLR_HOST_NETWORKING
+#if defined(NANOCLR_USE_HOST_OS_SOCKETS) && NANOCLR_USE_HOST_OS_SOCKETS
         if (datagram)
         {
             break;

@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <Host_Network.h>
+#include <Target_Network.h>
 
 #include <arpa/inet.h>
 #include <ifaddrs.h>

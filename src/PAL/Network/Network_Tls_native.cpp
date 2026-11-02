@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <Host_Tls.h>
+#include <Network_Tls.h>
 #include <sys_net_native.h>
 
 using NativeTls = Library_sys_net_native_System_Net_Security_SslNative;
@@ -34,14 +34,14 @@ HRESULT NativeTls::
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
     }
-    context = HostTls_CreateContext(
+    context = NetworkTls_CreateContext(
         stack.Arg0().NumericByRef().s4,
         data == nullptr ? nullptr : data->GetFirstElement(),
         data == nullptr ? 0 : data->m_numOfElements,
         verification != 1);
     if (context < 0)
     {
-        NANOCLR_CHECK_HRESULT(ThrowCryptographicError(stack, HostTls_LastError()));
+        NANOCLR_CHECK_HRESULT(ThrowCryptographicError(stack, NetworkTls_LastError()));
     }
     stack.SetResult_I4(context);
     NANOCLR_NOCLEANUP();
@@ -75,7 +75,7 @@ HRESULT NativeTls::
     password = identity[ManagedCertificate2::FIELD___password].DereferenceString();
     FAULT_ON_NULL_ARG(certificate);
     FAULT_ON_NULL_ARG(privateKey);
-    context = HostTls_CreateServerContext(
+    context = NetworkTls_CreateServerContext(
         stack.Arg0().NumericByRef().s4,
         certificate->GetFirstElement(),
         certificate->m_numOfElements,
@@ -84,7 +84,7 @@ HRESULT NativeTls::
         password == nullptr ? nullptr : password->StringText());
     if (context < 0)
     {
-        NANOCLR_CHECK_HRESULT(ThrowCryptographicError(stack, HostTls_LastError()));
+        NANOCLR_CHECK_HRESULT(ThrowCryptographicError(stack, NetworkTls_LastError()));
     }
     stack.SetResult_I4(context);
     NANOCLR_NOCLEANUP();
@@ -96,7 +96,7 @@ HRESULT ManagedCertificate2::DecodePrivateKeyNative___STATIC__VOID__SZARRAY_U1__
     CLR_RT_HeapBlock_Array *key = stack.Arg0().DereferenceArray();
     const char *password = stack.Arg1().RecoverString();
     FAULT_ON_NULL_ARG(key);
-    if (!HostTls_DecodePrivateKey(key->GetFirstElement(), key->m_numOfElements, password))
+    if (!NetworkTls_DecodePrivateKey(key->GetFirstElement(), key->m_numOfElements, password))
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
@@ -135,14 +135,14 @@ HRESULT Handshake(CLR_RT_StackFrame &stack, bool server)
             NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
         }
         result =
-            server ? HostTls_Accept(context, handle) : HostTls_Connect(context, handle, stack.Arg1().RecoverString());
+            server ? NetworkTls_Accept(context, handle) : NetworkTls_Connect(context, handle, stack.Arg1().RecoverString());
         if (result == 0)
         {
             break;
         }
-        if (result == HostTls_Error)
+        if (result == NetworkTls_Error)
         {
-            NANOCLR_CHECK_HRESULT(NativeTls::ThrowCryptographicError(stack, HostTls_LastError()));
+            NANOCLR_CHECK_HRESULT(NativeTls::ThrowCryptographicError(stack, NetworkTls_LastError()));
         }
         NANOCLR_CHECK_HRESULT(
             g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_Socket, signalled));
@@ -203,10 +203,10 @@ HRESULT NativeTls::ReadWriteHelper(CLR_RT_StackFrame &stack, bool write)
             NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
         }
         auto buffer = stack.Arg1().DereferenceArray()->GetFirstElement() + offset + total;
-        result = write ? HostTls_Write(handle, buffer, length - total) : HostTls_Read(handle, buffer, length - total);
-        if (result == HostTls_Error)
+        result = write ? NetworkTls_Write(handle, buffer, length - total) : NetworkTls_Read(handle, buffer, length - total);
+        if (result == NetworkTls_Error)
         {
-            int error = HostTls_LastError();
+            int error = NetworkTls_LastError();
             if (error > 0)
             {
                 NativeSocket::ThrowError(stack, error);
@@ -214,7 +214,7 @@ HRESULT NativeTls::ReadWriteHelper(CLR_RT_StackFrame &stack, bool write)
             }
             NANOCLR_CHECK_HRESULT(ThrowCryptographicError(stack, error));
         }
-        if (result == HostTls_WantRead || result == HostTls_WantWrite)
+        if (result == NetworkTls_WantRead || result == NetworkTls_WantWrite)
         {
             NANOCLR_CHECK_HRESULT(
                 g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_Socket, signalled));
@@ -253,10 +253,10 @@ HRESULT NativeTls::DataAvailable___STATIC__I4__OBJECT(CLR_RT_StackFrame &stack)
     CLR_RT_HeapBlock *socket = stack.Arg0().Dereference();
     int result;
     FAULT_ON_NULL(socket);
-    result = HostTls_Available(socket[NativeSocket::FIELD__m_Handle].NumericByRef().s4);
+    result = NetworkTls_Available(socket[NativeSocket::FIELD__m_Handle].NumericByRef().s4);
     if (result < 0)
     {
-        NANOCLR_CHECK_HRESULT(ThrowCryptographicError(stack, HostTls_LastError()));
+        NANOCLR_CHECK_HRESULT(ThrowCryptographicError(stack, NetworkTls_LastError()));
     }
     stack.SetResult_I4(result);
     NANOCLR_NOCLEANUP();
@@ -273,7 +273,7 @@ HRESULT NativeTls::SecureCloseSocket___STATIC__I4__OBJECT(CLR_RT_StackFrame &sta
 
 HRESULT NativeTls::ExitSecureContext___STATIC__I4__I4(CLR_RT_StackFrame &stack)
 {
-    stack.SetResult_I4(HostTls_FreeContext(stack.Arg0().NumericByRef().s4) ? 0 : -1);
+    stack.SetResult_I4(NetworkTls_FreeContext(stack.Arg0().NumericByRef().s4) ? 0 : -1);
     return S_OK;
 }
 
@@ -299,7 +299,7 @@ HRESULT Library_sys_net_native_System_Net_Security_CertificateManager::
     NANOCLR_HEADER();
     CLR_RT_HeapBlock_Array *data = stack.Arg0().DereferenceArray();
     FAULT_ON_NULL_ARG(data);
-    if (!HostTls_SetCaBundle(data->GetFirstElement(), data->m_numOfElements))
+    if (!NetworkTls_SetCaBundle(data->GetFirstElement(), data->m_numOfElements))
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
@@ -310,5 +310,5 @@ HRESULT Library_sys_net_native_System_Net_Security_CertificateManager::
 bool SSL_ParseCertificate(const char *data, size_t length, X509CertData *certificate)
 {
     return certificate != nullptr &&
-           HostTls_ParseCertificate(reinterpret_cast<const uint8_t *>(data), length, *certificate);
+           NetworkTls_ParseCertificate(reinterpret_cast<const uint8_t *>(data), length, *certificate);
 }

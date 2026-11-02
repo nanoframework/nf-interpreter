@@ -14,7 +14,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <PreprocessorDefinitions>NANOCLR_HOST_NETWORKING=1;NANOCLR_HOST_WINDOWS=1;FD_SETSIZE=256;WIN32_LEAN_AND_MEAN;NOMINMAX;_WIN32_WINNT=0x0602;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NANOCLR_USE_HOST_OS_SOCKETS=1;NANOCLR_HOST_WINDOWS=1;FD_SETSIZE=256;WIN32_LEAN_AND_MEAN;NOMINMAX;_WIN32_WINNT=0x0602;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory);$(HostNetworkRoot);$(HostNetworkSources);$(MbedTlsInstallDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>

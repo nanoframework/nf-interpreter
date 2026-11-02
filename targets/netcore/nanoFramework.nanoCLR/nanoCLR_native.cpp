@@ -6,7 +6,7 @@
 #include "stdafx.h"
 
 #include "nanoCLR_native.h"
-#include <Host_Network.h>
+#include <Target_Network.h>
 #include <nanoCLR_Application.h>
 #include <target_common.h>
 #include <iostream>

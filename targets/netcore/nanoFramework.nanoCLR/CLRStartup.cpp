@@ -5,7 +5,7 @@
 //
 #include "stdafx.h"
 #include "nanoCLR_native.h"
-#include <Host_Network.h>
+#include <Target_Network.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 

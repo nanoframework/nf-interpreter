@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <Host_Tls.h>
+#include <Network_Tls.h>
 
 #if !defined(_WIN32)
 #include <arpa/inet.h>
@@ -118,7 +118,7 @@ int Failure(const char *operation, int error)
         mbedtls_strerror(error, message, sizeof(message));
     }
     fprintf(stderr, "nanoCLR TLS %s failed (%d)%s%s\n", operation, error, message[0] ? ": " : "", message);
-    return HostTls_Error;
+    return NetworkTls_Error;
 }
 
 bool InitializeRandom(Context &context)
@@ -413,7 +413,7 @@ int TranslateResult(Connection &connection, int result)
     {
         if (HostNetwork_ArmSocket(connection.socket, result == MBEDTLS_ERR_SSL_WANT_WRITE))
         {
-            return result == MBEDTLS_ERR_SSL_WANT_READ ? HostTls_WantRead : HostTls_WantWrite;
+            return result == MBEDTLS_ERR_SSL_WANT_READ ? NetworkTls_WantRead : NetworkTls_WantWrite;
         }
         connection.failed = true;
         return Failure("closed socket", SOCK_ENOTSOCK);
@@ -445,13 +445,13 @@ void ReadDate(const mbedtls_x509_time &value, DATE_TIME_INFO &result)
 }
 } // namespace
 
-int HostTls_CreateContext(int protocols, const uint8_t *ca, size_t length, bool verifyPeer)
+int NetworkTls_CreateContext(int protocols, const uint8_t *ca, size_t length, bool verifyPeer)
 {
     std::lock_guard<std::mutex> lock(s_tlsMutex);
     auto context = MakeContext(protocols, false);
     if (!context)
     {
-        return HostTls_Error;
+        return NetworkTls_Error;
     }
     context->verifyPeer = verifyPeer;
     if (verifyPeer)
@@ -463,7 +463,7 @@ int HostTls_CreateContext(int protocols, const uint8_t *ca, size_t length, bool 
         }
         if (!context->certificates)
         {
-            return HostTls_Error;
+            return NetworkTls_Error;
         }
         mbedtls_ssl_conf_ca_chain(&context->config, &context->certificates->chain, nullptr);
     }
@@ -476,7 +476,7 @@ int HostTls_CreateContext(int protocols, const uint8_t *ca, size_t length, bool 
     return id;
 }
 
-int HostTls_CreateServerContext(
+int NetworkTls_CreateServerContext(
     int protocols,
     const uint8_t *certificate,
     size_t certificateLength,
@@ -488,12 +488,12 @@ int HostTls_CreateServerContext(
     auto context = MakeContext(protocols, true);
     if (!context)
     {
-        return HostTls_Error;
+        return NetworkTls_Error;
     }
     context->identity = ParseCertificates(certificate, certificateLength);
     if (!context->identity || !ParsePrivateKey(*context, privateKey, privateKeyLength, password))
     {
-        return HostTls_Error;
+        return NetworkTls_Error;
     }
     int result = mbedtls_pk_check_pair(
         &context->identity->chain.pk,
@@ -514,14 +514,14 @@ int HostTls_CreateServerContext(
     return id;
 }
 
-bool HostTls_DecodePrivateKey(const uint8_t *data, size_t length, const char *password)
+bool NetworkTls_DecodePrivateKey(const uint8_t *data, size_t length, const char *password)
 {
     std::lock_guard<std::mutex> lock(s_tlsMutex);
     Context context;
     return InitializeRandom(context) && ParsePrivateKey(context, data, length, password);
 }
 
-bool HostTls_FreeContext(int context)
+bool NetworkTls_FreeContext(int context)
 {
     std::lock_guard<std::mutex> lock(s_tlsMutex);
     for (auto it = s_connections.begin(); it != s_connections.end();)
@@ -584,17 +584,17 @@ int Handshake(int context, int socket, const char *host, bool server)
 }
 } // namespace
 
-int HostTls_Connect(int context, int socket, const char *host)
+int NetworkTls_Connect(int context, int socket, const char *host)
 {
     return Handshake(context, socket, host, false);
 }
 
-int HostTls_Accept(int context, int socket)
+int NetworkTls_Accept(int context, int socket)
 {
     return Handshake(context, socket, nullptr, true);
 }
 
-int HostTls_Read(int socket, uint8_t *buffer, int length)
+int NetworkTls_Read(int socket, uint8_t *buffer, int length)
 {
     std::lock_guard<std::mutex> lock(s_tlsMutex);
     auto found = s_connections.find(socket);
@@ -621,7 +621,7 @@ int HostTls_Read(int socket, uint8_t *buffer, int length)
     return TranslateResult(connection, result == 0 ? MBEDTLS_ERR_SSL_CONN_EOF : result);
 }
 
-int HostTls_Write(int socket, const uint8_t *buffer, int length)
+int NetworkTls_Write(int socket, const uint8_t *buffer, int length)
 {
     std::lock_guard<std::mutex> lock(s_tlsMutex);
     auto found = s_connections.find(socket);
@@ -659,7 +659,7 @@ int HostTls_Write(int socket, const uint8_t *buffer, int length)
     return TranslateResult(connection, result == 0 ? MBEDTLS_ERR_SSL_INTERNAL_ERROR : result);
 }
 
-int HostTls_Available(int socket)
+int NetworkTls_Available(int socket)
 {
     std::lock_guard<std::mutex> lock(s_tlsMutex);
     auto found = s_connections.find(socket);
@@ -670,12 +670,12 @@ int HostTls_Available(int socket)
     return static_cast<int>(mbedtls_ssl_get_bytes_avail(&found->second->session));
 }
 
-int HostTls_LastError()
+int NetworkTls_LastError()
 {
     return s_tlsError;
 }
 
-void HostTls_Close(int socket)
+void NetworkTls_Close(int socket)
 {
     std::lock_guard<std::mutex> lock(s_tlsMutex);
     auto found = s_connections.find(socket);
@@ -690,7 +690,7 @@ void HostTls_Close(int socket)
     }
 }
 
-void HostTls_Reset()
+void NetworkTls_Reset()
 {
     std::lock_guard<std::mutex> lock(s_tlsMutex);
     s_connections.clear();
@@ -699,7 +699,7 @@ void HostTls_Reset()
     mbedtls_psa_crypto_free();
 }
 
-bool HostTls_SetCaBundle(const uint8_t *data, size_t length)
+bool NetworkTls_SetCaBundle(const uint8_t *data, size_t length)
 {
     auto certificates = ParseCertificates(data, length);
     if (!certificates)
@@ -711,7 +711,7 @@ bool HostTls_SetCaBundle(const uint8_t *data, size_t length)
     return true;
 }
 
-bool HostTls_ParseCertificate(const uint8_t *data, size_t length, X509CertData &certificate)
+bool NetworkTls_ParseCertificate(const uint8_t *data, size_t length, X509CertData &certificate)
 {
     auto certificates = ParseCertificates(data, length);
     if (!certificates)

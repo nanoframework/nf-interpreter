@@ -7,10 +7,15 @@ for IPv4 TCP/UDP and DNS. TLS clients and servers use statically linked
 The socket table, asynchronous resolver, managed networking bridge and mbedTLS
 implementation are shared with the Linux host target under
 [`src/PAL/Network`](../../src/PAL/Network). Both targets include the shared
-`Host_Network.h` and `Host_Tls.h` headers directly. Windows-specific adapter
+`Target_Network.h` and `Network_Tls.h` headers directly. Windows-specific adapter
 enumeration lives beside the Windows DLL project; Linux interface enumeration
 remains in the POSIX target. No POSIX platform shims are added to the Windows
 include path.
+
+`NANOCLR_USE_HOST_OS_SOCKETS` selects the host operating system's socket backend,
+including asynchronous DNS and datagram handling in the shared managed bridge.
+It is a backend selector, not a general networking capability flag. Embedded
+network stacks retain their existing code paths.
 
 ## Building
 

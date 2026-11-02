@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <Host_Network.h>
-#include <Host_Tls.h>
+#include <Target_Network.h>
+#include <Network_Tls.h>
 
 #if !defined(_WIN32)
 #include <arpa/inet.h>
@@ -709,7 +709,7 @@ bool Network_Initialize()
 
 void SOCKETS_CloseConnections()
 {
-    HostTls_Reset();
+    NetworkTls_Reset();
     std::lock_guard<std::mutex> lock(s_mutex);
     for (auto &[handle, entry] : s_sockets)
     {
@@ -865,7 +865,7 @@ int SOCK_accept(int handle, SOCK_sockaddr *address, int *length)
 
 int SOCK_close(int handle)
 {
-    HostTls_Close(handle);
+    NetworkTls_Close(handle);
     std::lock_guard<std::mutex> lock(s_mutex);
     auto entry = FindSocket(handle);
     if (entry == nullptr)
