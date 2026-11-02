@@ -31,6 +31,13 @@ int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t *buffer, int
             return SL_MscFlashDriver_EraseBlock(NULL, location);
 
         case AccessMemory_Check:
+            // the configuration region can't be checked: a CRC of a small range reveals its content
+            if (location < (uint32_t)&__nanoConfig_end__ && location + lengthInBytes > (uint32_t)&__nanoConfig_start__)
+            {
+                *errorCode = AccessMemoryErrorCode_PermissionDenied;
+                return false;
+            }
+
             // compute CRC32 of the memory segment
             *(unsigned int *)buffer = SUPPORT_ComputeCRC((uint32_t *)location, lengthInBytes, 0);
             // done here

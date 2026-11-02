@@ -167,6 +167,9 @@ extern "C"
     // Id to set in a wireless profile so the Id is assigned on add
 #define CONFIGURATION_BLOCK_ID_AUTO 0xFFFFFFFF
 
+    // largest Id of a wireless profile (the upper bits are free, e.g. to queue a request with the Id)
+#define CONFIGURATION_BLOCK_ID_MAX 0x0FFFFFFF
+
     // information about a configuration block type
     typedef struct HAL_ConfigurationBlockInfo
     {

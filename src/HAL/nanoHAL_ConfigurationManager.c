@@ -381,27 +381,38 @@ static bool ReadWirelessProfile(DeviceConfigurationOption configuration, uint32_
 }
 
 // checks if a wireless profile, other than the one at excludeIndex, has this Id
-static bool IsWirelessProfileIdInUse(
+// a profile that can't be read means the Id can't be verified: that's a storage error
+static ConfigurationOperationError IsWirelessProfileIdInUse(
     DeviceConfigurationOption configuration,
     uint32_t id,
     uint32_t excludeIndex,
-    void *scratch)
+    void *scratch,
+    bool *inUse)
 {
     uint32_t count = ConfigurationManager_GetBlockCount(configuration);
 
-    for (uint32_t i = 0; i < count; i++)
+    *inUse = false;
+
+    for (uint32_t i = 0; i < count && !*inUse; i++)
     {
-        if (i != excludeIndex && ReadWirelessProfile(configuration, i, scratch) &&
-            GetWirelessProfileId(configuration, scratch) == id)
+        if (i == excludeIndex)
         {
-            return true;
+            continue;
         }
+
+        if (!ReadWirelessProfile(configuration, i, scratch))
+        {
+            return ConfigurationOperationError_StorageError;
+        }
+
+        *inUse = GetWirelessProfileId(configuration, scratch) == id;
     }
 
-    return false;
+    return ConfigurationOperationError_Success;
 }
 
 // checks if a network interface uses the wireless profile with this Id
+// if a network interface can't be read, the profile is taken as used: better safe
 static bool IsWirelessProfileUsedByNetworkInterface(DeviceConfigurationOption configuration, uint32_t id)
 {
     bool inUse = false;
@@ -427,6 +438,11 @@ static bool IsWirelessProfileUsedByNetworkInterface(DeviceConfigurationOption co
         {
             inUse = networkConfig->InterfaceType == interfaceType && networkConfig->SpecificConfigId == id;
         }
+        else
+        {
+            // can't check, better be safe
+            inUse = true;
+        }
     }
 
     platform_free(networkConfig);
@@ -445,6 +461,8 @@ static ConfigurationOperationError PrepareWirelessProfileOperation(
 {
     ConfigurationOperationError result = ConfigurationOperationError_Success;
     uint32_t id;
+    uint32_t storedId;
+    bool idInUse;
 
     // large enough for both wireless profile blocks
     void *storedBlock = platform_malloc(
@@ -465,9 +483,10 @@ static ConfigurationOperationError PrepareWirelessProfileOperation(
             {
                 result = ConfigurationOperationError_StorageError;
             }
-            else if (IsWirelessProfileUsedByNetworkInterface(
-                         configuration,
-                         GetWirelessProfileId(configuration, storedBlock)))
+            else if (
+                IsWirelessProfileUsedByNetworkInterface(
+                    configuration,
+                    GetWirelessProfileId(configuration, storedBlock)))
             {
                 result = ConfigurationOperationError_InUse;
             }
@@ -477,7 +496,11 @@ static ConfigurationOperationError PrepareWirelessProfileOperation(
     {
         id = GetWirelessProfileId(configuration, block);
 
-        if (operation == ConfigurationOperation_Replace)
+        if (id != CONFIGURATION_BLOCK_ID_AUTO && id > CONFIGURATION_BLOCK_ID_MAX)
+        {
+            result = ConfigurationOperationError_InvalidBlock;
+        }
+        else if (operation == ConfigurationOperation_Replace)
         {
             if (!ReadWirelessProfile(configuration, configurationIndex, storedBlock))
             {
@@ -485,14 +508,24 @@ static ConfigurationOperationError PrepareWirelessProfileOperation(
             }
             else
             {
+                storedId = GetWirelessProfileId(configuration, storedBlock);
+
                 if (id == CONFIGURATION_BLOCK_ID_AUTO)
                 {
                     // keep the Id of the profile being replaced
-                    id = GetWirelessProfileId(configuration, storedBlock);
+                    id = storedId;
                     SetWirelessProfileId(configuration, block, id);
                 }
+                else if (
+                    id != storedId && !(flags & ConfigurationOperationFlags_Force) &&
+                    IsWirelessProfileUsedByNetworkInterface(configuration, storedId))
+                {
+                    // a network interface uses the profile by its current Id, changing it would leave that one without
+                    // its profile
+                    result = ConfigurationOperationError_InUse;
+                }
 
-                if (flags & ConfigurationOperationFlags_KeepPassword)
+                if (result == ConfigurationOperationError_Success && (flags & ConfigurationOperationFlags_KeepPassword))
                 {
                     // passwords can't be read back, so the client asks to keep the one stored
                     if (configuration == DeviceConfigurationOption_Wireless80211Network)
@@ -515,25 +548,35 @@ static ConfigurationOperationError PrepareWirelessProfileOperation(
         else if (id == CONFIGURATION_BLOCK_ID_AUTO)
         {
             // add: assign the lowest Id that isn't in use
-            uint32_t candidate = 0;
-
-            while (IsWirelessProfileIdInUse(configuration, candidate, 0xFFFFFFFF, storedBlock))
+            for (id = 0; id <= CONFIGURATION_BLOCK_ID_MAX; id++)
             {
-                candidate++;
+                result = IsWirelessProfileIdInUse(configuration, id, 0xFFFFFFFF, storedBlock, &idInUse);
+
+                if (result != ConfigurationOperationError_Success || !idInUse)
+                {
+                    break;
+                }
             }
 
-            id = candidate;
-            SetWirelessProfileId(configuration, block, id);
+            if (result == ConfigurationOperationError_Success)
+            {
+                SetWirelessProfileId(configuration, block, id);
+            }
         }
 
-        if (result == ConfigurationOperationError_Success &&
-            IsWirelessProfileIdInUse(
+        if (result == ConfigurationOperationError_Success)
+        {
+            result = IsWirelessProfileIdInUse(
                 configuration,
                 id,
                 operation == ConfigurationOperation_Replace ? configurationIndex : 0xFFFFFFFF,
-                storedBlock))
-        {
-            result = ConfigurationOperationError_DuplicateId;
+                storedBlock,
+                &idInUse);
+
+            if (result == ConfigurationOperationError_Success && idInUse)
+            {
+                result = ConfigurationOperationError_DuplicateId;
+            }
         }
     }
 
@@ -734,6 +777,17 @@ ConfigurationOperationError ConfigurationManager_ExecuteConfigurationOperation(
             if (flags & ConfigurationOperationFlags_KeepPassword)
             {
                 return ConfigurationOperationError_NotSupported;
+            }
+
+            // a profile used by a network interface can't be deleted, unless forced
+            if (operation == ConfigurationOperation_Delete)
+            {
+                result = PrepareWirelessProfileOperation(operation, configuration, configurationIndex, flags, block);
+
+                if (result != ConfigurationOperationError_Success)
+                {
+                    return result;
+                }
             }
         }
         else
@@ -1342,8 +1396,11 @@ void ConfigurationManager_GetFlashBlockInfo(
     uint8_t maxWirelessProfiles,
     uint32_t maxCertificateBlockSize)
 {
-    uint32_t freeSize;
     uint32_t count;
+
+    (void)storage;
+    (void)storageSize;
+    (void)alignment;
 
     memset(info, 0, sizeof(HAL_ConfigurationBlockInfo));
 
@@ -1376,10 +1433,9 @@ void ConfigurationManager_GetFlashBlockInfo(
             info->Flags =
                 ConfigurationBlockFlags_CanAdd | ConfigurationBlockFlags_CanReplace | ConfigurationBlockFlags_CanDelete;
 
-            // limited by the RAM to receive it and by the free space
-            freeSize =
-                storageSize - ConfigurationManager_GetConfigurationImageUsedSize(storage, storageSize, alignment);
-            info->MaxBlockSize = freeSize < maxCertificateBlockSize ? freeSize : maxCertificateBlockSize;
+            // limited by the RAM to receive it, the room in the storage is checked when it's stored (a replace frees
+            // the room of the certificate it replaces)
+            info->MaxBlockSize = maxCertificateBlockSize;
             break;
 
         default:

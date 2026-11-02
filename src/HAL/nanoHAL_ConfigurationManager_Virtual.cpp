@@ -373,7 +373,8 @@ ConfigurationOperationError ConfigurationManager_ApplyConfigurationOperation(
         1,
         WriteConfigurationImage);
 
-    if (result == ConfigurationOperationError_Success)
+    // enumerate also after a failure: the image in RAM may have changed even if saving it failed
+    if (result != ConfigurationOperationError_NoChanges)
     {
         ConfigurationManager_EnumerateConfigurationBlocks();
     }

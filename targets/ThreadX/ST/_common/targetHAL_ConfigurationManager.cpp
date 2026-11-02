@@ -962,9 +962,40 @@ __nfweak void ConfigurationManager_GetSystemSerialNumber(char *serialNumber, siz
 // writes the configuration image (or part of it) to the configuration flash region
 static bool WriteConfigurationImage(uint32_t offset, const uint8_t *data, uint32_t length, bool eraseFirst)
 {
-    if (eraseFirst && !STM32FlashDriver_EraseBlock(nullptr, (uint32_t)&__nanoConfig_start__))
+    if (eraseFirst)
     {
-        return false;
+        // erase all the blocks of the configuration region
+        DeviceBlockInfo *blockInfo = STM32FlashDriver_GetDeviceInfo(nullptr);
+        uint32_t start = (uint32_t)&__nanoConfig_start__;
+        uint32_t end = (uint32_t)&__nanoConfig_end__;
+        BlockRegionInfo *region = nullptr;
+
+        for (uint32_t i = 0; i < blockInfo->NumRegions; i++)
+        {
+            BlockRegionInfo *candidate = &blockInfo->Regions[i];
+
+            if (start >= candidate->Start && start < candidate->Start + candidate->NumBlocks * candidate->BytesPerBlock)
+            {
+                region = candidate;
+                break;
+            }
+        }
+
+        if (region == nullptr)
+        {
+            return false;
+        }
+
+        for (uint32_t eraseAddress =
+                 BlockRegionInfo_BlockAddress(region, BlockRegionInfo_BlockIndexFromAddress(region, start));
+             eraseAddress < end;
+             eraseAddress += region->BytesPerBlock)
+        {
+            if (!STM32FlashDriver_EraseBlock(nullptr, eraseAddress))
+            {
+                return false;
+            }
+        }
     }
 
     return length == 0 || STM32FlashDriver_Write(
@@ -1024,6 +1055,12 @@ ConfigurationOperationError ConfigurationManager_ApplyConfigurationOperation(
         platform_free(g_TargetConfiguration.Wireless80211Configs);
         platform_free(g_TargetConfiguration.CertificateStore);
         platform_free(g_TargetConfiguration.DeviceCertificates);
+
+        if (g_TargetConfiguration.WirelessAPConfigs != nullptr)
+        {
+            platform_free(g_TargetConfiguration.WirelessAPConfigs);
+            g_TargetConfiguration.WirelessAPConfigs = nullptr;
+        }
 
         // perform enumeration of configuration blocks
         ConfigurationManager_EnumerateConfigurationBlocks();

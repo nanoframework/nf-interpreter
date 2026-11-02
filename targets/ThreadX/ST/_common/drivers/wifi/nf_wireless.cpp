@@ -18,13 +18,59 @@ uint32_t wifiConnectThreadStack[WIFI_CONNECT_THREAD_STACK_SIZE / sizeof(uint32_t
 // flag to store if Wi-Fi has been initialized
 // static bool NF_WirelessInitialized = false;
 
+// profile passed by the application to connect with (it may not be stored), taken by the worker
+static HAL_Configuration_Wireless80211 *s_requestedProfile = NULL;
+
+static void ReleaseProfile(HAL_Configuration_Wireless80211 *profile)
+{
+    if (profile != NULL)
+    {
+        // the profile has the password, clear it before releasing the memory
+        memset(profile, 0, sizeof(HAL_Configuration_Wireless80211));
+        platform_free(profile);
+    }
+}
+
+void NF_Wireless_SetRequestedProfile(const HAL_Configuration_Wireless80211 *profile)
+{
+    TX_INTERRUPT_SAVE_AREA
+
+    HAL_Configuration_Wireless80211 *copy =
+        (HAL_Configuration_Wireless80211 *)platform_malloc(sizeof(HAL_Configuration_Wireless80211));
+
+    if (copy != NULL)
+    {
+        memcpy(copy, profile, sizeof(HAL_Configuration_Wireless80211));
+    }
+
+    TX_DISABLE
+    HAL_Configuration_Wireless80211 *previous = s_requestedProfile;
+    s_requestedProfile = copy;
+    TX_RESTORE
+
+    ReleaseProfile(previous);
+}
+
+static HAL_Configuration_Wireless80211 *TakeRequestedProfile()
+{
+    TX_INTERRUPT_SAVE_AREA
+
+    TX_DISABLE
+    HAL_Configuration_Wireless80211 *profile = s_requestedProfile;
+    s_requestedProfile = NULL;
+    TX_RESTORE
+
+    return profile;
+}
+
 __attribute__((noreturn)) void WiFiConnectWorker_entry(uint32_t parameter)
 {
     (void)parameter;
     uint32_t wifiRequest;
     uint32_t configId;
-    HAL_Configuration_Wireless80211 *wirelessConfig;
-    bool connected;
+    HAL_Configuration_Wireless80211 *requestedProfile;
+    // profile being connected with, kept for the retries
+    HAL_Configuration_Wireless80211 *wirelessConfig = NULL;
     uint8_t ipAddress[4];
     uint8_t ipMask[4];
     uint8_t gatewayAddress[4];
@@ -47,6 +93,9 @@ __attribute__((noreturn)) void WiFiConnectWorker_entry(uint32_t parameter)
 
                 // update flags
                 NF_ConnectInProgress = false;
+
+                ReleaseProfile(wirelessConfig);
+                wirelessConfig = NULL;
             }
 
             if ((wifiRequest & WIFI_REQUEST_MASK) == WIFI_REQUEST_CONNECT_STATION)
@@ -54,22 +103,31 @@ __attribute__((noreturn)) void WiFiConnectWorker_entry(uint32_t parameter)
                 // the request has the Id of the station profile to connect with
                 configId = (wifiRequest & ~WIFI_REQUEST_MASK);
 
-                // request to connect to a Wi-Fi network
-                wirelessConfig = ConfigurationManager_GetWirelessConfigurationFromId(configId);
+                // an application can pass the credentials to connect with, stored or not
+                requestedProfile = TakeRequestedProfile();
+
+                if (requestedProfile != NULL)
+                {
+                    ReleaseProfile(wirelessConfig);
+                    wirelessConfig = requestedProfile;
+                }
+                else if (wirelessConfig == NULL || wirelessConfig->Id != configId)
+                {
+                    // not a retry of the last request: use the stored profile
+                    ReleaseProfile(wirelessConfig);
+                    wirelessConfig = ConfigurationManager_GetWirelessConfigurationFromId(configId);
+                }
 
                 if (wirelessConfig == NULL)
                 {
-                    // there is no station profile with this Id
+                    // there is nothing to connect with
+                    NF_ConnectResult = 0;
+                    NF_ConnectInProgress = false;
+
                     continue;
                 }
 
-                connected = NF_Wireless_Start_Connect(wirelessConfig);
-
-                // the profile has the password, clear it before releasing the memory
-                memset(wirelessConfig, 0, sizeof(HAL_Configuration_Wireless80211));
-                platform_free(wirelessConfig);
-
-                if (!connected)
+                if (!NF_Wireless_Start_Connect(wirelessConfig))
                 {
                     // failed to connect
 
@@ -140,6 +198,9 @@ __attribute__((noreturn)) void WiFiConnectWorker_entry(uint32_t parameter)
                     // all good, update flags
                     NF_ConnectResult = 1;
                     NF_ConnectInProgress = false;
+
+                    ReleaseProfile(wirelessConfig);
+                    wirelessConfig = NULL;
 
                     // fire event for Wi-Fi station job complete
                     Events_Set(SYSTEM_EVENT_FLAG_WIFI_STATION);
@@ -371,13 +432,15 @@ int NF_Wireless_Open(HAL_Configuration_NetworkInterface *config)
     // sanity check for Wireless station disabled
     if (wirelessConfig->Options & Wireless80211Configuration_ConfigurationOptions_Disable)
     {
-        platform_free(wirelessConfig);
+        ReleaseProfile(wirelessConfig);
         return SOCK_SOCKET_ERROR;
     }
 
     // Connect if Auto connect and we have an SSID
+    // the Id goes in the request, with the request bits
     if ((wirelessConfig->Options & Wireless80211Configuration_ConfigurationOptions_AutoConnect) &&
-        (hal_strlen_s((const char *)wirelessConfig->Ssid) > 0))
+        (hal_strlen_s((const char *)wirelessConfig->Ssid) > 0) &&
+        config->SpecificConfigId <= CONFIGURATION_BLOCK_ID_MAX)
     {
         // request to connect to WiFi
         wifiRequest = (WIFI_REQUEST_CONNECT_STATION | config->SpecificConfigId);

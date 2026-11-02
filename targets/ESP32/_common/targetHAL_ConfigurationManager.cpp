@@ -189,7 +189,8 @@ static void FreeConfigurationBlocks(HAL_TARGET_CONFIGURATION *configuration)
 
 // Enumerates the configuration blocks from the configuration flash sector
 // implemented with 'weak' attribute so it can be replaced at target level
-void ConfigurationManager_EnumerateConfigurationBlocks()
+// enumerates the configuration blocks, returns false if that wasn't possible (the previous enumeration is kept)
+static bool EnumerateConfigurationBlocks()
 {
     HAL_TARGET_CONFIGURATION enumerated;
 
@@ -202,7 +203,7 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
     if (networkConfigs == nullptr)
     {
         ESP_LOGE(TAG, "FindNetworkConfigurationBlocks returned NULL(out of memory)");
-        return;
+        return false;
     }
 
     if (networkConfigs->Count == 0)
@@ -259,7 +260,7 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
         if (!networkConfigs)
         {
             ESP_LOGE(TAG, "Re-enumeration of config returned NULL");
-            return;
+            return false;
         }
         ESP_LOGI(TAG, "networkCount %d/%d", networkCount, networkConfigs->Count);
     }
@@ -281,13 +282,21 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
 
         FreeConfigurationBlocks(&enumerated);
 
-        return;
+        return false;
     }
 
     // release the previous enumeration
     FreeConfigurationBlocks(&g_TargetConfiguration);
 
     g_TargetConfiguration = enumerated;
+
+    return true;
+}
+
+// Enumerates the configuration blocks from the configuration storage
+void ConfigurationManager_EnumerateConfigurationBlocks()
+{
+    EnumerateConfigurationBlocks();
 }
 
 // Build AP default SSID based on the last 3 bytes of MAC
@@ -996,16 +1005,22 @@ ConfigurationOperationError ConfigurationManager_ApplyConfigurationOperation(
     uint32_t blockSize)
 {
     bool success = false;
+    uint32_t newIndex;
 
     switch (operation)
     {
         case ConfigurationOperation_Add:
-            // the new block goes after the last one
-            success = ConfigStorage_WriteFileAtomic(
-                configuration,
-                ConfigurationManager_GetBlockCount(configuration),
-                (uint8_t *)block,
-                blockSize);
+            // the new block goes after the last one, in a file that doesn't exist (a gap that couldn't be closed may
+            // have left one there)
+            newIndex = ConfigurationManager_GetBlockCount(configuration);
+
+            while (newIndex < ESP32_CONFIG_MAX_FILE_INDEX && ConfigStorage_FileExists(configuration, newIndex))
+            {
+                newIndex++;
+            }
+
+            success = newIndex < ESP32_CONFIG_MAX_FILE_INDEX &&
+                      ConfigStorage_WriteFileAtomic(configuration, newIndex, (uint8_t *)block, blockSize);
             break;
 
         case ConfigurationOperation_Replace:
@@ -1031,7 +1046,11 @@ ConfigurationOperationError ConfigurationManager_ApplyConfigurationOperation(
         return ConfigurationOperationError_StorageError;
     }
 
-    ConfigurationManager_EnumerateConfigurationBlocks();
+    // the block is stored, but the lists in g_TargetConfiguration are stale until they are enumerated again
+    if (!EnumerateConfigurationBlocks())
+    {
+        return ConfigurationOperationError_OutOfMemory;
+    }
 
     return ConfigurationOperationError_Success;
 }

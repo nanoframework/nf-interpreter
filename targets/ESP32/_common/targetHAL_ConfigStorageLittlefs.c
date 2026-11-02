@@ -762,16 +762,12 @@ bool ConfigStorage_WriteFileAtomic(
 
     ConfigStorage_GetConfigFileName(configuration, configurationIndex, fileName);
 
+    // littlefs replaces an existing destination in a single step (lfs_rename)
+    // if that fails, the current file is left as it is
     if (rename(NANO_LITTLEFS_TEMP_FILE_NAME, fileName) != 0)
     {
-        // in case the file system doesn't replace an existing file
-        unlink(fileName);
-
-        if (rename(NANO_LITTLEFS_TEMP_FILE_NAME, fileName) != 0)
-        {
-            unlink(NANO_LITTLEFS_TEMP_FILE_NAME);
-            return false;
-        }
+        unlink(NANO_LITTLEFS_TEMP_FILE_NAME);
+        return false;
     }
 
     return true;
@@ -786,9 +782,10 @@ void ConfigStorage_CompactFiles(DeviceConfigurationOption configuration, uint32_
     {
         if (ConfigStorage_FileExists(configuration, index))
         {
-            if (index != nextIndex)
+            if (index != nextIndex && !ConfigStorage_RenameFile(configuration, index, nextIndex))
             {
-                ConfigStorage_RenameFile(configuration, index, nextIndex);
+                // the file stays where it is, the files that follow can't move before it
+                nextIndex = index;
             }
 
             nextIndex++;

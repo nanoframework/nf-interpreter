@@ -678,34 +678,55 @@ ConfigurationOperationError ConfigurationManager_ApplyConfigurationOperation(
         return ConfigurationOperationError_NotSupported;
     }
 
-    // replace and delete remove the SimpleLink profile from its slot
-    if (operation == ConfigurationOperation_Replace || operation == ConfigurationOperation_Delete)
+    int16_t currentSlot = operation == ConfigurationOperation_Add ? -1 : s_wirelessProfileSlots[configurationIndex];
+    uint32_t count = ConfigurationManager_GetBlockCount(configuration);
+    ConfigurationOperationError result = ConfigurationOperationError_Success;
+
+    if (operation == ConfigurationOperation_Delete)
     {
-        if (sl_WlanProfileDel(s_wirelessProfileSlots[configurationIndex]) < 0)
+        if (sl_WlanProfileDel(currentSlot) < 0)
         {
             return ConfigurationOperationError_StorageError;
         }
     }
-
-    // add and replace add a SimpleLink profile, SimpleLink picks the slot (the Id)
-    if (operation == ConfigurationOperation_Add || operation == ConfigurationOperation_Replace)
+    else if (operation == ConfigurationOperation_Add || count < SL_WLAN_MAX_PROFILES)
     {
-        // this enumerates the configuration blocks again
+        // add the new profile first (SimpleLink picks the slot, which is the Id), so the current one is kept if that
+        // fails; this enumerates the configuration blocks again
         if (!ConfigurationManager_StoreConfigurationBlock(block, configuration, configurationIndex, 0, 0, true))
         {
             return ConfigurationOperationError_StorageError;
         }
+
+        // replace: then remove the current one
+        if (operation == ConfigurationOperation_Replace && sl_WlanProfileDel(currentSlot) < 0)
+        {
+            // both profiles are stored now
+            result = ConfigurationOperationError_StorageError;
+        }
     }
     else
     {
-        // free the current allocation(s)
-        platform_free(g_TargetConfiguration.NetworkInterfaceConfigs);
-        platform_free(g_TargetConfiguration.Wireless80211Configs);
-        platform_free(g_TargetConfiguration.CertificateStore);
+        // replace with all the SimpleLink slots in use: the current profile has to be removed to make room, it can't be
+        // put back if the new one isn't added (SimpleLink doesn't give the password back)
+        if (sl_WlanProfileDel(currentSlot) < 0)
+        {
+            return ConfigurationOperationError_StorageError;
+        }
 
-        // perform enumeration of configuration blocks
-        ConfigurationManager_EnumerateConfigurationBlocks();
+        if (!ConfigurationManager_StoreConfigurationBlock(block, configuration, configurationIndex, 0, 0, true))
+        {
+            result = ConfigurationOperationError_StorageError;
+        }
     }
 
-    return ConfigurationOperationError_Success;
+    // free the current allocation(s)
+    platform_free(g_TargetConfiguration.NetworkInterfaceConfigs);
+    platform_free(g_TargetConfiguration.Wireless80211Configs);
+    platform_free(g_TargetConfiguration.CertificateStore);
+
+    // perform enumeration of configuration blocks (the slots may have changed)
+    ConfigurationManager_EnumerateConfigurationBlocks();
+
+    return result;
 }
