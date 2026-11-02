@@ -483,10 +483,9 @@ static ConfigurationOperationError PrepareWirelessProfileOperation(
             {
                 result = ConfigurationOperationError_StorageError;
             }
-            else if (
-                IsWirelessProfileUsedByNetworkInterface(
-                    configuration,
-                    GetWirelessProfileId(configuration, storedBlock)))
+            else if (IsWirelessProfileUsedByNetworkInterface(
+                         configuration,
+                         GetWirelessProfileId(configuration, storedBlock)))
             {
                 result = ConfigurationOperationError_InUse;
             }
