@@ -895,6 +895,12 @@ void CLR_RT_StackFrame::Pop()
 {
     NATIVE_PROFILE_CLR_CORE();
 
+    if (m_call.target != nullptr && (m_call.target->flags & CLR_RECORD_METHODDEF::MD_StaticConstructor) != 0 &&
+        (m_call.genericType == nullptr || !NANOCLR_INDEX_IS_VALID(*m_call.genericType)))
+    {
+        g_CLR_RT_ExecutionEngine.CompleteStaticConstructor(m_call, m_owningThread);
+    }
+
     // Clear localloc references before popping
     for (CLR_INT32 i = 0; i < m_localAllocCount; i++)
     {

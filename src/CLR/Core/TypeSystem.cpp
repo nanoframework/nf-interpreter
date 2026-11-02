@@ -5537,7 +5537,8 @@ HRESULT CLR_RT_AppDomainAssembly::CreateInstance(
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    int size = CONVERTFROMSIZETOHEAPBLOCKS(sizeof(CLR_RT_AppDomainAssembly)) + assm->m_iStaticFields;
+    int size = CONVERTFROMSIZETOHEAPBLOCKS(sizeof(CLR_RT_AppDomainAssembly)) + assm->m_iStaticFields +
+               CONVERTFROMSIZETOHEAPBLOCKS(assm->tablesSize[TBL_TypeDef] * sizeof(CLR_UINT8));
 
     appDomainAssembly = EVENTCACHE_EXTRACT_NODE_AS_BLOCKS(
         g_CLR_RT_EventCache,
@@ -5736,7 +5737,10 @@ struct MethodIndexLookup
 };
 
 static const MethodIndexLookup c_MethodIndexLookup[] = {
-#define MIL(nm, type, method) {nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method}
+#define MIL(nm, type, method)                                                                                          \
+    {                                                                                                                  \
+        nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method                                           \
+    }
 
     // clang-format off
 

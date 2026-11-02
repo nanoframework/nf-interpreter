@@ -915,6 +915,8 @@ struct CLR_RT_TypeDef_CrossReference
     static const CLR_UINT32 TD_CR_StaticConstructorCalled = 0x0001;
     static const CLR_UINT32 TD_CR_HasFinalizer = 0x0002;
     static const CLR_UINT32 TD_CR_IsMarshalByRefObject = 0x0004;
+    static const CLR_UINT32 TD_CR_StaticConstructorRunning = 0x0008;
+    static const CLR_UINT32 TD_CR_StaticConstructorFailed = 0x0010;
 
     CLR_UINT16 flags;
     CLR_INDEX totalFields;
@@ -4407,9 +4409,36 @@ struct CLR_RT_ExecutionEngine
 
     bool IsThereEnoughIdleTime(CLR_UINT32 expectedMsec);
 
+    enum StaticConstructorState : CLR_UINT8
+    {
+        StaticConstructorNotStarted,
+        StaticConstructorRunning,
+        StaticConstructorCompleted,
+        StaticConstructorFailed
+    };
+
     void SpawnTimer();
     void SpawnFinalizer();
     void SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread);
+    HRESULT EnsureStaticConstructorCompleted(CLR_RT_TypeDef_Instance &type, CLR_RT_Thread *thread);
+    void CompleteStaticConstructor(CLR_RT_MethodDef_Instance method, CLR_RT_Thread *thread);
+    CLR_UINT8 GetStaticConstructorState(
+        const CLR_RT_TypeDef_Instance &type,
+        CLR_RT_Thread *thread
+#if defined(NANOCLR_APPDOMAINS)
+        ,
+        CLR_RT_AppDomain *appDomain = nullptr
+#endif
+    );
+    void SetStaticConstructorState(
+        const CLR_RT_TypeDef_Instance &type,
+        CLR_RT_Thread *thread,
+        CLR_UINT8 state
+#if defined(NANOCLR_APPDOMAINS)
+        ,
+        CLR_RT_AppDomain *appDomain = nullptr
+#endif
+    );
 #if defined(NANOCLR_APPDOMAINS)
     bool SpawnStaticConstructorHelper(
         CLR_RT_AppDomain *appDomain,
