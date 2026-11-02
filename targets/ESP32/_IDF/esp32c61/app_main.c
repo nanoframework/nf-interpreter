@@ -46,11 +46,12 @@ void app_main()
 {
     UBaseType_t taskPriority = 5;
 
-    // Switch off logging so as not to interfere with UART 0 
+    // Switch off logging so as not to interfere with UART 0
     esp_log_level_set("*", ESP_LOG_NONE);
 
     esp_err_t err = nvs_flash_init();
-    if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+    if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND)
+    {
         ESP_ERROR_CHECK(nvs_flash_erase());
         err = nvs_flash_init();
     }
@@ -59,7 +60,9 @@ void app_main()
     vTaskPrioritySet(NULL, taskPriority);
 
     // start receiver task
-    xTaskCreate(&receiver_task, "ReceiverThread", 3072, NULL, taskPriority, &ReceiverTask);
+    // the wire protocol commands run in this task, including the configuration writes to littlefs, which
+    // need a deep stack (about 3.3 KB measured on ESP32-S3)
+    xTaskCreate(&receiver_task, "ReceiverThread", 4608, NULL, taskPriority, &ReceiverTask);
 
     // start the CLR main task
     xTaskCreate(&main_task, "main_task", 15000, NULL, taskPriority, NULL);
