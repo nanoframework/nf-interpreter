@@ -210,8 +210,9 @@ discards the request, but an active native lookup may finish later. A slow looku
 delays subsequent queued lookups, and final shutdown waits for that active OS
 call. Readiness waiting remains independent of DNS.
 
-macOS and Windows networking are unchanged. Application sockets do not provide or
-enable debugger/wire-protocol transport.
+macOS networking is unchanged. For Windows netcore networking support, see the
+[Windows networking documentation](../netcore/README.md). Application sockets do
+not provide or enable debugger/wire-protocol transport.
 
 ## Linux TLS
 

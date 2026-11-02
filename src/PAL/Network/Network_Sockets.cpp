@@ -496,13 +496,33 @@ void ResolverWorker()
             }
         }
 
+#if defined(_WIN32)
+        ADDRINFOW hints = {};
+#else
         addrinfo hints = {};
+#endif
         hints.ai_family = AF_INET;
         hints.ai_socktype = SOCK_STREAM;
         hints.ai_flags = AI_CANONNAME;
+#if defined(_WIN32)
+        ADDRINFOW *addresses = nullptr;
+        int result = WSAEINVAL;
+        int nameLength = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, job->name.c_str(), -1, nullptr, 0);
+        if (nameLength > 0)
+        {
+            std::vector<wchar_t> name(nameLength);
+            if (MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, job->name.c_str(), -1, name.data(), nameLength) > 0)
+            {
+                result = GetAddrInfoW(name.data(), nullptr, &hints, &addresses);
+            }
+        }
+        if (result == WSAEINVAL)
+        {
+            fprintf(stderr, "nanoCLR DNS invalid host name or resolver arguments\n");
+        }
+#else
         addrinfo *addresses = nullptr;
         int result = getaddrinfo(job->name.c_str(), nullptr, &hints, &addresses);
-#if !defined(_WIN32)
         int systemError = errno;
 #endif
         std::vector<SOCK_sockaddr_in> converted;
@@ -520,13 +540,39 @@ void ResolverWorker()
                 converted.push_back(value);
                 if (address->ai_canonname != nullptr)
                 {
+#if defined(_WIN32)
+                    int length = WideCharToMultiByte(
+                        CP_UTF8, WC_ERR_INVALID_CHARS, address->ai_canonname, -1, nullptr, 0, nullptr, nullptr);
+                    std::vector<char> name(length);
+                    if (length == 0 ||
+                        WideCharToMultiByte(
+                            CP_UTF8,
+                            WC_ERR_INVALID_CHARS,
+                            address->ai_canonname,
+                            -1,
+                            name.data(),
+                            length,
+                            nullptr,
+                            nullptr) == 0)
+                    {
+                        fprintf(stderr, "nanoCLR DNS canonical name UTF-8 conversion failed (%lu)\n", GetLastError());
+                        result = WSAEINVAL;
+                        break;
+                    }
+                    canonicalName.assign(name.data(), name.size() - 1);
+#else
                     canonicalName = address->ai_canonname;
+#endif
                 }
             }
         }
         if (addresses != nullptr)
         {
+#if defined(_WIN32)
+            FreeAddrInfoW(addresses);
+#else
             freeaddrinfo(addresses);
+#endif
         }
         {
             std::lock_guard<std::mutex> lock(s_mutex);
@@ -535,7 +581,9 @@ void ResolverWorker()
             job->error = result == 0            ? 0
                          : result == EAI_AGAIN  ? SOCK_TRY_AGAIN
                          : result == EAI_MEMORY ? SOCK_ENOBUFS
-#if !defined(_WIN32)
+#if defined(_WIN32)
+                         : result == WSAEINVAL ? SOCK_EINVAL
+#else
                          : result == EAI_SYSTEM ? MapError(systemError)
 #endif
                                                 : SOCK_HOST_NOT_FOUND;

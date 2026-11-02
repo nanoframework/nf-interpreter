@@ -49,6 +49,8 @@ Optional MSBuild properties:
 
 - IPv4 TCP clients/servers, UDP (including empty datagrams), DNS, socket options,
   numeric IPv4 addresses and read-only interface enumeration.
+- DNS converts managed UTF-8 host names to UTF-16 for `GetAddrInfoW` and converts
+  canonical names back to UTF-8, independently of the Windows ANSI code page.
 - `SOCKET` values remain native-width, including on x64. Managed socket handles
   are separate monotonically allocated integers, not truncated Windows handles.
 - Native sockets are nonblocking. A one-shot Winsock `select` worker and a
