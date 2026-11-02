@@ -9,10 +9,7 @@
 // defining this array here makes is local helping reduce the image size because of compiler opmitizations
 const CommandHandlerLookup c_Lookup_Request[] = {
 /*******************************************************************************************************************************************************************/
-#define DEFINE_CMD(cmd)                                                                                                \
-    {                                                                                                                  \
-        CLR_DBG_Commands_c_Monitor_##cmd, &Monitor_##cmd                                                               \
-    }
+#define DEFINE_CMD(cmd) {CLR_DBG_Commands_c_Monitor_##cmd, &Monitor_##cmd}
 
     DEFINE_CMD(Ping),
     DEFINE_CMD(Reboot),
@@ -43,10 +40,7 @@ const CommandHandlerLookup c_Lookup_Request[] = {
 // defining this array here makes is local helping reduce the image size because of compiler opmitizations
 const CommandHandlerLookup c_Lookup_Reply[] = {
 /*******************************************************************************************************************************************************************/
-#define DEFINE_CMD(cmd)                                                                                                \
-    {                                                                                                                  \
-        CLR_DBG_Commands_c_Monitor_##cmd, &Monitor_##cmd                                                               \
-    }
+#define DEFINE_CMD(cmd) {CLR_DBG_Commands_c_Monitor_##cmd, &Monitor_##cmd}
     DEFINE_CMD(Ping),
 #undef DEFINE_CMD
     /*******************************************************************************************************************************************************************/

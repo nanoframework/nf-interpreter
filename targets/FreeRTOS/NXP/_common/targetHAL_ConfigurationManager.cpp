@@ -655,8 +655,12 @@ static bool WriteConfigurationImage(uint32_t offset, const uint8_t *data, uint32
         return false;
     }
 
-    return length == 0 ||
-           iMXRTFlexSPIDriver_Write(nullptr, (uint32_t)&__nanoConfig_start__ + offset, length, (unsigned char *)data, false);
+    return length == 0 || iMXRTFlexSPIDriver_Write(
+                              nullptr,
+                              (uint32_t)&__nanoConfig_start__ + offset,
+                              length,
+                              (unsigned char *)data,
+                              false);
 }
 
 void ConfigurationManager_GetBlockInfo(DeviceConfigurationOption configuration, HAL_ConfigurationBlockInfo *info)

@@ -244,8 +244,9 @@ uint32_t ConfigurationManager_GetBlockCount(DeviceConfigurationOption configurat
                        : 0;
 
         case DeviceConfigurationOption_Wireless80211Network:
-            return g_TargetConfiguration.Wireless80211Configs != NULL ? g_TargetConfiguration.Wireless80211Configs->Count
-                                                                     : 0;
+            return g_TargetConfiguration.Wireless80211Configs != NULL
+                       ? g_TargetConfiguration.Wireless80211Configs->Count
+                       : 0;
 
         case DeviceConfigurationOption_WirelessNetworkAP:
             return g_TargetConfiguration.WirelessAPConfigs != NULL ? g_TargetConfiguration.WirelessAPConfigs->Count : 0;
@@ -255,7 +256,7 @@ uint32_t ConfigurationManager_GetBlockCount(DeviceConfigurationOption configurat
 
         case DeviceConfigurationOption_X509DeviceCertificates:
             return g_TargetConfiguration.DeviceCertificates != NULL ? g_TargetConfiguration.DeviceCertificates->Count
-                                                                   : 0;
+                                                                    : 0;
 
         default:
             return 0;
@@ -264,7 +265,9 @@ uint32_t ConfigurationManager_GetBlockCount(DeviceConfigurationOption configurat
 
 #if !defined(VIRTUAL_DEVICE)
 
-__nfweak void ConfigurationManager_GetBlockInfo(DeviceConfigurationOption configuration, HAL_ConfigurationBlockInfo *info)
+__nfweak void ConfigurationManager_GetBlockInfo(
+    DeviceConfigurationOption configuration,
+    HAL_ConfigurationBlockInfo *info)
 {
     (void)configuration;
 
@@ -881,7 +884,7 @@ ConfigurationOperationError ConfigurationManager_ProcessConfigurationOperationCh
             if (totalLength > info.MaxBlockSize)
             {
                 return GetFixedConfigurationBlockSize(configuration) != 0 ? ConfigurationOperationError_InvalidBlock
-                                                                         : ConfigurationOperationError_NoSpace;
+                                                                          : ConfigurationOperationError_NoSpace;
             }
 
             s_stagedOperation.Buffer = (uint8_t *)platform_malloc(totalLength);
@@ -992,7 +995,10 @@ static uint32_t GetStoredConfigurationBlockSize(const uint8_t *block, uint32_t r
         }
 
         // the block may not be aligned
-        memcpy(&certificateSize, block + offsetof(HAL_Configuration_X509CaRootBundle, CertificateSize), sizeof(uint32_t));
+        memcpy(
+            &certificateSize,
+            block + offsetof(HAL_Configuration_X509CaRootBundle, CertificateSize),
+            sizeof(uint32_t));
 
         blockSize = certificateSize > remainingSize - headerSize ? remainingSize : headerSize + certificateSize;
     }
@@ -1230,10 +1236,10 @@ ConfigurationOperationError ConfigurationManager_ApplyConfigurationOperationToIm
             memcpy(image, block, blockSize);
             memset(image + blockSize, 0xFF, alignedSize - blockSize);
 
-            result = (writeImage(usedSize, image, alignedSize, false) &&
-                      memcmp(storage + usedSize, image, alignedSize) == 0)
-                         ? ConfigurationOperationError_Success
-                         : ConfigurationOperationError_StorageError;
+            result =
+                (writeImage(usedSize, image, alignedSize, false) && memcmp(storage + usedSize, image, alignedSize) == 0)
+                    ? ConfigurationOperationError_Success
+                    : ConfigurationOperationError_StorageError;
 
             memset(image, 0, alignedSize);
             platform_free(image);
@@ -1371,7 +1377,8 @@ void ConfigurationManager_GetFlashBlockInfo(
                 ConfigurationBlockFlags_CanAdd | ConfigurationBlockFlags_CanReplace | ConfigurationBlockFlags_CanDelete;
 
             // limited by the RAM to receive it and by the free space
-            freeSize = storageSize - ConfigurationManager_GetConfigurationImageUsedSize(storage, storageSize, alignment);
+            freeSize =
+                storageSize - ConfigurationManager_GetConfigurationImageUsedSize(storage, storageSize, alignment);
             info->MaxBlockSize = freeSize < maxCertificateBlockSize ? freeSize : maxCertificateBlockSize;
             break;
 

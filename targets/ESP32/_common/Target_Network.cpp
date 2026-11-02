@@ -152,7 +152,10 @@ bool GetWirelessConfig(int index, HAL_Configuration_Wireless80211 **wirelessConf
     if (networkConfiguration)
     {
         // load network interface configuration from storage
-        if (ConfigurationManager_GetConfigurationBlock(networkConfiguration, DeviceConfigurationOption_Network, index) &&
+        if (ConfigurationManager_GetConfigurationBlock(
+                networkConfiguration,
+                DeviceConfigurationOption_Network,
+                index) &&
             networkConfiguration->InterfaceType == NetworkInterfaceType_Wireless80211)
         {
             // the network interface refers to its station profile by Id
@@ -180,7 +183,10 @@ static int32_t FindWirelessProfileIndex(uint32_t configurationId)
     {
         for (uint32_t i = 0; i < count && profileIndex < 0; i++)
         {
-            if (ConfigurationManager_GetConfigurationBlock(profile, DeviceConfigurationOption_Wireless80211Network, i) &&
+            if (ConfigurationManager_GetConfigurationBlock(
+                    profile,
+                    DeviceConfigurationOption_Wireless80211Network,
+                    i) &&
                 profile->Id == configurationId)
             {
                 profileIndex = (int32_t)i;

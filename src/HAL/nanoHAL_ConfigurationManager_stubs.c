@@ -93,7 +93,9 @@ __nfweak uint32_t ConfigurationManager_GetBlockCount(DeviceConfigurationOption c
     return 0;
 }
 
-__nfweak void ConfigurationManager_GetBlockInfo(DeviceConfigurationOption configuration, HAL_ConfigurationBlockInfo *info)
+__nfweak void ConfigurationManager_GetBlockInfo(
+    DeviceConfigurationOption configuration,
+    HAL_ConfigurationBlockInfo *info)
 {
     (void)configuration;
 

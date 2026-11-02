@@ -15,7 +15,7 @@ extern "C"
 #endif
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////
-    // !!! KEEP IN SYNC WITH                                                                            //   
+    // !!! KEEP IN SYNC WITH                                                                            //
     // nanoFramework.Tools.Debugger.DeviceConfiguration.DeviceConfigurationOption (in managed code) !!! //
     //////////////////////////////////////////////////////////////////////////////////////////////////////
     typedef enum DeviceConfigurationOption
@@ -54,8 +54,8 @@ extern "C"
     } UpdateConfigurationResult;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // !!! KEEP IN SYNC WITH nanoFramework.Tools.Debugger.WireProtocol.Commands.Monitor_ConfigurationOperation (in managed
-    // code) !!!                                                                                                        //
+    // !!! KEEP IN SYNC WITH nanoFramework.Tools.Debugger.WireProtocol.Commands.Monitor_ConfigurationOperation (in
+    // managed code) !!! //
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // version of the configuration storage API, reported by Monitor_ConfigurationInfo
@@ -332,8 +332,9 @@ extern "C"
         uint32_t blockSize);
 
     // Executes an operation on a configuration block: validates it, assigns or checks the wireless profile Id,
-    // checks if a wireless profile in use is being deleted, then calls ConfigurationManager_ApplyConfigurationOperation.
-    // resultIndex, resultId and resultCount are optional outputs (0xFFFFFFFF when not applicable).
+    // checks if a wireless profile in use is being deleted, then calls
+    // ConfigurationManager_ApplyConfigurationOperation. resultIndex, resultId and resultCount are optional outputs
+    // (0xFFFFFFFF when not applicable).
     ConfigurationOperationError ConfigurationManager_ExecuteConfigurationOperation(
         ConfigurationOperation operation,
         DeviceConfigurationOption configuration,
@@ -380,7 +381,10 @@ extern "C"
         ConfigurationImageWriter writeImage);
 
     // Gets the size in use in a memory mapped configuration region (end of the last block, aligned)
-    uint32_t ConfigurationManager_GetConfigurationImageUsedSize(const uint8_t *start, uint32_t size, uint32_t alignment);
+    uint32_t ConfigurationManager_GetConfigurationImageUsedSize(
+        const uint8_t *start,
+        uint32_t size,
+        uint32_t alignment);
 
     // Gets the information of a configuration block type for targets that keep the configuration in a flash region:
     // network interfaces can be replaced and reset, wireless station profiles (if the device has a wireless station)

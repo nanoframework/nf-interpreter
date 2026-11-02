@@ -95,14 +95,16 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
 
     g_TargetConfiguration.NetworkInterfaceConfigs =
         (HAL_CONFIGURATION_NETWORK *)FindVirtualConfigurationBlocks(c_MARKER_CONFIGURATION_NETWORK_V1);
-    g_TargetConfiguration.Wireless80211Configs = (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)
-        FindVirtualConfigurationBlocks(c_MARKER_CONFIGURATION_WIRELESS80211_V1);
+    g_TargetConfiguration.Wireless80211Configs =
+        (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)FindVirtualConfigurationBlocks(
+            c_MARKER_CONFIGURATION_WIRELESS80211_V1);
     g_TargetConfiguration.WirelessAPConfigs =
         (HAL_CONFIGURATION_NETWORK_WIRELESSAP *)FindVirtualConfigurationBlocks(c_MARKER_CONFIGURATION_WIRELESS_AP_V1);
     g_TargetConfiguration.CertificateStore = (HAL_CONFIGURATION_X509_CERTIFICATE *)FindVirtualConfigurationBlocks(
         c_MARKER_CONFIGURATION_X509CAROOTBUNDLE_V1);
-    g_TargetConfiguration.DeviceCertificates = (HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *)
-        FindVirtualConfigurationBlocks(c_MARKER_CONFIGURATION_X509DEVICECERTIFICATE_V1);
+    g_TargetConfiguration.DeviceCertificates =
+        (HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *)FindVirtualConfigurationBlocks(
+            c_MARKER_CONFIGURATION_X509DEVICECERTIFICATE_V1);
 }
 
 void ConfigurationManager_Initialize()
@@ -283,7 +285,13 @@ UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock(
     DeviceConfigurationOption configuration,
     uint32_t configurationIndex)
 {
-    return ConfigurationManager_StoreConfigurationBlock(configurationBlock, configuration, configurationIndex, 0, 0, true)
+    return ConfigurationManager_StoreConfigurationBlock(
+               configurationBlock,
+               configuration,
+               configurationIndex,
+               0,
+               0,
+               true)
                ? UpdateConfigurationResult_Success
                : UpdateConfigurationResult_Failed;
 }
