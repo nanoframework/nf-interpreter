@@ -80,6 +80,11 @@ void *ConfigurationManagerCC32xx_FindNetworkConfigurationBlocks()
     return networkConfigs;
 }
 
+// SimpleLink slot of each wireless profile, in index order
+// SimpleLink keeps the profiles in slots 0 to SL_WLAN_MAX_PROFILES - 1 (7 profiles), a deleted profile leaves its slot
+// free, so the slots in use can be sparse
+static int16_t s_wirelessProfileSlots[SL_WLAN_MAX_PROFILES];
+
 // wireless profiles are stored as SimpleLink WLAN profile
 void *ConfigurationManagerCC32xx_FindNetworkWireless80211ConfigurationBlocks()
 {
@@ -98,7 +103,7 @@ void *ConfigurationManagerCC32xx_FindNetworkWireless80211ConfigurationBlocks()
         status = sl_WlanProfileGet(index, name, &nameLength, macAddr, &secParams, &secExtParams, &priority);
         if (status >= 0)
         {
-            profileCount++;
+            s_wirelessProfileSlots[profileCount++] = index;
         }
     }
 
@@ -350,9 +355,9 @@ bool ConfigurationManager_GetConfigurationBlock(
             c_MARKER_CONFIGURATION_WIRELESS80211_V1,
             sizeof(c_MARKER_CONFIGURATION_WIRELESS80211_V1));
 
-        // get profile from SimpleLink
+        // get profile from SimpleLink, from the slot of this index
         retVal = sl_WlanProfileGet(
-            configurationIndex,
+            s_wirelessProfileSlots[configurationIndex],
             (signed char *)wirelessConfigBlock->Ssid,
             &dummyNameLen,
             &dummyMAC[0],
@@ -365,7 +370,8 @@ bool ConfigurationManager_GetConfigurationBlock(
         }
 
         // fill struct fields
-        wirelessConfigBlock->Id = configurationIndex;
+        // the Id is the SimpleLink slot
+        wirelessConfigBlock->Id = s_wirelessProfileSlots[configurationIndex];
         wirelessConfigBlock->Authentication = GetAuthentication(secParams);
         wirelessConfigBlock->Encryption = GetEncryption(secParams);
 
@@ -600,4 +606,106 @@ __nfweak void ConfigurationManager_GetSystemSerialNumber(char *serialNumber, siz
 {
     // do the thing to get unique device ID
     memset(serialNumber, 0, serialNumberSize);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// configuration storage operations
+
+void ConfigurationManager_GetBlockInfo(DeviceConfigurationOption configuration, HAL_ConfigurationBlockInfo *info)
+{
+    uint32_t count;
+
+    memset(info, 0, sizeof(HAL_ConfigurationBlockInfo));
+
+    switch (configuration)
+    {
+        case DeviceConfigurationOption_Network:
+            // network interfaces are created by the device, a delete resets them to the defaults
+            count = ConfigurationManager_GetBlockCount(DeviceConfigurationOption_Network);
+            info->MaxCount = count > 0 ? (uint8_t)count : 1;
+            info->Flags = ConfigurationBlockFlags_CanReplace | ConfigurationBlockFlags_CanDelete |
+                          ConfigurationBlockFlags_DeleteResets | ConfigurationBlockFlags_Readable;
+            info->MaxBlockSize = sizeof(HAL_Configuration_NetworkInterface);
+            break;
+
+        case DeviceConfigurationOption_Wireless80211Network:
+            // SimpleLink profiles: the Id is the SimpleLink slot, the password can't be read back
+            info->MaxCount = SL_WLAN_MAX_PROFILES;
+            info->Flags = ConfigurationBlockFlags_CanAdd | ConfigurationBlockFlags_CanReplace |
+                          ConfigurationBlockFlags_CanDelete | ConfigurationBlockFlags_Readable |
+                          ConfigurationBlockFlags_IdIsSlot;
+            info->MaxBlockSize = sizeof(HAL_Configuration_Wireless80211);
+            break;
+
+        default:
+            // wireless AP and certificates aren't supported
+            break;
+    }
+}
+
+void ConfigurationManager_GetStorageInfo(uint32_t *totalSize, uint32_t *freeSize, uint32_t *flags)
+{
+    // SimpleLink file system and profiles: size unknown
+    *totalSize = 0;
+    *freeSize = 0xFFFFFFFF;
+    *flags = 0;
+}
+
+ConfigurationOperationError ConfigurationManager_ApplyConfigurationOperation(
+    ConfigurationOperation operation,
+    DeviceConfigurationOption configuration,
+    uint32_t configurationIndex,
+    void *block,
+    uint32_t blockSize)
+{
+    (void)blockSize;
+
+    if (configuration == DeviceConfigurationOption_Network)
+    {
+        // network configuration blocks are files, a replace overwrites the file
+        if (operation != ConfigurationOperation_Replace)
+        {
+            return ConfigurationOperationError_NotSupported;
+        }
+
+        return ConfigurationManager_StoreConfigurationBlock(block, configuration, configurationIndex, 0, 0, true)
+                   ? ConfigurationOperationError_Success
+                   : ConfigurationOperationError_StorageError;
+    }
+
+    if (configuration != DeviceConfigurationOption_Wireless80211Network)
+    {
+        return ConfigurationOperationError_NotSupported;
+    }
+
+    // replace and delete remove the SimpleLink profile from its slot
+    if (operation == ConfigurationOperation_Replace || operation == ConfigurationOperation_Delete)
+    {
+        if (sl_WlanProfileDel(s_wirelessProfileSlots[configurationIndex]) < 0)
+        {
+            return ConfigurationOperationError_StorageError;
+        }
+    }
+
+    // add and replace add a SimpleLink profile, SimpleLink picks the slot (the Id)
+    if (operation == ConfigurationOperation_Add || operation == ConfigurationOperation_Replace)
+    {
+        // this enumerates the configuration blocks again
+        if (!ConfigurationManager_StoreConfigurationBlock(block, configuration, configurationIndex, 0, 0, true))
+        {
+            return ConfigurationOperationError_StorageError;
+        }
+    }
+    else
+    {
+        // free the current allocation(s)
+        platform_free(g_TargetConfiguration.NetworkInterfaceConfigs);
+        platform_free(g_TargetConfiguration.Wireless80211Configs);
+        platform_free(g_TargetConfiguration.CertificateStore);
+
+        // perform enumeration of configuration blocks
+        ConfigurationManager_EnumerateConfigurationBlocks();
+    }
+
+    return ConfigurationOperationError_Success;
 }

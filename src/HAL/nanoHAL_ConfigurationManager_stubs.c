@@ -85,3 +85,53 @@ __nfweak void ConfigurationManager_GetSystemSerialNumber(char *serialNumber, siz
 {
     memset(serialNumber, 0, serialNumberSize);
 }
+
+__nfweak uint32_t ConfigurationManager_GetBlockCount(DeviceConfigurationOption configuration)
+{
+    (void)configuration;
+
+    return 0;
+}
+
+__nfweak void ConfigurationManager_GetBlockInfo(DeviceConfigurationOption configuration, HAL_ConfigurationBlockInfo *info)
+{
+    (void)configuration;
+
+    memset(info, 0, sizeof(HAL_ConfigurationBlockInfo));
+}
+
+__nfweak void ConfigurationManager_GetStorageInfo(uint32_t *totalSize, uint32_t *freeSize, uint32_t *flags)
+{
+    *totalSize = 0;
+    *freeSize = 0;
+    *flags = 0;
+}
+
+__nfweak ConfigurationOperationError ConfigurationManager_ProcessConfigurationOperationChunk(
+    ConfigurationOperation operation,
+    DeviceConfigurationOption configuration,
+    uint32_t configurationIndex,
+    uint32_t flags,
+    uint32_t totalLength,
+    uint32_t offset,
+    const uint8_t *data,
+    uint32_t length,
+    uint32_t *resultIndex,
+    uint32_t *resultId,
+    uint32_t *resultCount)
+{
+    (void)operation;
+    (void)configuration;
+    (void)configurationIndex;
+    (void)flags;
+    (void)totalLength;
+    (void)offset;
+    (void)data;
+    (void)length;
+
+    *resultIndex = 0xFFFFFFFF;
+    *resultId = 0xFFFFFFFF;
+    *resultCount = 0;
+
+    return ConfigurationOperationError_NotSupported;
+}

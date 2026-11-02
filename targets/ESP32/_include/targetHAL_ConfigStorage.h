@@ -120,6 +120,28 @@ extern "C"
     //
     bool ConfigStorage_DeleteFile(DeviceConfigurationOption configuration, uint32_t configurationIndex);
 
+    // checks if the file of a configuration block exists
+    bool ConfigStorage_FileExists(DeviceConfigurationOption configuration, uint32_t configurationIndex);
+
+    // renames the file of a configuration block to another index
+    bool ConfigStorage_RenameFile(DeviceConfigurationOption configuration, uint32_t fromIndex, uint32_t toIndex);
+
+    // writes a configuration block to its file, replacing the current one in a single step
+    bool ConfigStorage_WriteFileAtomic(
+        DeviceConfigurationOption configuration,
+        uint32_t configurationIndex,
+        uint8_t *pData,
+        int32_t writeSize);
+
+    // renames the files of a configuration type so their indexes are contiguous, from 0
+    void ConfigStorage_CompactFiles(DeviceConfigurationOption configuration, uint32_t maxIndex);
+
+    // deletes the temporary file left by an interrupted write
+    void ConfigStorage_DeleteTempFile();
+
+    // gets the total and used size of the configuration file system
+    void ConfigStorage_GetInfo(uint32_t *totalSize, uint32_t *usedSize);
+
     bool ConfigurationManager_GetConfigurationBlockFromStorage(
         DeviceConfigurationOption configuration,
         uint32_t configurationIndex,

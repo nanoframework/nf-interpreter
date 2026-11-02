@@ -22,7 +22,9 @@ __attribute__((noreturn)) void WiFiConnectWorker_entry(uint32_t parameter)
 {
     (void)parameter;
     uint32_t wifiRequest;
-    uint16_t configIndex;
+    uint32_t configId;
+    HAL_Configuration_Wireless80211 *wirelessConfig;
+    bool connected;
     uint8_t ipAddress[4];
     uint8_t ipMask[4];
     uint8_t gatewayAddress[4];
@@ -49,19 +51,25 @@ __attribute__((noreturn)) void WiFiConnectWorker_entry(uint32_t parameter)
 
             if ((wifiRequest & WIFI_REQUEST_MASK) == WIFI_REQUEST_CONNECT_STATION)
             {
-                // store the config index
-                configIndex = (wifiRequest & ~WIFI_REQUEST_MASK);
+                // the request has the Id of the station profile to connect with
+                configId = (wifiRequest & ~WIFI_REQUEST_MASK);
 
                 // request to connect to a Wi-Fi network
-                // sanity check
-                if (g_TargetConfiguration.Wireless80211Configs->Count == 0 ||
-                    g_TargetConfiguration.Wireless80211Configs->Count < configIndex)
+                wirelessConfig = ConfigurationManager_GetWirelessConfigurationFromId(configId);
+
+                if (wirelessConfig == NULL)
                 {
-                    // non existing config index
+                    // there is no station profile with this Id
                     continue;
                 }
 
-                if (!NF_Wireless_Start_Connect(g_TargetConfiguration.Wireless80211Configs->Configs[configIndex]))
+                connected = NF_Wireless_Start_Connect(wirelessConfig);
+
+                // the profile has the password, clear it before releasing the memory
+                memset(wirelessConfig, 0, sizeof(HAL_Configuration_Wireless80211));
+                platform_free(wirelessConfig);
+
+                if (!connected)
                 {
                     // failed to connect
 
@@ -86,7 +94,7 @@ __attribute__((noreturn)) void WiFiConnectWorker_entry(uint32_t parameter)
 
                     // find network config for this wireless config
                     int32_t networkConfigId =
-                        ConfigurationManager_FindNetworkConfigurationMatchingWirelessConfigurationFromId(configIndex);
+                        ConfigurationManager_FindNetworkConfigurationMatchingWirelessConfigurationFromId(configId);
 
                     // grab IP configuration from Wifi module
                     if (WIFI_GetIP_Address(ipAddress) != WIFI_STATUS_OK)
@@ -339,7 +347,8 @@ int NF_Wireless_Open(HAL_Configuration_NetworkInterface *config)
 
     if (wirelessConfig == NULL)
     {
-        return SOCK_SOCKET_ERROR;
+        // a device can have no station profiles: the interface is open, an application can connect it
+        return 0;
     }
 
     // check if we have the MAC address stored in the configuration block
@@ -362,6 +371,7 @@ int NF_Wireless_Open(HAL_Configuration_NetworkInterface *config)
     // sanity check for Wireless station disabled
     if (wirelessConfig->Options & Wireless80211Configuration_ConfigurationOptions_Disable)
     {
+        platform_free(wirelessConfig);
         return SOCK_SOCKET_ERROR;
     }
 
@@ -376,6 +386,10 @@ int NF_Wireless_Open(HAL_Configuration_NetworkInterface *config)
         // don't start smart connect
         // okToStartSmartConnect = false;
     }
+
+    // the profile has the password, clear it before releasing the memory
+    memset(wirelessConfig, 0, sizeof(HAL_Configuration_Wireless80211));
+    platform_free(wirelessConfig);
 
     // TODO check if we're good with a single interface
     return 0;

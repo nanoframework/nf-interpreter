@@ -33,6 +33,14 @@ int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t *buffer, int
             return true;
 
         case AccessMemory_Read:
+            // the configuration region can't be read: it holds certificates, private keys and passwords
+            if (location < (uint32_t)&__nanoConfig_end__ &&
+                location + lengthInBytes > (uint32_t)&__nanoConfig_start__)
+            {
+                *errorCode = AccessMemoryErrorCode_PermissionDenied;
+                return false;
+            }
+
             // use FLASH driver to perform read operation
             SL_MscFlashDriver_Read(NULL, location, lengthInBytes, buffer);
             return true;
