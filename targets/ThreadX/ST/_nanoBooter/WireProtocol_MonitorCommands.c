@@ -13,6 +13,10 @@
 #include <Target_BlockStorage_STM32FlashDriver.h>
 #include <target_board.h>
 
+// limits of the configuration region, from the linker script
+extern uint32_t __nanoConfig_start__;
+extern uint32_t __nanoConfig_end__;
+
 int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t *buffer, int32_t mode, uint32_t *errorCode)
 {
     // reset error code
