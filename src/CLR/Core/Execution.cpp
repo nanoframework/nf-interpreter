@@ -797,6 +797,225 @@ void CLR_RT_ExecutionEngine::SpawnTimer()
     NANOCLR_FOREACH_NODE_END();
 }
 
+CLR_UINT8 CLR_RT_ExecutionEngine::GetStaticConstructorState(
+    const CLR_RT_TypeDef_Instance &type,
+    CLR_RT_Thread *thread
+#if defined(NANOCLR_APPDOMAINS)
+    ,
+    CLR_RT_AppDomain *appDomain
+#endif
+)
+{
+#if defined(NANOCLR_APPDOMAINS)
+    if (appDomain == nullptr && thread != nullptr)
+    {
+        appDomain = thread->CurrentAppDomain();
+    }
+
+    if (appDomain == nullptr)
+    {
+        appDomain = GetCurrentAppDomain();
+    }
+
+    if (appDomain == nullptr)
+    {
+        return StaticConstructorFailed;
+    }
+
+    CLR_RT_AppDomainAssembly *appDomainAssembly = appDomain->FindAppDomainAssembly(type.assembly);
+    if (appDomainAssembly == nullptr)
+    {
+        return StaticConstructorFailed;
+    }
+
+    CLR_UINT8 *states =
+        (CLR_UINT8 *)(appDomainAssembly->m_pStaticFields + appDomainAssembly->m_assembly->m_iStaticFields);
+    return states[type.Type()];
+#else
+    (void)thread;
+
+    const CLR_UINT32 flags = type.CrossReference().flags;
+    if (flags & CLR_RT_TypeDef_CrossReference::TD_CR_StaticConstructorRunning)
+    {
+        return StaticConstructorRunning;
+    }
+    if (flags & CLR_RT_TypeDef_CrossReference::TD_CR_StaticConstructorFailed)
+    {
+        return StaticConstructorFailed;
+    }
+    if (flags & CLR_RT_TypeDef_CrossReference::TD_CR_StaticConstructorCalled)
+    {
+        return StaticConstructorCompleted;
+    }
+
+    return StaticConstructorNotStarted;
+#endif
+}
+
+void CLR_RT_ExecutionEngine::SetStaticConstructorState(
+    const CLR_RT_TypeDef_Instance &type,
+    CLR_RT_Thread *thread,
+    CLR_UINT8 state
+#if defined(NANOCLR_APPDOMAINS)
+    ,
+    CLR_RT_AppDomain *appDomain
+#endif
+)
+{
+#if defined(NANOCLR_APPDOMAINS)
+    if (appDomain == nullptr && thread != nullptr)
+    {
+        appDomain = thread->CurrentAppDomain();
+    }
+
+    if (appDomain == nullptr)
+    {
+        appDomain = GetCurrentAppDomain();
+    }
+
+    if (appDomain == nullptr)
+    {
+        return;
+    }
+
+    CLR_RT_AppDomainAssembly *appDomainAssembly = appDomain->FindAppDomainAssembly(type.assembly);
+    if (appDomainAssembly == nullptr)
+    {
+        return;
+    }
+
+    CLR_UINT8 *states =
+        (CLR_UINT8 *)(appDomainAssembly->m_pStaticFields + appDomainAssembly->m_assembly->m_iStaticFields);
+    states[type.Type()] = state;
+#else
+    (void)thread;
+
+    CLR_RT_TypeDef_CrossReference &crossReference = type.CrossReference();
+    crossReference.flags &=
+        ~(CLR_RT_TypeDef_CrossReference::TD_CR_StaticConstructorCalled |
+          CLR_RT_TypeDef_CrossReference::TD_CR_StaticConstructorRunning |
+          CLR_RT_TypeDef_CrossReference::TD_CR_StaticConstructorFailed);
+
+    switch (state)
+    {
+        case StaticConstructorRunning:
+            crossReference.flags |= CLR_RT_TypeDef_CrossReference::TD_CR_StaticConstructorRunning;
+            break;
+        case StaticConstructorCompleted:
+            crossReference.flags |= CLR_RT_TypeDef_CrossReference::TD_CR_StaticConstructorCalled;
+            break;
+        case StaticConstructorFailed:
+            crossReference.flags |= CLR_RT_TypeDef_CrossReference::TD_CR_StaticConstructorFailed;
+            break;
+        default:
+            break;
+    }
+#endif
+}
+
+HRESULT CLR_RT_ExecutionEngine::EnsureStaticConstructorCompleted(CLR_RT_TypeDef_Instance &type, CLR_RT_Thread *thread)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    if (type.target == nullptr || !type.assembly->HasStaticConstructor(type))
+    {
+        return S_OK;
+    }
+
+    CLR_UINT8 state = GetStaticConstructorState(type, thread);
+    if (state == StaticConstructorCompleted)
+    {
+        return S_OK;
+    }
+    if (state == StaticConstructorFailed)
+    {
+        return CLR_E_WRONG_TYPE;
+    }
+
+    if (state == StaticConstructorRunning)
+    {
+        CLR_RT_StackFrame *frame = thread->CurrentFrame();
+        while (frame != nullptr && frame->Caller() != nullptr)
+        {
+            if (frame->m_call.target != nullptr &&
+                (frame->m_call.target->flags & CLR_RECORD_METHODDEF::MD_StaticConstructor) != 0 &&
+                (frame->m_call.genericType == nullptr || !NANOCLR_INDEX_IS_VALID(*frame->m_call.genericType)))
+            {
+                CLR_RT_TypeDef_Instance frameType{};
+                if (frameType.InitializeFromMethod(frame->m_call) && frameType.data == type.data)
+                {
+                    return S_OK;
+                }
+            }
+
+            frame = frame->Caller();
+        }
+
+        return CLR_E_RESCHEDULE;
+    }
+
+    const CLR_RECORD_TYPEDEF *typeDef = type.target;
+    const CLR_RECORD_METHODDEF *method = type.assembly->GetMethodDef(typeDef->firstMethod);
+    int methodCount = typeDef->virtualMethodCount + typeDef->instanceMethodCount + typeDef->staticMethodCount;
+    CLR_RT_MethodDef_Index cctorIndex{};
+    bool foundCctor = false;
+
+    for (int i = 0; i < methodCount; i++, method++)
+    {
+        if (method->flags & CLR_RECORD_METHODDEF::MD_StaticConstructor)
+        {
+            cctorIndex.Set(type.assembly->assemblyIndex, typeDef->firstMethod + i);
+            foundCctor = true;
+            break;
+        }
+    }
+
+    if (!foundCctor)
+    {
+        return S_OK;
+    }
+
+    CLR_RT_MethodDef_Instance cctor{};
+    if (!cctor.InitializeFromIndex(cctorIndex))
+    {
+        return CLR_E_WRONG_TYPE;
+    }
+
+    SetStaticConstructorState(type, thread, StaticConstructorRunning);
+
+    HRESULT hr = CLR_RT_StackFrame::Push(thread, cctor, -1);
+    if (FAILED(hr))
+    {
+        SetStaticConstructorState(type, thread, StaticConstructorNotStarted);
+        return hr;
+    }
+
+    return CLR_E_PROCESS_EXCEPTION;
+}
+
+void CLR_RT_ExecutionEngine::CompleteStaticConstructor(CLR_RT_MethodDef_Instance method, CLR_RT_Thread *thread)
+{
+    if (method.target == nullptr || (method.target->flags & CLR_RECORD_METHODDEF::MD_StaticConstructor) == 0 ||
+        (method.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*method.genericType)))
+    {
+        return;
+    }
+
+    CLR_RT_TypeDef_Instance type{};
+    if (type.InitializeFromMethod(method))
+    {
+        SetStaticConstructorState(
+            type,
+            thread,
+            thread->m_currentException.Dereference() == nullptr ? StaticConstructorCompleted : StaticConstructorFailed
+#if defined(NANOCLR_APPDOMAINS)
+            ,
+            thread->CurrentAppDomain()
+#endif
+        );
+    }
+}
+
 void CLR_RT_ExecutionEngine::StaticConstructorTerminationCallback(void *arg)
 {
     (void)arg;
@@ -839,13 +1058,26 @@ bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper(
     _ASSERTE(m_cctorThread != nullptr);
     //_ASSERTE(m_cctorThread->CanThreadBeReused());
 
-    indexNext.m_data = index.m_data;
+    indexNext.data = index.data;
 
     _ASSERTE(appDomainAssembly != nullptr);
 
-    // find next method with static constructor
-    if (appDomainAssembly->m_assembly->FindNextStaticConstructor(indexNext))
+    while (appDomainAssembly->m_assembly->FindNextStaticConstructor(indexNext))
     {
+        CLR_RT_MethodDef_Instance cctor{};
+        CLR_RT_TypeDef_Instance type{};
+        if (!cctor.InitializeFromIndex(indexNext) || !type.InitializeFromMethod(cctor))
+        {
+            indexNext.data++;
+            continue;
+        }
+
+        if (GetStaticConstructorState(type, m_cctorThread, appDomain) != StaticConstructorNotStarted)
+        {
+            indexNext.data++;
+            continue;
+        }
+
         CLR_RT_HeapBlock_Delegate *dlg;
         CLR_RT_HeapBlock refDlg;
         refDlg.SetObjectReference(nullptr);
@@ -858,6 +1090,7 @@ bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper(
 
             if (SUCCEEDED(m_cctorThread->PushThreadProcDelegate(dlg)))
             {
+                SetStaticConstructorState(type, m_cctorThread, StaticConstructorRunning, appDomain);
                 m_cctorThread->m_terminationCallback = CLR_RT_ExecutionEngine::StaticConstructorTerminationCallback;
 
                 return true;
@@ -958,9 +1191,22 @@ bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper(
 
     _ASSERTE(assembly != nullptr);
 
-    // find next method with static constructor
-    if (assembly->FindNextStaticConstructor(indexNext))
+    while (assembly->FindNextStaticConstructor(indexNext))
     {
+        CLR_RT_MethodDef_Instance cctor{};
+        CLR_RT_TypeDef_Instance type{};
+        if (!cctor.InitializeFromIndex(indexNext) || !type.InitializeFromMethod(cctor))
+        {
+            indexNext.data++;
+            continue;
+        }
+
+        if (GetStaticConstructorState(type, m_cctorThread) != StaticConstructorNotStarted)
+        {
+            indexNext.data++;
+            continue;
+        }
+
         CLR_RT_HeapBlock_Delegate *dlg;
         CLR_RT_HeapBlock refDlg;
 
@@ -973,6 +1219,7 @@ bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper(
 
             if (SUCCEEDED(m_cctorThread->PushThreadProcDelegate(dlg)))
             {
+                SetStaticConstructorState(type, m_cctorThread, StaticConstructorRunning);
                 m_cctorThread->m_terminationCallback = CLR_RT_ExecutionEngine::StaticConstructorTerminationCallback;
 
                 return true;

@@ -1159,6 +1159,41 @@ static HRESULT EnsureGenericCctorCompleted(
     return CLR_E_PROCESS_EXCEPTION;
 }
 
+static HRESULT EnsureOrdinaryCctorCompleted(
+    CLR_RT_TypeDef_Instance &type,
+    CLR_RT_StackFrame *stack,
+    CLR_RT_Thread *thread,
+    CLR_PMETADATA &ip,
+    CLR_RT_HeapBlock *&evalPos,
+    bool &fDirty)
+{
+    HRESULT hr = g_CLR_RT_ExecutionEngine.EnsureStaticConstructorCompleted(type, thread);
+    if (hr == CLR_E_PROCESS_EXCEPTION || hr == CLR_E_RESCHEDULE)
+    {
+        ip -= 3;
+        WRITEBACK(stack, evalPos, ip, fDirty);
+    }
+
+    return hr;
+}
+
+static HRESULT EnsureOrdinaryFieldCctorCompleted(
+    CLR_RT_FieldDef_Instance &field,
+    CLR_RT_StackFrame *stack,
+    CLR_RT_Thread *thread,
+    CLR_PMETADATA &ip,
+    CLR_RT_HeapBlock *&evalPos,
+    bool &fDirty)
+{
+    CLR_RT_TypeDef_Instance ownerType{};
+    if (!ownerType.InitializeFromField(field))
+    {
+        return CLR_E_WRONG_TYPE;
+    }
+
+    return EnsureOrdinaryCctorCompleted(ownerType, stack, thread, ip, evalPos, fDirty);
+}
+
 HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -2481,6 +2516,27 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         {
                             doInstanceResolution = false;
 
+                            CLR_RT_TypeDef_Instance ownerType{};
+                            if (!calleeInst.GetDeclaringType(ownerType))
+                            {
+                                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                            }
+
+                            if (ownerType.target->genericParamCount == 0 &&
+                                (ownerType.target->flags & CLR_RECORD_TYPEDEF::TD_BeforeFieldInit) == 0)
+                            {
+                                hr = EnsureOrdinaryCctorCompleted(ownerType, stack, th, ip, evalPos, fDirty);
+                                if (hr == CLR_E_PROCESS_EXCEPTION)
+                                {
+                                    goto Execute_Restart;
+                                }
+                                else if (hr == CLR_E_RESCHEDULE)
+                                {
+                                    NANOCLR_SET_AND_LEAVE(CLR_E_RESCHEDULE);
+                                }
+                                NANOCLR_CHECK_HRESULT(hr);
+                            }
+
                             {
                                 const CLR_RT_TypeSpec_Index *tsForCctor = calleeInst.genericType;
                                 if (tsForCctor == nullptr || !NANOCLR_INDEX_IS_VALID(*tsForCctor))
@@ -3090,6 +3146,21 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             stack->m_call.arrayElementType.data);
 #endif
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
+
+                    if (cls.target->genericParamCount == 0 &&
+                        (cls.target->flags & CLR_RECORD_TYPEDEF::TD_BeforeFieldInit) == 0)
+                    {
+                        hr = EnsureOrdinaryCctorCompleted(cls, stack, th, ip, evalPos, fDirty);
+                        if (hr == CLR_E_PROCESS_EXCEPTION)
+                        {
+                            goto Execute_Restart;
+                        }
+                        else if (hr == CLR_E_RESCHEDULE)
+                        {
+                            NANOCLR_SET_AND_LEAVE(CLR_E_RESCHEDULE);
+                        }
+                        NANOCLR_CHECK_HRESULT(hr);
                     }
 
                     // Nested generic construction (Holder<T> builds Box<!0>). See CLAUDE.md §9.
@@ -3734,6 +3805,17 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     else
                     {
                         // static field of a non-generic class
+                        hr = EnsureOrdinaryFieldCctorCompleted(field, stack, th, ip, evalPos, fDirty);
+                        if (hr == CLR_E_PROCESS_EXCEPTION)
+                        {
+                            goto Execute_Restart;
+                        }
+                        else if (hr == CLR_E_RESCHEDULE)
+                        {
+                            NANOCLR_SET_AND_LEAVE(CLR_E_RESCHEDULE);
+                        }
+                        NANOCLR_CHECK_HRESULT(hr);
+
                         ptr = CLR_RT_ExecutionEngine::AccessStaticField(field);
                     }
 
@@ -3814,6 +3896,17 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     else
                     {
                         // static field of a non-generic class
+                        hr = EnsureOrdinaryFieldCctorCompleted(field, stack, th, ip, evalPos, fDirty);
+                        if (hr == CLR_E_PROCESS_EXCEPTION)
+                        {
+                            goto Execute_Restart;
+                        }
+                        else if (hr == CLR_E_RESCHEDULE)
+                        {
+                            NANOCLR_SET_AND_LEAVE(CLR_E_RESCHEDULE);
+                        }
+                        NANOCLR_CHECK_HRESULT(hr);
+
                         ptr = CLR_RT_ExecutionEngine::AccessStaticField(field);
                     }
 
@@ -3898,6 +3991,17 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     else
                     {
                         // static field of a non-generic class
+                        hr = EnsureOrdinaryFieldCctorCompleted(field, stack, th, ip, evalPos, fDirty);
+                        if (hr == CLR_E_PROCESS_EXCEPTION)
+                        {
+                            goto Execute_Restart;
+                        }
+                        else if (hr == CLR_E_RESCHEDULE)
+                        {
+                            NANOCLR_SET_AND_LEAVE(CLR_E_RESCHEDULE);
+                        }
+                        NANOCLR_CHECK_HRESULT(hr);
+
                         ptr = CLR_RT_ExecutionEngine::AccessStaticField(field);
                     }
 
