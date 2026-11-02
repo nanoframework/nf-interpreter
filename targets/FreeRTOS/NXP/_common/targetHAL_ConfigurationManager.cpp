@@ -635,3 +635,122 @@ __nfweak void ConfigurationManager_GetSystemSerialNumber(char *serialNumber, siz
     // do the thing to get unique device ID
     memset(serialNumber, 0, serialNumberSize);
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// configuration storage operations
+
+// maximum count of wireless station profiles
+#define CONFIG_MAX_WIRELESS_PROFILES 1
+
+// maximum size of a certificate block, it's received in RAM and the configuration image is built in RAM too
+#ifndef NF_CONFIG_MAX_CERTIFICATE_BLOCK_SIZE
+#define NF_CONFIG_MAX_CERTIFICATE_BLOCK_SIZE (8 * 1024)
+#endif
+
+// writes the configuration image (or part of it) to the configuration flash region
+static bool WriteConfigurationImage(uint32_t offset, const uint8_t *data, uint32_t length, bool eraseFirst)
+{
+    if (eraseFirst)
+    {
+        // erase all the blocks of the configuration region
+        DeviceBlockInfo *blockInfo = BlockStorageDevice_GetDeviceInfo(BlockStorageList_GetFirstDevice());
+        uint32_t start = (uint32_t)&__nanoConfig_start__;
+        uint32_t end = (uint32_t)&__nanoConfig_end__;
+        BlockRegionInfo *region = nullptr;
+
+        for (uint32_t i = 0; i < blockInfo->NumRegions; i++)
+        {
+            BlockRegionInfo *candidate = &blockInfo->Regions[i];
+
+            if (start >= candidate->Start && start < candidate->Start + candidate->NumBlocks * candidate->BytesPerBlock)
+            {
+                region = candidate;
+                break;
+            }
+        }
+
+        if (region == nullptr)
+        {
+            return false;
+        }
+
+        for (uint32_t eraseAddress =
+                 BlockRegionInfo_BlockAddress(region, BlockRegionInfo_BlockIndexFromAddress(region, start));
+             eraseAddress < end;
+             eraseAddress += region->BytesPerBlock)
+        {
+            if (!iMXRTFlexSPIDriver_EraseBlock(nullptr, eraseAddress))
+            {
+                return false;
+            }
+        }
+    }
+
+    return length == 0 || iMXRTFlexSPIDriver_Write(
+                              nullptr,
+                              (uint32_t)&__nanoConfig_start__ + offset,
+                              length,
+                              (unsigned char *)data,
+                              false);
+}
+
+void ConfigurationManager_GetBlockInfo(DeviceConfigurationOption configuration, HAL_ConfigurationBlockInfo *info)
+{
+    ConfigurationManager_GetFlashBlockInfo(
+        configuration,
+        info,
+        (const uint8_t *)&__nanoConfig_start__,
+        (uint32_t)&__nanoConfig_end__ - (uint32_t)&__nanoConfig_start__,
+        1,
+        CONFIG_MAX_WIRELESS_PROFILES,
+        NF_CONFIG_MAX_CERTIFICATE_BLOCK_SIZE);
+}
+
+void ConfigurationManager_GetStorageInfo(uint32_t *totalSize, uint32_t *freeSize, uint32_t *flags)
+{
+    ConfigurationManager_GetFlashStorageInfo(
+        (const uint8_t *)&__nanoConfig_start__,
+        (uint32_t)&__nanoConfig_end__ - (uint32_t)&__nanoConfig_start__,
+        1,
+        totalSize,
+        freeSize,
+        flags);
+}
+
+ConfigurationOperationError ConfigurationManager_ApplyConfigurationOperation(
+    ConfigurationOperation operation,
+    DeviceConfigurationOption configuration,
+    uint32_t configurationIndex,
+    void *block,
+    uint32_t blockSize)
+{
+    ConfigurationOperationError result = ConfigurationManager_ApplyConfigurationOperationToImage(
+        operation,
+        configuration,
+        configurationIndex,
+        block,
+        blockSize,
+        (const uint8_t *)&__nanoConfig_start__,
+        (uint32_t)&__nanoConfig_end__ - (uint32_t)&__nanoConfig_start__,
+        1,
+        WriteConfigurationImage);
+
+    if (result == ConfigurationOperationError_Success)
+    {
+        // blocks may have moved, so the configuration blocks have to be enumerated again
+        platform_free(g_TargetConfiguration.NetworkInterfaceConfigs);
+        platform_free(g_TargetConfiguration.Wireless80211Configs);
+        platform_free(g_TargetConfiguration.CertificateStore);
+        platform_free(g_TargetConfiguration.DeviceCertificates);
+
+        if (g_TargetConfiguration.WirelessAPConfigs != nullptr)
+        {
+            platform_free(g_TargetConfiguration.WirelessAPConfigs);
+            g_TargetConfiguration.WirelessAPConfigs = nullptr;
+        }
+
+        ConfigurationManager_EnumerateConfigurationBlocks();
+    }
+
+    return result;
+}

@@ -49,6 +49,13 @@ typedef enum AccessMemory_Operations
 
 } AccessMemory_Operations;
 
+// true if [location, location + length) overlaps [regionStart, regionEnd)
+// computed in 64 bits so that the end of the range can't wrap around
+static inline bool AccessMemory_OverlapsRegion(uint32_t location, uint32_t length, uint32_t regionStart, uint32_t regionEnd)
+{
+    return (uint64_t)location < (uint64_t)regionEnd && (uint64_t)location + length > (uint64_t)regionStart;
+}
+
 typedef enum MemoryMap_Options
 {
     Monitor_MemoryMap_c_RAM     = 0x00000001,
@@ -164,18 +171,6 @@ typedef struct Monitor_QueryConfiguration_Command
 
 } Monitor_QueryConfiguration_Command;
 
-typedef struct __nfpack Monitor_UpdateConfiguration_Command
-{
-    uint32_t    Configuration;
-    uint32_t    BlockIndex;
-    uint32_t    Length;
-    uint32_t    Offset;
-    uint32_t    Done;
-    uint8_t     Data[1];
-
-} Monitor_UpdateConfiguration_Command;
-
-
 typedef struct Monitor_StorageOperation_Command
 {
     uint32_t    Operation;
@@ -191,11 +186,100 @@ typedef struct Monitor_StorageOperation_Reply
 
 } Monitor_StorageOperation_Reply;
 
-typedef struct Monitor_UpdateConfiguration_Reply
-{
-    uint32_t ErrorCode;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH nanoFramework.Tools.Debugger.WireProtocol.Commands.Monitor_ConfigurationInfo (in managed code) !!! //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-} Monitor_UpdateConfiguration_Reply;
+// information about a configuration block type
+typedef struct __nfpack Monitor_ConfigurationInfo_BlockInfo
+{
+    // DeviceConfigurationOption
+    uint8_t     Configuration;
+
+    // count of blocks stored
+    uint8_t     Count;
+
+    // maximum count of blocks, 0 if this type isn't supported
+    uint8_t     MaxCount;
+
+    // ConfigurationBlockFlags
+    uint8_t     Flags;
+
+    // size of the block, or the maximum size for blocks of variable size (certificates)
+    uint32_t    MaxBlockSize;
+
+} Monitor_ConfigurationInfo_BlockInfo;
+
+// count of configuration block types reported
+#define MONITOR_CONFIGURATION_INFO_BLOCK_TYPES  5
+
+typedef struct __nfpack Monitor_ConfigurationInfo_Reply
+{
+    // CONFIGURATION_STORAGE_API_VERSION
+    uint32_t    Version;
+
+    // ConfigurationStorageFlags
+    uint32_t    Flags;
+
+    // size of the configuration storage, 0 if unknown
+    uint32_t    TotalSize;
+
+    // free space in the configuration storage, 0xFFFFFFFF if unknown
+    uint32_t    FreeSize;
+
+    // count of entries in Blocks
+    uint32_t    BlockInfoCount;
+
+    Monitor_ConfigurationInfo_BlockInfo Blocks[MONITOR_CONFIGURATION_INFO_BLOCK_TYPES];
+
+} Monitor_ConfigurationInfo_Reply;
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH nanoFramework.Tools.Debugger.WireProtocol.Commands.Monitor_ConfigurationOperation (in managed code) !!! //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+typedef struct __nfpack Monitor_ConfigurationOperation_Command
+{
+    // ConfigurationOperation
+    uint32_t    Operation;
+
+    // DeviceConfigurationOption
+    uint32_t    Configuration;
+
+    // index of the block to replace or delete, ignored for add
+    uint32_t    BlockIndex;
+
+    // ConfigurationOperationFlags
+    uint32_t    Flags;
+
+    // size of the whole block, 0 for delete
+    uint32_t    TotalLength;
+
+    // offset of this chunk in the block
+    uint32_t    Offset;
+
+    // size of this chunk
+    uint32_t    Length;
+
+    uint8_t     Data[1];
+
+} Monitor_ConfigurationOperation_Command;
+
+typedef struct __nfpack Monitor_ConfigurationOperation_Reply
+{
+    // ConfigurationOperationError
+    uint32_t    ErrorCode;
+
+    // index of the block after the operation (add, replace), 0xFFFFFFFF otherwise
+    uint32_t    BlockIndex;
+
+    // count of blocks of this type after the operation
+    uint32_t    Count;
+
+    // Id of the wireless profile after the operation (add, replace), 0xFFFFFFFF otherwise
+    uint32_t    Id;
+
+} Monitor_ConfigurationOperation_Reply;
 
 typedef struct __nfpack Flash_BlockRegionInfo
 {
@@ -225,7 +309,6 @@ extern "C"
     int Monitor_EraseMemory(WP_Message *message);
     int Monitor_QueryConfiguration(WP_Message *message);
     int Monitor_StorageOperation(WP_Message *message);
-    int Monitor_UpdateConfiguration(WP_Message *message);
     int Monitor_CheckMemory(WP_Message *message);
     int Monitor_MemoryMap(WP_Message *message);
     int Monitor_FlashSectorMap(WP_Message *message);

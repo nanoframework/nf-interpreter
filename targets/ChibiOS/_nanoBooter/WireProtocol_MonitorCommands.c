@@ -13,6 +13,10 @@
 #include <WireProtocol_MonitorCommands.h>
 #include <target_board.h>
 
+// limits of the configuration region, from the linker script
+extern uint32_t __nanoConfig_start__;
+extern uint32_t __nanoConfig_end__;
+
 // Vendor-abstracted flash operations
 #if (HAL_NF_USE_STM32_FLASH == TRUE)
 #define nf_TargetFlashWrite stm32FlashWrite
@@ -39,6 +43,17 @@ int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t *buffer, int
             return nf_TargetFlashErase(location);
 
         case AccessMemory_Check:
+            // the configuration region can't be checked: a CRC of a small range reveals its content
+            if (AccessMemory_OverlapsRegion(
+                    location,
+                    lengthInBytes,
+                    (uint32_t)&__nanoConfig_start__,
+                    (uint32_t)&__nanoConfig_end__))
+            {
+                *errorCode = AccessMemoryErrorCode_PermissionDenied;
+                return false;
+            }
+
             // compute CRC32 of the memory segment
             *(unsigned int *)buffer = SUPPORT_ComputeCRC((uint32_t *)location, lengthInBytes, 0);
             // done here

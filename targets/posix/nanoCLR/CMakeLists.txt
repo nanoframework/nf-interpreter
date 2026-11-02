@@ -189,6 +189,8 @@ set(NF_RUNTIME_NATIVE_SRCS
 
 # ─── HAL / PAL stubs ──────────────────────────────────────────────────────────
 set(NF_HAL_PAL_STUB_SRCS
+    ${REPO_ROOT}/src/HAL/nanoHAL_ConfigurationManager.c
+    ${REPO_ROOT}/src/HAL/nanoHAL_ConfigurationManager_Virtual.cpp
     ${REPO_ROOT}/src/HAL/nanoHAL_Time.cpp
     ${REPO_ROOT}/src/HAL/nanoHAL_Watchdog.c
     ${REPO_ROOT}/src/HAL/nanoHAL_SystemEvents.c

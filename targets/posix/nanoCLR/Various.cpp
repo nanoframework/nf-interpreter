@@ -151,6 +151,9 @@ void nanoHAL_Initialize()
     HAL_CONTINUATION::InitializeList();
     HAL_COMPLETION::InitializeList();
     Events_Initialize();
+
+    // configuration blocks, kept in RAM
+    ConfigurationManager_Initialize();
 }
 
 void nanoHAL_Uninitialize(bool isPoweringDown)

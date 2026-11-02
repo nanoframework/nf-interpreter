@@ -54,7 +54,7 @@ wifi_mode_t NF_ESP32_CheckExpectedWifiMode()
             // Wireless Config with SSID setup
             if (networkConfig->InterfaceType == NetworkInterfaceType::NetworkInterfaceType_Wireless80211)
             {
-                wirelessConfig = ConfigurationManager_GetWirelessConfigurationFromId(networkConfig->SpecificConfigId);
+                wirelessConfig = NF_ESP32_GetWirelessConfigurationFromIdOrDefault(networkConfig->SpecificConfigId);
 
                 if (wirelessConfig != nullptr)
                 {
@@ -94,10 +94,15 @@ wifi_mode_t NF_ESP32_CheckExpectedWifiMode()
     // this one is always set
     platform_free(networkConfig);
 
-    // free this one, if it was allocated
+    // free these, if they were allocated
     if (wirelessConfig)
     {
         platform_free(wirelessConfig);
+    }
+
+    if (wirelessAPConfig)
+    {
+        platform_free(wirelessAPConfig);
     }
 
     return mode;
@@ -332,7 +337,7 @@ int NF_ESP32_Wireless_Open(HAL_Configuration_NetworkInterface *config)
 
     // Get Wireless config
     HAL_Configuration_Wireless80211 *wirelessConfig =
-        ConfigurationManager_GetWirelessConfigurationFromId(config->SpecificConfigId);
+        NF_ESP32_GetWirelessConfigurationFromIdOrDefault(config->SpecificConfigId);
 
     if (wirelessConfig == nullptr)
     {
@@ -342,12 +347,14 @@ int NF_ESP32_Wireless_Open(HAL_Configuration_NetworkInterface *config)
     // Wireless station not enabled
     if (!(NF_ESP32_GetCurrentWifiMode() & WIFI_MODE_STA))
     {
+        platform_free(wirelessConfig);
         return SOCK_SOCKET_ERROR;
     }
 
     // sanity check for Wireless station disabled
     if (wirelessConfig->Options & Wireless80211Configuration_ConfigurationOptions_Disable)
     {
+        platform_free(wirelessConfig);
         return SOCK_SOCKET_ERROR;
     }
 
@@ -378,6 +385,8 @@ int NF_ESP32_Wireless_Open(HAL_Configuration_NetworkInterface *config)
         NF_ESP32_IsToConnect = false;
     }
 #endif
+
+    platform_free(wirelessConfig);
 
     return NF_ESP32_Wait_NetNumber(IDF_WIFI_STA_DEF);
 }
@@ -543,3 +552,24 @@ bool NF_ESP32_WirelessAP_Close()
 }
 
 #endif
+
+HAL_Configuration_Wireless80211 *NF_ESP32_GetWirelessConfigurationFromIdOrDefault(uint32_t configurationId)
+{
+    HAL_Configuration_Wireless80211 *wirelessConfig =
+        ConfigurationManager_GetWirelessConfigurationFromId(configurationId);
+
+    if (wirelessConfig == nullptr &&
+        ConfigurationManager_GetBlockCount(DeviceConfigurationOption_Wireless80211Network) == 0)
+    {
+        // a device can have no station profiles, use the defaults so the station starts and an application can
+        // connect it
+        wirelessConfig = (HAL_Configuration_Wireless80211 *)platform_malloc(sizeof(HAL_Configuration_Wireless80211));
+
+        if (wirelessConfig != nullptr)
+        {
+            InitialiseWirelessDefaultConfig(wirelessConfig, configurationId);
+        }
+    }
+
+    return wirelessConfig;
+}

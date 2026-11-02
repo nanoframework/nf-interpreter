@@ -18,6 +18,19 @@ bool ethernetEnabled = false;
 
 static const char *TAG = "cm";
 
+// maximum count of wireless profiles (station and AP)
+// ESP-IDF keeps a single station configuration, the profiles are nanoFramework's own (one file per profile)
+#define ESP32_CONFIG_MAX_WIRELESS_PROFILES 10
+
+// maximum count of network interfaces: Wireless Station, Wireless AP, Ethernet and OpenThread
+#define ESP32_CONFIG_MAX_NETWORK_INTERFACES 4
+
+// maximum size of a certificate block, it's received in RAM before being stored
+#define ESP32_CONFIG_MAX_CERTIFICATE_BLOCK_SIZE (32 * 1024)
+
+// highest file index checked when closing gaps in the indexes
+#define ESP32_CONFIG_MAX_FILE_INDEX 16
+
 // #define DEBUG_CONFIG        1
 
 #ifdef DEBUG_CONFIG
@@ -65,6 +78,9 @@ void ConfigurationManager_Initialize()
     memset((void *)&g_TargetConfiguration, 0, sizeof(HAL_TARGET_CONFIGURATION));
 
     ConfigStorage_Initialise();
+
+    // a write interrupted by a power loss can leave the temporary file behind
+    ConfigStorage_DeleteTempFile();
 
     // enumerate the blocks
     ConfigurationManager_EnumerateConfigurationBlocks();
@@ -148,23 +164,53 @@ bool AppendConfigBlock(
 }
 
 // Enumerates the configuration blocks from the configuration flash sector
-// it's implemented with 'weak' attribute so it can be replaced at target level if a different persistence mechanism is
-// used
-void ConfigurationManager_EnumerateConfigurationBlocks()
+// implemented with 'weak' attribute so it can be replaced at target level
+// frees the memory of the enumerated configuration blocks
+static void FreeConfigurationBlocks(HAL_TARGET_CONFIGURATION *configuration)
 {
-    HAL_CONFIGURATION_NETWORK *networkConfigs = ConfigStorage_FindNetworkConfigurationBlocks();
-    if (networkConfigs == NULL)
+    if (configuration->CertificateStore != nullptr && configuration->CertificateStore->Count > 0)
     {
-        ESP_LOGE(TAG, "FindNetworkConfigurationBlocks returned NULL(out of memory)");
-        return;
+        platform_free(configuration->CertificateStore->Certificates[0]);
     }
 
-    // check network configs count
+    if (configuration->DeviceCertificates != nullptr && configuration->DeviceCertificates->Count > 0)
+    {
+        platform_free(configuration->DeviceCertificates->Certificates[0]);
+    }
+
+    platform_free(configuration->NetworkInterfaceConfigs);
+    platform_free(configuration->Wireless80211Configs);
+    platform_free(configuration->WirelessAPConfigs);
+    platform_free(configuration->CertificateStore);
+    platform_free(configuration->DeviceCertificates);
+
+    memset(configuration, 0, sizeof(HAL_TARGET_CONFIGURATION));
+}
+
+// Enumerates the configuration blocks from the configuration flash sector
+// implemented with 'weak' attribute so it can be replaced at target level
+// enumerates the configuration blocks, returns false if that wasn't possible (the previous enumeration is kept)
+static bool EnumerateConfigurationBlocks()
+{
+    HAL_TARGET_CONFIGURATION enumerated;
+
+    // the blocks are read by index, so the indexes have to be contiguous
+    ConfigStorage_CompactFiles(DeviceConfigurationOption_Network, ESP32_CONFIG_MAX_FILE_INDEX);
+    ConfigStorage_CompactFiles(DeviceConfigurationOption_Wireless80211Network, ESP32_CONFIG_MAX_FILE_INDEX);
+    ConfigStorage_CompactFiles(DeviceConfigurationOption_WirelessNetworkAP, ESP32_CONFIG_MAX_FILE_INDEX);
+
+    HAL_CONFIGURATION_NETWORK *networkConfigs = ConfigStorage_FindNetworkConfigurationBlocks();
+    if (networkConfigs == nullptr)
+    {
+        ESP_LOGE(TAG, "FindNetworkConfigurationBlocks returned NULL(out of memory)");
+        return false;
+    }
+
     if (networkConfigs->Count == 0)
     {
         // there is no network config block available, need to create a default for each network interface
         int networkCount = 0;
-        NetworkInterfaceType netTypes[4] = {NetworkInterfaceType_Unknown};
+        NetworkInterfaceType netTypes[ESP32_CONFIG_MAX_NETWORK_INTERFACES] = {NetworkInterfaceType_Unknown};
 
         // ESP32 can have have up to 4 network interfaces: Wireless Station, Wireless AP, Ethernet and OpenThread
 
@@ -187,100 +233,70 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
         HAL_Configuration_NetworkInterface *networkConfig =
             (HAL_Configuration_NetworkInterface *)platform_malloc(sizeof(HAL_Configuration_NetworkInterface));
 
-        for (int configIndex = 0; configIndex < networkCount; configIndex++)
+        if (networkConfig != nullptr)
         {
-            // clear memory
-            memset(networkConfig, 0, sizeof(HAL_Configuration_NetworkInterface));
+            for (int configIndex = 0; configIndex < networkCount; configIndex++)
+            {
+                memset(networkConfig, 0, sizeof(HAL_Configuration_NetworkInterface));
 
-            networkConfig->InterfaceType = netTypes[configIndex];
+                networkConfig->InterfaceType = netTypes[configIndex];
 
-            // init to default
-            InitialiseNetworkDefaultConfig(networkConfig, configIndex);
+                // init to default
+                InitialiseNetworkDefaultConfig(networkConfig, configIndex);
 
-            // store
-            StoreConfigBlock(
-                DeviceConfigurationOption_Network,
-                configIndex,
-                networkConfig,
-                sizeof(HAL_Configuration_NetworkInterface));
+                StoreConfigBlock(
+                    DeviceConfigurationOption_Network,
+                    configIndex,
+                    networkConfig,
+                    sizeof(HAL_Configuration_NetworkInterface));
+            }
+
+            platform_free(networkConfig);
         }
 
-        // free memory
-        platform_free(networkConfig);
-
         // have to enumerate again to pick it up
+        platform_free(networkConfigs);
         networkConfigs = ConfigStorage_FindNetworkConfigurationBlocks();
         if (!networkConfigs)
         {
             ESP_LOGE(TAG, "Re-enumeration of config returned NULL");
-            return;
+            return false;
         }
         ESP_LOGI(TAG, "networkCount %d/%d", networkCount, networkConfigs->Count);
     }
 
-    // find wireless 80211 network configuration blocks
-    HAL_CONFIGURATION_NETWORK_WIRELESS80211 *networkWirelessConfigs =
-        (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)ConfigStorage_FindNetworkWireless80211ConfigurationBlocks();
+    // wireless station and AP profiles are not created by default: a device can have none
+    // the code that starts the network interfaces has to cope with that
 
-    // check wireless configs count
-    if (networkWirelessConfigs != nullptr && networkWirelessConfigs->Count == 0)
+    // build the new enumeration before releasing the current one, so it's never left empty
+    enumerated.NetworkInterfaceConfigs = networkConfigs;
+    enumerated.Wireless80211Configs = ConfigStorage_FindNetworkWireless80211ConfigurationBlocks();
+    enumerated.WirelessAPConfigs = ConfigStorage_FindNetworkWirelessAPConfigurationBlocks();
+    enumerated.CertificateStore = ConfigStorage_FindX509CertificateConfigurationBlocks();
+    enumerated.DeviceCertificates = ConfigStorage_FindX509DeviceCertificatesConfigurationBlocks();
+
+    if (enumerated.Wireless80211Configs == nullptr || enumerated.WirelessAPConfigs == nullptr ||
+        enumerated.CertificateStore == nullptr || enumerated.DeviceCertificates == nullptr)
     {
-        // allocate memory for ONE network configuration
-        HAL_Configuration_Wireless80211 *wirelessConfig =
-            (HAL_Configuration_Wireless80211 *)platform_malloc(sizeof(HAL_Configuration_Wireless80211));
+        ESP_LOGE(TAG, "Enumeration of config failed (out of memory)");
 
-        InitialiseWirelessDefaultConfig(wirelessConfig, 0);
+        FreeConfigurationBlocks(&enumerated);
 
-        StoreConfigBlock(
-            DeviceConfigurationOption_Wireless80211Network,
-            0,
-            wirelessConfig,
-            sizeof(HAL_Configuration_Wireless80211));
-
-        // free memory
-        platform_free(wirelessConfig);
-
-        // have to enumerate again to pick it up
-        networkWirelessConfigs = ConfigStorage_FindNetworkWireless80211ConfigurationBlocks();
+        return false;
     }
 
-    // find wireless AP configuration blocks
-    HAL_CONFIGURATION_NETWORK_WIRELESSAP *wirelessAPconfigs = ConfigStorage_FindNetworkWirelessAPConfigurationBlocks();
+    // release the previous enumeration
+    FreeConfigurationBlocks(&g_TargetConfiguration);
 
-    // check wireless AP configs count
-    if (wirelessAPconfigs != nullptr && wirelessAPconfigs->Count == 0)
-    {
-        // allocate memory for ONE wireless AP configuration
-        HAL_Configuration_WirelessAP *wirelessAPConfig =
-            (HAL_Configuration_WirelessAP *)platform_malloc(sizeof(HAL_Configuration_WirelessAP));
+    g_TargetConfiguration = enumerated;
 
-        InitialiseWirelessAPDefaultConfig(wirelessAPConfig, 0);
+    return true;
+}
 
-        StoreConfigBlock(
-            DeviceConfigurationOption_WirelessNetworkAP,
-            0,
-            wirelessAPConfig,
-            sizeof(HAL_Configuration_WirelessAP));
-
-        // free memory
-        platform_free(wirelessAPConfig);
-
-        // have to enumerate again to pick it up
-        wirelessAPconfigs = ConfigStorage_FindNetworkWirelessAPConfigurationBlocks();
-    }
-
-    // find X509 CA certificate blocks
-    HAL_CONFIGURATION_X509_CERTIFICATE *certificateStore = ConfigStorage_FindX509CertificateConfigurationBlocks();
-
-    // find X509 device certificate blocks
-    HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *deviceCertificates =
-        ConfigStorage_FindX509DeviceCertificatesConfigurationBlocks();
-
-    g_TargetConfiguration.NetworkInterfaceConfigs = networkConfigs;
-    g_TargetConfiguration.Wireless80211Configs = networkWirelessConfigs;
-    g_TargetConfiguration.WirelessAPConfigs = wirelessAPconfigs;
-    g_TargetConfiguration.CertificateStore = certificateStore;
-    g_TargetConfiguration.DeviceCertificates = deviceCertificates;
+// Enumerates the configuration blocks from the configuration storage
+void ConfigurationManager_EnumerateConfigurationBlocks()
+{
+    EnumerateConfigurationBlocks();
 }
 
 // Build AP default SSID based on the last 3 bytes of MAC
@@ -543,29 +559,7 @@ bool ConfigurationManager_StoreConfigurationBlockCertificate(
         // if this is the 1st chunk of data for a certificate, delete the existing one, if that exists
         if (ConfigStorage_DeleteFile(configuration, configurationIndex))
         {
-            if (configuration == DeviceConfigurationOption_X509CaRootBundle)
-            {
-                // need to free memory before enumerating again
-                if (g_TargetConfiguration.CertificateStore->Count > 0)
-                {
-                    platform_free(g_TargetConfiguration.CertificateStore->Certificates[0]);
-                }
-                platform_free(g_TargetConfiguration.CertificateStore);
-
-                g_TargetConfiguration.CertificateStore = ConfigStorage_FindX509CertificateConfigurationBlocks();
-            }
-            else if (configuration == DeviceConfigurationOption_X509DeviceCertificates)
-            {
-                // need to free memory before enumerating again
-                if (g_TargetConfiguration.DeviceCertificates->Count > 0)
-                {
-                    platform_free(g_TargetConfiguration.DeviceCertificates->Certificates[0]);
-                }
-                platform_free(g_TargetConfiguration.DeviceCertificates);
-
-                g_TargetConfiguration.DeviceCertificates =
-                    ConfigStorage_FindX509DeviceCertificatesConfigurationBlocks();
-            }
+            ConfigurationManager_EnumerateConfigurationBlocks();
         }
     }
 
@@ -652,15 +646,11 @@ bool ConfigurationManager_StoreConfigurationBlock(
                 // 0 size means that there is a request to clear the certificate
                 result = ConfigStorage_DeleteFile(configuration, configurationIndex);
 
-                // check if operation was successful
-                if (result)
-                {
-                    // reset this
-                    blockSize = 0;
+                // there is nothing to store
+                blockSize = 0;
 
-                    // enumeration is required
-                    requiresEnumeration = true;
-                }
+                // enumeration is required
+                requiresEnumeration = result;
             }
 
 #ifdef DEBUG_CONFIG
@@ -693,15 +683,11 @@ bool ConfigurationManager_StoreConfigurationBlock(
                 // 0 size means that there is a request to clear the certificate
                 result = ConfigStorage_DeleteFile(configuration, configurationIndex);
 
-                // check if operation was successful
-                if (result)
-                {
-                    // reset this
-                    blockSize = 0;
+                // there is nothing to store, whether there was a certificate to delete or not
+                blockSize = 0;
 
-                    // enumeration is required
-                    requiresEnumeration = true;
-                }
+                // enumeration is required
+                requiresEnumeration = result;
             }
 
 #ifdef DEBUG_CONFIG
@@ -722,6 +708,9 @@ bool ConfigurationManager_StoreConfigurationBlock(
     if (blockSize != 0)
     {
         result = StoreConfigBlock(configuration, configurationIndex, configurationBlock, blockSize);
+
+        // a block stored in a new index has to be enumerated
+        requiresEnumeration = result;
     }
 
     if (requiresEnumeration)
@@ -939,4 +928,129 @@ __nfweak void ConfigurationManager_GetSystemSerialNumber(char *serialNumber, siz
         // Set the first byte to a number that is unique (within the nanoFramework CLR) for ESP32.
         serialNumber[0] = 1;
     }
+}
+
+void ConfigurationManager_GetBlockInfo(DeviceConfigurationOption configuration, HAL_ConfigurationBlockInfo *info)
+{
+    uint32_t totalSize;
+    uint32_t usedSize;
+
+    memset(info, 0, sizeof(HAL_ConfigurationBlockInfo));
+
+    switch (configuration)
+    {
+        case DeviceConfigurationOption_Network:
+            // network interfaces are created by the device, a delete resets them to the defaults
+            info->MaxCount = ESP32_CONFIG_MAX_NETWORK_INTERFACES;
+            info->Flags = ConfigurationBlockFlags_CanReplace | ConfigurationBlockFlags_CanDelete |
+                          ConfigurationBlockFlags_DeleteResets | ConfigurationBlockFlags_Readable;
+            info->MaxBlockSize = sizeof(HAL_Configuration_NetworkInterface);
+            break;
+
+#if defined(CONFIG_SOC_WIFI_SUPPORTED) || defined(CONFIG_SOC_WIRELESS_HOST_SUPPORTED)
+        case DeviceConfigurationOption_Wireless80211Network:
+            info->MaxCount = ESP32_CONFIG_MAX_WIRELESS_PROFILES;
+            info->Flags = ConfigurationBlockFlags_CanAdd | ConfigurationBlockFlags_CanReplace |
+                          ConfigurationBlockFlags_CanDelete | ConfigurationBlockFlags_Readable;
+            info->MaxBlockSize = sizeof(HAL_Configuration_Wireless80211);
+            break;
+
+        case DeviceConfigurationOption_WirelessNetworkAP:
+            info->MaxCount = ESP32_CONFIG_MAX_WIRELESS_PROFILES;
+            info->Flags = ConfigurationBlockFlags_CanAdd | ConfigurationBlockFlags_CanReplace |
+                          ConfigurationBlockFlags_CanDelete | ConfigurationBlockFlags_Readable;
+            info->MaxBlockSize = sizeof(HAL_Configuration_WirelessAP);
+            break;
+#endif
+
+        case DeviceConfigurationOption_X509CaRootBundle:
+        case DeviceConfigurationOption_X509DeviceCertificates:
+            // a single certificate block of each type, write only
+            info->MaxCount = 1;
+            info->Flags =
+                ConfigurationBlockFlags_CanAdd | ConfigurationBlockFlags_CanReplace | ConfigurationBlockFlags_CanDelete;
+
+            // limited by the RAM to receive it and by the free space
+            ConfigStorage_GetInfo(&totalSize, &usedSize);
+            info->MaxBlockSize = ESP32_CONFIG_MAX_CERTIFICATE_BLOCK_SIZE;
+
+            if (totalSize > usedSize && totalSize - usedSize < info->MaxBlockSize)
+            {
+                info->MaxBlockSize = totalSize - usedSize;
+            }
+            break;
+
+        default:
+            break;
+    }
+}
+
+void ConfigurationManager_GetStorageInfo(uint32_t *totalSize, uint32_t *freeSize, uint32_t *flags)
+{
+    uint32_t usedSize;
+
+    ConfigStorage_GetInfo(totalSize, &usedSize);
+
+    *freeSize = *totalSize >= usedSize ? *totalSize - usedSize : 0;
+
+    // blocks are written to a temporary file and then renamed
+    *flags = ConfigurationStorageFlags_PowerLossSafe;
+}
+
+ConfigurationOperationError ConfigurationManager_ApplyConfigurationOperation(
+    ConfigurationOperation operation,
+    DeviceConfigurationOption configuration,
+    uint32_t configurationIndex,
+    void *block,
+    uint32_t blockSize)
+{
+    bool success = false;
+    uint32_t newIndex;
+
+    switch (operation)
+    {
+        case ConfigurationOperation_Add:
+            // the new block goes after the last one, in a file that doesn't exist (a gap that couldn't be closed may
+            // have left one there)
+            newIndex = ConfigurationManager_GetBlockCount(configuration);
+
+            while (newIndex < ESP32_CONFIG_MAX_FILE_INDEX && ConfigStorage_FileExists(configuration, newIndex))
+            {
+                newIndex++;
+            }
+
+            success = newIndex < ESP32_CONFIG_MAX_FILE_INDEX &&
+                      ConfigStorage_WriteFileAtomic(configuration, newIndex, (uint8_t *)block, blockSize);
+            break;
+
+        case ConfigurationOperation_Replace:
+            success = ConfigStorage_WriteFileAtomic(configuration, configurationIndex, (uint8_t *)block, blockSize);
+            break;
+
+        case ConfigurationOperation_Delete:
+            success = ConfigStorage_DeleteFile(configuration, configurationIndex);
+
+            if (success)
+            {
+                // the blocks that follow move down one index
+                ConfigStorage_CompactFiles(configuration, ESP32_CONFIG_MAX_FILE_INDEX);
+            }
+            break;
+
+        default:
+            return ConfigurationOperationError_NotSupported;
+    }
+
+    if (!success)
+    {
+        return ConfigurationOperationError_StorageError;
+    }
+
+    // the block is stored, but the lists in g_TargetConfiguration are stale until they are enumerated again
+    if (!EnumerateConfigurationBlocks())
+    {
+        return ConfigurationOperationError_OutOfMemory;
+    }
+
+    return ConfigurationOperationError_Success;
 }

@@ -21,24 +21,25 @@
 //#if defined(_MSC_VER)
 struct CLR_DBG_Commands
 {
-    static const unsigned int c_Monitor_Ping               = 0x00000000; // The payload is empty, this command is used to let the other side know we are here...
-    static const unsigned int c_Monitor_Message            = 0x00000001; // The payload is composed of the string characters, no zero at the end.
-    static const unsigned int c_Monitor_ReadMemory         = 0x00000002;
-    static const unsigned int c_Monitor_WriteMemory        = 0x00000003;
-    static const unsigned int c_Monitor_CheckMemory        = 0x00000004;
-    static const unsigned int c_Monitor_EraseMemory        = 0x00000005;
-    static const unsigned int c_Monitor_Execute            = 0x00000006;
-    static const unsigned int c_Monitor_Reboot             = 0x00000007;
-    static const unsigned int c_Monitor_MemoryMap          = 0x00000008;
-    static const unsigned int c_Monitor_ProgramExit        = 0x00000009; // The payload is empty, this command is used to tell the PC of a program termination
-    static const unsigned int c_Monitor_CheckSignature     = 0x0000000A;
-    static const unsigned int c_Monitor_DeploymentMap      = 0x0000000B;
-    static const unsigned int c_Monitor_FlashSectorMap     = 0x0000000C;
-    static const unsigned int c_Monitor_OemInfo            = 0x0000000E;
-    static const unsigned int c_Monitor_QueryConfiguration = 0x0000000F;
-    static const unsigned int c_Monitor_UpdateConfiguration= 0x00000010;
-    static const unsigned int c_Monitor_StorageOperation   = 0x00000011;
-    static const unsigned int c_Monitor_TargetInfo         = 0x00000020;
+    static const unsigned int c_Monitor_Ping                    = 0x00000000; // The payload is empty, this command is used to let the other side know we are here...
+    static const unsigned int c_Monitor_Message                 = 0x00000001; // The payload is composed of the string characters, no zero at the end.
+    static const unsigned int c_Monitor_ReadMemory              = 0x00000002;
+    static const unsigned int c_Monitor_WriteMemory             = 0x00000003;
+    static const unsigned int c_Monitor_CheckMemory             = 0x00000004;
+    static const unsigned int c_Monitor_EraseMemory             = 0x00000005;
+    static const unsigned int c_Monitor_Execute                 = 0x00000006;
+    static const unsigned int c_Monitor_Reboot                  = 0x00000007;
+    static const unsigned int c_Monitor_MemoryMap               = 0x00000008;
+    static const unsigned int c_Monitor_ProgramExit             = 0x00000009; // The payload is empty, this command is used to tell the PC of a program termination
+    static const unsigned int c_Monitor_CheckSignature          = 0x0000000A;
+    static const unsigned int c_Monitor_DeploymentMap           = 0x0000000B;
+    static const unsigned int c_Monitor_FlashSectorMap          = 0x0000000C;
+    static const unsigned int c_Monitor_OemInfo                 = 0x0000000E;
+    static const unsigned int c_Monitor_QueryConfiguration      = 0x0000000F;
+    static const unsigned int c_Monitor_StorageOperation        = 0x00000011;
+    static const unsigned int c_Monitor_ConfigurationInfo       = 0x00000012;
+    static const unsigned int c_Monitor_ConfigurationOperation  = 0x00000013;
+    static const unsigned int c_Monitor_TargetInfo              = 0x00000020;
 
     //--//
 
@@ -959,8 +960,9 @@ public:
     static bool Monitor_FlashSectorMap                  ( WP_Message *msg );
     static bool Monitor_DeploymentMap                   ( WP_Message *msg );
     static bool Monitor_QueryConfiguration              ( WP_Message *msg );
-    static bool Monitor_UpdateConfiguration             ( WP_Message *msg );
     static bool Monitor_StorageOperation                ( WP_Message *msg );
+    static bool Monitor_ConfigurationInfo               ( WP_Message *msg );
+    static bool Monitor_ConfigurationOperation          ( WP_Message *msg );
                                              
     static bool Debugging_Execution_BasePtr             ( WP_Message *msg );
     static bool Debugging_Execution_ChangeConditions    ( WP_Message *msg );

@@ -61,23 +61,7 @@ HAL_SYSTEM_CONFIG HalSystemConfig = {
     {0, 0}, // { FLASH_MEMORY_Base, FLASH_MEMORY_Size },
 };
 
-bool ConfigurationManager_GetConfigurationBlock(
-    void *configurationBlock,
-    DeviceConfigurationOption configuration,
-    uint32_t configurationIndex)
-{
-    return true;
-}
-
-bool ConfigurationManager_StoreConfigurationBlock(
-    void *configurationBlock,
-    DeviceConfigurationOption configuration,
-    uint32_t configurationIndex,
-    uint32_t blockSize,
-    bool done)
-{
-    return true;
-}
+// the configuration manager of the virtual devices is in src/HAL/nanoHAL_ConfigurationManager_Virtual.cpp
 
 void NFReleaseInfo::Init(
     NFReleaseInfo &NFReleaseInfo,
@@ -159,6 +143,9 @@ void nanoHAL_Initialize(void)
 #endif
 
     Events_Initialize();
+
+    // configuration blocks, kept in RAM
+    ConfigurationManager_Initialize();
 }
 
 void nanoHAL_Uninitialize(bool isPoweringDown)

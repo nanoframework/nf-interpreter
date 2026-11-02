@@ -6,6 +6,7 @@
 #include "targetHAL_ConfigStorage.h"
 #include <esp_vfs.h>
 #include <esp_littlefs.h>
+#include <sys/stat.h>
 
 // this one is following the the same "drive letter" as the HAL Windows Storage INTERNAL_DRIVE0_LETTER
 #define NANO_LITTLEFS_BASE_PATH   "/I"
@@ -74,10 +75,8 @@ void ConfigStorage_GetConfigFileName(
     uint32_t configurationIndex,
     char *configName)
 {
-    // buffer for config index
-    // this is only working for single digit indexes
-    // it's assumed that this validation has occurred in the caller
-    char configIndexAsString[2] = {0};
+    // buffer for config index (room for any 32 bits value)
+    char configIndexAsString[11] = {0};
 
     // config index to string
     itoa(configurationIndex, configIndexAsString, 10);
@@ -354,7 +353,7 @@ HAL_CONFIGURATION_NETWORK *ConfigStorage_FindNetworkConfigurationBlocks()
     // 1st pass, count the config files
     for (;;)
     {
-        dirInfo = readdir(dir);
+        dirInfo = dir != NULL ? readdir(dir) : NULL;
 
         // check for "no more files"
         if (!dirInfo)
@@ -366,6 +365,11 @@ HAL_CONFIGURATION_NETWORK *ConfigStorage_FindNetworkConfigurationBlocks()
         {
             configCount++;
         }
+    }
+
+    if (dir != NULL)
+    {
+        closedir(dir);
     }
 
     // allocate config struct
@@ -399,7 +403,7 @@ HAL_CONFIGURATION_NETWORK_WIRELESS80211 *ConfigStorage_FindNetworkWireless80211C
     // 1st pass, count the config files
     for (;;)
     {
-        dirInfo = readdir(dir);
+        dirInfo = dir != NULL ? readdir(dir) : NULL;
 
         // check for "no more files"
         if (!dirInfo)
@@ -411,6 +415,11 @@ HAL_CONFIGURATION_NETWORK_WIRELESS80211 *ConfigStorage_FindNetworkWireless80211C
         {
             configCount++;
         }
+    }
+
+    if (dir != NULL)
+    {
+        closedir(dir);
     }
 
     // allocate config struct
@@ -445,7 +454,7 @@ HAL_CONFIGURATION_NETWORK_WIRELESSAP *ConfigStorage_FindNetworkWirelessAPConfigu
     // 1st pass, count the config files
     for (;;)
     {
-        dirInfo = readdir(dir);
+        dirInfo = dir != NULL ? readdir(dir) : NULL;
 
         // check for "no more files"
         if (!dirInfo)
@@ -457,6 +466,11 @@ HAL_CONFIGURATION_NETWORK_WIRELESSAP *ConfigStorage_FindNetworkWirelessAPConfigu
         {
             configCount++;
         }
+    }
+
+    if (dir != NULL)
+    {
+        closedir(dir);
     }
 
     // allocate config struct
@@ -491,7 +505,7 @@ HAL_CONFIGURATION_X509_CERTIFICATE *ConfigStorage_FindX509CertificateConfigurati
     // 1st pass, count the config files
     for (;;)
     {
-        dirInfo = readdir(dir);
+        dirInfo = dir != NULL ? readdir(dir) : NULL;
 
         // check for "no more files"
         if (!dirInfo)
@@ -506,6 +520,11 @@ HAL_CONFIGURATION_X509_CERTIFICATE *ConfigStorage_FindX509CertificateConfigurati
             // there is only one CA root bundle, so we're good here
             break;
         }
+    }
+
+    if (dir != NULL)
+    {
+        closedir(dir);
     }
 
     // allocate config struct
@@ -569,7 +588,7 @@ HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *IRAM_ATTR ConfigStorage_FindX509Devic
     // 1st pass, count the config files
     for (;;)
     {
-        dirInfo = readdir(dir);
+        dirInfo = dir != NULL ? readdir(dir) : NULL;
 
         // check for "no more files"
         if (!dirInfo)
@@ -584,6 +603,11 @@ HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *IRAM_ATTR ConfigStorage_FindX509Devic
             // there is only one device cert, so we're good here
             break;
         }
+    }
+
+    if (dir != NULL)
+    {
+        closedir(dir);
     }
 
     // allocate config struct
@@ -683,4 +707,109 @@ int32_t ConfigurationManager_GetConfigurationBlockSize(
     }
 
     return readSize;
+}
+
+// name of the temporary file used to write a configuration block before it replaces the current one
+#define NANO_LITTLEFS_TEMP_FILE_NAME NANO_LITTLEFS_BASE_PATH "/" NANO_LITTLEFS_CONFIG_NAME "tmp.sys"
+
+bool ConfigStorage_FileExists(DeviceConfigurationOption configuration, uint32_t configurationIndex)
+{
+    char fileName[CONFIG_LITTLEFS_OBJ_NAME_LEN + 1] = {0};
+    struct stat fileStat;
+
+    ConfigStorage_GetConfigFileName(configuration, configurationIndex, fileName);
+
+    return stat(fileName, &fileStat) == 0;
+}
+
+bool ConfigStorage_RenameFile(DeviceConfigurationOption configuration, uint32_t fromIndex, uint32_t toIndex)
+{
+    char fromFileName[CONFIG_LITTLEFS_OBJ_NAME_LEN + 1] = {0};
+    char toFileName[CONFIG_LITTLEFS_OBJ_NAME_LEN + 1] = {0};
+
+    ConfigStorage_GetConfigFileName(configuration, fromIndex, fromFileName);
+    ConfigStorage_GetConfigFileName(configuration, toIndex, toFileName);
+
+    return rename(fromFileName, toFileName) == 0;
+}
+
+bool ConfigStorage_WriteFileAtomic(
+    DeviceConfigurationOption configuration,
+    uint32_t configurationIndex,
+    uint8_t *pData,
+    int32_t writeSize)
+{
+    char fileName[CONFIG_LITTLEFS_OBJ_NAME_LEN + 1] = {0};
+    bool success;
+
+    // write to a temporary file first
+    FILE *file = fopen(NANO_LITTLEFS_TEMP_FILE_NAME, "w");
+
+    if (file == NULL)
+    {
+        ESP_LOGE(TAG, "NANO: Failed to open file (%s)", NANO_LITTLEFS_TEMP_FILE_NAME);
+        return false;
+    }
+
+    success = (fwrite(pData, 1, (size_t)writeSize, file) == (size_t)writeSize);
+    success = (fclose(file) == 0) && success;
+
+    if (!success)
+    {
+        unlink(NANO_LITTLEFS_TEMP_FILE_NAME);
+        return false;
+    }
+
+    ConfigStorage_GetConfigFileName(configuration, configurationIndex, fileName);
+
+    // littlefs replaces an existing destination in a single step (lfs_rename)
+    // if that fails, the current file is left as it is
+    if (rename(NANO_LITTLEFS_TEMP_FILE_NAME, fileName) != 0)
+    {
+        unlink(NANO_LITTLEFS_TEMP_FILE_NAME);
+        return false;
+    }
+
+    return true;
+}
+
+void ConfigStorage_CompactFiles(DeviceConfigurationOption configuration, uint32_t maxIndex)
+{
+    uint32_t nextIndex = 0;
+
+    // the indexes of a configuration type have to be contiguous, as the blocks are counted and read by index
+    for (uint32_t index = 0; index < maxIndex; index++)
+    {
+        if (ConfigStorage_FileExists(configuration, index))
+        {
+            if (index != nextIndex && !ConfigStorage_RenameFile(configuration, index, nextIndex))
+            {
+                // the file stays where it is, the files that follow can't move before it
+                nextIndex = index;
+            }
+
+            nextIndex++;
+        }
+    }
+}
+
+void ConfigStorage_DeleteTempFile()
+{
+    unlink(NANO_LITTLEFS_TEMP_FILE_NAME);
+}
+
+void ConfigStorage_GetInfo(uint32_t *totalSize, uint32_t *usedSize)
+{
+    size_t total = 0, used = 0;
+
+    if (esp_littlefs_info(LITTLEFS_PARTITION_LABEL, &total, &used) == ESP_OK)
+    {
+        *totalSize = (uint32_t)total;
+        *usedSize = (uint32_t)used;
+    }
+    else
+    {
+        *totalSize = 0;
+        *usedSize = 0;
+    }
 }
