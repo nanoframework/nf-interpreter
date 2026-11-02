@@ -2522,7 +2522,20 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                             }
 
-                            if (ownerType.target->genericParamCount == 0 &&
+                            const CLR_RT_TypeSpec_Index *tsForCctor = calleeInst.genericType;
+                            if (tsForCctor == nullptr || !NANOCLR_INDEX_IS_VALID(*tsForCctor))
+                            {
+                                tsForCctor = (effectiveCallerGeneric && NANOCLR_INDEX_IS_VALID(*effectiveCallerGeneric))
+                                                 ? effectiveCallerGeneric
+                                                 : nullptr;
+                            }
+
+                            CLR_RT_TypeSpec_Instance tsInst{};
+                            bool genericOwner = tsForCctor != nullptr && tsInst.InitializeFromIndex(*tsForCctor) &&
+                                                NANOCLR_INDEX_IS_VALID(tsInst.genericTypeDef) &&
+                                                tsInst.genericTypeDef.data == ownerType.data;
+
+                            if (!genericOwner && ownerType.target->genericParamCount == 0 &&
                                 (ownerType.target->flags & CLR_RECORD_TYPEDEF::TD_BeforeFieldInit) == 0)
                             {
                                 hr = EnsureOrdinaryCctorCompleted(ownerType, stack, th, ip, evalPos, fDirty);
@@ -2536,37 +2549,21 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                 }
                                 NANOCLR_CHECK_HRESULT(hr);
                             }
-
+                            else if (genericOwner)
                             {
-                                const CLR_RT_TypeSpec_Index *tsForCctor = calleeInst.genericType;
-                                if (tsForCctor == nullptr || !NANOCLR_INDEX_IS_VALID(*tsForCctor))
+                                hr = EnsureGenericCctorCompleted(tsInst, stack, th);
+                                if (hr == CLR_E_PROCESS_EXCEPTION)
                                 {
-                                    tsForCctor =
-                                        (effectiveCallerGeneric && NANOCLR_INDEX_IS_VALID(*effectiveCallerGeneric))
-                                            ? effectiveCallerGeneric
-                                            : nullptr;
+                                    ip -= 3;
+                                    WRITEBACK(stack, evalPos, ip, fDirty);
+                                    goto Execute_Restart;
                                 }
-
-                                if (tsForCctor != nullptr)
+                                else if (hr == CLR_E_RESCHEDULE)
                                 {
-                                    CLR_RT_TypeSpec_Instance tsInst;
-                                    if (tsInst.InitializeFromIndex(*tsForCctor))
-                                    {
-                                        hr = EnsureGenericCctorCompleted(tsInst, stack, th);
-                                        if (hr == CLR_E_PROCESS_EXCEPTION)
-                                        {
-                                            ip -= 3;
-                                            WRITEBACK(stack, evalPos, ip, fDirty);
-                                            goto Execute_Restart;
-                                        }
-                                        else if (hr == CLR_E_RESCHEDULE)
-                                        {
-                                            ip -= 3;
-                                            NANOCLR_SET_AND_LEAVE(CLR_E_RESCHEDULE);
-                                        }
-                                        NANOCLR_CHECK_HRESULT(hr);
-                                    }
+                                    ip -= 3;
+                                    NANOCLR_SET_AND_LEAVE(CLR_E_RESCHEDULE);
                                 }
+                                NANOCLR_CHECK_HRESULT(hr);
                             }
                         }
                         else
@@ -3148,21 +3145,6 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
-                    if (cls.target->genericParamCount == 0 &&
-                        (cls.target->flags & CLR_RECORD_TYPEDEF::TD_BeforeFieldInit) == 0)
-                    {
-                        hr = EnsureOrdinaryCctorCompleted(cls, stack, th, ip, evalPos, fDirty);
-                        if (hr == CLR_E_PROCESS_EXCEPTION)
-                        {
-                            goto Execute_Restart;
-                        }
-                        else if (hr == CLR_E_RESCHEDULE)
-                        {
-                            NANOCLR_SET_AND_LEAVE(CLR_E_RESCHEDULE);
-                        }
-                        NANOCLR_CHECK_HRESULT(hr);
-                    }
-
                     // Nested generic construction (Holder<T> builds Box<!0>). See CLAUDE.md §9.
                     const CLR_RT_TypeSpec_Index *nestedGenericTag = nullptr;
 
@@ -3307,36 +3289,52 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     {
                         const CLR_RT_TypeSpec_Index *tsForCctor = nullptr;
 
-                        if (stack->m_call.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*stack->m_call.genericType))
-                        {
-                            tsForCctor = stack->m_call.genericType;
-                        }
-                        else if (calleeInst.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType))
+                        if (calleeInst.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType))
                         {
                             tsForCctor = calleeInst.genericType;
                         }
-
-                        if (tsForCctor != nullptr)
+                        else if (
+                            stack->m_call.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*stack->m_call.genericType))
                         {
-                            CLR_RT_TypeSpec_Instance tsInst;
-                            if (tsInst.InitializeFromIndex(*tsForCctor))
+                            tsForCctor = stack->m_call.genericType;
+                        }
+
+                        CLR_RT_TypeSpec_Instance tsInst{};
+                        bool genericOwner = tsForCctor != nullptr && tsInst.InitializeFromIndex(*tsForCctor) &&
+                                            NANOCLR_INDEX_IS_VALID(tsInst.genericTypeDef) &&
+                                            tsInst.genericTypeDef.data == cls.data;
+
+                        if (!genericOwner && cls.target->genericParamCount == 0 &&
+                            (cls.target->flags & CLR_RECORD_TYPEDEF::TD_BeforeFieldInit) == 0)
+                        {
+                            hr = EnsureOrdinaryCctorCompleted(cls, stack, th, ip, evalPos, fDirty);
+                            if (hr == CLR_E_PROCESS_EXCEPTION)
                             {
-                                hr = EnsureGenericCctorCompleted(tsInst, stack, th);
-
-                                if (hr == CLR_E_PROCESS_EXCEPTION)
-                                {
-                                    ip -= 3;
-                                    WRITEBACK(stack, evalPos, ip, fDirty);
-                                    goto Execute_Restart;
-                                }
-                                else if (hr == CLR_E_RESCHEDULE)
-                                {
-                                    ip -= 3;
-                                    NANOCLR_SET_AND_LEAVE(CLR_E_RESCHEDULE);
-                                }
-
-                                NANOCLR_CHECK_HRESULT(hr);
+                                goto Execute_Restart;
                             }
+                            else if (hr == CLR_E_RESCHEDULE)
+                            {
+                                NANOCLR_SET_AND_LEAVE(CLR_E_RESCHEDULE);
+                            }
+                            NANOCLR_CHECK_HRESULT(hr);
+                        }
+                        else if (genericOwner)
+                        {
+                            hr = EnsureGenericCctorCompleted(tsInst, stack, th);
+
+                            if (hr == CLR_E_PROCESS_EXCEPTION)
+                            {
+                                ip -= 3;
+                                WRITEBACK(stack, evalPos, ip, fDirty);
+                                goto Execute_Restart;
+                            }
+                            else if (hr == CLR_E_RESCHEDULE)
+                            {
+                                ip -= 3;
+                                NANOCLR_SET_AND_LEAVE(CLR_E_RESCHEDULE);
+                            }
+
+                            NANOCLR_CHECK_HRESULT(hr);
                         }
                     }
 
