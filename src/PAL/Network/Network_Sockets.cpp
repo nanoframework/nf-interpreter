@@ -542,18 +542,24 @@ void ResolverWorker()
                 {
 #if defined(_WIN32)
                     int length = WideCharToMultiByte(
-                        CP_UTF8, WC_ERR_INVALID_CHARS, address->ai_canonname, -1, nullptr, 0, nullptr, nullptr);
+                        CP_UTF8,
+                        WC_ERR_INVALID_CHARS,
+                        address->ai_canonname,
+                        -1,
+                        nullptr,
+                        0,
+                        nullptr,
+                        nullptr);
                     std::vector<char> name(length);
-                    if (length == 0 ||
-                        WideCharToMultiByte(
-                            CP_UTF8,
-                            WC_ERR_INVALID_CHARS,
-                            address->ai_canonname,
-                            -1,
-                            name.data(),
-                            length,
-                            nullptr,
-                            nullptr) == 0)
+                    if (length == 0 || WideCharToMultiByte(
+                                           CP_UTF8,
+                                           WC_ERR_INVALID_CHARS,
+                                           address->ai_canonname,
+                                           -1,
+                                           name.data(),
+                                           length,
+                                           nullptr,
+                                           nullptr) == 0)
                     {
                         fprintf(stderr, "nanoCLR DNS canonical name UTF-8 conversion failed (%lu)\n", GetLastError());
                         result = WSAEINVAL;
@@ -586,7 +592,7 @@ void ResolverWorker()
 #else
                          : result == EAI_SYSTEM ? MapError(systemError)
 #endif
-                                                : SOCK_HOST_NOT_FOUND;
+                                               : SOCK_HOST_NOT_FOUND;
             if (job->error == 0 && job->addresses.empty())
             {
                 job->error = SOCK_NO_DATA;
