@@ -134,8 +134,8 @@ HRESULT Handshake(CLR_RT_StackFrame &stack, bool server)
             NativeSocket::ThrowError(stack, SOCK_ETIMEDOUT);
             NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
         }
-        result =
-            server ? NetworkTls_Accept(context, handle) : NetworkTls_Connect(context, handle, stack.Arg1().RecoverString());
+        result = server ? NetworkTls_Accept(context, handle)
+                        : NetworkTls_Connect(context, handle, stack.Arg1().RecoverString());
         if (result == 0)
         {
             break;
@@ -203,7 +203,8 @@ HRESULT NativeTls::ReadWriteHelper(CLR_RT_StackFrame &stack, bool write)
             NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
         }
         auto buffer = stack.Arg1().DereferenceArray()->GetFirstElement() + offset + total;
-        result = write ? NetworkTls_Write(handle, buffer, length - total) : NetworkTls_Read(handle, buffer, length - total);
+        result =
+            write ? NetworkTls_Write(handle, buffer, length - total) : NetworkTls_Read(handle, buffer, length - total);
         if (result == NetworkTls_Error)
         {
             int error = NetworkTls_LastError();
