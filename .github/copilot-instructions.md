@@ -179,6 +179,7 @@ Each target board has:
 
 - **Primary CI**: Azure Pipelines (`azure-pipelines.yml`) — builds firmware for all reference targets on `main`, `develop*`, and `release-*` branches.
 - **GitHub Actions**: Dev container smoke tests (`.github/workflows/devcontainer-smoketest.yaml`) — builds selected targets in Docker containers, triggered on PRs that modify `.devcontainer/` or `.github/workflows/`.
+- **Changelog and GitHub releases**: `.github/workflows/generate-changelog.yml` builds the changelog from merged PRs (grouped by labels, see `.github/.changelog-config.json`) and creates/updates the GitHub release. Runs when a version tag (`vX.Y.Z[.W]`) on `main` is pushed, or manually (`workflow_dispatch` from `main`) for a given tag, with optional `from_tag` and `dry_run`. PR labels (`Type:`, `Area:`, `Platform:`, `Series:`, `Breaking-change`) drive the grouping, so label PRs accordingly.
 - **Nightly builds**: `azure-pipelines-nightly.yml`.
 - Issues are tracked in the central `nanoframework/Home` repository. Link format: `nanoFramework/Home#NNNN`.
 
