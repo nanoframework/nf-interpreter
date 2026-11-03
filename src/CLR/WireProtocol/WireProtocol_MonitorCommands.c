@@ -214,6 +214,15 @@ int Monitor_UpdateConfiguration(WP_Message *message)
     Monitor_UpdateConfiguration_Command *cmd = (Monitor_UpdateConfiguration_Command *)message->m_payload;
     Monitor_UpdateConfiguration_Reply cmdReply;
 
+    // the data length is provided by the host, it can't be larger than the data received in the payload
+    if (message->m_header.m_size < offsetof(Monitor_UpdateConfiguration_Command, Data) ||
+        cmd->Length > message->m_header.m_size - offsetof(Monitor_UpdateConfiguration_Command, Data))
+    {
+        cmdReply.ErrorCode = 100;
+        WP_ReplyToCommand(message, false, false, &cmdReply, sizeof(cmdReply));
+        return false;
+    }
+
     switch ((DeviceConfigurationOption)cmd->Configuration)
     {
         case DeviceConfigurationOption_Network:
