@@ -129,6 +129,65 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::Invoke___OBJECT__OBJ
             numArgs = pArray->m_numOfElements;
         }
 
+        if ((mdR->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
+        {
+            CLR_RT_TypeDef_Instance declaringType{};
+
+            if (obj.Dereference() == NULL)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_NULL_REFERENCE);
+            }
+
+            if (declaringType.InitializeFromMethod(md) == false ||
+                CLR_RT_ExecutionEngine::IsInstanceOf(obj, declaringType) == false)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+            }
+        }
+
+        CLR_RT_SignatureParser parser{};
+        CLR_RT_SignatureParser::Element element{};
+        parser.Initialize_MethodSignature(md.m_assm, mdR);
+
+        // Skip the return type; the remaining signature elements are the explicit parameters.
+        NANOCLR_CHECK_HRESULT(parser.Advance(element));
+
+        int argIndex = 0;
+        while (parser.Available() > 0 && argIndex < numArgs)
+        {
+            NANOCLR_CHECK_HRESULT(parser.Advance(element));
+
+            if (element.m_levels > 0 ||
+                (c_CLR_RT_DataTypeLookup[element.m_dt].m_flags & CLR_RT_DataTypeLookup::c_Reference) != 0)
+            {
+                CLR_RT_HeapBlock &arg = args[argIndex];
+                bool isNullReference =
+                    (c_CLR_RT_DataTypeLookup[arg.DataType()].m_flags & CLR_RT_DataTypeLookup::c_Reference) != 0 &&
+                    arg.Dereference() == NULL;
+
+                if (!isNullReference)
+                {
+                    CLR_RT_ReflectionDef_Index expectedType{};
+                    CLR_RT_TypeDescriptor sourceType{};
+                    CLR_RT_TypeDescriptor targetType{};
+
+                    expectedType.m_kind = REFLECTION_TYPE;
+                    expectedType.m_levels = (CLR_UINT16)element.m_levels;
+                    expectedType.m_data.m_type = element.m_cls;
+
+                    NANOCLR_CHECK_HRESULT(targetType.InitializeFromReflection(expectedType));
+
+                    if (FAILED(sourceType.InitializeFromObject(arg)) ||
+                        CLR_RT_ExecutionEngine::IsInstanceOf(sourceType, targetType, false) == false)
+                    {
+                        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+                    }
+                }
+            }
+
+            argIndex++;
+        }
+
         NANOCLR_CHECK_HRESULT(stack.MakeCall(md, &obj, args, numArgs));
     }
     else
