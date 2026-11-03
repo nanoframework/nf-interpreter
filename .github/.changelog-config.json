@@ -274,7 +274,7 @@
                             ]
                         },
                         {
-                            "title": "#### Other",
+                            "title": "#### General",
                             "rules": [
                                 {
                                     "pattern": ".+",
@@ -360,7 +360,7 @@
                             ]
                         },
                         {
-                            "title": "#### Other",
+                            "title": "#### General",
                             "rules": [
                                 {
                                     "pattern": ".+",
@@ -397,7 +397,7 @@
                             ]
                         },
                         {
-                            "title": "#### Other",
+                            "title": "#### General",
                             "rules": [
                                 {
                                     "pattern": ".+",
@@ -426,7 +426,7 @@
                             ]
                         },
                         {
-                            "title": "#### Other",
+                            "title": "#### General",
                             "rules": [
                                 {
                                     "pattern": ".+",
@@ -462,7 +462,7 @@
                             ]
                         },
                         {
-                            "title": "#### Other",
+                            "title": "#### General",
                             "rules": [
                                 {
                                     "pattern": ".+",
