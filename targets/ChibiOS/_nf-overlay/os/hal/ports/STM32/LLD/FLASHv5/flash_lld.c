@@ -143,6 +143,12 @@ int flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t *buffe
     uint32_t remainingBytes = length;
     bool success = true;
 
+    // the range to write has to be inside the flash bank (the comparisons are written so they can't overflow)
+    if (startAddress < FLASH_BANK1_BASE || startAddress > FLASH_END || length > FLASH_END - startAddress + 1U)
+    {
+        return false;
+    }
+
     if (!FLASH_Unlock())
     {
         return false;
