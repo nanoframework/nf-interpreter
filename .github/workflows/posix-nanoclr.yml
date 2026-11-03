@@ -22,7 +22,7 @@ jobs:
       ${{
         github.event_name != 'pull_request' ||
         !(
-          github.actor == 'nfbot' &&
+          github.event.pull_request.user.login == 'nfbot' &&
           (
             contains(github.event.pull_request.title, 'Code style fixes') ||
             contains(github.event.pull_request.body || '', 'Automated fix of code style')
