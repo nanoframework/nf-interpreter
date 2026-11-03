@@ -230,22 +230,25 @@ int8_t GetNextFreeAdcChannel(NF_PAL_ADC_PORT_PIN_CHANNEL *&newChannel)
             (RuntimeAdcChannelCount + 1) * sizeof(NF_PAL_ADC_PORT_PIN_CHANNEL));
 
         // sanity check
-        if (RuntimeAdcPortPinConfig != NULL)
+        if (newRuntimeAdcPortPinConfig != NULL)
         {
-            // update the number of channels
-            RuntimeAdcChannelCount++;
+            if (RuntimeAdcPortPinConfig != NULL)
+            {
+                // copy the existing channels to the new memory block
+                memcpy(
+                    newRuntimeAdcPortPinConfig,
+                    RuntimeAdcPortPinConfig,
+                    RuntimeAdcChannelCount * sizeof(NF_PAL_ADC_PORT_PIN_CHANNEL));
 
-            // copy the old channels to the new memory block
-            memcpy(
-                newRuntimeAdcPortPinConfig,
-                RuntimeAdcPortPinConfig,
-                RuntimeAdcChannelCount * sizeof(NF_PAL_ADC_PORT_PIN_CHANNEL));
-
-            // free the old memory block
-            platform_free(RuntimeAdcPortPinConfig);
+                // free the old memory block
+                platform_free(RuntimeAdcPortPinConfig);
+            }
 
             // set the new memory block
             RuntimeAdcPortPinConfig = newRuntimeAdcPortPinConfig;
+
+            // update the number of channels
+            RuntimeAdcChannelCount++;
 
             // clear the new channel
             memset(&RuntimeAdcPortPinConfig[RuntimeAdcChannelCount - 1], 0, sizeof(NF_PAL_ADC_PORT_PIN_CHANNEL));
