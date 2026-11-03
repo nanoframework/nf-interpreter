@@ -21,6 +21,12 @@ namespace nanoFramework.nanoCLR.CLI
         public IEnumerable<string> AssembliesToLoad { get; set; }
 
         [Option(
+            "ca-bundle",
+            Required = false,
+            HelpText = "CA certificate file for outgoing TLS. Overrides NANOCLR_CA_BUNDLE; managed CA certificates take precedence.")]
+        public string CaBundle { get; set; }
+
+        [Option(
             's',
             "serialport",
             Required = false,

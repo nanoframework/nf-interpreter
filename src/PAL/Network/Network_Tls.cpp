@@ -3,9 +3,11 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <Target_Tls.h>
+#include <Network_Tls.h>
 
+#if !defined(_WIN32)
 #include <arpa/inet.h>
+#endif
 #include <mbedtls/ctr_drbg.h>
 #include <mbedtls/entropy.h>
 #include <mbedtls/error.h>
@@ -22,6 +24,7 @@
 #include <climits>
 #include <cstdlib>
 #include <fstream>
+#include <filesystem>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -115,7 +118,7 @@ int Failure(const char *operation, int error)
         mbedtls_strerror(error, message, sizeof(message));
     }
     fprintf(stderr, "nanoCLR TLS %s failed (%d)%s%s\n", operation, error, message[0] ? ": " : "", message);
-    return LinuxTls_Error;
+    return NetworkTls_Error;
 }
 
 bool InitializeRandom(Context &context)
@@ -279,6 +282,29 @@ std::shared_ptr<Certificates> ParseCertificates(const uint8_t *data, size_t leng
 
 std::shared_ptr<Certificates> ReadCaFile()
 {
+#if defined(_WIN32)
+    SetLastError(ERROR_SUCCESS);
+    DWORD size = GetEnvironmentVariableW(L"NANOCLR_CA_BUNDLE", nullptr, 0);
+    if (size == 0)
+    {
+        Failure(
+            GetLastError() == ERROR_ENVVAR_NOT_FOUND
+                ? "no trusted CA configured; supply a managed CA, NANOCLR_CA_BUNDLE or --ca-bundle"
+                : "empty or unreadable NANOCLR_CA_BUNDLE",
+            SOCK_EINVAL);
+        return nullptr;
+    }
+    std::vector<wchar_t> value(size);
+    DWORD read = GetEnvironmentVariableW(L"NANOCLR_CA_BUNDLE", value.data(), size);
+    if (read == 0 || read >= size)
+    {
+        Failure("NANOCLR_CA_BUNDLE changed while reading", SOCK_EINVAL);
+        return nullptr;
+    }
+    std::filesystem::path nativePath(value.data());
+    auto encodedPath = nativePath.u8string();
+    std::string path(reinterpret_cast<const char *>(encodedPath.data()), encodedPath.size());
+#else
     const char *configured = getenv("NANOCLR_CA_BUNDLE");
     if (configured == nullptr)
     {
@@ -291,7 +317,9 @@ std::shared_ptr<Certificates> ReadCaFile()
         Failure("empty NANOCLR_CA_BUNDLE", SOCK_EINVAL);
         return nullptr;
     }
-    std::ifstream file(path, std::ios::binary | std::ios::ate);
+    std::filesystem::path nativePath(path);
+#endif
+    std::ifstream file(nativePath, std::ios::binary | std::ios::ate);
     if (!file.is_open())
     {
         fprintf(stderr, "nanoCLR TLS cannot open CA bundle '%s': %s\n", path.c_str(), strerror(errno));
@@ -324,7 +352,7 @@ std::shared_ptr<Certificates> ReadCaFile()
 int Receive(void *opaque, unsigned char *buffer, size_t length)
 {
     auto &connection = *static_cast<Connection *>(opaque);
-    int result = SOCK_recv(connection.socket, reinterpret_cast<char *>(buffer), std::min(length, size_t(INT_MAX)), 0);
+    int result = SOCK_recv(connection.socket, reinterpret_cast<char *>(buffer), (std::min)(length, size_t(INT_MAX)), 0);
     if (result >= 0)
     {
         return result;
@@ -342,7 +370,7 @@ int Send(void *opaque, const unsigned char *buffer, size_t length)
 {
     auto &connection = *static_cast<Connection *>(opaque);
     int result =
-        SOCK_send(connection.socket, reinterpret_cast<const char *>(buffer), std::min(length, size_t(INT_MAX)), 0);
+        SOCK_send(connection.socket, reinterpret_cast<const char *>(buffer), (std::min)(length, size_t(INT_MAX)), 0);
     if (result >= 0)
     {
         return result;
@@ -383,9 +411,9 @@ int TranslateResult(Connection &connection, int result)
 {
     if (result == MBEDTLS_ERR_SSL_WANT_READ || result == MBEDTLS_ERR_SSL_WANT_WRITE)
     {
-        if (LinuxNetwork_ArmSocket(connection.socket, result == MBEDTLS_ERR_SSL_WANT_WRITE))
+        if (HostNetwork_ArmSocket(connection.socket, result == MBEDTLS_ERR_SSL_WANT_WRITE))
         {
-            return result == MBEDTLS_ERR_SSL_WANT_READ ? LinuxTls_WantRead : LinuxTls_WantWrite;
+            return result == MBEDTLS_ERR_SSL_WANT_READ ? NetworkTls_WantRead : NetworkTls_WantWrite;
         }
         connection.failed = true;
         return Failure("closed socket", SOCK_ENOTSOCK);
@@ -417,13 +445,13 @@ void ReadDate(const mbedtls_x509_time &value, DATE_TIME_INFO &result)
 }
 } // namespace
 
-int LinuxTls_CreateContext(int protocols, const uint8_t *ca, size_t length, bool verifyPeer)
+int NetworkTls_CreateContext(int protocols, const uint8_t *ca, size_t length, bool verifyPeer)
 {
     std::lock_guard<std::mutex> lock(s_tlsMutex);
     auto context = MakeContext(protocols, false);
     if (!context)
     {
-        return LinuxTls_Error;
+        return NetworkTls_Error;
     }
     context->verifyPeer = verifyPeer;
     if (verifyPeer)
@@ -435,7 +463,7 @@ int LinuxTls_CreateContext(int protocols, const uint8_t *ca, size_t length, bool
         }
         if (!context->certificates)
         {
-            return LinuxTls_Error;
+            return NetworkTls_Error;
         }
         mbedtls_ssl_conf_ca_chain(&context->config, &context->certificates->chain, nullptr);
     }
@@ -448,7 +476,7 @@ int LinuxTls_CreateContext(int protocols, const uint8_t *ca, size_t length, bool
     return id;
 }
 
-int LinuxTls_CreateServerContext(
+int NetworkTls_CreateServerContext(
     int protocols,
     const uint8_t *certificate,
     size_t certificateLength,
@@ -460,12 +488,12 @@ int LinuxTls_CreateServerContext(
     auto context = MakeContext(protocols, true);
     if (!context)
     {
-        return LinuxTls_Error;
+        return NetworkTls_Error;
     }
     context->identity = ParseCertificates(certificate, certificateLength);
     if (!context->identity || !ParsePrivateKey(*context, privateKey, privateKeyLength, password))
     {
-        return LinuxTls_Error;
+        return NetworkTls_Error;
     }
     int result = mbedtls_pk_check_pair(
         &context->identity->chain.pk,
@@ -486,14 +514,14 @@ int LinuxTls_CreateServerContext(
     return id;
 }
 
-bool LinuxTls_DecodePrivateKey(const uint8_t *data, size_t length, const char *password)
+bool NetworkTls_DecodePrivateKey(const uint8_t *data, size_t length, const char *password)
 {
     std::lock_guard<std::mutex> lock(s_tlsMutex);
     Context context;
     return InitializeRandom(context) && ParsePrivateKey(context, data, length, password);
 }
 
-bool LinuxTls_FreeContext(int context)
+bool NetworkTls_FreeContext(int context)
 {
     std::lock_guard<std::mutex> lock(s_tlsMutex);
     for (auto it = s_connections.begin(); it != s_connections.end();)
@@ -556,17 +584,17 @@ int Handshake(int context, int socket, const char *host, bool server)
 }
 } // namespace
 
-int LinuxTls_Connect(int context, int socket, const char *host)
+int NetworkTls_Connect(int context, int socket, const char *host)
 {
     return Handshake(context, socket, host, false);
 }
 
-int LinuxTls_Accept(int context, int socket)
+int NetworkTls_Accept(int context, int socket)
 {
     return Handshake(context, socket, nullptr, true);
 }
 
-int LinuxTls_Read(int socket, uint8_t *buffer, int length)
+int NetworkTls_Read(int socket, uint8_t *buffer, int length)
 {
     std::lock_guard<std::mutex> lock(s_tlsMutex);
     auto found = s_connections.find(socket);
@@ -593,7 +621,7 @@ int LinuxTls_Read(int socket, uint8_t *buffer, int length)
     return TranslateResult(connection, result == 0 ? MBEDTLS_ERR_SSL_CONN_EOF : result);
 }
 
-int LinuxTls_Write(int socket, const uint8_t *buffer, int length)
+int NetworkTls_Write(int socket, const uint8_t *buffer, int length)
 {
     std::lock_guard<std::mutex> lock(s_tlsMutex);
     auto found = s_connections.find(socket);
@@ -612,7 +640,7 @@ int LinuxTls_Write(int socket, const uint8_t *buffer, int length)
     {
         return Failure("TLS record capacity", limit < 0 ? limit : MBEDTLS_ERR_SSL_INTERNAL_ERROR);
     }
-    size_t count = std::min(length, limit);
+    size_t count = (std::min)(length, limit);
     if (connection.pendingWrite.empty())
     {
         // mbedTLS retries require stable arguments, even if the managed buffer moves during GC.
@@ -631,7 +659,7 @@ int LinuxTls_Write(int socket, const uint8_t *buffer, int length)
     return TranslateResult(connection, result == 0 ? MBEDTLS_ERR_SSL_INTERNAL_ERROR : result);
 }
 
-int LinuxTls_Available(int socket)
+int NetworkTls_Available(int socket)
 {
     std::lock_guard<std::mutex> lock(s_tlsMutex);
     auto found = s_connections.find(socket);
@@ -642,12 +670,12 @@ int LinuxTls_Available(int socket)
     return static_cast<int>(mbedtls_ssl_get_bytes_avail(&found->second->session));
 }
 
-int LinuxTls_LastError()
+int NetworkTls_LastError()
 {
     return s_tlsError;
 }
 
-void LinuxTls_Close(int socket)
+void NetworkTls_Close(int socket)
 {
     std::lock_guard<std::mutex> lock(s_tlsMutex);
     auto found = s_connections.find(socket);
@@ -662,7 +690,7 @@ void LinuxTls_Close(int socket)
     }
 }
 
-void LinuxTls_Reset()
+void NetworkTls_Reset()
 {
     std::lock_guard<std::mutex> lock(s_tlsMutex);
     s_connections.clear();
@@ -671,7 +699,7 @@ void LinuxTls_Reset()
     mbedtls_psa_crypto_free();
 }
 
-bool LinuxTls_SetCaBundle(const uint8_t *data, size_t length)
+bool NetworkTls_SetCaBundle(const uint8_t *data, size_t length)
 {
     auto certificates = ParseCertificates(data, length);
     if (!certificates)
@@ -683,7 +711,7 @@ bool LinuxTls_SetCaBundle(const uint8_t *data, size_t length)
     return true;
 }
 
-bool LinuxTls_ParseCertificate(const uint8_t *data, size_t length, X509CertData &certificate)
+bool NetworkTls_ParseCertificate(const uint8_t *data, size_t length, X509CertData &certificate)
 {
     auto certificates = ParseCertificates(data, length);
     if (!certificates)
