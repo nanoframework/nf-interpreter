@@ -61,5 +61,5 @@ The following ADC channels (and respective GPIO pins) are available to the manag
 
 ## Floating point
 
-The build is set to add support for single-precision floating point.
-Meaning that `System.Math` API supports only the `float` overloads. The `double` ones will throw a `NotImplementedException`.
+The build is set to add support for double-precision floating point (the Cortex-M7 FPU in STM32H7 has double-precision support).
+Meaning that `System.Math` API supports both the `float` and the `double` overloads.
