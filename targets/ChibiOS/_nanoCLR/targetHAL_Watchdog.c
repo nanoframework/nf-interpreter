@@ -70,18 +70,30 @@ void Watchdog_Init()
 
     uint16_t divisor = 4;
 
+#if defined(STM32H7XX)
+    uint32_t lsiClock = STM32_LSI_CK;
+#else
+    uint32_t lsiClock = STM32_LSICLK;
+#endif
+
     for (uint8_t index = 0; index < length; index++)
     {
         divisor = 4 << prescaler[index];
-#if defined(STM32H7XX)
-        ticksForTimeout = (STM32_LSI_CK / divisor) * (IWATCHDOG_TIMEOUT_MILLIS / 1000) - 1;
-#else
-        ticksForTimeout = (STM32_LSICLK / divisor) * (IWATCHDOG_TIMEOUT_MILLIS / 1000) - 1;
-#endif
 
-        if (ticksForTimeout <= 0xFFF)
+        // multiply by the timeout in milliseconds before dividing by 1000 to keep timeouts that aren't whole seconds
+        // 64 bits intermediate result to prevent overflow
+        uint64_t ticks = ((uint64_t)(lsiClock / divisor) * IWATCHDOG_TIMEOUT_MILLIS) / 1000U;
+
+        // need at least one tick (reload value is the number of ticks minus 1)
+        if (ticks == 0)
+        {
+            continue;
+        }
+
+        if (ticks - 1 <= 0xFFF)
         {
             // the max reload register value
+            ticksForTimeout = (uint32_t)(ticks - 1);
 
             wdgConfig.pr = prescaler[index];
             wdgConfig.rlr = ticksForTimeout;
