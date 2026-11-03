@@ -246,7 +246,7 @@
 /  To enable exFAT, also LFN needs to be enabled. (FF_USE_LFN >= 1)
 /  Note that enabling exFAT discards ANSI C (C89) compatibility. */
 
-#define FF_FS_NORTC   1
+#define FF_FS_NORTC   0
 #define FF_NORTC_MON  8
 #define FF_NORTC_MDAY 1
 #define FF_NORTC_YEAR 2018

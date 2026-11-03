@@ -26,6 +26,9 @@ STM32FlashDriver STM32FLASH;
 // Driver local variables and types.                                         //
 ///////////////////////////////////////////////////////////////////////////////
 
+// timeout for a flash operation (sector erase is the longest one, up to 4 seconds on STM32H7)
+#define FLASH_OPERATION_TIMEOUT_MS 5000U
+
 // buffer for a flash word
 static union
 {
@@ -70,9 +73,16 @@ static void FLASH_ClearErrors(void)
 static bool FLASH_WaitForLastOperation(void)
 {
     // Wait for the FLASH operation to complete by polling on QW flag to be reset.
-    // no need to overload this with a timeout workflow as the watchdog will quick-in if execution gets stuck
+    // the timeout has to be longer than the worst case sector erase time
+    systime_t start = osalOsGetSystemTimeX();
+
     while ((FLASH->SR1 & FLASH_SR_QW) != 0U)
-        ;
+    {
+        if (osalTimeDiffX(start, osalOsGetSystemTimeX()) > OSAL_MS2I(FLASH_OPERATION_TIMEOUT_MS))
+        {
+            return false;
+        }
+    }
 
     if ((FLASH->SR1 & FLASH_FLAG_ALL_ERRORS_BANK1) != 0U)
     {

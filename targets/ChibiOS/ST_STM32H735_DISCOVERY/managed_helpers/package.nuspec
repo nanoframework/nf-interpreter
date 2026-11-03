@@ -20,7 +20,7 @@
   </metadata>
   <files>
     <file src="STM32H735_DISCOVERY.Adc.cs" target="content" />
-    <file src="..\..\..\..\..\assets\nf-logo.png" target="images" />
-    <file src="LICENSE.md" target="" />
+    <file src="..\..\..\..\assets\nf-logo.png" target="images" />
+    <file src="..\..\..\..\LICENSE.md" target="" />
   </files>
 </package>
