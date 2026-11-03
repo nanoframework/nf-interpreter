@@ -13,12 +13,6 @@ bool NF_ESP32_ConnectInProgress = false;
 int NF_ESP32_ConnectResult = 0;
 int nf_threadNetworkIndex = -1;
 
-bool StoreConfigBlock(
-    DeviceConfigurationOption configType,
-    uint32_t configurationIndex,
-    void *pConfigBlock,
-    size_t writeSize);
-
 bool Network_Interface_Bind(int index)
 {
     (void)index;
@@ -141,6 +135,10 @@ int Network_Interface_Start_Scan(int index)
 
 bool GetWirelessConfig(int index, HAL_Configuration_Wireless80211 **wirelessConfig)
 {
+    bool found = false;
+
+    *wirelessConfig = nullptr;
+
     // Check index in range
     if (g_TargetConfiguration.NetworkInterfaceConfigs->Count <= index)
     {
@@ -154,32 +152,53 @@ bool GetWirelessConfig(int index, HAL_Configuration_Wireless80211 **wirelessConf
     if (networkConfiguration)
     {
         // load network interface configuration from storage
-        if (ConfigurationManager_GetConfigurationBlock(networkConfiguration, DeviceConfigurationOption_Network, index))
+        if (ConfigurationManager_GetConfigurationBlock(
+                networkConfiguration,
+                DeviceConfigurationOption_Network,
+                index) &&
+            networkConfiguration->InterfaceType == NetworkInterfaceType_Wireless80211)
         {
-            if (networkConfiguration->InterfaceType == NetworkInterfaceType_Wireless80211)
-            {
-                *wirelessConfig =
-                    (HAL_Configuration_Wireless80211 *)platform_malloc(sizeof(HAL_Configuration_Wireless80211));
+            // the network interface refers to its station profile by Id
+            *wirelessConfig = NF_ESP32_GetWirelessConfigurationFromIdOrDefault(networkConfiguration->SpecificConfigId);
 
-                // check allocation
-                if (wirelessConfig)
-                {
-                    if (ConfigurationManager_GetConfigurationBlock(
-                            *wirelessConfig,
-                            DeviceConfigurationOption_Wireless80211Network,
-                            networkConfiguration->SpecificConfigId))
-                    {
-                        // found and loaded
-                        return true;
-                    }
-                }
-            }
+            found = (*wirelessConfig != nullptr);
         }
 
         platform_free(networkConfiguration);
     }
 
-    return false;
+    return found;
+}
+
+// gets the index of the station profile with this Id, -1 if there is none, -2 if a profile couldn't be read
+static int32_t FindWirelessProfileIndex(uint32_t configurationId)
+{
+    int32_t profileIndex = -1;
+    uint32_t count = ConfigurationManager_GetBlockCount(DeviceConfigurationOption_Wireless80211Network);
+
+    HAL_Configuration_Wireless80211 *profile =
+        (HAL_Configuration_Wireless80211 *)platform_malloc(sizeof(HAL_Configuration_Wireless80211));
+
+    if (profile != nullptr)
+    {
+        for (uint32_t i = 0; i < count && profileIndex == -1; i++)
+        {
+            if (!ConfigurationManager_GetConfigurationBlock(profile, DeviceConfigurationOption_Wireless80211Network, i))
+            {
+                // can't tell if the profile exists
+                profileIndex = -2;
+            }
+            else if (profile->Id == configurationId)
+            {
+                profileIndex = (int32_t)i;
+            }
+        }
+
+        memset(profile, 0, sizeof(HAL_Configuration_Wireless80211));
+        platform_free(profile);
+    }
+
+    return profileIndex;
 }
 
 //
@@ -229,11 +248,23 @@ int Network_Interface_Start_Connect(int index, const char *ssid, const char *pas
     // Option to Save new config
     if (options & NETWORK_CONNECT_SAVE_CONFIG)
     {
-        StoreConfigBlock(
-            DeviceConfigurationOption_Wireless80211Network,
-            index,
-            wirelessConfig,
-            sizeof(HAL_Configuration_Wireless80211));
+        // replace the station profile used by this network interface, or add it if there is none
+        // (not if the profiles couldn't be read: that could add a duplicate)
+        int32_t profileIndex = FindWirelessProfileIndex(wirelessConfig->Id);
+
+        if (profileIndex != -2)
+        {
+            ConfigurationManager_ExecuteConfigurationOperation(
+                profileIndex >= 0 ? ConfigurationOperation_Replace : ConfigurationOperation_Add,
+                DeviceConfigurationOption_Wireless80211Network,
+                profileIndex >= 0 ? (uint32_t)profileIndex : 0,
+                0,
+                wirelessConfig,
+                sizeof(HAL_Configuration_Wireless80211),
+                nullptr,
+                nullptr,
+                nullptr);
+        }
     }
 
     NF_ESP32_ConnectInProgress = true;

@@ -20,6 +20,9 @@
 #define CONFIG_NF_SUPPORT_ANY_BASE_CONVERSION 1
 
 // ── nanoFramework features ────────────────────────────────────────────────────
+// Configuration blocks (network, wireless profiles, certificates), kept in RAM
+// (src/HAL/nanoHAL_ConfigurationManager_Virtual.cpp).
+#define CONFIG_NF_FEATURE_HAS_CONFIG_BLOCK 1
 // Managed application debugging transport present.
 #define CONFIG_NF_FEATURE_DEBUGGER 1
 // System.Reflection API.

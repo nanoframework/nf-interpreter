@@ -142,6 +142,20 @@
 //     SslError_HandshakeFailed = 13,
 // } SslError;
 
+struct Library_sys_net_native_nanoFramework_Networking_IPConfiguration
+{
+    // renamed backing field '<IPAddress>k__BackingField'
+    static const int FIELD__IPAddress = 1;
+    // renamed backing field '<IPSubnetMask>k__BackingField'
+    static const int FIELD__IPSubnetMask = 2;
+    // renamed backing field '<IPGatewayAddress>k__BackingField'
+    static const int FIELD__IPGatewayAddress = 3;
+    // renamed backing field '<IPDns>k__BackingField'
+    static const int FIELD__IPDns = 4;
+
+    //--//
+};
+
 struct Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface
 {
     static const int FIELD___interfaceIndex = 1;

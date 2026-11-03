@@ -777,6 +777,24 @@ need step-by-step visibility into opcode dispatch.
 
 When you see one of these symptoms, this is where to look first.
 
+**`Assembly.Load(byte[])` throws `CLR_E_FAIL`, possibly followed by a reset.**
+- Its constructor wait is a polling interval, not a deadline for loading the
+  assembly. Renew the interval immediately before each `WaitEvents` call:
+  metadata resolution and static-field allocation can take longer than two
+  thread quanta, particularly when allocations trigger GC.
+- Expiring a deadline established before resolution used to enter failure
+  cleanup after `SpawnStaticConstructor` had scheduled a delegate into the
+  new assembly. `DestroyInstance` then removed that assembly while the
+  constructor thread still referenced it, leading to an access violation.
+- Reproduced on netcore with a valid PE read from `I:`, 300 static struct
+  fields, and `NANOCLR_FORCE_GC_BEFORE_EVERY_ALLOCATION`. This demonstrates
+  the loader failure independently of ESP32 storage timing.
+- The image must exactly fill the byte array (`TotalSize()` equals the array
+  length) and its table offsets must be ordered, aligned and within the image.
+  The array is checked before any header field is trusted. Otherwise data past
+  the end of the array is read, and trailing bytes outside the assembly CRC,
+  such as an appended second assembly, are accepted.
+
 **`CLR_E_WRONG_TYPE` on `callvirt`.**
 - Walk the `FindVirtualMethodDef` 3-pass chain (§3). Most commonly the
   signature matcher silently fails on an explicit interface impl and the
