@@ -186,7 +186,7 @@ jobs:
           if gh release view "$TAG" > /dev/null 2>&1; then
             gh release edit "$TAG" --notes-file release-notes.md --latest="$LATEST"
           else
-            gh release create "$TAG" --verify-tag --title "nanoFramework CLR $TAG" --notes-file release-notes.md --latest="$LATEST"
+            gh release create "$TAG" --verify-tag --title "$TAG" --notes-file release-notes.md --latest="$LATEST"
           fi
 
           if [ "$ATTACH_CHANGELOG" = "true" ]; then
