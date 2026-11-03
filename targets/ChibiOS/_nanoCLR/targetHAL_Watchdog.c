@@ -73,7 +73,11 @@ void Watchdog_Init()
     for (uint8_t index = 0; index < length; index++)
     {
         divisor = 4 << prescaler[index];
+#if defined(STM32H7XX)
+        ticksForTimeout = (STM32_LSI_CK / divisor) * (IWATCHDOG_TIMEOUT_MILLIS / 1000) - 1;
+#else
         ticksForTimeout = (STM32_LSICLK / divisor) * (IWATCHDOG_TIMEOUT_MILLIS / 1000) - 1;
+#endif
 
         if (ticksForTimeout <= 0xFFF)
         {
@@ -94,6 +98,9 @@ void Watchdog_Init()
 #if defined(STM32L4XX)
     DBGMCU->APB1FZR1 |= DBGMCU_APB1FZR1_DBG_IWDG_STOP;
     DBGMCU->APB1FZR1 |= DBGMCU_APB1FZR1_DBG_WWDG_STOP;
+#elif defined(STM32H7XX)
+    DBGMCU->APB4FZ1 |= DBGMCU_APB4FZ1_DBG_IWDG1;
+    DBGMCU->APB3FZ1 |= DBGMCU_APB3FZ1_DBG_WWDG1;
 #else
     DBGMCU->APB1FZ |= DBGMCU_APB1_FZ_DBG_IWDG_STOP;
     DBGMCU->APB1FZ |= DBGMCU_APB1_FZ_DBG_WWDG_STOP;

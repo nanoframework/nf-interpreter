@@ -59,6 +59,13 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeOpenCh
             break;
 #endif
 
+#if defined(STM32_ADC_USE_ADC12) && STM32_ADC_USE_ADC12
+        // STM32H7 ADC1 is accessed through the ADC12 driver (single mode)
+        case 1:
+            adcDriver = &ADCD1;
+            break;
+#endif
+
 #if defined(STM32_ADC_USE_ADC2) && STM32_ADC_USE_ADC2
         case 2:
             adcDriver = &ADCD2;

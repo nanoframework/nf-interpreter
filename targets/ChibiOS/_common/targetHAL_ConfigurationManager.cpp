@@ -20,6 +20,9 @@ static uint32_t GetConfigBlockAlignment()
 #elif defined(STM32L475xx)
     // 8 bytes - STM32L4 flash can only be programmed in double-word units
     return 8U;
+#elif defined(STM32H7XX)
+    // 32 bytes - STM32H7 flash can only be programmed in flash word (256 bits) units
+    return 32U;
 #else
     // default to byte alignment
     return 1U;
@@ -441,6 +444,9 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
 #elif defined(STM32L475xx)
             // round up to 8 bytes - STM32L4 flash can only be programmed in double-word units
             existingSize = (existingSize + 7U) & ~7U;
+#elif defined(STM32H7XX)
+            // round up to 32 bytes - STM32H7 flash can only be programmed in flash word (256 bits) units
+            existingSize = (existingSize + 31U) & ~31U;
 #else
             // default to byte alignment
 #endif

@@ -127,9 +127,9 @@ void ConfigPins_UART8();
         Uart##num##_PAL.SignalLevelsInverted = false;                                                                  \
     }
 
-#elif defined(STM32F7XX) || defined(STM32F0XX)
+#elif defined(STM32F7XX) || defined(STM32F0XX) || defined(STM32H7XX)
 
-// STM32F7 and STM32F0 use UART driver v2
+// STM32F7 and STM32F0 use UART driver v2, STM32H7 uses UART driver v3 which has the same UARTConfig struct
 #define UART_INIT(num)                                                                                                 \
     void Init_UART##num()                                                                                              \
     {                                                                                                                  \
