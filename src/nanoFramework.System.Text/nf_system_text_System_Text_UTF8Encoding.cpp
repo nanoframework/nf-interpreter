@@ -74,7 +74,7 @@ HRESULT Library_nf_system_text_System_Text_UTF8Encoding::GetBytes___I4__STRING__
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
     }
-    
+
     if (bytesToCopy > pArrayBytes->m_numOfElements - (CLR_UINT32)byteIdx)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
