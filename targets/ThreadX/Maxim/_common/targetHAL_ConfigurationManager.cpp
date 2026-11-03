@@ -105,30 +105,6 @@ static uint32_t GetConfigurationBlockSize(void *configurationBlock, DeviceConfig
     }
 }
 
-// gets the size of the configuration block to be stored, 0 for configuration options that can't be updated
-static uint32_t GetConfigurationBlockSize(void *configurationBlock, DeviceConfigurationOption configuration)
-{
-    switch (configuration)
-    {
-        case DeviceConfigurationOption_Network:
-            return sizeof(HAL_Configuration_NetworkInterface);
-
-        case DeviceConfigurationOption_Wireless80211Network:
-            return sizeof(HAL_Configuration_Wireless80211);
-
-        case DeviceConfigurationOption_X509CaRootBundle:
-            return offsetof(HAL_Configuration_X509CaRootBundle, Certificate) +
-                   ((HAL_Configuration_X509CaRootBundle *)configurationBlock)->CertificateSize;
-
-        case DeviceConfigurationOption_X509DeviceCertificates:
-            return offsetof(HAL_Configuration_X509DeviceCertificate, Certificate) +
-                   ((HAL_Configuration_X509DeviceCertificate *)configurationBlock)->CertificateSize;
-
-        default:
-            return 0;
-    }
-}
-
 // initialization of configuration manager
 // provided as weak so it can be replaced at target level, if required because of the target implementing the storage
 // with a mechanism other then saving to flash
