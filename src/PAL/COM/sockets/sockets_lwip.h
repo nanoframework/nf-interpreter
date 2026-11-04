@@ -20,8 +20,7 @@
     SOCKET_CHECK_RETURN:
 
 #define SOCKET_CHECK_EXIT_CLEANUP()                                                                                    \
-    RETURN_OK:                                                                                                         \
-    ASSERT(ret != SOCK_SOCKET_ERROR);                                                                                  \
+    RETURN_OK : ASSERT(ret != SOCK_SOCKET_ERROR);                                                                      \
     return ret;
 
 #define SOCKET_CHECK_EXIT()                                                                                            \
@@ -35,9 +34,7 @@
     RETURN_OK:                                                                                                         \
     return ret != SOCK_SOCKET_ERROR;
 
-#define SOCKET_CHECK_EXIT_bool_CLEANUP()                                                                               \
-    RETURN_OK:                                                                                                         \
-    return ret != SOCK_SOCKET_ERROR;
+#define SOCKET_CHECK_EXIT_bool_CLEANUP() RETURN_OK : return ret != SOCK_SOCKET_ERROR;
 
 #define SOCKET_CHECK_RESULT(x)                                                                                         \
     if ((ret = (x)) == SOCK_SOCKET_ERROR)                                                                              \
@@ -52,8 +49,7 @@
         goto SOCKET_CHECK_RETURN;                                                                                      \
     }
 
-#define SOCKET_CHECK_EXIT_NORETURN()                                                                                   \
-    RETURN_OK:
+#define SOCKET_CHECK_EXIT_NORETURN() RETURN_OK:
 
 struct Sockets_LWIP_Driver
 {
