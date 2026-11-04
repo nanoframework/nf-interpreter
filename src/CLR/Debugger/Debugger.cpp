@@ -1464,6 +1464,15 @@ bool CLR_DBG_Debugger::Monitor_ConfigurationOperation(WP_Message *message)
     cmdReply.Id = id;
     cmdReply.Count = count;
 
+#if CONFIG_NF_WP_CHANNEL_NETWORK
+    if (cmd->Configuration == DeviceConfigurationOption_WPAuthToken &&
+        cmdReply.ErrorCode == ConfigurationOperationError_Success)
+    {
+        // the authentication token changed, it applies from now on
+        WP_Network_ReloadAuthToken();
+    }
+#endif
+
     WP_ReplyToCommand(message, true, false, &cmdReply, sizeof(cmdReply));
 
     return true;

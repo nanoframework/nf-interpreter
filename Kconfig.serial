@@ -62,7 +62,7 @@ config NF_WP_NETWORK_DISCOVERY_PORT
     default 23657
 
 config NF_WP_NETWORK_AUTH_TOKEN
-    string "Default authentication token (max 64 characters)"
+    string "Default authentication token (max 64 bytes)"
     default ""
     help
       Token the debugger has to present to use the network channel.

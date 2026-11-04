@@ -782,10 +782,23 @@ ConfigurationOperationError ConfigurationManager_ExecuteConfigurationOperation(
         // the device sets the marker
         memcpy(block, marker, 4);
 
-        if (configuration == DeviceConfigurationOption_WPAuthToken &&
-            ((HAL_Configuration_WPAuthToken *)block)->TokenLength > WPAUTHTOKEN_CONFIG_MAX_TOKEN_LENGTH)
+        if (configuration == DeviceConfigurationOption_WPAuthToken)
         {
-            return ConfigurationOperationError_InvalidBlock;
+            HAL_Configuration_WPAuthToken *tokenBlock = (HAL_Configuration_WPAuthToken *)block;
+
+            if (tokenBlock->TokenLength > WPAUTHTOKEN_CONFIG_MAX_TOKEN_LENGTH)
+            {
+                return ConfigurationOperationError_InvalidBlock;
+            }
+
+            // the token is text, a NUL would end it
+            for (uint32_t i = 0; i < tokenBlock->TokenLength; i++)
+            {
+                if (tokenBlock->Token[i] == 0)
+                {
+                    return ConfigurationOperationError_InvalidBlock;
+                }
+            }
         }
     }
 

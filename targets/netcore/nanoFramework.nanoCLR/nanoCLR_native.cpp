@@ -159,7 +159,7 @@ void nanoCLR_SetWireProtocolChannelInfo(bool isNetwork, const char *token)
 {
     if (token != nullptr)
     {
-        WP_Auth_SetToken(token);
+        WP_Auth_SetToken((const uint8_t *)token, (uint32_t)strlen(token));
     }
 
     WP_Auth_SessionChanged(isNetwork);

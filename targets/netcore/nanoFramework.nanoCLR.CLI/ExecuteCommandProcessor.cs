@@ -36,6 +36,8 @@ namespace nanoFramework.nanoCLR.CLI
                 Environment.SetEnvironmentVariable("NANOCLR_CA_BUNDLE", Path.GetFullPath(options.CaBundle));
             }
 
+            ValidateNetworkOptions(options);
+
             nanoCLRHostBuilder hostBuilder;
 
             // are we to use a local DLL?
@@ -141,21 +143,11 @@ namespace nanoFramework.nanoCLR.CLI
 
             if (options.ExposedTcpIpPort != null)
             {
-                if (options.DebugToken != null
-                    && System.Text.Encoding.UTF8.GetByteCount(options.DebugToken) > 64)
-                {
-                    throw new CLIException(ExitCode.E9000, "--debugtoken can't be longer than 64 bytes.");
-                }
-
                 hostBuilder.UseTcpIpPortWireProtocol(
                     options.ExposedTcpIpHost ?? TcpIpListeningPort.Localhost,
                     options.ExposedTcpIpPort.Value,
                     options.ExposedBroadcastPort ?? NetworkWireBroadcastService.DebugBroadcastPort,
                     options.DebugToken);
-            }
-            else if (options.DebugToken != null || options.ExposedTcpIpHost != null || options.ExposedBroadcastPort != null)
-            {
-                throw new CLIException(ExitCode.E9000, "--host, --broadcast and --debugtoken require --networkport.");
             }
 
             if (options.ExposedNamedPipe != null)
@@ -223,6 +215,50 @@ namespace nanoFramework.nanoCLR.CLI
             }
 
             return 0;
+        }
+
+        // checks the options of the debugging over the network, before anything is set up
+        private static void ValidateNetworkOptions(ExecuteCommandLineOptions options)
+        {
+            if (options.ExposedTcpIpPort == null)
+            {
+                if (options.DebugToken != null || options.ExposedTcpIpHost != null || options.ExposedBroadcastPort != null)
+                {
+                    throw new CLIException(ExitCode.E9000, "--host, --broadcast and --debugtoken require --networkport.");
+                }
+
+                return;
+            }
+
+            // the debugger uses a single port
+            if (options.ExposedSerialPort != null || options.ExposedNamedPipe != null)
+            {
+                throw new CLIException(ExitCode.E9000, "--networkport can't be used together with --serialport or --namedpipe.");
+            }
+
+            if (options.ExposedTcpIpPort < 1 || options.ExposedTcpIpPort > 65535)
+            {
+                throw new CLIException(ExitCode.E9000, "--networkport has to be between 1 and 65535.");
+            }
+
+            if (options.ExposedBroadcastPort != null
+                && (options.ExposedBroadcastPort < 1 || options.ExposedBroadcastPort > 65535))
+            {
+                throw new CLIException(ExitCode.E9000, "--broadcast has to be between 1 and 65535.");
+            }
+
+            if (options.DebugToken != null)
+            {
+                if (options.DebugToken.Length == 0)
+                {
+                    throw new CLIException(ExitCode.E9000, "--debugtoken can't be empty. Leave it out for no authentication.");
+                }
+
+                if (System.Text.Encoding.UTF8.GetByteCount(options.DebugToken) > TcpIpListeningPort.MaxTokenLength)
+                {
+                    throw new CLIException(ExitCode.E9000, "--debugtoken can't be longer than 64 UTF-8 bytes.");
+                }
+            }
         }
 
         private static void ParentProcess_Exited(object sender, EventArgs e)

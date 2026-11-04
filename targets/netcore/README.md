@@ -129,8 +129,7 @@ Behavior:
 
 - The device accepts a single debugger at a time. A new connection replaces the current one.
 - **Discovery**: every 5 seconds the device broadcasts `+:<port>:<targetName>` over UDP. When the device exits it sends `-:<port>`. The debugger takes
-  the IP address from the sender of the datagram. Broadcasts reach the local network only when `--host` is not
-  `127.0.0.1`.
+  the IP address from the sender of the datagram. With `--host 127.0.0.1` the announcements go to this computer only.
 - **Authentication**: the debugger sends `Monitor_Authenticate` (`0x14`) after connecting. Without a token it always
   succeeds. With a token, only ping and authenticate are accepted until the token is right.
   After 3 wrong tokens the connection is dropped and new connections are rejected for 1 second. The token is sent in

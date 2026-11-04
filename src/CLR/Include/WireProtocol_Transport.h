@@ -61,7 +61,9 @@ extern "C"
     /// @brief Takes the lock that serializes the transmission of messages. Messages are sent from the CLR thread and
     /// from the receiver thread.
     ///
-    void WP_Transport_Lock(void);
+    /// @return false if the lock couldn't be taken, the message must not be sent.
+    ///
+    bool WP_Transport_Lock(void);
 
     ///
     /// @brief Releases the transmission lock.
@@ -73,9 +75,12 @@ extern "C"
 
     ///
     /// @brief Sets the token required to authenticate a network session. An empty token (or NULL) disables the
-    /// authentication.
+    /// authentication. The token is a sequence of bytes (UTF-8), not a null terminated string. Longer than
+    /// WP_AUTH_TOKEN_MAX_LENGTH is truncated. A session that is allowed to execute commands stays allowed.
+    /// Called when the network channel starts and, when the token is changed in the configuration, from the thread that
+    /// processes the Wire Protocol messages (the same one that verifies the token).
     ///
-    void WP_Auth_SetToken(const char *token);
+    void WP_Auth_SetToken(const uint8_t *token, uint32_t length);
 
     ///
     /// @brief To be called when a session starts or ends. Resets the authentication state.
@@ -126,6 +131,12 @@ extern "C"
     void WP_Network_Uninitialize(void);
 
     ///
+    /// @brief Loads the authentication token again (default of the build or configuration block). To be called after
+    /// the token has been changed in the configuration.
+    ///
+    void WP_Network_ReloadAuthToken(void);
+
+    ///
     /// @brief Closes the listener and the client. The listener is created again from WP_Network_Poll().
     ///
     void WP_Network_Stop(void);
@@ -143,9 +154,10 @@ extern "C"
     void WP_Network_Receive(uint8_t **ptr, uint32_t *size);
 
     ///
-    /// @brief Sends bytes to the connected client.
+    /// @brief Sends a message (header and payload) to the connected client. Both are sent to the same client, if it
+    /// goes away in the middle the send fails.
     ///
-    bool WP_Network_Send(const uint8_t *data, uint32_t size);
+    bool WP_Network_Transmit(const uint8_t *header, uint32_t headerSize, const uint8_t *payload, uint32_t payloadSize);
 
     ///
     /// @brief true if there is a client connected.

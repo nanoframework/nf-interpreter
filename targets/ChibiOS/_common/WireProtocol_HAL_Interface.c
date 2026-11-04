@@ -87,9 +87,11 @@ uint8_t WP_Serial_TransmitMessage(WP_Message *message)
 
 static MUTEX_DECL(s_txMutex);
 
-void WP_Transport_Lock(void)
+bool WP_Transport_Lock(void)
 {
     chMtxLock(&s_txMutex);
+
+    return true;
 }
 
 void WP_Transport_Unlock(void)

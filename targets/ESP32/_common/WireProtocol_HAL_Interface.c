@@ -505,39 +505,46 @@ typedef enum WP_TxMutexState
 static SemaphoreHandle_t s_txMutex = NULL;
 static volatile WP_TxMutexState s_txMutexState = WP_TxMutexState_NotCreated;
 
-void WP_Transport_Lock(void)
+bool WP_Transport_Lock(void)
 {
-    WP_TxMutexState expected = WP_TxMutexState_NotCreated;
-
-    if (__atomic_compare_exchange_n(
-            &s_txMutexState,
-            &expected,
-            WP_TxMutexState_Creating,
-            false,
-            __ATOMIC_ACQ_REL,
-            __ATOMIC_ACQUIRE))
-    {
-        s_txMutex = xSemaphoreCreateMutex();
-        __atomic_store_n(&s_txMutexState, WP_TxMutexState_Ready, __ATOMIC_RELEASE);
-    }
-
+    // create the mutex on first use, if that fails the next attempt tries again
     while (__atomic_load_n(&s_txMutexState, __ATOMIC_ACQUIRE) != WP_TxMutexState_Ready)
     {
-        taskYIELD();
+        WP_TxMutexState expected = WP_TxMutexState_NotCreated;
+
+        if (__atomic_compare_exchange_n(
+                &s_txMutexState,
+                &expected,
+                WP_TxMutexState_Creating,
+                false,
+                __ATOMIC_ACQ_REL,
+                __ATOMIC_ACQUIRE))
+        {
+            SemaphoreHandle_t mutex = xSemaphoreCreateMutex();
+
+            if (mutex == NULL)
+            {
+                __atomic_store_n(&s_txMutexState, WP_TxMutexState_NotCreated, __ATOMIC_RELEASE);
+
+                return false;
+            }
+
+            s_txMutex = mutex;
+            __atomic_store_n(&s_txMutexState, WP_TxMutexState_Ready, __ATOMIC_RELEASE);
+        }
+        else
+        {
+            // being created by another thread
+            taskYIELD();
+        }
     }
 
-    if (s_txMutex != NULL)
-    {
-        xSemaphoreTake(s_txMutex, portMAX_DELAY);
-    }
+    return xSemaphoreTake(s_txMutex, portMAX_DELAY) == pdTRUE;
 }
 
 void WP_Transport_Unlock(void)
 {
-    if (s_txMutex != NULL)
-    {
-        xSemaphoreGive(s_txMutex);
-    }
+    xSemaphoreGive(s_txMutex);
 }
 
 #endif // CONFIG_NF_WP_CHANNEL_NETWORK

@@ -96,16 +96,19 @@ uint8_t WP_TransmitMessage(WP_Message *message)
 
     uint8_t result = false;
 
-    WP_Transport_Lock();
+    if (!WP_Transport_Lock())
+    {
+        // can't guarantee that header and payload go out together
+        return false;
+    }
 
     if (s_activeChannel == WP_ActiveChannel_Network)
     {
-        result = WP_Network_Send((const uint8_t *)&message->m_header, sizeof(message->m_header));
-
-        if (result && message->m_header.m_size && message->m_payload)
-        {
-            result = WP_Network_Send(message->m_payload, message->m_header.m_size);
-        }
+        result = WP_Network_Transmit(
+            (const uint8_t *)&message->m_header,
+            sizeof(message->m_header),
+            message->m_payload,
+            message->m_header.m_size);
     }
 #if WP_SERIAL_ENABLED
     else

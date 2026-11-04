@@ -106,7 +106,7 @@ namespace nanoFramework.nanoCLR.Host.Interop
         [DllImport(NativeLibraryName, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void nanoCLR_SetWireProtocolChannelInfo(
             [MarshalAs(UnmanagedType.I1)] bool isNetwork,
-            [MarshalAs(UnmanagedType.LPStr)] string token);
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string token);
 
         [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void nanoCLR_SetProfilerMessageCallback(

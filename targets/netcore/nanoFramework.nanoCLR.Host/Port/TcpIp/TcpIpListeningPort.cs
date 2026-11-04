@@ -6,6 +6,7 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 using nanoFramework.nanoCLR.Host.Port.Common;
 
@@ -19,6 +20,11 @@ namespace nanoFramework.nanoCLR.Host.Port.TcpIp
         /// Default TCP port for debugging over the network. Same as the devices.
         /// </summary>
         public const int DefaultPort = 26000;
+
+        /// <summary>
+        /// Maximum length of the authentication token, in UTF-8 bytes.
+        /// </summary>
+        public const int MaxTokenLength = 64;
 
         // name announced by the discovery, it can't have ':'
         private const string TargetName = "CLR_VIRTUAL";
@@ -42,23 +48,40 @@ namespace nanoFramework.nanoCLR.Host.Port.TcpIp
         /// <param name="token">Token that the debugger has to present. Null or empty for no authentication.</param>
         public TcpIpListeningPort(string hostAddress, int port, int? broadcastPort, string token = null)
         {
+            if (token != null && Encoding.UTF8.GetByteCount(token) > MaxTokenLength)
+            {
+                throw new ArgumentException($"The token can't be longer than {MaxTokenLength} UTF-8 bytes.", nameof(token));
+            }
+
+            var address = IPAddress.Parse(hostAddress);
+
             _token = token ?? string.Empty;
-            _server = new TcpListener(IPAddress.Parse(hostAddress), port);
+            _server = new TcpListener(address, port);
 
             if (broadcastPort != null)
             {
                 _broadcastService = new NetworkWireBroadcastService(
                     broadcastPort.Value,
                     port,
-                    TargetName);
+                    TargetName,
+                    address);
             }
 
             _dropClientCallback = () =>
             {
+                // the session that failed to authenticate is the one that is active now
+                var session = ActiveConnection;
+
+                if (session == null)
+                {
+                    return;
+                }
+
                 // let the reply that was just sent go out before closing
                 Thread.Sleep(50);
 
-                DropActiveConnection(s_holdOffAfterAuthenticationFailures);
+                // only that session, another one may have connected in the meantime
+                DropActiveConnection(s_holdOffAfterAuthenticationFailures, session);
             };
         }
 
@@ -96,28 +119,38 @@ namespace nanoFramework.nanoCLR.Host.Port.TcpIp
         {
             var client = _server.AcceptTcpClient();
 
-            client.NoDelay = true;
-            client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+            try
+            {
+                client.NoDelay = true;
+                client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
 
-            return new StreamedConnection(client.GetStream(),
-                bytesAvailable: () =>
-                {
-                    var available = client.Available;
-
-                    if (available == 0 && IsClientGone(client))
+                return new StreamedConnection(client.GetStream(),
+                    bytesAvailable: () =>
                     {
-                        // the debugger went away
-                        DropActiveConnection(TimeSpan.Zero);
-                    }
+                        var available = client.Available;
 
-                    return available;
-                },
-                releaseResources: () =>
-                {
-                    client.Close();
-                    client.Dispose();
-                }
-            );
+                        if (available == 0 && IsClientGone(client))
+                        {
+                            // the debugger went away
+                            DropActiveConnection(TimeSpan.Zero);
+                        }
+
+                        return available;
+                    },
+                    releaseResources: () =>
+                    {
+                        client.Close();
+                        client.Dispose();
+                    }
+                );
+            }
+            catch
+            {
+                // not handed over to a connection, nobody else will release it
+                client.Dispose();
+
+                throw;
+            }
         }
 
         private static bool IsClientGone(TcpClient client)

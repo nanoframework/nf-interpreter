@@ -27,6 +27,11 @@ namespace nanoFramework.nanoCLR.Host.Port.Common
             // empty on purpose, nothing to process here
         }
 
+        /// <summary>
+        /// The connection that is active now, if there is one.
+        /// </summary>
+        protected IPort ActiveConnection => _syncRoot.Sync(() => _activeConnection);
+
         protected abstract void OpenListener();
         protected abstract void CloseListener();
         protected abstract IPort WaitForConnection();
@@ -49,10 +54,17 @@ namespace nanoFramework.nanoCLR.Host.Port.Common
         /// Closes the active connection, if there is one, and rejects the new connections for a while.
         /// </summary>
         /// <param name="holdOff">Time to reject new connections.</param>
-        protected void DropActiveConnection(TimeSpan holdOff)
+        /// <param name="expected">When set, only closes the connection if it is still this one.</param>
+        protected void DropActiveConnection(TimeSpan holdOff, IPort expected = null)
         {
             _syncRoot.Sync(() =>
             {
+                if (expected != null && _activeConnection != expected)
+                {
+                    // that connection is already gone
+                    return;
+                }
+
                 if (holdOff > TimeSpan.Zero)
                 {
                     _holdOffUntil = DateTime.UtcNow + holdOff;
@@ -100,6 +112,14 @@ namespace nanoFramework.nanoCLR.Host.Port.Common
                     IPort connection = WaitForConnection();
                     _syncRoot.Sync(() =>
                     {
+                        if (Status != PortStatus.Opened)
+                        {
+                            // the port was closed while the connection was being accepted
+                            connection.Close();
+
+                            return;
+                        }
+
                         if (DateTime.UtcNow < _holdOffUntil)
                         {
                             // holding off, reject this one

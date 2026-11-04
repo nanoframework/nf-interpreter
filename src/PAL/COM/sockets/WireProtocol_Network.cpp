@@ -72,6 +72,9 @@ static SOCK_SOCKET s_discovery = SOCK_SOCKET_ERROR;
 
 static bool s_started = false;
 
+// incremented for each accepted client
+static uint32_t s_clientGeneration = 0;
+
 // all times in milliseconds
 static uint32_t s_takeoverDeadline = 0;
 static bool s_takeoverArmed = false;
@@ -105,6 +108,18 @@ static SOCK_SOCKET GetClient()
 
     GLOBAL_LOCK();
     sock = s_client;
+    GLOBAL_UNLOCK();
+
+    return sock;
+}
+
+static SOCK_SOCKET GetClientAndGeneration(uint32_t *generation)
+{
+    SOCK_SOCKET sock;
+
+    GLOBAL_LOCK();
+    sock = s_client;
+    *generation = s_clientGeneration;
     GLOBAL_UNLOCK();
 
     return sock;
@@ -226,43 +241,42 @@ static_assert(
     WPAUTHTOKEN_CONFIG_MAX_TOKEN_LENGTH == WP_AUTH_TOKEN_MAX_LENGTH,
     "token length of the configuration block doesn't match the one of the authentication");
 
+#if defined(CONFIG_NF_WP_NETWORK_AUTH_TOKEN)
+static_assert(
+    sizeof(CONFIG_NF_WP_NETWORK_AUTH_TOKEN) - 1 <= WP_AUTH_TOKEN_MAX_LENGTH,
+    "NF_WP_NETWORK_AUTH_TOKEN can't be longer than 64 bytes");
+#endif
+
 // token required to authenticate: the one stored in the configuration block, if there is one
 // (empty means no authentication), otherwise the default of the build
 static void LoadAuthToken()
 {
-    const char *token = "";
+    const uint8_t *token = (const uint8_t *)"";
+    uint32_t length = 0;
 
 #if defined(CONFIG_NF_WP_NETWORK_AUTH_TOKEN)
-    token = CONFIG_NF_WP_NETWORK_AUTH_TOKEN;
+    token = (const uint8_t *)CONFIG_NF_WP_NETWORK_AUTH_TOKEN;
+    length = sizeof(CONFIG_NF_WP_NETWORK_AUTH_TOKEN) - 1;
 #endif
 
 #if CONFIG_NF_FEATURE_HAS_CONFIG_BLOCK
     HAL_Configuration_WPAuthToken config;
-    char storedToken[WP_AUTH_TOKEN_MAX_LENGTH + 1];
 
     memset(&config, 0, sizeof(config));
 
     if (ConfigurationManager_GetConfigurationBlock(&config, DeviceConfigurationOption_WPAuthToken, 0))
     {
-        uint32_t length = config.TokenLength;
-
-        if (length > WP_AUTH_TOKEN_MAX_LENGTH)
-        {
-            length = WP_AUTH_TOKEN_MAX_LENGTH;
-        }
-
-        memcpy(storedToken, config.Token, length);
-        storedToken[length] = 0;
-        token = storedToken;
+        token = config.Token;
+        length = config.TokenLength;
     }
 
-    WP_Auth_SetToken(token);
+    // the length is limited to the maximum by the authentication
+    WP_Auth_SetToken(token, length);
 
     // don't leave the token around
     memset(&config, 0, sizeof(config));
-    memset(storedToken, 0, sizeof(storedToken));
 #else
-    WP_Auth_SetToken(token);
+    WP_Auth_SetToken(token, length);
 #endif
 }
 
@@ -476,6 +490,7 @@ static void AcceptClients()
 
     GLOBAL_LOCK();
     s_client = sock;
+    s_clientGeneration++;
     GLOBAL_UNLOCK();
 
     s_takeoverArmed = false;
@@ -483,6 +498,11 @@ static void AcceptClients()
     // new session: nothing from previous ones is valid
     WP_Auth_SessionChanged(true);
     WP_Message_ResetReception();
+}
+
+void WP_Network_ReloadAuthToken(void)
+{
+    LoadAuthToken();
 }
 
 bool WP_Network_Initialize(void)
@@ -556,8 +576,8 @@ void WP_Network_Poll(uint32_t waitMs)
         }
     }
 
-    // discovery
-    if (s_announceDue || TimeReached(now, s_nextAnnounce))
+    // discovery, only if the debugger can connect (it stays due until the listener is up)
+    if (GetListener() != SOCK_SOCKET_ERROR && (s_announceDue || TimeReached(now, s_nextAnnounce)))
     {
         s_announceDue = false;
         s_nextAnnounce = now + c_DiscoveryIntervalMs;
@@ -620,17 +640,19 @@ void WP_Network_Receive(uint8_t **ptr, uint32_t *size)
     }
 }
 
-bool WP_Network_Send(const uint8_t *data, uint32_t size)
+// sends to the client, as long as it is still the same one
+static bool SendToClient(SOCK_SOCKET client, uint32_t generation, const uint8_t *data, uint32_t size)
 {
     uint32_t sent = 0;
     uint32_t deadline = NowMs() + c_SendTimeoutMs;
 
     while (sent < size)
     {
-        SOCK_SOCKET client = GetClient();
+        uint32_t currentGeneration;
 
-        if (client == SOCK_SOCKET_ERROR)
+        if (GetClientAndGeneration(&currentGeneration) != client || currentGeneration != generation)
         {
+            // client is gone, a new one can't get what was meant for the previous one
             return false;
         }
 
@@ -670,6 +692,25 @@ bool WP_Network_Send(const uint8_t *data, uint32_t size)
     }
 
     return true;
+}
+
+bool WP_Network_Transmit(const uint8_t *header, uint32_t headerSize, const uint8_t *payload, uint32_t payloadSize)
+{
+    uint32_t generation;
+    SOCK_SOCKET client = GetClientAndGeneration(&generation);
+
+    if (client == SOCK_SOCKET_ERROR)
+    {
+        return false;
+    }
+
+    // header and payload go to the same client
+    if (!SendToClient(client, generation, header, headerSize))
+    {
+        return false;
+    }
+
+    return payloadSize == 0 || payload == nullptr || SendToClient(client, generation, payload, payloadSize);
 }
 
 bool WP_Network_IsConnected(void)

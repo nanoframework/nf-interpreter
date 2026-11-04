@@ -38,6 +38,7 @@ namespace nanoFramework.nanoCLR.Host.Port.TcpIp
         private readonly int _broadcastPort;
         private readonly int _devicePort;
         private readonly string _targetName;
+        private readonly IPAddress _bindAddress;
         private readonly object _syncRoot = new object();
 
         private Timer _timer;
@@ -49,11 +50,14 @@ namespace nanoFramework.nanoCLR.Host.Port.TcpIp
         /// <param name="broadcastPort">Broadcast port.</param>
         /// <param name="devicePort">Port where the device listens for the debugger.</param>
         /// <param name="targetName">Name of the target to announce.</param>
-        public NetworkWireBroadcastService(int broadcastPort, int devicePort, string targetName)
+        /// <param name="bindAddress">Address where the device listens. Announcements stay on this computer when it is
+        /// a loopback address, otherwise they are sent from that address (any address: from the default interface).</param>
+        public NetworkWireBroadcastService(int broadcastPort, int devicePort, string targetName, IPAddress bindAddress)
         {
             _broadcastPort = broadcastPort;
             _devicePort = devicePort;
             _targetName = targetName;
+            _bindAddress = bindAddress;
         }
 
         /// <summary>
@@ -107,10 +111,15 @@ namespace nanoFramework.nanoCLR.Host.Port.TcpIp
         {
             try
             {
-                var group = new IPEndPoint(IPAddress.Broadcast, _broadcastPort);
+                // a device that listens only on the loopback can't be reached from other computers, so it's not announced to them
+                bool loopback = IPAddress.IsLoopback(_bindAddress);
+                var group = new IPEndPoint(loopback ? IPAddress.Loopback : IPAddress.Broadcast, _broadcastPort);
                 var data = Encoding.ASCII.GetBytes(message);
 
-                using (var udpClient = new UdpClient())
+                // announce from the address where the device listens, unless any
+                using (var udpClient = loopback || IPAddress.Any.Equals(_bindAddress)
+                    ? new UdpClient()
+                    : new UdpClient(new IPEndPoint(_bindAddress, 0)))
                 {
                     udpClient.EnableBroadcast = true;
                     udpClient.Send(data, data.Length, group);

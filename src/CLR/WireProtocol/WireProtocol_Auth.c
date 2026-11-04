@@ -23,23 +23,33 @@ static volatile bool s_networkSession = false;
 static volatile bool s_authenticated = false;
 static uint32_t s_failures = 0;
 
-void WP_Auth_SetToken(const char *token)
+void WP_Auth_SetToken(const uint8_t *token, uint32_t length)
 {
-    uint32_t length = 0;
+    // a session that is allowed to execute commands doesn't lose that because the token changed
+    bool wasAuthenticated = WP_Auth_IsAuthenticated();
 
-    if (token != NULL)
+    if (token == NULL)
     {
-        length = (uint32_t)strlen(token);
+        length = 0;
+    }
+    else if (length > WP_AUTH_TOKEN_MAX_LENGTH)
+    {
+        length = WP_AUTH_TOKEN_MAX_LENGTH;
+    }
 
-        if (length > WP_AUTH_TOKEN_MAX_LENGTH)
-        {
-            length = WP_AUTH_TOKEN_MAX_LENGTH;
-        }
+    memset(s_token, 0, sizeof(s_token));
 
+    if (length > 0)
+    {
         memcpy(s_token, token, length);
     }
 
     s_tokenLength = length;
+
+    if (wasAuthenticated)
+    {
+        s_authenticated = true;
+    }
 }
 
 void WP_Auth_SessionChanged(bool isNetwork)

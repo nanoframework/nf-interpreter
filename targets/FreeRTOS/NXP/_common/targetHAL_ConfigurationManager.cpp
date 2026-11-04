@@ -165,8 +165,9 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
                                               certificateStore->Count * sizeof(certificateStore->Certificates[0]);
         uint32_t sizeOfX509DeviceCertificates = offsetof(HAL_CONFIGURATION_X509_CERTIFICATE, Certificates) +
                                                 deviceCertificates->Count * sizeof(deviceCertificates->Certificates[0]);
+        uint32_t countOfWPAuthTokenConfigs = wpAuthTokenConfigs != NULL ? wpAuthTokenConfigs->Count : 0;
         uint32_t sizeOfWPAuthTokenConfigs = offsetof(HAL_CONFIGURATION_WPAUTHTOKEN, Configs) +
-                                            wpAuthTokenConfigs->Count * sizeof(wpAuthTokenConfigs->Configs[0]);
+                                            countOfWPAuthTokenConfigs * sizeof(wpAuthTokenConfigs->Configs[0]);
 
         g_TargetConfiguration.NetworkInterfaceConfigs =
             (HAL_CONFIGURATION_NETWORK *)platform_malloc(sizeOfNetworkInterfaceConfigs);
@@ -196,10 +197,21 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
             (HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *)g_TargetConfiguration.DeviceCertificates,
             deviceCertificates,
             sizeOfX509DeviceCertificates);
-        memcpy(
-            (HAL_CONFIGURATION_WPAUTHTOKEN *)g_TargetConfiguration.WPAuthTokenConfigs,
-            wpAuthTokenConfigs,
-            sizeOfWPAuthTokenConfigs);
+        if (g_TargetConfiguration.WPAuthTokenConfigs != NULL)
+        {
+            if (wpAuthTokenConfigs != NULL)
+            {
+                memcpy(
+                    (HAL_CONFIGURATION_WPAUTHTOKEN *)g_TargetConfiguration.WPAuthTokenConfigs,
+                    wpAuthTokenConfigs,
+                    sizeOfWPAuthTokenConfigs);
+            }
+            else
+            {
+                // couldn't enumerate, there is no token block
+                memset(g_TargetConfiguration.WPAuthTokenConfigs, 0, sizeOfWPAuthTokenConfigs);
+            }
+        }
 
         // now free the memory of the original structs
         platform_free(networkConfigs);
@@ -310,6 +322,12 @@ bool ConfigurationManager_GetConfigurationBlock(
 
         // get block address
         blockAddress = (uint8_t *)g_TargetConfiguration.WPAuthTokenConfigs->Configs[configurationIndex];
+
+        // a block that goes beyond the end of the configuration region is not complete
+        if ((uint32_t)blockAddress + sizeOfBlock > (uint32_t)&__nanoConfig_end__)
+        {
+            return FALSE;
+        }
     }
     else
     {

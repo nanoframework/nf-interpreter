@@ -57,7 +57,7 @@ namespace nanoFramework.nanoCLR.CLI
         [Option(
             "debugtoken",
             Required = false,
-            HelpText = "Token that the debugger has to present to connect over the network (max 64 characters). Without it, no authentication is required.")]
+            HelpText = "Token that the debugger has to present to connect over the network (max 64 UTF-8 bytes). Without it, no authentication is required.")]
         public string DebugToken { get; set; }
 
         [Option(
