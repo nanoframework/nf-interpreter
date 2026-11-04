@@ -115,6 +115,8 @@ Supported in this first implementation:
   `AF_PACKET`, and DNS from `/etc/resolv.conf`. macOS reads gateways from the
   Darwin routing table via `sysctl`, hardware addresses from `AF_LINK`, and DNS
   from SystemConfiguration's active global DNS state, not `/etc/resolv.conf`.
+  If the macOS DNS store cannot be opened, the failure is logged and adapters
+  remain available with DNS addresses reported as `0.0.0.0`.
   The resolver itself still uses the host's native resolver, including split-DNS
   and macOS scoped resolver policy.
 - Common integer socket options: reuse address, keepalive, broadcast, don't route,
@@ -440,6 +442,12 @@ Client-side certificate verification remains the default; only an explicit
 `SslVerification.NoVerification` setting disables it.
 
 ## Running Managed Applications
+
+The runner exits with a nonzero status if host networking initialization fails,
+instead of reporting success without starting the CLR. It uses the POSIX
+`nanoCLR_RunWithStatus` export; the existing `void nanoCLR_Run` export remains
+unchanged for managed hosts. This status does not report managed application
+failures.
 
 Pass the application's PE file and all matching dependency PEs directly to the
 standalone runner, with dependencies before the application:

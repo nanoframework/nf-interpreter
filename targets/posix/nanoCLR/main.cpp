@@ -153,7 +153,5 @@ int main(int argc, char **argv)
     settings.PerformGarbageCollection = false;
     settings.PerformHeapCompaction = false;
 
-    nanoCLR_Run(settings);
-
-    return 0;
+    return nanoCLR_RunWithStatus(settings);
 }

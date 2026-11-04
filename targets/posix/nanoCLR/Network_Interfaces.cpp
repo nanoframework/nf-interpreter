@@ -35,7 +35,7 @@ bool ReadDns(std::array<uint32_t, 2> &dns)
     if (store == nullptr)
     {
         fprintf(stderr, "nanoCLR DNS configuration: %s\n", SCErrorString(SCError()));
-        return false;
+        return true;
     }
     auto configuration = SCDynamicStoreCopyValue(store, CFSTR("State:/Network/Global/DNS"));
     int error = SCError();
