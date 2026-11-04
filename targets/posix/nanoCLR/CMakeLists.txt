@@ -231,7 +231,7 @@ add_library(nanoFramework.nanoCLR SHARED ${NANOCLR_POSIX_SOURCES})
 
 target_compile_features(nanoFramework.nanoCLR PRIVATE cxx_std_20)
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR APPLE)
     find_package(Threads REQUIRED)
     include(FetchContent)
     include(${REPO_ROOT}/CMake/binutils.common.cmake)
@@ -244,6 +244,12 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     nf_add_mbedtls_library()
     FetchContent_GetProperties(mbedtls)
     target_link_libraries(nanoFramework.nanoCLR PRIVATE Threads::Threads mbedtls mbedx509 mbedcrypto)
+    if(APPLE)
+        find_library(SYSTEM_CONFIGURATION_FRAMEWORK SystemConfiguration REQUIRED)
+        find_library(CORE_FOUNDATION_FRAMEWORK CoreFoundation REQUIRED)
+        target_link_libraries(nanoFramework.nanoCLR PRIVATE
+            ${SYSTEM_CONFIGURATION_FRAMEWORK} ${CORE_FOUNDATION_FRAMEWORK})
+    endif()
     configure_file(
         ${mbedtls_SOURCE_DIR}/LICENSE
         ${CMAKE_BINARY_DIR}/share/nanoFramework/LICENSE-mbedTLS.txt COPYONLY)
@@ -318,7 +324,7 @@ set(NANOCLR_POSIX_COMMON_DEFINITIONS
     NANOCLR_HOST_POSIX=1
     NANOCLR_HOST_APPLE=${NANOCLR_HOST_APPLE}
     NANOCLR_HOST_LINUX=${NANOCLR_HOST_LINUX}
-    NANOCLR_USE_HOST_OS_SOCKETS=${NANOCLR_HOST_LINUX}
+    NANOCLR_USE_HOST_OS_SOCKETS=1
     NANOCLR_HOST_WINDOWS=0
     NANOCLR_POSIX_VERSION_STRING="${PROJECT_VERSION}"
     NANOCLR_PLATFORM_NAME="${NANOCLR_PLATFORM_NAME}"

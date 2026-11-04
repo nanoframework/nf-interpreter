@@ -30,23 +30,39 @@ cmake --build build/posix
 
 ### Linux
 
-Linux TLS statically links the repository-pinned mbedTLS (currently 3.6.7);
-no OpenSSL or system mbedTLS development/runtime packages are required.
-The first configure fetches its sources using Git. For an existing checkout,
-pass `-DMBEDTLS_SOURCE=/absolute/path/to/mbedtls`.
-
 ```bash
 cmake -S targets/posix -B build/posix -G Ninja
 cmake --build build/posix
 ```
 
+Both macOS and Linux networking statically link the repository-pinned mbedTLS
+(currently 3.6.7); no OpenSSL or system mbedTLS development/runtime packages are
+required by the runtime. The first configure fetches its sources using Git.
+For an existing checkout, pass `-DMBEDTLS_SOURCE=/absolute/path/to/mbedtls`.
+macOS additionally links the system SystemConfiguration and CoreFoundation
+frameworks. Xcode command-line tools and an accepted Xcode license are required.
+
 Keep the generated `bin/`, `lib/` and `share/` directories together when deploying.
 `share/nanoFramework/` contains third-party licenses. No CA bundle is shipped.
+
+### Local networking validation (macOS and Linux)
+
+Run a managed networking application with matching dependency PEs using the
+standalone runner; see [Running Managed Applications](#running-managed-applications)
+and the [managed loopback example](#managed-loopback-example-macos-linux-or-wsl).
+This exercises the native backend, managed CLR scheduling and `System.Net`
+marshalling together. There is no separate native networking test executable.
+
+Use a separate build directory for each OS/architecture. On macOS the architecture
+defaults to the host. Compare the application's interfaces and gateway with
+`ifconfig` and `route -n get default` on macOS; compare DNS with `scutil --dns`.
+VPN/split-DNS configurations can contain more servers than the two system-wide
+IPv4 addresses exposed by the managed snapshot.
 
 ## Configuration Options
 
 `NANO_POSIX_ARCH` *(macOS only)*
-- Default: `arm64`
+- Default: host architecture (`arm64` on Apple Silicon, `x86_64` on Intel)
 - Accepted values: `arm64`, `x86_64`
 - Has no effect on Linux (CMake uses the host architecture automatically).
 
@@ -54,15 +70,15 @@ Keep the generated `bin/`, `lib/` and `share/` directories together when deployi
 - Default: `ON`
 - Builds the standalone command-line application runner, including its startup banner/version output.
 
-## Linux Networking (including WSL)
+## POSIX Networking (macOS and Linux, including WSL)
 
 The socket scheduler, resolver, managed networking bridge and mbedTLS
 implementation live in [`src/PAL/Network`](../../src/PAL/Network).
 They are also compiled by the
 [Windows netcore virtual device](../netcore/README.md), using Winsock and Windows
-adapter enumeration. Linux continues to use its native sockets and resolver.
+adapter enumeration. macOS and Linux use their native sockets and resolvers.
 
-Linux builds register `System.Net` and use the Linux socket API directly. No plugin,
+macOS and Linux builds register `System.Net` and use native BSD/POSIX sockets directly. No plugin,
 embedded TCP/IP stack, desktop .NET relay, root privileges, or network-interface
 configuration is required. The application uses the host's network namespace,
 routing, DNS configuration, permissions and firewall rules.
@@ -81,13 +97,26 @@ Supported in this first implementation:
   managed lookup has a 30-second deadline; up to 16 lookups can be outstanding.
 - Numeric IPv4 parsing/formatting and `NetworkInterface.GetIsNetworkAvailable()`.
   Availability means an up/running, non-loopback/non-point-to-point IPv4 interface exists, not that
-  an Internet service or DNS server is reachable.
-- Read-only `NetworkInterface.GetAllNetworkInterfaces()`: actual Linux interfaces,
-  including loopback and currently unconfigured links, sorted by native interface
-  index. Reports one IPv4 address/subnet per link, a default IPv4 gateway from
-  `/proc/net/route` (lowest metric per interface), hardware address and up to two
-  system-wide IPv4 DNS entries from `/etc/resolv.conf`. The resolver itself still
-  uses the host's native resolver, including any split-DNS policy.
+  an Internet service or DNS server is reachable. On macOS only Ethernet-compatible
+  interfaces (including Wi-Fi) qualify.
+- Read-only `NetworkInterface.GetAllNetworkInterfaces()`: actual host interfaces,
+  sorted by native interface index. Linux includes loopback and currently
+  unconfigured links. macOS exposes the main IPv4 loopback interface (`127.0.0.1`,
+  normally `lo0`) and up/running Ethernet-compatible interfaces (including Wi-Fi)
+  with a nonzero IPv4 address, excluding point-to-point/VPN tunnels, other
+  non-Ethernet links and unused adapters. Loopback alone does not make
+  `GetIsNetworkAvailable()` return true. Entries are grouped by native
+  interface index, not merged by MAC or IP address; distinct adapters remain distinct.
+  This filters discovery only: sockets still use the host's routing policy,
+  including VPNs, and loopback sockets remain usable.
+  Reports one IPv4 address/subnet per link, a default IPv4 gateway, hardware
+  address and up to two system-wide IPv4 DNS entries. Linux reads gateways from
+  `/proc/net/route` (lowest metric per interface), hardware addresses from
+  `AF_PACKET`, and DNS from `/etc/resolv.conf`. macOS reads gateways from the
+  Darwin routing table via `sysctl`, hardware addresses from `AF_LINK`, and DNS
+  from SystemConfiguration's active global DNS state, not `/etc/resolv.conf`.
+  The resolver itself still uses the host's native resolver, including split-DNS
+  and macOS scoped resolver policy.
 - Common integer socket options: reuse address, keepalive, broadcast, don't route,
   inline out-of-band data, send/receive buffer sizes, accept status, socket error,
   TCP no-delay, IPv4 TTL/TOS; `FIONREAD`/`Socket.Available`.
@@ -99,7 +128,7 @@ Supported in this first implementation:
   The `Linger` byte-array overload also accepts the two 32-bit fields
   (enabled flag, timeout in seconds). Negative timeouts are rejected.
 - TLS clients and HTTPS servers using statically linked mbedTLS, TLS 1.2/1.3, configurable CA trust
-  or explicit managed CA certificates/bundles; see [Linux TLS](#linux-tls).
+  or explicit managed CA certificates/bundles; see [POSIX TLS](#posix-tls).
 
 The native socket table is limited to 128 live sockets. CLR handles are independent
 of OS descriptor numbers. All descriptors are nonblocking and close-on-exec;
@@ -107,7 +136,7 @@ closed handles cannot accidentally identify newly opened sockets. Connections an
 resolver requests are discarded on runtime cleanup/soft reboot. Final shutdown
 joins both workers before unloading native code.
 
-### Managed WSL example
+### Managed loopback example (macOS, Linux or WSL)
 
 Build a nanoFramework console application referencing `System.Net` and using the
 following entry point. Use CoreLibrary/System.Net assemblies and the metadata
@@ -122,13 +151,15 @@ Error `0x9b000000` means an unsupported assembly format: this branch requires
 managed dependencies with matching tools/contracts; renaming files or changing
 their format marker does not convert them.
 
-In another terminal in the **same WSL distribution/network namespace**, start a
+In another terminal on the **same host/network namespace**, start a
 one-connection TCP echo server from Bash using `socat` (install on Ubuntu/WSL
 with `sudo apt install socat`):
 
 ```bash
 socat TCP4-LISTEN:9090,bind=127.0.0.1,reuseaddr EXEC:/bin/cat
 ```
+
+On macOS, install `socat` with `brew install socat` and use the same command.
 
 Run the following client as the **nanoFramework application**:
 
@@ -193,10 +224,10 @@ IPv6, mutual TLS, multicast-specific options, Wi-Fi provisioning,
 SNTP and interface reconfiguration are not implemented here. Native
 blocking mode and unmapped flags/options fail explicitly. Network-change events
 are not raised. `NetworkHelper`/DHCP/static-IP operations should not be used to
-configure the host; Linux already owns that configuration.
+configure the host; the host OS already owns that configuration.
 
 Interface objects are snapshots; a new enumeration refreshes them. Native refresh
-after a rejected managed configuration change uses the stored Linux interface
+after a rejected managed configuration change uses the stored native interface
 index, not its position in the enumeration. The count/enumerate pair uses one
 snapshot so link changes cannot shift entries mid-enumeration. Loopback and
 non-Ethernet links report `Unknown`; Ethernet-compatible links report `Ethernet`,
@@ -210,14 +241,15 @@ discards the request, but an active native lookup may finish later. A slow looku
 delays subsequent queued lookups, and final shutdown waits for that active OS
 call. Readiness waiting remains independent of DNS.
 
-macOS networking is unchanged. For Windows netcore networking support, see the
+For Windows netcore networking support, see the
 [Windows networking documentation](../netcore/README.md). Application sockets do
 not provide or enable debugger/wire-protocol transport.
 
-## Linux TLS
+## POSIX TLS
 
-Linux TLS uses the repository-pinned mbedTLS, the host clock and operating-system
+macOS and Linux TLS use the repository-pinned mbedTLS, the host clock and operating-system
 entropy. It does not automatically load the host's certificate store.
+In particular, macOS Keychain trust is not imported.
 For outgoing client connections, chain verification, validity dates and the
 requested DNS hostname/IP identity are checked by default. SNI is sent for DNS names.
 `SslProtocols.None` negotiates TLS 1.2/1.3; TLS 1.0/1.1 are unsupported.
@@ -270,7 +302,7 @@ Or add the option before the PE arguments in your launch command:
     MyApplication.pe
 ```
 
-The option is currently Linux-only, like application networking. Relative custom
+The option is supported on both macOS and Linux. Relative custom
 paths are resolved against the process's working directory. CA files may contain
 a PEM bundle or one DER certificate, up to 1 MiB. A missing, empty, malformed or
 unreadable selected file fails TLS explicitly: it never falls back to another
@@ -434,7 +466,7 @@ The macro `PLATFORM_POSIX_HOST` is defined by the build system and gates POSIX-s
 
 ## Native Assembly Table
 
-The interop table in `posix_stubs.cpp` registers the same portable set as the win32 virtual-device target. Hardware assemblies (GPIO, I2C, SPI, IO.Ports) are included with `NotImplementedStub()` bodies — they satisfy the PE checksum check at load time so applications referencing these assemblies can load, but calling their native methods throws `NotImplementedException`. Linux additionally registers the socket-backed `System.Net` assembly described above.
+The interop table in `posix_stubs.cpp` registers the same portable set as the win32 virtual-device target. Hardware assemblies (GPIO, I2C, SPI, IO.Ports) are included with `NotImplementedStub()` bodies — they satisfy the PE checksum check at load time so applications referencing these assemblies can load, but calling their native methods throws `NotImplementedException`. Both macOS and Linux additionally register the socket-backed `System.Net` assembly described above.
 
 | Assembly | Notes |
 |---|---|
@@ -452,16 +484,14 @@ The interop table in `posix_stubs.cpp` registers the same portable set as the wi
 | `System.Device.I2c` | Stubs — `NotImplementedException` |
 | `System.Device.Spi` | Stubs — `NotImplementedException` |
 | `System.IO.Ports` | Stubs — `NotImplementedException` |
-| `System.Net` | Linux only: native IPv4 sockets/DNS, read-only interfaces, TLS clients and HTTPS servers; other APIs remain unsupported |
+| `System.Net` | macOS and Linux: native IPv4 sockets/DNS, read-only interfaces, TLS clients and HTTPS servers; other APIs remain unsupported |
 
 Not included (require a network stack or platform filesystem not present on the host):
-`nanoFramework.Networking.Sntp`, `System.IO.FileSystem`. `System.Net` is not included
-on macOS.
+`nanoFramework.Networking.Sntp`, `System.IO.FileSystem`.
 
 ## Known Limitations
 
-- Linux networking is IPv4-only; TLS clients and HTTPS servers are supported with the limitations above.
-- No application networking implementation on macOS.
+- macOS and Linux networking is IPv4-only; TLS clients and HTTPS servers are supported with the limitations above.
 - No managed filesystem (`System.IO.FileSystem`) — PAL filesystem calls are no-ops.
 - `System.Device.Gpio/I2c/Spi` and `System.IO.Ports` native methods throw `NotImplementedException`.
 - Wire Protocol transport is not connected (debugger attach not supported).

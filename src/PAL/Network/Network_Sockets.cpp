@@ -243,6 +243,25 @@ int NativeSetOption(NativeSocket socket, int level, int option, const void *valu
     return setsockopt(socket, level, option, static_cast<const char *>(value), length);
 }
 
+#if defined(__APPLE__)
+bool ConfigureDescriptor(int descriptor, bool socket)
+{
+    int status = fcntl(descriptor, F_GETFL);
+    int flags = fcntl(descriptor, F_GETFD);
+    int noSignal = 1;
+    if (status < 0 || flags < 0 || fcntl(descriptor, F_SETFL, status | O_NONBLOCK) < 0 ||
+        fcntl(descriptor, F_SETFD, flags | FD_CLOEXEC) < 0 ||
+        (socket && setsockopt(descriptor, SOL_SOCKET, SO_NOSIGPIPE, &noSignal, sizeof(noSignal)) < 0))
+    {
+        int error = errno;
+        close(descriptor);
+        errno = error;
+        return false;
+    }
+    return true;
+}
+#endif
+
 NativeSocket OpenSocket(int type, int protocol)
 {
 #if defined(_WIN32)
@@ -259,6 +278,13 @@ NativeSocket OpenSocket(int type, int protocol)
         }
     }
     return socket;
+#elif defined(__APPLE__)
+    int descriptor = socket(AF_INET, type, protocol);
+    if (descriptor >= 0 && !ConfigureDescriptor(descriptor, true))
+    {
+        return c_invalidSocket;
+    }
+    return descriptor;
 #else
     return socket(AF_INET, type | SOCK_NONBLOCK | SOCK_CLOEXEC, protocol);
 #endif
@@ -277,6 +303,20 @@ bool OpenWakeSockets()
            bind(s_wakePipe[0], reinterpret_cast<sockaddr *>(&address), sizeof(address)) == 0 &&
            getsockname(s_wakePipe[0], reinterpret_cast<sockaddr *>(&address), &length) == 0 &&
            connect(s_wakePipe[1], reinterpret_cast<sockaddr *>(&address), length) == 0;
+#elif defined(__APPLE__)
+    if (pipe(s_wakePipe) < 0)
+    {
+        return false;
+    }
+    for (auto &descriptor : s_wakePipe)
+    {
+        if (!ConfigureDescriptor(descriptor, false))
+        {
+            descriptor = c_invalidSocket;
+            return false;
+        }
+    }
+    return true;
 #else
     return pipe2(s_wakePipe, O_NONBLOCK | O_CLOEXEC) == 0;
 #endif
@@ -367,6 +407,9 @@ bool ToNativeAddress(const SOCK_sockaddr *address, int length, sockaddr_in &nati
         return false;
     }
     native = {};
+#if defined(__APPLE__)
+    native.sin_len = sizeof(native);
+#endif
     native.sin_family = AF_INET;
     native.sin_port = source.sin_port;
     native.sin_addr.s_addr = source.sin_addr.S_un.S_addr;
@@ -848,6 +891,13 @@ int SOCK_accept(int handle, SOCK_sockaddr *address, int *length)
         }
     }
     if (RecordIoResult(*entry, result, POLLIN) < 0)
+#elif defined(__APPLE__)
+        accept(entry->descriptor, reinterpret_cast<sockaddr *>(&native), &size);
+    if (descriptor >= 0 && !ConfigureDescriptor(descriptor, true))
+    {
+        return Fail(MapError(errno), entry);
+    }
+    if (RecordIoResult(*entry, descriptor, POLLIN) < 0)
 #else
         accept4(entry->descriptor, reinterpret_cast<sockaddr *>(&native), &size, SOCK_NONBLOCK | SOCK_CLOEXEC);
     if (RecordIoResult(*entry, descriptor, POLLIN) < 0)
@@ -922,7 +972,7 @@ int SOCK_sendto(int handle, const char *buffer, int length, int flags, const SOC
             buffer,
             length,
             nativeFlags
-#if !defined(_WIN32)
+#if !defined(_WIN32) && !defined(__APPLE__)
                 | MSG_NOSIGNAL
 #endif
             ,

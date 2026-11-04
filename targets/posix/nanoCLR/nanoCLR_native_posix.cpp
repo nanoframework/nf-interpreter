@@ -52,10 +52,10 @@ void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
 
     nanoHAL_Initialize();
 
-#if NANOCLR_HOST_LINUX
+#if NANOCLR_USE_HOST_OS_SOCKETS
     if (!Network_Initialize())
     {
-        CLR_Debug::Printf("Failed to initialize Linux networking.\r\n");
+        CLR_Debug::Printf("Failed to initialize POSIX networking.\r\n");
         nanoHAL_Uninitialize(false);
         return;
     }
@@ -78,7 +78,7 @@ void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
 
     ClrStartup(clrSettings);
 
-#if NANOCLR_HOST_LINUX
+#if NANOCLR_USE_HOST_OS_SOCKETS
     Network_Uninitialize();
 #endif
     nanoHAL_Uninitialize(false);

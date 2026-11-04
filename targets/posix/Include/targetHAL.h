@@ -15,7 +15,7 @@
 // Start with the same minimum socket count used by win32 host.
 #define PLATFORM_DEPENDENT__SOCKETS_MAX_COUNT 1
 
-#if defined(NANOCLR_HOST_LINUX) && NANOCLR_HOST_LINUX
+#if defined(NANOCLR_USE_HOST_OS_SOCKETS) && NANOCLR_USE_HOST_OS_SOCKETS
 #define GLOBAL_LOCK_SOCKETS(x)
 #endif
 

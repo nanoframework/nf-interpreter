@@ -85,7 +85,7 @@ int main(int argc, char **argv)
     {
         if (std::strcmp(argv[i], "--ca-bundle") == 0)
         {
-#if NANOCLR_HOST_LINUX
+#if NANOCLR_USE_HOST_OS_SOCKETS
             if (caBundlePath != nullptr || i + 1 >= argc || argv[i + 1][0] == '\0' ||
                 std::strncmp(argv[i + 1], "--", 2) == 0)
             {
@@ -95,7 +95,7 @@ int main(int argc, char **argv)
             caBundlePath = argv[++i];
             continue;
 #else
-            std::cerr << "error: --ca-bundle requires the Linux networking backend\n";
+            std::cerr << "error: --ca-bundle requires the POSIX networking backend\n";
             return 1;
 #endif
         }

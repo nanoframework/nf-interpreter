@@ -111,7 +111,7 @@ extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Gpio;
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_I2c;
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Spi;
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_Ports;
-#if NANOCLR_HOST_LINUX
+#if NANOCLR_USE_HOST_OS_SOCKETS
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Net;
 #endif
 
@@ -130,7 +130,7 @@ const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[] = {
     &g_CLR_AssemblyNative_System_Device_I2c,
     &g_CLR_AssemblyNative_System_Device_Spi,
     &g_CLR_AssemblyNative_System_IO_Ports,
-#if NANOCLR_HOST_LINUX
+#if NANOCLR_USE_HOST_OS_SOCKETS
     &g_CLR_AssemblyNative_System_Net,
 #endif
     nullptr,
