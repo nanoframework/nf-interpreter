@@ -410,14 +410,16 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
     {
         // particular situation where we are receiving the full configuration block
 
-        // set storage address as the start of the flash configuration sector, plus the requested offset
-        storageAddress = (ByteAddress)&__nanoConfig_start__ + offset;
+        uint32_t configSize = (uint32_t)&__nanoConfig_end__ - (uint32_t)&__nanoConfig_start__;
 
-        // for save all the block size has to be provided, check that
-        if (blockSize == 0)
+        // for SAVE ALL the block size has to be provided
+        // sanity checks on offset and size (coming from host)
+        if (blockSize == 0 || offset > configSize || blockSize > configSize - offset)
         {
             return FALSE;
         }
+
+        storageAddress = (ByteAddress)&__nanoConfig_start__ + offset;
     }
 
     // copy the config block content to the config block storage

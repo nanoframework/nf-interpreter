@@ -18,10 +18,12 @@ list(APPEND STM32H7_CubePackage_INCLUDE_DIRS ${TARGET_BASE_LOCATION})
 set(STM32H7_CubePackage_SRCS
 
     # add HAL files here as required
+    stm32h7xx_hal_cortex.c
 
     # littlefs
     stm32h7xx_hal_dma.c
     stm32h7xx_hal_qspi.c
+    stm32h7xx_hal_ospi.c
 )
 
 foreach(SRC_FILE ${STM32H7_CubePackage_SRCS})
@@ -31,7 +33,8 @@ foreach(SRC_FILE ${STM32H7_CubePackage_SRCS})
     find_file(STM32H7_CubePackage_SRC_FILE ${SRC_FILE}
         PATHS 
 
-        ${stm32h7_hal_driver_SOURCE_DIR}/Src
+            ${stm32h7_hal_driver_SOURCE_DIR}/Src
+            ${TARGET_BASE_LOCATION}/common/CubeMX
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

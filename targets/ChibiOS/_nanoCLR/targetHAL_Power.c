@@ -122,9 +122,33 @@ void CPU_SetPowerMode(PowerLevel_type powerLevel)
 
 #elif defined(STM32H7XX)
 
+            // only need to change this option bit if not already done
+            if ((FLASH->OPTSR_CUR & FLASH_OPTSR_FZ_IWDG_SDBY))
+            {
+                // developer notes:
+                // follow workflow recommended @ 4.4.3 Option byte modification (from reference manual)
+                // Authorizes the Option Byte register programming
+                FLASH->OPTKEYR = FLASH_OPT_KEY1;
+                FLASH->OPTKEYR = FLASH_OPT_KEY2;
+
+                // write option value (clear the FLASH_OPTSR_FZ_IWDG_SDBY)
+                CLEAR_BIT(FLASH->OPTSR_PRG, FLASH_OPTSR_FZ_IWDG_SDBY);
+
+                // set the option start bit
+                FLASH->OPTCR |= FLASH_OPTCR_OPTSTART;
+
+                // Data synchronous Barrier, forcing the CPU to respect the sequence of instruction without
+                // optimization
+                __DSB();
+
+                // wait for the option byte change to be completed
+                while (FLASH->OPTSR_CUR & FLASH_OPTSR_OPT_BUSY)
+                    ;
+
+                // Set the OPTLOCK Bit to lock the FLASH Option Byte Registers access
+                FLASH->OPTCR |= FLASH_OPTCR_OPTLOCK;
+            }
             (void)success;
-            // TODO FIXME this code needs to follow the same workflow as the STM32F7
-            CLEAR_BIT(FLASH->OPTSR, FLASH_OPTSR_FZ_IWDG_SDBY);
 
 #else
             (void)success;
@@ -153,7 +177,8 @@ void CPU_SetPowerMode(PowerLevel_type powerLevel)
 #endif
 
 #if defined(STM32H7XX)
-            SET_BIT(PWR->CR1, PWR_CR1_PDDS);
+            // all domains in standby
+            SET_BIT(PWR->CPUCR, PWR_CPUCR_PDDS_D1 | PWR_CPUCR_PDDS_D2 | PWR_CPUCR_PDDS_D3);
 #endif
 
             // set SLEEPDEEP bit of Cortex SCR

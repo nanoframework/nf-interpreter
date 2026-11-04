@@ -1,0 +1,516 @@
+{
+    "categories": [
+        {
+            "title": "## ⚠️ Breaking Changes",
+            "labels": [
+                "Breaking-change"
+            ]
+        },
+        {
+            "title": "## ✨ New Features and enhancements",
+            "labels": [
+                "Type: enhancement"
+            ],
+            "categories": [
+                {
+                    "title": "### Interpreter",
+                    "labels": [
+                        "Area: Interpreter"
+                    ]
+                },
+                {
+                    "title": "### Common libraries",
+                    "labels": [
+                        "Area: Common libs"
+                    ]
+                },
+                {
+                    "title": "### Targets",
+                    "labels": [
+                        "Area: Targets"
+                    ]
+                },
+                {
+                    "title": "### Config and build",
+                    "labels": [
+                        "Area: Config-and-Build"
+                    ]
+                },
+                {
+                    "title": "### Dev Containers",
+                    "labels": [
+                        "Area: Dev-Containers"
+                    ]
+                },
+                {
+                    "title": "### Infrastructure and organization",
+                    "labels": [
+                        "Area: Infrastructure-and-Organization"
+                    ]
+                },
+                {
+                    "title": "### Other",
+                    "rules": [
+                        {
+                            "pattern": ".+",
+                            "on_property": "title",
+                            "flags": "u"
+                        }
+                    ],
+                    "exclude_labels": [
+                        "Area: Interpreter",
+                        "Area: Common libs",
+                        "Area: Targets",
+                        "Area: Config-and-Build",
+                        "Area: Dev-Containers",
+                        "Area: Infrastructure-and-Organization"
+                    ]
+                }
+            ]
+        },
+        {
+            "title": "## 🐛 Bug Fixes",
+            "labels": [
+                "Type: bug"
+            ],
+            "categories": [
+                {
+                    "title": "### Interpreter",
+                    "labels": [
+                        "Area: Interpreter"
+                    ]
+                },
+                {
+                    "title": "### Common libraries",
+                    "labels": [
+                        "Area: Common libs"
+                    ]
+                },
+                {
+                    "title": "### Targets",
+                    "labels": [
+                        "Area: Targets"
+                    ]
+                },
+                {
+                    "title": "### Config and build",
+                    "labels": [
+                        "Area: Config-and-Build"
+                    ]
+                },
+                {
+                    "title": "### Dev Containers",
+                    "labels": [
+                        "Area: Dev-Containers"
+                    ]
+                },
+                {
+                    "title": "### Infrastructure and organization",
+                    "labels": [
+                        "Area: Infrastructure-and-Organization"
+                    ]
+                },
+                {
+                    "title": "### Other",
+                    "rules": [
+                        {
+                            "pattern": ".+",
+                            "on_property": "title",
+                            "flags": "u"
+                        }
+                    ],
+                    "exclude_labels": [
+                        "Area: Interpreter",
+                        "Area: Common libs",
+                        "Area: Targets",
+                        "Area: Config-and-Build",
+                        "Area: Dev-Containers",
+                        "Area: Infrastructure-and-Organization"
+                    ]
+                }
+            ]
+        },
+        {
+            "title": "## 🔧 Other changes",
+            "rules": [
+                {
+                    "pattern": ".+",
+                    "on_property": "title",
+                    "flags": "u"
+                }
+            ],
+            "exclude_labels": [
+                "Type: enhancement",
+                "Type: bug",
+                "Type: Unit Tests",
+                "Type: documentation",
+                "Type: dependencies"
+            ],
+            "categories": [
+                {
+                    "title": "### Interpreter",
+                    "labels": [
+                        "Area: Interpreter"
+                    ]
+                },
+                {
+                    "title": "### Common libraries",
+                    "labels": [
+                        "Area: Common libs"
+                    ]
+                },
+                {
+                    "title": "### Targets",
+                    "labels": [
+                        "Area: Targets"
+                    ]
+                },
+                {
+                    "title": "### Config and build",
+                    "labels": [
+                        "Area: Config-and-Build"
+                    ]
+                },
+                {
+                    "title": "### Dev Containers",
+                    "labels": [
+                        "Area: Dev-Containers"
+                    ]
+                },
+                {
+                    "title": "### Infrastructure and organization",
+                    "labels": [
+                        "Area: Infrastructure-and-Organization"
+                    ]
+                },
+                {
+                    "title": "### Other",
+                    "rules": [
+                        {
+                            "pattern": ".+",
+                            "on_property": "title",
+                            "flags": "u"
+                        }
+                    ],
+                    "exclude_labels": [
+                        "Area: Interpreter",
+                        "Area: Common libs",
+                        "Area: Targets",
+                        "Area: Config-and-Build",
+                        "Area: Dev-Containers",
+                        "Area: Infrastructure-and-Organization"
+                    ]
+                }
+            ]
+        },
+        {
+            "title": "## 🧪 Unit Tests",
+            "labels": [
+                "Type: Unit Tests"
+            ],
+            "collapsed": true
+        },
+        {
+            "title": "## 📝 Documentation",
+            "labels": [
+                "Type: documentation"
+            ],
+            "collapsed": true
+        },
+        {
+            "title": "## 📦 Updated dependencies",
+            "labels": [
+                "Type: dependencies"
+            ],
+            "collapsed": true
+        },
+        {
+            "title": "## 🔲 Changes by platform",
+            "labels": [
+                "Platform: ChibiOS",
+                "Series: STM32xx",
+                "Series: RPI Pico",
+                "Platform: ESP32",
+                "Series: ESP32",
+                "Series: ESP32S2",
+                "Series: ESP32S3",
+                "Series: ESP32C3",
+                "Series: ESP32C5",
+                "Series: ESP32C6",
+                "Series: ESP32C61",
+                "Series: ESP32H2",
+                "Series: ESP32P4",
+                "Platform: ThreadX",
+                "Series: SL-EFM32GG11",
+                "Platform: NXP",
+                "Series: NXP i6",
+                "Platform: TI-SimpleLink",
+                "Series: TI-CC32xx",
+                "Series: TI-CC13x2_26x2",
+                "Platform: Nordic",
+                "Platform: Virtual Device & WIN32",
+                "Platform: POSIX"
+            ],
+            "categories": [
+                {
+                    "title": "### 🟢 ChibiOS",
+                    "labels": [
+                        "Platform: ChibiOS",
+                        "Series: STM32xx",
+                        "Series: RPI Pico"
+                    ],
+                    "collapsed": true,
+                    "categories": [
+                        {
+                            "title": "#### STM32xx",
+                            "labels": [
+                                "Series: STM32xx"
+                            ]
+                        },
+                        {
+                            "title": "#### Raspberry Pi Pico",
+                            "labels": [
+                                "Series: RPI Pico"
+                            ]
+                        },
+                        {
+                            "title": "#### General",
+                            "rules": [
+                                {
+                                    "pattern": ".+",
+                                    "on_property": "title",
+                                    "flags": "u"
+                                }
+                            ],
+                            "exclude_labels": [
+                                "Series: STM32xx",
+                                "Series: RPI Pico"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "title": "### 🔴 ESP32",
+                    "labels": [
+                        "Platform: ESP32",
+                        "Series: ESP32",
+                        "Series: ESP32S2",
+                        "Series: ESP32S3",
+                        "Series: ESP32C3",
+                        "Series: ESP32C5",
+                        "Series: ESP32C6",
+                        "Series: ESP32C61",
+                        "Series: ESP32H2",
+                        "Series: ESP32P4"
+                    ],
+                    "collapsed": true,
+                    "categories": [
+                        {
+                            "title": "#### ESP32",
+                            "labels": [
+                                "Series: ESP32"
+                            ]
+                        },
+                        {
+                            "title": "#### ESP32-S2",
+                            "labels": [
+                                "Series: ESP32S2"
+                            ]
+                        },
+                        {
+                            "title": "#### ESP32-S3",
+                            "labels": [
+                                "Series: ESP32S3"
+                            ]
+                        },
+                        {
+                            "title": "#### ESP32-C3",
+                            "labels": [
+                                "Series: ESP32C3"
+                            ]
+                        },
+                        {
+                            "title": "#### ESP32-C5",
+                            "labels": [
+                                "Series: ESP32C5"
+                            ]
+                        },
+                        {
+                            "title": "#### ESP32-C6",
+                            "labels": [
+                                "Series: ESP32C6"
+                            ]
+                        },
+                        {
+                            "title": "#### ESP32-C61",
+                            "labels": [
+                                "Series: ESP32C61"
+                            ]
+                        },
+                        {
+                            "title": "#### ESP32-H2",
+                            "labels": [
+                                "Series: ESP32H2"
+                            ]
+                        },
+                        {
+                            "title": "#### ESP32-P4",
+                            "labels": [
+                                "Series: ESP32P4"
+                            ]
+                        },
+                        {
+                            "title": "#### General",
+                            "rules": [
+                                {
+                                    "pattern": ".+",
+                                    "on_property": "title",
+                                    "flags": "u"
+                                }
+                            ],
+                            "exclude_labels": [
+                                "Series: ESP32",
+                                "Series: ESP32S2",
+                                "Series: ESP32S3",
+                                "Series: ESP32C3",
+                                "Series: ESP32C5",
+                                "Series: ESP32C6",
+                                "Series: ESP32C61",
+                                "Series: ESP32H2",
+                                "Series: ESP32P4"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "title": "### 🟣 ThreadX",
+                    "labels": [
+                        "Platform: ThreadX",
+                        "Series: SL-EFM32GG11"
+                    ],
+                    "collapsed": true,
+                    "categories": [
+                        {
+                            "title": "#### Silicon Labs EFM32GG11",
+                            "labels": [
+                                "Series: SL-EFM32GG11"
+                            ]
+                        },
+                        {
+                            "title": "#### General",
+                            "rules": [
+                                {
+                                    "pattern": ".+",
+                                    "on_property": "title",
+                                    "flags": "u"
+                                }
+                            ],
+                            "exclude_labels": [
+                                "Series: SL-EFM32GG11"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "title": "### 🟡 NXP (FreeRTOS)",
+                    "labels": [
+                        "Platform: NXP",
+                        "Series: NXP i6"
+                    ],
+                    "collapsed": true,
+                    "categories": [
+                        {
+                            "title": "#### NXP i.MX RT1060",
+                            "labels": [
+                                "Series: NXP i6"
+                            ]
+                        },
+                        {
+                            "title": "#### General",
+                            "rules": [
+                                {
+                                    "pattern": ".+",
+                                    "on_property": "title",
+                                    "flags": "u"
+                                }
+                            ],
+                            "exclude_labels": [
+                                "Series: NXP i6"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "title": "### 🟠 TI SimpleLink",
+                    "labels": [
+                        "Platform: TI-SimpleLink",
+                        "Series: TI-CC32xx",
+                        "Series: TI-CC13x2_26x2"
+                    ],
+                    "collapsed": true,
+                    "categories": [
+                        {
+                            "title": "#### TI CC32xx",
+                            "labels": [
+                                "Series: TI-CC32xx"
+                            ]
+                        },
+                        {
+                            "title": "#### TI CC13x2/26x2",
+                            "labels": [
+                                "Series: TI-CC13x2_26x2"
+                            ]
+                        },
+                        {
+                            "title": "#### General",
+                            "rules": [
+                                {
+                                    "pattern": ".+",
+                                    "on_property": "title",
+                                    "flags": "u"
+                                }
+                            ],
+                            "exclude_labels": [
+                                "Series: TI-CC32xx",
+                                "Series: TI-CC13x2_26x2"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "title": "### 🔵 Nordic",
+                    "labels": [
+                        "Platform: Nordic"
+                    ],
+                    "collapsed": true
+                },
+                {
+                    "title": "### 🖥️ Virtual Device & WIN32",
+                    "labels": [
+                        "Platform: Virtual Device & WIN32"
+                    ],
+                    "collapsed": true
+                },
+                {
+                    "title": "### 🐧 POSIX",
+                    "labels": [
+                        "Platform: POSIX"
+                    ],
+                    "collapsed": true
+                }
+            ]
+        }
+    ],
+    "ignore_labels": [
+        ":warning: DO NOT MERGE :warning:",
+        "invalid",
+        "wontfix"
+    ],
+    "sort": "ASC",
+    "template": "${{CHANGELOG}}\n\n**Full Changelog:** ${{RELEASE_DIFF}}\n\nFirmware packages for all reference targets built from this release are available from our [Cloudsmith feed](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/).",
+    "pr_template": "* ${{TITLE}} by @${{AUTHOR}} in #${{NUMBER}}",
+    "empty_template": "- no changes",
+    "max_tags_to_fetch": 300,
+    "max_pull_requests": 1000,
+    "max_back_track_time_days": 3650
+}

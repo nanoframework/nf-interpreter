@@ -1954,7 +1954,17 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocksForArray(
     NanoCLRDataType dt = (NanoCLRDataType)inst.target->dataType;
     const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[dt];
 
-    CLR_UINT32 totLength = (CLR_UINT32)(sizeof(CLR_RT_HeapBlock_Array) + length * dtl.m_sizeInBytes + extraBytes);
+    const CLR_UINT32 maxArraySize = CLR_RT_HeapBlock::HB_MaxSize * (CLR_UINT32)sizeof(CLR_RT_HeapBlock);
+    const CLR_UINT32 arrayHeaderSize = (CLR_UINT32)sizeof(CLR_RT_HeapBlock_Array);
+    const CLR_UINT32 elementSize = dtl.m_sizeInBytes;
+
+    if (elementSize == 0 || arrayHeaderSize > maxArraySize || extraBytes > maxArraySize - arrayHeaderSize ||
+        length > (maxArraySize - arrayHeaderSize - extraBytes) / elementSize)
+    {
+        return nullptr;
+    }
+
+    CLR_UINT32 totLength = arrayHeaderSize + length * elementSize + extraBytes;
     CLR_UINT32 lengthHB = CONVERTFROMSIZETOHEAPBLOCKS(totLength);
 
     if (lengthHB > CLR_RT_HeapBlock::HB_MaxSize)

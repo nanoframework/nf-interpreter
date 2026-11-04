@@ -20,6 +20,9 @@ static uint32_t GetConfigBlockAlignment()
 #elif defined(STM32L475xx)
     // 8 bytes - STM32L4 flash can only be programmed in double-word units
     return 8U;
+#elif defined(STM32H7XX)
+    // 32 bytes - STM32H7 flash can only be programmed in flash word (256 bits) units
+    return 32U;
 #else
     // default to byte alignment
     return 1U;
@@ -401,25 +404,16 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
             (g_TargetConfiguration.Wireless80211Configs->Count == 0 && configurationIndex == 0))
         {
             // no wireless config block exists yet, storing the first one
-            // scan flash to find the end of existing config data (network configs come first)
-            HAL_CONFIGURATION_NETWORK *existingNet =
-                (HAL_CONFIGURATION_NETWORK *)ConfigurationManager_FindNetworkConfigurationBlocks(
-                    (uint32_t)&__nanoConfig_start__,
-                    (uint32_t)&__nanoConfig_end__);
-            uint32_t existingSize = existingNet->Count * sizeof(HAL_Configuration_NetworkInterface);
-            platform_free(existingNet);
+            storageAddress = (uint32_t)&__nanoConfig_start__ + GetExistingConfigSize();
 
-#if defined(RP2040) || defined(RP2350)
-            // round up to 256 bytes - RP2040/RP2350 flash program granularity
-            existingSize = (existingSize + 255U) & ~255U;
-#elif defined(STM32L475xx)
-            // round up to 8 bytes - STM32L4 flash can only be programmed in double-word units
-            existingSize = (existingSize + 7U) & ~7U;
-#else
-            // default to byte alignment
-#endif
+            // check if there is room for it
+            if (storageAddress >= (uint32_t)&__nanoConfig_end__ ||
+                ((uint32_t)&__nanoConfig_end__ - storageAddress) < sizeof(HAL_Configuration_Wireless80211))
+            {
+                // not enough room
+                return FALSE;
+            }
 
-            storageAddress = (uint32_t)&__nanoConfig_start__ + existingSize;
             isInitialAllocation = TRUE;
         }
         else if (
@@ -548,14 +542,16 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
     {
         // particular situation where we are receiving the full configuration block
 
-        // set storage address as the start of the flash configuration sector, plus the requested offset
-        storageAddress = (ByteAddress)&__nanoConfig_start__ + offset;
+        uint32_t configSize = (uint32_t)&__nanoConfig_end__ - (uint32_t)&__nanoConfig_start__;
 
-        // for save all the block size has to be provided, check that
-        if (blockSize == 0)
+        // for SAVE ALL the block size has to be provided
+        // sanity checks on offset and size (coming from host)
+        if (blockSize == 0 || offset > configSize || blockSize > configSize - offset)
         {
             return FALSE;
         }
+
+        storageAddress = (ByteAddress)&__nanoConfig_start__ + offset;
     }
 
     if (isInitialAllocation &&

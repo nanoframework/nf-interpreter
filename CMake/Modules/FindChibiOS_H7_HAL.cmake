@@ -25,12 +25,13 @@ list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LL
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/DACv1)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/DMAv2)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/EXTIv1)
-list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/FDCANv1)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/FDCANv2)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/GPIOv2)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/I2Cv3)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/MACv2)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/MDMAv1)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/OTGv1)
-list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/QUADSPIv2)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/OCTOSPIv2)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/RNGv1)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/RTCv2)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SDMMCv2)
@@ -38,7 +39,7 @@ list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LL
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SYSTICKv1)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/TIMv1)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USART)
-list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USARTv2)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USARTv3)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/xWDGv1)
 
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CHIBIOS_BOARD_DEFINITIONS_PATH})
@@ -52,7 +53,7 @@ endif()
 # WHEN ADDING A NEW CHIBIOS OVERLAY component add the include directory(ies) below 
 ####################################################################################
 # component STM32_FLASH
-list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/FLASHv2)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/FLASHv5)
 # component STM32_CRC
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/CRCv1)
 # component STM32_RNG
@@ -73,7 +74,7 @@ list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-ove
 # WHEN ADDING A NEW CHIBIOS OVERLAY component add the source file(s) specific to this series below 
 ####################################################################################################
 # component STM32_FLASH
-list(APPEND CHIBIOS_HAL_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/FLASHv2/flash_lld.c)
+list(APPEND CHIBIOS_HAL_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/FLASHv5/flash_lld.c)
 # component STM32_CRC
 list(APPEND CHIBIOS_HAL_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/CRCv1/crc_lld.c)
 # component STM32_RNG
@@ -97,7 +98,7 @@ list(APPEND CHIBIOS_HAL_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/
 if(RTOS_CHIBIOS_CHECK)
     set(OSHAL_PATH ${chibios_SOURCE_DIR}/os/hal/osal/rt-nil)
 elseif(RTOS_THREADX_CHECK)
-    set(OSHAL_PATH ${CMAKE_SOURCE_DIR}/targets/ThreadX/ChibiOS/HAL)
+    set(OSHAL_PATH ${CMAKE_SOURCE_DIR}/targets/ThreadX/ChibiOS)
 else()
     message(FATAL_ERROR "RTOS not configured to use ChibiOS HAL")
 endif()
@@ -159,11 +160,13 @@ set(CHIBIOS_HAL_SRCS
     hal_can_lld.c
     hal_crypto_lld.c
     hal_dac_lld.c
+    stm32_bdma.c
     stm32_dma.c
+    stm32_mdma.c
     stm32_exti.c
     hal_pal_lld.c
     hal_i2c_lld.c
-    #hal_mac_lld.c
+    hal_mac_lld.c
     hal_usb_lld.c
     hal_wspi_lld.c 
     hal_trng_lld.c
@@ -204,26 +207,26 @@ foreach(SRC_FILE ${CHIBIOS_HAL_SRCS})
 
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/STM32H7xx
 
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/STM32H7xx
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/ADCv4
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/BDMAv1
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/CRYPv1
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/DACv1
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/DMAv2
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/EXTIv1
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/FDCANv1
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/FDCANv2
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/GPIOv2
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/I2Cv3
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/MACv2
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/MDMAv1
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/OTGv1
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/QUADSPIv2
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/OCTOSPIv2
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/RNGv1
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/RTCv2
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SDMMCv2
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SPIv3
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SYSTICKv1
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/TIMv1
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USARTv2
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USARTv3
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/xWDGv1
 
             ${OSHAL_PATH}

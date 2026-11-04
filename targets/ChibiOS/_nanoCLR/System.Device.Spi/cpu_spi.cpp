@@ -13,6 +13,12 @@
 #include <sys_dev_spi_native_target.h>
 #include <hal.h>
 
+#if defined(STM32H7XX)
+// STM32H7 SPI has the half duplex direction control in HDDIR
+// NOTE: half duplex mode is not supported by the ChibiOS SPIv3 driver, so this is never used
+#define SPI_CR1_BIDIOE SPI_CR1_HDDIR
+#endif
+
 // SPI DMA errors are reported through an extension field of the SPI driver, which is set by the SPI DMA error hook
 // (see SPI_DRIVER_EXT_FIELDS in the target mcuconf.h). Targets that don't define it keep their previous behaviour.
 #if defined(SPI_DRIVER_EXT_FIELDS)
@@ -967,15 +973,40 @@ uint16_t ComputeBaudRate(SPI_DEVICE_CONFIGURATION &config, int32_t &actualFreque
 
 #elif defined(STM32H7XX)
 
-    // SP1, SPI4, SPI5 and SPI6 are feed by APB2 (STM32_PCLK2)
-    actualFrequency = STM32_PCLK2;
-    maxSpiFrequency = STM32_SPI456_MAX;
-
-    // SPI1, SPI2 and SPI3 are feed by APB1 (STM32_PCLK1)
-    if (busIndex == 2 || busIndex == 3)
+    // SPI1, SPI2 and SPI3 are feed by the SPI123 kernel clock
+    // SPI4 and SPI5 are feed by the SPI45 kernel clock
+    // SPI6 is feed by the SPI6 kernel clock
+    switch (busIndex)
     {
-        actualFrequency = STM32_PCLK1;
-        maxSpiFrequency = STM32_SPI123_MAX;
+        case 1:
+            actualFrequency = STM32_SPI1CLK;
+            maxSpiFrequency = STM32_SPI123_MAX;
+            break;
+
+        case 2:
+            actualFrequency = STM32_SPI2CLK;
+            maxSpiFrequency = STM32_SPI123_MAX;
+            break;
+
+        case 3:
+            actualFrequency = STM32_SPI3CLK;
+            maxSpiFrequency = STM32_SPI123_MAX;
+            break;
+
+        case 4:
+            actualFrequency = STM32_SPI4CLK;
+            maxSpiFrequency = STM32_SPI456_MAX;
+            break;
+
+        case 5:
+            actualFrequency = STM32_SPI5CLK;
+            maxSpiFrequency = STM32_SPI456_MAX;
+            break;
+
+        default:
+            actualFrequency = STM32_SPI6CLK;
+            maxSpiFrequency = STM32_SPI456_MAX;
+            break;
     }
 
 #elif defined(STM32L4XX)
@@ -1021,8 +1052,13 @@ uint16_t ComputeBaudRate(SPI_DEVICE_CONFIGURATION &config, int32_t &actualFreque
         }
     }
 
+#if defined(STM32H7XX)
+    // the baud rate bits (MBR) are in CFG1, caller has to shift the divider value
+    return divider;
+#else
     // the baud rate bits are in the position B5:3 so need to left shit the divider value
     return divider << 3;
+#endif
 }
 
 // Return the NF_PAL structure for busIndex
@@ -1084,6 +1120,58 @@ NF_PAL_SPI *GetNfPalfromBusIndex(uint8_t busIndex)
 void GetSPIConfig(SPI_DEVICE_CONFIGURATION &config, SPI_WRITE_READ_SETTINGS &wrc, SPIConfig *llConfig)
 {
     int32_t actualFrequency;
+
+#if defined(STM32H7XX)
+
+    // clear values
+    llConfig->cfg1 = 0;
+    llConfig->cfg2 = 0;
+
+    // SPI mode
+    switch (config.Spi_Mode)
+    {
+        case SpiMode_Mode1:
+            llConfig->cfg2 |= SPI_CFG2_CPHA;
+            break;
+
+        case SpiMode_Mode2:
+            llConfig->cfg2 |= SPI_CFG2_CPOL;
+            break;
+
+        case SpiMode_Mode3:
+            llConfig->cfg2 |= SPI_CFG2_CPHA | SPI_CFG2_CPOL;
+            break;
+
+        default: // Default to Mode0 if invalid mode specified
+            break;
+    }
+
+    // compute baud rate of SPI peripheral according to the requested frequency
+    llConfig->cfg1 |= (uint32_t)ComputeBaudRate(config, actualFrequency) << SPI_CFG1_MBR_Pos;
+
+    // set data transfer length according passed setting
+    // DSIZE holds the number of bits in the data frame minus 1
+    if (wrc.Bits16ReadWrite)
+    {
+        // Set data transfer length to 16 bits
+        llConfig->cfg1 |= (16U - 1U) << SPI_CFG1_DSIZE_Pos;
+
+        // Sets the order of bytes transmission : MSB first or LSB first
+        int bitOrder = config.DataOrder16;
+        if (bitOrder == DataBitOrder_LSB)
+        {
+            llConfig->cfg2 |= SPI_CFG2_LSBFRST;
+        }
+    }
+    else
+    {
+        // set transfer length to 8bits
+        llConfig->cfg1 |= (8U - 1U) << SPI_CFG1_DSIZE_Pos;
+    }
+
+    // half duplex mode is not supported by the ChibiOS SPIv3 driver (COMM bits are forced to full duplex)
+
+#else
 
     // clear values
     llConfig->cr1 = 0;
@@ -1150,6 +1238,8 @@ void GetSPIConfig(SPI_DEVICE_CONFIGURATION &config, SPI_WRITE_READ_SETTINGS &wrc
         llConfig->cr2 |= SPI_CR1_BIDIMODE;
 #endif
     }
+
+#endif
 
     // Create the low level configuration
     llConfig->data_cb = SpiCallback;
