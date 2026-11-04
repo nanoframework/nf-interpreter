@@ -2870,6 +2870,18 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
     bool isInstInstruction)
 {
     NATIVE_PROFILE_CLR_CORE();
+
+    // Reflection objects carry the represented type's metadata, not their runtime array type.
+    if (desc.m_reflex.m_levels > 0 && (desc.m_flags & CLR_RT_DataTypeLookup::c_Array) == 0)
+    {
+        CLR_RT_TypeDef_Index runtimeType = desc.m_handlerCls;
+
+        if (FAILED(desc.InitializeFromType(runtimeType)))
+        {
+            return false;
+        }
+    }
+
     CLR_RT_TypeDef_Instance &inst = desc.m_handlerCls;
     CLR_RT_TypeDef_Instance &instTarget = descTarget.m_handlerCls;
     bool fArray = false;
@@ -2882,8 +2894,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
         fArray = true;
     }
 
-    // only check reflection levels if this is not an array
-    if (!fArray && desc.m_reflex.m_levels < descTarget.m_reflex.m_levels)
+    if (desc.m_reflex.m_levels < descTarget.m_reflex.m_levels)
     {
         return false;
     }
@@ -2895,29 +2906,30 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
             //
             // Casting from <type>[] to System.Array or System.Object is always allowed.
             //
-            if (inst.m_data == g_CLR_RT_WellKnownTypes.m_Array.m_data ||
-                inst.m_data == g_CLR_RT_WellKnownTypes.m_Object.m_data ||
-                inst.m_data == g_CLR_RT_WellKnownTypes.m_IList.m_data ||
-                inst.m_data == g_CLR_RT_WellKnownTypes.m_ICloneable.m_data)
+            if (instTarget.m_data == g_CLR_RT_WellKnownTypes.m_Array.m_data ||
+                instTarget.m_data == g_CLR_RT_WellKnownTypes.m_Object.m_data ||
+                instTarget.m_data == g_CLR_RT_WellKnownTypes.m_IList.m_data ||
+                instTarget.m_data == g_CLR_RT_WellKnownTypes.m_ICloneable.m_data)
             {
                 return true;
             }
         }
 
-        if (inst.m_target->dataType != instTarget.m_target->dataType)
-        {
-            return false;
-        }
+        return false;
     }
 
-    CLR_UINT32 semantic = (inst.m_target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask);
     CLR_UINT32 semanticTarget = (instTarget.m_target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask);
 
     if (fArray)
     {
-        if (semantic != semanticTarget)
+        const CLR_UINT32 valueTypeFlags =
+            CLR_RT_DataTypeLookup::c_OptimizedValueType | CLR_RT_DataTypeLookup::c_ValueType;
+
+        // Value-type array elements are invariant; reference elements can use inheritance and interfaces.
+        if ((c_CLR_RT_DataTypeLookup[inst.m_target->dataType].m_flags & valueTypeFlags) != 0 ||
+            (c_CLR_RT_DataTypeLookup[instTarget.m_target->dataType].m_flags & valueTypeFlags) != 0)
         {
-            return false;
+            return inst.m_data == instTarget.m_data;
         }
     }
 
