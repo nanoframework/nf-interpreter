@@ -129,6 +129,20 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::Invoke___OBJECT__OBJ
             numArgs = pArray->m_numOfElements;
         }
 
+        // Preserve null-target invocation for instance methods that do not access this.
+        if ((mdR->flags & CLR_RECORD_METHODDEF::MD_Static) == 0 && obj.Dereference() != NULL)
+        {
+            CLR_RT_TypeDef_Instance declaringType{};
+
+            if (declaringType.InitializeFromMethod(md) == false ||
+                CLR_RT_ExecutionEngine::IsInstanceOf(obj, declaringType) == false)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+            }
+        }
+
+        NANOCLR_CHECK_HRESULT(CheckInvokeArguments(md, args, numArgs));
+
         NANOCLR_CHECK_HRESULT(stack.MakeCall(md, &obj, args, numArgs));
     }
     else
@@ -162,6 +176,59 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::GetMethodDescriptor(
 
     NATIVE_PROFILE_CLR_CORE();
     return CLR_RT_ReflectionDef_Index::Convert(arg, inst) ? S_OK : CLR_E_NULL_REFERENCE;
+}
+
+HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckInvokeArguments(
+    const CLR_RT_MethodDef_Instance &md,
+    CLR_RT_HeapBlock *args,
+    int numArgs)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    CLR_RT_SignatureParser parser{};
+    CLR_RT_SignatureParser::Element element{};
+    parser.Initialize_MethodSignature(md.m_assm, md.m_target);
+
+    // Skip the return type; the remaining signature elements are the explicit parameters.
+    NANOCLR_CHECK_HRESULT(parser.Advance(element));
+
+    for (int i = 0; i < numArgs && parser.Available() > 0; i++)
+    {
+        NANOCLR_CHECK_HRESULT(parser.Advance(element));
+
+        CLR_RT_HeapBlock &arg = args[i];
+
+        if (arg.DataType() == DATATYPE_OBJECT && arg.Dereference() == NULL)
+        {
+            continue;
+        }
+
+        CLR_RT_ReflectionDef_Index expectedType{};
+        CLR_RT_TypeDescriptor targetType{};
+        CLR_RT_TypeDescriptor sourceType{};
+
+        expectedType.m_kind = REFLECTION_TYPE;
+        expectedType.m_levels = (CLR_UINT16)element.m_levels;
+        expectedType.m_data.m_type = element.m_cls;
+
+        NANOCLR_CHECK_HRESULT(targetType.InitializeFromReflection(expectedType));
+
+        // FixCall checks and converts these, including enums from their underlying type.
+        if (c_CLR_RT_DataTypeLookup[targetType.m_handlerCls.m_target->dataType].m_flags &
+            CLR_RT_DataTypeLookup::c_OptimizedValueType)
+        {
+            continue;
+        }
+
+        if (FAILED(sourceType.InitializeFromObject(arg)) ||
+            CLR_RT_ExecutionEngine::IsInstanceOf(sourceType, targetType) == false)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+        }
+    }
+
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckFlags(

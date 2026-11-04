@@ -36,8 +36,16 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::SetValue___VOID__OBJE
     NANOCLR_CHECK_HRESULT(instTDescObj.InitializeFromFieldDefinition(instFD));
 
     // make sure the right side object is of the same type as the left side
-    if (NULL != val.Dereference() && !CLR_RT_ExecutionEngine::IsInstanceOf(val, instTDescObj.m_handlerCls))
-        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    if (NULL != val.Dereference())
+    {
+        CLR_RT_TypeDescriptor descVal{};
+
+        // compare with the full field descriptor: its handler class is System.Array for any array field
+        if (FAILED(descVal.InitializeFromObject(val)) || !CLR_RT_ExecutionEngine::IsInstanceOf(descVal, instTDescObj))
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        }
+    }
 
     fValueType = obj->IsAValueType();
     if (fValueType || (c_CLR_RT_DataTypeLookup[obj->DataType()].m_flags & CLR_RT_DataTypeLookup::c_OptimizedValueType))

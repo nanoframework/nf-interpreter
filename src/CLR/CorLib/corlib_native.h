@@ -753,6 +753,7 @@ struct Library_corlib_native_System_Reflection_MethodBase
         CLR_RT_HeapBlock &arg,
         CLR_RT_MethodDef_Instance &inst);
     static HRESULT CheckFlags(CLR_RT_StackFrame &stack, CLR_UINT32 mask, CLR_UINT32 flag);
+    static HRESULT CheckInvokeArguments(const CLR_RT_MethodDef_Instance &md, CLR_RT_HeapBlock *args, int numArgs);
 #endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 };
 
