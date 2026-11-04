@@ -1483,7 +1483,16 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocksForArray(
     CLR_DataType dt = (CLR_DataType)inst.m_target->dataType;
     const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[dt];
 
-    CLR_UINT32 totLength = (CLR_UINT32)(sizeof(CLR_RT_HeapBlock_Array) + length * dtl.m_sizeInBytes);
+    const CLR_UINT32 maxArraySize = CLR_RT_HeapBlock::HB_MaxSize * (CLR_UINT32)sizeof(CLR_RT_HeapBlock);
+    const CLR_UINT32 arrayHeaderSize = (CLR_UINT32)sizeof(CLR_RT_HeapBlock_Array);
+    const CLR_UINT32 elementSize = dtl.m_sizeInBytes;
+
+    if (elementSize == 0 || arrayHeaderSize > maxArraySize || length > (maxArraySize - arrayHeaderSize) / elementSize)
+    {
+        return NULL;
+    }
+
+    CLR_UINT32 totLength = arrayHeaderSize + length * elementSize;
     CLR_UINT32 lengthHB = CONVERTFROMSIZETOHEAPBLOCKS(totLength);
 
     if (lengthHB > CLR_RT_HeapBlock::HB_MaxSize)
