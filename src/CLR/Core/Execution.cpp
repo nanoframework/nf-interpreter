@@ -2945,8 +2945,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
     }
 
     std::set<CLR_UINT32> visited;
-    auto matchesType = [&](auto &&self, CLR_RT_TypeDef_Instance current) -> bool
-    {
+    auto matchesType = [&](auto &&self, CLR_RT_TypeDef_Instance current) -> bool {
         do
         {
             if (!visited.insert(current.m_data).second)
