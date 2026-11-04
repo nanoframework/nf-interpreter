@@ -8,6 +8,7 @@
 #include <nanoCLR_Messaging.h>
 #include <WireProtocol.h>
 #include <WireProtocol_Message.h>
+#include <WireProtocol_Transport.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -352,6 +353,15 @@ bool CLR_Messaging::ProcessPayload(WP_Message *msg)
         //
         // Bad packet...
         //
+        return true;
+    }
+
+    // sessions over the network have to authenticate before using any command
+    if (!WP_Auth_IsAuthenticated() && msg->m_header.m_cmd != CLR_DBG_Commands_c_Monitor_Ping &&
+        msg->m_header.m_cmd != CLR_DBG_Commands_c_Monitor_Authenticate)
+    {
+        WP_ReplyToCommand(msg, false, false, nullptr, 0);
+
         return true;
     }
 

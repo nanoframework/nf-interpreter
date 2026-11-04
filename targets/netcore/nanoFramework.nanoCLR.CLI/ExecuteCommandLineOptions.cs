@@ -37,25 +37,28 @@ namespace nanoFramework.nanoCLR.CLI
             'p',
             "networkport",
             Required = false,
-            Hidden = true,
-            HelpText = "Set TCP/IP port exposing the nanoCLR instance.")]
+            HelpText = "TCP/IP port to expose the nanoCLR instance for debugging over the network. Use 26000 to be found by the debugger tools.")]
         public int? ExposedTcpIpPort { get; set; }
 
         [Option(
             'h',
             "host",
             Required = false,
-            Hidden = true,
-            HelpText = "Set TCP/IP host address exposing the nanoCLR instance.")]
+            HelpText = "Address to bind the TCP/IP port to. Default is 127.0.0.1. Use 0.0.0.0 to accept connections from other computers.")]
         public string ExposedTcpIpHost { get; set; }
 
         [Option(
             'b',
             "broadcast",
             Required = false,
-            Hidden = true,
-            HelpText = "Set UDP broadcast port for device discovery.")]
+            HelpText = "UDP port to announce the device on the network, for discovery by the debugger tools. Default is 23657.")]
         public int? ExposedBroadcastPort { get; set; }
+
+        [Option(
+            "debugtoken",
+            Required = false,
+            HelpText = "Token that the debugger has to present to connect over the network (max 64 characters). Without it, no authentication is required.")]
+        public string DebugToken { get; set; }
 
         [Option(
             'n',

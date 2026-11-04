@@ -5,6 +5,7 @@
 
 #include <nanoWeak.h>
 #include "WireProtocol_HAL_Interface.h"
+#include "WireProtocol_Transport.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -33,5 +34,11 @@ __nfweak uint8_t WP_TransmitMessage(WP_Message *message)
 
 // provided as weak to be replaced by actual implementation by HAL interface
 __nfweak void WP_CheckAvailableIncomingData()
+{
+}
+
+// provided as weak to be replaced by actual implementation by the platform when it has a channel that can be dropped
+// (the targets with the Wire Protocol channel dispatcher have this one defined there)
+__nfweak void WP_Transport_DropClient(void)
 {
 }

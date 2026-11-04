@@ -9,6 +9,7 @@
 #include <nanoHAL_v2.h>
 #include <WireProtocol.h>
 #include <WireProtocol_Message.h>
+#include <WireProtocol_Transport.h>
 
 #if defined(TRACE_MASK) && (TRACE_MASK & TRACE_VERBOSE) != 0
 // used WP_Message_Process() and methods it calls to avoid flooding TRACE
@@ -21,7 +22,7 @@ extern uint32_t traceLoopCounter;
 #include <serialcfg.h>
 #endif
 
-void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
+void WP_Serial_ReceiveBytes(uint8_t **ptr, uint32_t *size)
 {
     // save for later comparison
     uint32_t requestedSize = *size;
@@ -42,7 +43,7 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
     }
 }
 
-uint8_t WP_TransmitMessage(WP_Message *message)
+uint8_t WP_Serial_TransmitMessage(WP_Message *message)
 {
     uint32_t writeResult;
     bool operationResult = false;
@@ -76,3 +77,24 @@ uint8_t WP_TransmitMessage(WP_Message *message)
 
     return operationResult;
 }
+
+#if CONFIG_NF_WP_CHANNEL_NETWORK && !defined(I_AM_NANOBOOTER)
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// transmission lock
+// messages are transmitted from the CLR thread and from the receiver thread, the lock makes sure that the header and
+// payload of a message are never interleaved with another one
+
+static MUTEX_DECL(s_txMutex);
+
+void WP_Transport_Lock(void)
+{
+    chMtxLock(&s_txMutex);
+}
+
+void WP_Transport_Unlock(void)
+{
+    chMtxUnlock(&s_txMutex);
+}
+
+#endif // CONFIG_NF_WP_CHANNEL_NETWORK

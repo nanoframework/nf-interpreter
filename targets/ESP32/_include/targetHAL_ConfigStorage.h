@@ -157,6 +157,7 @@ extern "C"
     HAL_CONFIGURATION_NETWORK_WIRELESSAP *ConfigStorage_FindNetworkWirelessAPConfigurationBlocks();
     HAL_CONFIGURATION_X509_CERTIFICATE *ConfigStorage_FindX509CertificateConfigurationBlocks();
     HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *ConfigStorage_FindX509DeviceCertificatesConfigurationBlocks();
+    HAL_CONFIGURATION_WPAUTHTOKEN *ConfigStorage_FindWPAuthTokenConfigurationBlocks();
 
 #ifdef __cplusplus
 }

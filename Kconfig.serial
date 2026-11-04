@@ -25,4 +25,50 @@ config TARGET_SERIAL_BAUDRATE
     depends on NF_WP_TRANSPORT_SERIAL || NF_WP_TRANSPORT_USB_CDC_OR_SERIAL
     default 921600
 
+config NF_WP_CHANNEL_SERIAL
+    bool "Debug over serial/USB transport"
+    depends on NF_FEATURE_DEBUGGER
+    default y
+    help
+      nanoCLR debugging over the transport selected above (UART, USB CDC or both).
+      nanoBooter always uses that transport, regardless of this option.
+
+config NF_WP_CHANNEL_NETWORK
+    bool "Debug over network (TCP)"
+    depends on NF_FEATURE_DEBUGGER && API_SYSTEM_NET && (RTOS_ESP32 || RTOS_CHIBIOS || RTOS_FREERTOS)
+    default n
+    help
+      nanoCLR Wire Protocol is also available over a TCP connection.
+      The device listens for a single debugger client.
+      nanoBooter does not have a network stack and stays serial only.
+
+if NF_WP_CHANNEL_NETWORK
+
+config NF_WP_NETWORK_PORT
+    int "TCP port to listen for the debugger"
+    range 1 65535
+    default 26000
+
+config NF_WP_NETWORK_DISCOVERY
+    bool "Announce the device by UDP broadcast"
+    default y
+    help
+      Broadcasts a short message every 5 seconds so debuggers can find the device.
+
+config NF_WP_NETWORK_DISCOVERY_PORT
+    int "UDP port for the discovery broadcast"
+    depends on NF_WP_NETWORK_DISCOVERY
+    range 1 65535
+    default 23657
+
+config NF_WP_NETWORK_AUTH_TOKEN
+    string "Default authentication token (max 64 characters)"
+    default ""
+    help
+      Token the debugger has to present to use the network channel.
+      A token stored in the configuration block overrides this value.
+      Leave empty to not require authentication.
+
+endif # NF_WP_CHANNEL_NETWORK
+
 endmenu

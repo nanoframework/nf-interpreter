@@ -51,6 +51,12 @@ static uint32_t GetStoredConfigBlockSize(const uint8_t *block, uint32_t remainin
         return certificateSize > remainingSize - headerSize ? remainingSize : headerSize + certificateSize;
     }
 
+    if (memcmp(block, c_MARKER_CONFIGURATION_WPAUTHTOKEN_V1, 4) == 0)
+    {
+        uint32_t blockSize = sizeof(HAL_Configuration_WPAuthToken);
+        return blockSize > remainingSize ? remainingSize : blockSize;
+    }
+
     return 0;
 }
 
@@ -141,6 +147,12 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
                 (uint32_t)&__nanoConfig_start__,
                 (uint32_t)&__nanoConfig_end__);
 
+        // find Wire Protocol authentication token configuration blocks
+        HAL_CONFIGURATION_WPAUTHTOKEN *wpAuthTokenConfigs =
+            (HAL_CONFIGURATION_WPAUTHTOKEN *)ConfigurationManager_FindWPAuthTokenConfigurationBlocks(
+                (uint32_t)&__nanoConfig_start__,
+                (uint32_t)&__nanoConfig_end__);
+
         // alloc memory for g_TargetConfiguration
         // because this is a struct of structs that use flexible members the memory has to be allocated from the heap
         // the malloc size for each struct is computed separately
@@ -153,6 +165,8 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
                                               certificateStore->Count * sizeof(certificateStore->Certificates[0]);
         uint32_t sizeOfX509DeviceCertificates = offsetof(HAL_CONFIGURATION_X509_CERTIFICATE, Certificates) +
                                                 deviceCertificates->Count * sizeof(deviceCertificates->Certificates[0]);
+        uint32_t sizeOfWPAuthTokenConfigs = offsetof(HAL_CONFIGURATION_WPAUTHTOKEN, Configs) +
+                                            wpAuthTokenConfigs->Count * sizeof(wpAuthTokenConfigs->Configs[0]);
 
         g_TargetConfiguration.NetworkInterfaceConfigs =
             (HAL_CONFIGURATION_NETWORK *)platform_malloc(sizeOfNetworkInterfaceConfigs);
@@ -162,6 +176,8 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
             (HAL_CONFIGURATION_X509_CERTIFICATE *)platform_malloc(sizeOfX509CertificateStore);
         g_TargetConfiguration.DeviceCertificates =
             (HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *)platform_malloc(sizeOfX509DeviceCertificates);
+        g_TargetConfiguration.WPAuthTokenConfigs =
+            (HAL_CONFIGURATION_WPAUTHTOKEN *)platform_malloc(sizeOfWPAuthTokenConfigs);
 
         // copy structs to g_TargetConfiguration
         memcpy(
@@ -180,12 +196,17 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
             (HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *)g_TargetConfiguration.DeviceCertificates,
             deviceCertificates,
             sizeOfX509DeviceCertificates);
+        memcpy(
+            (HAL_CONFIGURATION_WPAUTHTOKEN *)g_TargetConfiguration.WPAuthTokenConfigs,
+            wpAuthTokenConfigs,
+            sizeOfWPAuthTokenConfigs);
 
         // now free the memory of the original structs
         platform_free(networkConfigs);
         platform_free(networkWirelessConfigs);
         platform_free(certificateStore);
         platform_free(deviceCertificates);
+        platform_free(wpAuthTokenConfigs);
     }
     else
     {
@@ -274,6 +295,21 @@ bool ConfigurationManager_GetConfigurationBlock(
         // because X509 certificate has a variable length need to compute the block size in two steps
         sizeOfBlock = offsetof(HAL_Configuration_X509DeviceCertificate, Certificate);
         sizeOfBlock += ((HAL_Configuration_X509DeviceCertificate *)blockAddress)->CertificateSize;
+    }
+    else if (configuration == DeviceConfigurationOption_WPAuthToken)
+    {
+        if (g_TargetConfiguration.WPAuthTokenConfigs == nullptr ||
+            g_TargetConfiguration.WPAuthTokenConfigs->Count == 0 ||
+            (configurationIndex + 1) > g_TargetConfiguration.WPAuthTokenConfigs->Count)
+        {
+            return FALSE;
+        }
+
+        // set block size
+        sizeOfBlock = sizeof(HAL_Configuration_WPAuthToken);
+
+        // get block address
+        blockAddress = (uint8_t *)g_TargetConfiguration.WPAuthTokenConfigs->Configs[configurationIndex];
     }
     else
     {
@@ -402,6 +438,7 @@ bool ConfigurationManager_StoreConfigurationBlock(
         platform_free(g_TargetConfiguration.Wireless80211Configs);
         platform_free(g_TargetConfiguration.CertificateStore);
         platform_free(g_TargetConfiguration.DeviceCertificates);
+        platform_free(g_TargetConfiguration.WPAuthTokenConfigs);
 
         // perform enumeration of configuration blocks
         ConfigurationManager_EnumerateConfigurationBlocks();
@@ -602,6 +639,7 @@ UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock(
             platform_free(g_TargetConfiguration.Wireless80211Configs);
             platform_free(g_TargetConfiguration.CertificateStore);
             platform_free(g_TargetConfiguration.DeviceCertificates);
+            platform_free(g_TargetConfiguration.WPAuthTokenConfigs);
 
             // perform enumeration of configuration blocks
             ConfigurationManager_EnumerateConfigurationBlocks();
@@ -744,6 +782,7 @@ ConfigurationOperationError ConfigurationManager_ApplyConfigurationOperation(
         platform_free(g_TargetConfiguration.Wireless80211Configs);
         platform_free(g_TargetConfiguration.CertificateStore);
         platform_free(g_TargetConfiguration.DeviceCertificates);
+        platform_free(g_TargetConfiguration.WPAuthTokenConfigs);
 
         if (g_TargetConfiguration.WirelessAPConfigs != nullptr)
         {

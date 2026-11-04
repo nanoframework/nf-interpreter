@@ -9,6 +9,7 @@
 #include <WireProtocol.h>
 #include <WireProtocol_Message.h>
 #include <WireProtocol_MonitorCommands.h>
+#include <WireProtocol_Transport.h>
 #include "Debugger.h"
 #include <corlib_native.h>
 #include <target_common.h>
@@ -463,6 +464,57 @@ HRESULT CLR_DBG_Debugger::CreateListOfCalls(
 // developer note:
 // all Monitor_nnnnnnn, Debugger_nnnnn and Profiller_nnnn handlers have to execute the respective reply
 // if the handler fails to execute, it will return false and then the caller will reply with a failed reply
+
+bool CLR_DBG_Debugger::Monitor_Authenticate(WP_Message *msg)
+{
+    NATIVE_PROFILE_CLR_DEBUGGER();
+
+    // only requests are handled
+    if ((msg->m_header.m_flags & WP_Flags_c_Reply) != 0)
+    {
+        return true;
+    }
+
+    uint32_t result = WP_AuthResult_Ok;
+
+    // a session that doesn't require authentication (serial, or no token set) is always authenticated
+    if (WP_Auth_IsRequired())
+    {
+        uint32_t length = 0;
+        const uint8_t *token = msg->m_payload;
+
+        if (token != nullptr && msg->m_header.m_size >= sizeof(length))
+        {
+            memcpy(&length, token, sizeof(length));
+            token += sizeof(length);
+
+            if (length > msg->m_header.m_size - sizeof(length))
+            {
+                // malformed request, count it as a failure
+                length = WP_AUTH_TOKEN_MAX_LENGTH + 1;
+                token = nullptr;
+            }
+        }
+        else
+        {
+            length = WP_AUTH_TOKEN_MAX_LENGTH + 1;
+            token = nullptr;
+        }
+
+        result = WP_Auth_Verify(token, length);
+    }
+
+    // always acknowledged, the outcome is the result in the payload
+    WP_ReplyToCommand(msg, true, false, &result, sizeof(result));
+
+    if (result == WP_AuthResult_Dropped)
+    {
+        // too many failures
+        WP_Transport_DropClient();
+    }
+
+    return true;
+}
 
 bool CLR_DBG_Debugger::Monitor_Ping(WP_Message *msg)
 {

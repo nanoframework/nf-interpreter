@@ -141,7 +141,21 @@ namespace nanoFramework.nanoCLR.CLI
 
             if (options.ExposedTcpIpPort != null)
             {
-                hostBuilder.UseTcpIpPortWireProtocol(options.ExposedTcpIpHost ?? TcpIpListeningPort.Localhost, options.ExposedTcpIpPort.Value, options.ExposedBroadcastPort ?? NetworkWireBroadcastService.DebugBroadcastPort);
+                if (options.DebugToken != null
+                    && System.Text.Encoding.UTF8.GetByteCount(options.DebugToken) > 64)
+                {
+                    throw new CLIException(ExitCode.E9000, "--debugtoken can't be longer than 64 bytes.");
+                }
+
+                hostBuilder.UseTcpIpPortWireProtocol(
+                    options.ExposedTcpIpHost ?? TcpIpListeningPort.Localhost,
+                    options.ExposedTcpIpPort.Value,
+                    options.ExposedBroadcastPort ?? NetworkWireBroadcastService.DebugBroadcastPort,
+                    options.DebugToken);
+            }
+            else if (options.DebugToken != null || options.ExposedTcpIpHost != null || options.ExposedBroadcastPort != null)
+            {
+                throw new CLIException(ExitCode.E9000, "--host, --broadcast and --debugtoken require --networkport.");
             }
 
             if (options.ExposedNamedPipe != null)

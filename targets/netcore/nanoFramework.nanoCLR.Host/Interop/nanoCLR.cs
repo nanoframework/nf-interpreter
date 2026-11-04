@@ -48,6 +48,8 @@ namespace nanoFramework.nanoCLR.Host.Interop
         internal delegate int WireReceiveDelegate(
             [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)][Out] byte[] data, int length);
 
+        internal delegate void WireDropClientDelegate();
+
         internal delegate void ProfilerMessageDelegate(
             [MarshalAs(UnmanagedType.LPStr)] string message);
 
@@ -96,6 +98,15 @@ namespace nanoFramework.nanoCLR.Host.Interop
         [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void nanoCLR_SetWireProtocolTransmitCallback(
             [MarshalAs(UnmanagedType.FunctionPtr)] WireTransmitDelegate transmitCallback);
+
+        [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void nanoCLR_SetWireProtocolDropClientCallback(
+            [MarshalAs(UnmanagedType.FunctionPtr)] WireDropClientDelegate dropClientCallback);
+
+        [DllImport(NativeLibraryName, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void nanoCLR_SetWireProtocolChannelInfo(
+            [MarshalAs(UnmanagedType.I1)] bool isNetwork,
+            [MarshalAs(UnmanagedType.LPStr)] string token);
 
         [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void nanoCLR_SetProfilerMessageCallback(

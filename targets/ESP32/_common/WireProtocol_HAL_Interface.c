@@ -4,13 +4,14 @@
 //
 #include <target_platform.h>
 #include <esp32_idf.h>
+#include <freertos/semphr.h>
 
 #include <nanoHAL_v2.h>
 #include <WireProtocol.h>
 #include <WireProtocol_Message.h>
-#include <WireProtocol_HAL_Interface.h>
-#include <WireProtocol_Uart_Pins.h>
 #include <WireProtocol_Transport.h>
+#include <WireProtocol_Uart_Pins.h>
+#include <WireProtocol_ESP32_SerialTransport.h>
 
 #if CONFIG_TINYUSB_CDC_ENABLED
 #include <tinyusb.h>
@@ -44,7 +45,7 @@
 
 // Select between USB Jtag or UART based WP transport based on where connected and configuration
 static bool WP_Port_Initialised = false;
-WP_TransportType g_WP_Transport = WP_TRANSPORT_NONE;
+WP_ESP32_SerialTransportType g_WP_ESP32_SerialTransport = WP_ESP32_SERIAL_TRANSPORT_NONE;
 
 // WP using TinyUSB CDC
 #if defined(WP_USE_TINYUSB)
@@ -386,7 +387,7 @@ static bool WP_Initialise(COM_HANDLE port)
 #if defined(WP_USE_TINYUSB)
     if (WP_InitialiseTinyUsb(port))
     {
-        g_WP_Transport = WP_TRANSPORT_TINY_USB;
+        g_WP_ESP32_SerialTransport = WP_ESP32_SERIAL_TRANSPORT_TINY_USB;
         return true;
     }
 #endif
@@ -394,7 +395,7 @@ static bool WP_Initialise(COM_HANDLE port)
 #if defined(WP_USE_USB_JTAG)
     if (WP_InitialiseUsbJtag(port))
     {
-        g_WP_Transport = WP_TRANSPORT_USB_JTAG;
+        g_WP_ESP32_SerialTransport = WP_ESP32_SERIAL_TRANSPORT_USB_JTAG;
         return true;
     }
 
@@ -403,17 +404,17 @@ static bool WP_Initialise(COM_HANDLE port)
 #if defined(WP_USE_UART)
     if (WP_InitialiseUart(port))
     {
-        g_WP_Transport = WP_TRANSPORT_UART;
+        g_WP_ESP32_SerialTransport = WP_ESP32_SERIAL_TRANSPORT_UART;
         return true;
     }
 #endif
 
-    g_WP_Transport = WP_TRANSPORT_NONE;
+    g_WP_ESP32_SerialTransport = WP_ESP32_SERIAL_TRANSPORT_NONE;
 
     return false;
 }
 
-void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
+void WP_Serial_ReceiveBytes(uint8_t **ptr, uint32_t *size)
 {
     // TODO: Initialise Port if not already done, Wire Protocol should be calling this directly at startup
     if (!WP_Port_Initialised)
@@ -421,66 +422,122 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
         WP_Initialise(ESP32_WP_UART);
     }
 
-    switch (g_WP_Transport)
+    switch (g_WP_ESP32_SerialTransport)
     {
         default:
         // No transport selected on startup
-        case WP_TRANSPORT_NONE:
+        case WP_ESP32_SERIAL_TRANSPORT_NONE:
             *size = 0;
             // delay to avoid busy loop if no transport selected
             vTaskDelay(pdMS_TO_TICKS(1000));
             break;
 
 #if defined(WP_USE_UART)
-        case WP_TRANSPORT_UART:
+        case WP_ESP32_SERIAL_TRANSPORT_UART:
             WP_ReceiveBytesUart(ptr, size);
             break;
 #endif
 
 #if defined(WP_USE_USB_JTAG)
-        case WP_TRANSPORT_USB_JTAG:
+        case WP_ESP32_SERIAL_TRANSPORT_USB_JTAG:
             WP_ReceiveBytesUsbJtag(ptr, size);
             break;
 #endif
 
 #if defined(WP_USE_TINYUSB)
-        case WP_TRANSPORT_TINY_USB:
+        case WP_ESP32_SERIAL_TRANSPORT_TINY_USB:
             WP_ReceiveBytesTinyUsb(ptr, size);
             break;
 #endif
     }
 }
 
-uint8_t WP_TransmitMessage(WP_Message *message)
+uint8_t WP_Serial_TransmitMessage(WP_Message *message)
 {
     if (!WP_Port_Initialised)
     {
         WP_Initialise(ESP32_WP_UART);
     }
 
-    switch (g_WP_Transport)
+    switch (g_WP_ESP32_SerialTransport)
     {
         default:
             // No transport selected on startup
-        case WP_TRANSPORT_NONE:
+        case WP_ESP32_SERIAL_TRANSPORT_NONE:
             // delay to avoid busy loop if no transport selected
             vTaskDelay(pdMS_TO_TICKS(1000));
             return 0;
 
 #if defined(WP_USE_UART)
-        case WP_TRANSPORT_UART:
+        case WP_ESP32_SERIAL_TRANSPORT_UART:
             return WP_TransmitMessageUart(message);
 #endif
 
 #if defined(WP_USE_USB_JTAG)
-        case WP_TRANSPORT_USB_JTAG:
+        case WP_ESP32_SERIAL_TRANSPORT_USB_JTAG:
             return WP_TransmitMessageUsbJtag(message);
 #endif
 
 #if defined(WP_USE_TINYUSB)
-        case WP_TRANSPORT_TINY_USB:
+        case WP_ESP32_SERIAL_TRANSPORT_TINY_USB:
             return WP_TransmitMessageTinyUsb(message);
 #endif
     }
 }
 #pragma endregion WP main interface
+
+#if CONFIG_NF_WP_CHANNEL_NETWORK && !defined(I_AM_NANOBOOTER)
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// transmission lock
+// messages are transmitted from the CLR thread and from the receiver thread, the lock makes sure that the header and
+// payload of a message are never interleaved with another one
+
+// lifecycle of the transmission mutex, which is created on first use
+typedef enum WP_TxMutexState
+{
+    WP_TxMutexState_NotCreated = 0,
+    WP_TxMutexState_Creating = 1,
+    WP_TxMutexState_Ready = 2,
+
+} WP_TxMutexState;
+
+static SemaphoreHandle_t s_txMutex = NULL;
+static volatile WP_TxMutexState s_txMutexState = WP_TxMutexState_NotCreated;
+
+void WP_Transport_Lock(void)
+{
+    WP_TxMutexState expected = WP_TxMutexState_NotCreated;
+
+    if (__atomic_compare_exchange_n(
+            &s_txMutexState,
+            &expected,
+            WP_TxMutexState_Creating,
+            false,
+            __ATOMIC_ACQ_REL,
+            __ATOMIC_ACQUIRE))
+    {
+        s_txMutex = xSemaphoreCreateMutex();
+        __atomic_store_n(&s_txMutexState, WP_TxMutexState_Ready, __ATOMIC_RELEASE);
+    }
+
+    while (__atomic_load_n(&s_txMutexState, __ATOMIC_ACQUIRE) != WP_TxMutexState_Ready)
+    {
+        taskYIELD();
+    }
+
+    if (s_txMutex != NULL)
+    {
+        xSemaphoreTake(s_txMutex, portMAX_DELAY);
+    }
+}
+
+void WP_Transport_Unlock(void)
+{
+    if (s_txMutex != NULL)
+    {
+        xSemaphoreGive(s_txMutex);
+    }
+}
+
+#endif // CONFIG_NF_WP_CHANNEL_NETWORK

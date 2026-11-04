@@ -12,6 +12,7 @@
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_ConfigurationManager.h>
 #include <nanoHAL_StorageOperation.h>
+#include <WireProtocol_Transport.h>
 #include <nanoHAL_Graphics.h>
 #if (HAL_USE_UART == TRUE)
 #include <sys_io_ser_native_target.h>
@@ -121,8 +122,10 @@ void nanoHAL_Initialize()
     // Init Networking
     Network_Initialize();
 
-    // Start Network Debugger
-    // SOCKETS_DbgInitialize( 0 );
+#if CONFIG_NF_WP_CHANNEL_NETWORK
+    // Start Wire Protocol over network (listener and discovery)
+    WP_Network_Initialize();
+#endif
 
 #if (NANOCLR_ESP32_BLE == TRUE)
     // Bluetooth test code
@@ -152,7 +155,11 @@ void nanoHAL_Uninitialize(bool isPoweringDown)
 
     SOCKETS_CloseConnections();
 
+#if !CONFIG_NF_WP_CHANNEL_NETWORK
+    // with the Wire Protocol network channel the network stack has to be kept running, otherwise the debugger
+    // connection is lost on every CLR reboot
     Network_Uninitialize();
+#endif
 
     FileSystemVolumeList::UninitializeVolumes();
 

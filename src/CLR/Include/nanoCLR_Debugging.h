@@ -39,6 +39,7 @@ struct CLR_DBG_Commands
     static const unsigned int c_Monitor_StorageOperation        = 0x00000011;
     static const unsigned int c_Monitor_ConfigurationInfo       = 0x00000012;
     static const unsigned int c_Monitor_ConfigurationOperation  = 0x00000013;
+    static const unsigned int c_Monitor_Authenticate            = 0x00000014;
     static const unsigned int c_Monitor_TargetInfo              = 0x00000020;
 
     //--//
@@ -947,6 +948,7 @@ public:
     static CLR_RT_Thread *GetThreadFromPid ( CLR_INT32 pid );
 
     static bool Monitor_Ping                            ( WP_Message *msg );
+    static bool Monitor_Authenticate                    ( WP_Message *msg );
     static bool Monitor_Reboot                          ( WP_Message *msg );
     static bool Monitor_TargetInfo                      ( WP_Message *msg );
     static bool Debugging_Execution_QueryCLRCapabilities( WP_Message *msg );

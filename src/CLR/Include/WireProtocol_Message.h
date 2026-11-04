@@ -66,6 +66,12 @@ extern "C"
 #endif
 
     void WP_Message_PrepareReception();
+
+    ///
+    /// @brief Discards what was received so far and restarts the receive state machine.
+    /// Safe to call from the thread that runs WP_Message_Process(), takes effect on its next iteration.
+    ///
+    void WP_Message_ResetReception();
     void WP_Message_Initialize(WP_Message *message);
     void WP_Message_PrepareRequest(
         WP_Message *message,

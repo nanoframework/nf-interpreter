@@ -10,7 +10,7 @@
 #include <nanoHAL_v2.h>
 #include <WireProtocol.h>
 #include <WireProtocol_Message.h>
-#include <WireProtocol_HAL_Interface.h>
+#include <WireProtocol_Transport.h>
 
 bool WP_Initialise();
 
@@ -46,7 +46,7 @@ bool WP_Initialise()
     return WP_Port_Intitialised;
 }
 
-void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
+void WP_Serial_ReceiveBytes(uint8_t **ptr, uint32_t *size)
 {
     // TODO: Initialise Port if not already done, Wire Protocol should be calling this directly at startup
     if (!WP_Port_Intitialised)
@@ -68,7 +68,7 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
     }
 }
 
-uint8_t WP_TransmitMessage(WP_Message *message)
+uint8_t WP_Serial_TransmitMessage(WP_Message *message)
 {
     if (!WP_Port_Intitialised)
     {
@@ -91,3 +91,59 @@ uint8_t WP_TransmitMessage(WP_Message *message)
 
     return true;
 }
+
+#if CONFIG_NF_WP_CHANNEL_NETWORK && !defined(I_AM_NANOBOOTER)
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// transmission lock
+// messages are transmitted from the CLR thread and from the receiver thread, the lock makes sure that the header and
+// payload of a message are never interleaved with another one
+
+// lifecycle of the transmission mutex, which is created on first use
+typedef enum WP_TxMutexState
+{
+    WP_TxMutexState_NotCreated = 0,
+    WP_TxMutexState_Creating = 1,
+    WP_TxMutexState_Ready = 2,
+
+} WP_TxMutexState;
+
+static SemaphoreHandle_t s_txMutex = NULL;
+static volatile WP_TxMutexState s_txMutexState = WP_TxMutexState_NotCreated;
+
+void WP_Transport_Lock(void)
+{
+    WP_TxMutexState expected = WP_TxMutexState_NotCreated;
+
+    if (__atomic_compare_exchange_n(
+            &s_txMutexState,
+            &expected,
+            WP_TxMutexState_Creating,
+            false,
+            __ATOMIC_ACQ_REL,
+            __ATOMIC_ACQUIRE))
+    {
+        s_txMutex = xSemaphoreCreateMutex();
+        __atomic_store_n(&s_txMutexState, WP_TxMutexState_Ready, __ATOMIC_RELEASE);
+    }
+
+    while (__atomic_load_n(&s_txMutexState, __ATOMIC_ACQUIRE) != WP_TxMutexState_Ready)
+    {
+        taskYIELD();
+    }
+
+    if (s_txMutex != NULL)
+    {
+        xSemaphoreTake(s_txMutex, portMAX_DELAY);
+    }
+}
+
+void WP_Transport_Unlock(void)
+{
+    if (s_txMutex != NULL)
+    {
+        xSemaphoreGive(s_txMutex);
+    }
+}
+
+#endif // CONFIG_NF_WP_CHANNEL_NETWORK

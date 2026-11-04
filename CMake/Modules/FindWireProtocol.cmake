@@ -44,16 +44,64 @@ else()
     message(STATUS "Wire Protocol transport: serial port (UART)")
 endif()
 
+# sanity checks for the Wire Protocol channels (nanoCLR)
+if(NF_FEATURE_DEBUGGER)
+
+    if(NOT NF_WP_CHANNEL_SERIAL AND NOT NF_WP_CHANNEL_NETWORK)
+        message(FATAL_ERROR "
+
+ERROR: managed application debugging is enabled but there is no Wire Protocol channel. Enable NF_WP_CHANNEL_SERIAL and/or NF_WP_CHANNEL_NETWORK.")
+    endif()
+
+    if(NF_WP_CHANNEL_NETWORK)
+
+        if(TARGET_HAS_WIFI_ISM43362)
+            message(FATAL_ERROR "
+
+ERROR: NF_WP_CHANNEL_NETWORK is not supported with the ISM43362 Wi-Fi module.")
+        endif()
+
+        if(NOT RTOS_CHIBIOS_CHECK AND NOT RTOS_FREERTOS_CHECK AND NOT RTOS_ESP32_CHECK)
+            message(FATAL_ERROR "
+
+ERROR: NF_WP_CHANNEL_NETWORK is only supported on ChibiOS, FreeRTOS and ESP32 targets.")
+        endif()
+
+    endif()
+
+endif()
+
+# report Wire Protocol channels
+if(NF_FEATURE_DEBUGGER)
+    if(NF_WP_CHANNEL_NETWORK)
+        message(STATUS "Wire Protocol network channel: enabled (TCP port ${NF_WP_NETWORK_PORT})")
+        if(NF_WP_NETWORK_DISCOVERY)
+            message(STATUS "Wire Protocol network discovery: UDP port ${NF_WP_NETWORK_DISCOVERY_PORT}")
+        endif()
+    else()
+        message(STATUS "Wire Protocol network channel: disabled")
+    endif()
+endif()
+
 # set include directories for Wire Protocol
 list(APPEND WireProtocol_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Include)
 
 # source files for Wire Protocol
+# on ChibiOS, FreeRTOS and ESP32 the channel dispatcher replaces the default (weak) HAL interface
+# the platform serial implementation is provided as WP_Serial_*
+if(RTOS_CHIBIOS_CHECK OR RTOS_FREERTOS_CHECK OR RTOS_ESP32_CHECK)
+    set(WireProtocol_HAL_SRC WireProtocol_Transport.c)
+else()
+    set(WireProtocol_HAL_SRC WireProtocol_HAL_Interface.c)
+endif()
+
 set(WireProtocol_SRCS
 
     WireProtocol_Message.c
     WireProtocol_MonitorCommands.c
-    WireProtocol_HAL_Interface.c
+    ${WireProtocol_HAL_SRC}
     WireProtocol_App_Interface.c
+    WireProtocol_Auth.c
 
     nanoSupport_CRC32.c
 )

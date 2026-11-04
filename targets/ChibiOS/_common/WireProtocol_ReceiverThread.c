@@ -29,7 +29,12 @@ __attribute__((noreturn)) void ReceiverThread(void const *argument)
 
 #if (HAL_USE_SERIAL_USB == TRUE)
         // only bother to wait for WP message is USB is connected
+        // (with the network channel enabled the thread has to run to handle network clients too)
+#if CONFIG_NF_WP_CHANNEL_NETWORK && !defined(I_AM_NANOBOOTER)
+        if (true)
+#else
         if (SDU1.config->usbp->state == USB_ACTIVE)
+#endif
         {
 #endif
 

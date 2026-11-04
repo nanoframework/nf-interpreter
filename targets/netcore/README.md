@@ -109,6 +109,34 @@ Servers use a managed `X509Certificate2` certificate/private-key identity and
 do not require a CA path. Mutual TLS/client identities and TLS 1.0/1.1 remain
 unsupported.
 
+## Debug over network
+
+The virtual device can be debugged over TCP, with the same Wire Protocol used on serial. A debugger can find it
+without any cable or virtual serial port.
+
+```
+nanoclr run --assemblies <pe files> --networkport 26000 --debugtoken <token> --waitfordebugger
+```
+
+| Option | Description |
+| --- | --- |
+| `--networkport` | TCP port the device listens on. Use `26000`, the port the debugger tools and the devices use by default. |
+| `--host` | Address to bind to. Default is `127.0.0.1` (this computer only). Use `0.0.0.0` to accept connections from other computers. |
+| `--broadcast` | UDP port where the device announces itself. Default is `23657`. |
+| `--debugtoken` | Token the debugger has to present to connect (max 64 bytes). Without it, no authentication is required. |
+
+Behavior:
+
+- The device accepts a single debugger at a time. A new connection replaces the current one.
+- **Discovery**: every 5 seconds the device broadcasts `+:<port>:<targetName>` over UDP. When the device exits it sends `-:<port>`. The debugger takes
+  the IP address from the sender of the datagram. Broadcasts reach the local network only when `--host` is not
+  `127.0.0.1`.
+- **Authentication**: the debugger sends `Monitor_Authenticate` (`0x14`) after connecting. Without a token it always
+  succeeds. With a token, only ping and authenticate are accepted until the token is right.
+  After 3 wrong tokens the connection is dropped and new connections are rejected for 1 second. The token is sent in
+  clear text, so use it to keep unintended clients out, not as protection on untrusted networks.
+- A client that disconnects loses its authentication.
+
 ## Validation
 
 Build and run matching System.Net managed tests on the Windows DLL, including

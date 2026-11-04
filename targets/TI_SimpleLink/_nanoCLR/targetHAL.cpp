@@ -106,9 +106,6 @@ void nanoHAL_Initialize()
 
     // Init Networking
     Network_Initialize();
-
-    // Start Network Debugger
-    // SOCKETS_DbgInitialize( 0 );
 }
 
 void nanoHAL_Uninitialize(bool isPoweringDown)

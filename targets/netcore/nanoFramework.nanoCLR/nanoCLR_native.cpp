@@ -9,6 +9,7 @@
 #include <Target_Network.h>
 #include <nanoCLR_Application.h>
 #include <target_common.h>
+#include <WireProtocol_Transport.h>
 #include <iostream>
 #include <format>
 
@@ -54,6 +55,7 @@ ProfilerDataCallback g_ProfilerDataCallback = nullptr;
 
 WireTransmitCallback WireProtocolTransmitCallback = nullptr;
 WireReceiveCallback WireProtocolReceiveCallback = nullptr;
+WireDropClientCallback WireProtocolDropClientCallback = nullptr;
 
 // flag requesting stopping of WP processing
 bool _wireProtocolStopProcess;
@@ -146,6 +148,21 @@ void nanoCLR_SetWireProtocolReceiveCallback(WireReceiveCallback receiveCallback)
 void nanoCLR_SetWireProtocolTransmitCallback(WireTransmitCallback transmitCallback)
 {
     WireProtocolTransmitCallback = transmitCallback;
+}
+
+void nanoCLR_SetWireProtocolDropClientCallback(WireDropClientCallback dropClientCallback)
+{
+    WireProtocolDropClientCallback = dropClientCallback;
+}
+
+void nanoCLR_SetWireProtocolChannelInfo(bool isNetwork, const char *token)
+{
+    if (token != nullptr)
+    {
+        WP_Auth_SetToken(token);
+    }
+
+    WP_Auth_SessionChanged(isNetwork);
 }
 
 void nanoCLR_WireProtocolProcess()

@@ -726,9 +726,14 @@
  * LWIP_TCP_KEEPALIVE==1: Enable TCP_KEEPIDLE, TCP_KEEPINTVL and TCP_KEEPCNT
  * options processing. Note that TCP_KEEPIDLE and TCP_KEEPINTVL have to be set
  * in seconds. (does not require sockets.c, and will affect tcp.c)
+ * It's required by the Wire Protocol network channel (keepalive of the debugger connection).
  */
 #ifndef LWIP_TCP_KEEPALIVE
+#if CONFIG_NF_WP_CHANNEL_NETWORK
+#define LWIP_TCP_KEEPALIVE 1
+#else
 #define LWIP_TCP_KEEPALIVE 0
+#endif
 #endif
 
 /**

@@ -76,6 +76,11 @@ __nfweak void *ConfigurationManager_FindX509DeviceCertificatesConfigurationBlock
     return FindConfigurationBlocks(startAddress, endAddress, c_MARKER_CONFIGURATION_X509DEVICECERTIFICATE_V1);
 }
 
+__nfweak void *ConfigurationManager_FindWPAuthTokenConfigurationBlocks(uint32_t startAddress, uint32_t endAddress)
+{
+    return FindConfigurationBlocks(startAddress, endAddress, c_MARKER_CONFIGURATION_WPAUTHTOKEN_V1);
+}
+
 __nfweak HAL_Configuration_Wireless80211 *ConfigurationManager_GetWirelessConfigurationFromId(uint32_t configurationId)
 {
     for (int i = 0; i < g_TargetConfiguration.Wireless80211Configs->Count; i++)
@@ -258,6 +263,10 @@ uint32_t ConfigurationManager_GetBlockCount(DeviceConfigurationOption configurat
             return g_TargetConfiguration.DeviceCertificates != NULL ? g_TargetConfiguration.DeviceCertificates->Count
                                                                     : 0;
 
+        case DeviceConfigurationOption_WPAuthToken:
+            return g_TargetConfiguration.WPAuthTokenConfigs != NULL ? g_TargetConfiguration.WPAuthTokenConfigs->Count
+                                                                    : 0;
+
         default:
             return 0;
     }
@@ -315,6 +324,9 @@ static uint32_t GetFixedConfigurationBlockSize(DeviceConfigurationOption configu
         case DeviceConfigurationOption_WirelessNetworkAP:
             return sizeof(HAL_Configuration_WirelessAP);
 
+        case DeviceConfigurationOption_WPAuthToken:
+            return sizeof(HAL_Configuration_WPAuthToken);
+
         default:
             return 0;
     }
@@ -338,6 +350,9 @@ static const unsigned char *GetConfigurationBlockMarker(DeviceConfigurationOptio
 
         case DeviceConfigurationOption_X509DeviceCertificates:
             return c_MARKER_CONFIGURATION_X509DEVICECERTIFICATE_V1;
+
+        case DeviceConfigurationOption_WPAuthToken:
+            return c_MARKER_CONFIGURATION_WPAUTHTOKEN_V1;
 
         default:
             return NULL;
@@ -766,6 +781,12 @@ ConfigurationOperationError ConfigurationManager_ExecuteConfigurationOperation(
 
         // the device sets the marker
         memcpy(block, marker, 4);
+
+        if (configuration == DeviceConfigurationOption_WPAuthToken &&
+            ((HAL_Configuration_WPAuthToken *)block)->TokenLength > WPAUTHTOKEN_CONFIG_MAX_TOKEN_LENGTH)
+        {
+            return ConfigurationOperationError_InvalidBlock;
+        }
     }
 
     if (IsWirelessProfile(configuration))
@@ -1033,6 +1054,10 @@ static uint32_t GetStoredConfigurationBlockSize(const uint8_t *block, uint32_t r
     else if (memcmp(block, c_MARKER_CONFIGURATION_WIRELESS_AP_V1, 4) == 0)
     {
         blockSize = sizeof(HAL_Configuration_WirelessAP);
+    }
+    else if (memcmp(block, c_MARKER_CONFIGURATION_WPAUTHTOKEN_V1, 4) == 0)
+    {
+        blockSize = sizeof(HAL_Configuration_WPAuthToken);
     }
     else if (
         memcmp(block, c_MARKER_CONFIGURATION_X509CAROOTBUNDLE_V1, 4) == 0 ||
@@ -1435,6 +1460,16 @@ void ConfigurationManager_GetFlashBlockInfo(
             // limited by the RAM to receive it, the room in the storage is checked when it's stored (a replace frees
             // the room of the certificate it replaces)
             info->MaxBlockSize = maxCertificateBlockSize;
+            break;
+
+        case DeviceConfigurationOption_WPAuthToken:
+            // only if the device can debug over the network, a single block that can't be read back (it's a secret)
+#if CONFIG_NF_WP_CHANNEL_NETWORK
+            info->MaxCount = 1;
+            info->Flags =
+                ConfigurationBlockFlags_CanAdd | ConfigurationBlockFlags_CanReplace | ConfigurationBlockFlags_CanDelete;
+            info->MaxBlockSize = sizeof(HAL_Configuration_WPAuthToken);
+#endif
             break;
 
         default:

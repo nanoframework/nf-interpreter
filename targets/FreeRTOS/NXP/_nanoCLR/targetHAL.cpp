@@ -10,6 +10,7 @@
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_ConfigurationManager.h>
 #include <nanoHAL_StorageOperation.h>
+#include <WireProtocol_Transport.h>
 
 //
 //  Reboot handlers clean up on reboot
@@ -80,8 +81,10 @@ void nanoHAL_Initialize()
     // Init Networking
     Network_Initialize();
 
-    // Start Network Debugger
-    // SOCKETS_DbgInitialize( 0 );
+#if CONFIG_NF_WP_CHANNEL_NETWORK
+    // Start Wire Protocol over network (listener and discovery)
+    WP_Network_Initialize();
+#endif
 }
 
 void nanoHAL_Uninitialize(bool isPoweringDown)

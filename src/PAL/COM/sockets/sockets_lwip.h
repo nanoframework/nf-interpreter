@@ -76,18 +76,6 @@ struct Sockets_LWIP_Driver
 
     static void SaveConfig(int32_t index, HAL_Configuration_NetworkInterface *cfg);
 
-    // Debugger methods ( socket_debugger.cpp )
-    static void Debugger_Initialize();
-    static void Debugger_Uninitialize();
-    static void Debugger_Abort();
-
-    static bool InitializeDbgListener( int ComPortNum );
-    static bool UninitializeDbgListener( int ComPortNum );
-    static int  Write( int ComPortNum, const char* Data, size_t size );
-    static int  Read ( int ComPortNum, char*       Data, size_t size );
-    static bool UpgradeToSsl( int ComPortNum, const int8_t* pCACert, uint32_t caCertLen, const int8_t* pDeviceCert, uint32_t deviceCertLen, const char* szTargetHost );
-    static bool IsUsingSsl( int ComPortNum );
-
     void* GetSocketSslData(SOCK_SOCKET socket)
     {
         int32_t tmp;
@@ -131,7 +119,6 @@ struct Sockets_LWIP_Driver
 
 
     static void ClearStatusBitsForSocket(SOCK_SOCKET sock, bool fWrite);
-    static bool InitializeMulticastDiscovery();
 
 private:
 
@@ -148,35 +135,12 @@ private:
         static const uint32_t c_CloseSocket      = 0x0004;
     };
 
-    enum DebuggerState
-    {
-        DbgSock_Uninitialized = 0,
-        DbgSock_Listening     = 1,
-        DbgSock_Connected     = 2,
-    } m_stateDebugSocket;
-
-    bool m_usingSSL;
-    
-    static void MulticastDiscoveryRespond(void* arg);
-	static void MulticastDiscoverySchedule();
-
-    static void CloseDebuggerSocket();
-    static void OnDebuggerTimeout(void* arg);
-    
-    static HAL_COMPLETION s_DebuggerTimeoutCompletion;
-
-    SOCK_SOCKET    m_SocketDebugListener;
-    SOCK_SOCKET    m_SocketDebugStream;
-    SOCK_SOCKET    m_multicastSocket;
-
     bool           m_fShuttingDown;
 
     int32_t  m_cntSockets;
     struct SocketRegisterMap m_socketHandles[SOCKETS_MAX_COUNT];
 
     static bool           s_initialized;
-    static bool           s_initializedDbg;
-    static const int32_t    c_WellKnownDebugPort = DEBUG_SOCKET_PORT;
     static bool           s_wirelessInitialized;
     static bool           s_discoveryInitialized;
 };
