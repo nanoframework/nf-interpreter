@@ -2957,7 +2957,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
                 if (FAILED(parser.Advance(res)))
                     break;
 
-                if (res.m_cls.m_data == instTarget.m_data)
+                if (res.m_cls.m_data == instTarget.m_data || IsInstanceOf(res.m_cls, instTarget))
                 {
                     return true;
                 }
