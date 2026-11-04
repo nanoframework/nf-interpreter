@@ -21,10 +21,10 @@
 // General TRACE Macros only included in output if WP_TRACE_f option is ON
 #if defined(TRACE_MASK) && TRACE_MASK != 0
 #define TRACE0(f, msg)                                                                                                 \
-    if ((f)&TRACE_MASK)                                                                                                \
+    if ((f) & TRACE_MASK)                                                                                              \
     debug_printf(msg)
 #define TRACE(f, msg, ...)                                                                                             \
-    if ((f)&TRACE_MASK)                                                                                                \
+    if ((f) & TRACE_MASK)                                                                                              \
     debug_printf(msg, __VA_ARGS__)
 #else
 #define TRACE0(f, msg)
@@ -35,10 +35,10 @@
 // and WP_TRACE_f option is ON and only once every "modCount" times around the WP_Process loop.
 #if defined(TRACE_MASK) && ((TRACE_MASK & TRACE_VERBOSE) != 0)
 #define TRACE0_LIMIT(f, modCount, msg)                                                                                 \
-    if (((traceLoopCounter++) % modCount == 0) && (f)&TRACE_MASK)                                                      \
+    if (((traceLoopCounter++) % modCount == 0) && (f) & TRACE_MASK)                                                    \
     debug_printf(msg)
 #define TRACE_LIMIT(f, modCount, msg, ...)                                                                             \
-    if (((traceLoopCounter++) % modCount == 0) && (f)&TRACE_MASK)                                                      \
+    if (((traceLoopCounter++) % modCount == 0) && (f) & TRACE_MASK)                                                    \
     debug_printf(msg, __VA_ARGS__)
 #else
 #define TRACE0_LIMIT(f, modCount, msg, ...)

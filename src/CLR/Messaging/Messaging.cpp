@@ -90,8 +90,7 @@ bool CLR_Messaging::Messaging_Query__Reply(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_MESSAGING();
 
-    auto *cmd =
-        (CLR_Messaging_Commands::Messaging_Query::Reply *)msg->m_payload;
+    auto *cmd = (CLR_Messaging_Commands::Messaging_Query::Reply *)msg->m_payload;
 
     g_CLR_Messaging->AllocateAndQueueMessage(
         CLR_Messaging_Commands::c_Messaging_Query,
