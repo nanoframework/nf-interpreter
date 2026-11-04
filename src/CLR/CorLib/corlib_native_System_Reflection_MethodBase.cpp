@@ -160,27 +160,31 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::Invoke___OBJECT__OBJ
             if (element.m_levels > 0 ||
                 (c_CLR_RT_DataTypeLookup[element.m_dt].m_flags & CLR_RT_DataTypeLookup::c_Reference) != 0)
             {
-                CLR_RT_HeapBlock &arg = args[argIndex];
-                bool isNullReference =
-                    (c_CLR_RT_DataTypeLookup[arg.DataType()].m_flags & CLR_RT_DataTypeLookup::c_Reference) != 0 &&
-                    arg.Dereference() == NULL;
+                CLR_RT_ReflectionDef_Index expectedType{};
+                CLR_RT_TypeDescriptor targetType{};
 
-                if (!isNullReference)
+                expectedType.m_kind = REFLECTION_TYPE;
+                expectedType.m_levels = (CLR_UINT16)element.m_levels;
+                expectedType.m_data.m_type = element.m_cls;
+
+                NANOCLR_CHECK_HRESULT(targetType.InitializeFromReflection(expectedType));
+
+                if ((targetType.m_flags & CLR_RT_DataTypeLookup::c_Enum) == 0)
                 {
-                    CLR_RT_ReflectionDef_Index expectedType{};
-                    CLR_RT_TypeDescriptor sourceType{};
-                    CLR_RT_TypeDescriptor targetType{};
+                    CLR_RT_HeapBlock &arg = args[argIndex];
+                    bool isNullReference =
+                        (c_CLR_RT_DataTypeLookup[arg.DataType()].m_flags & CLR_RT_DataTypeLookup::c_Reference) != 0 &&
+                        arg.Dereference() == NULL;
 
-                    expectedType.m_kind = REFLECTION_TYPE;
-                    expectedType.m_levels = (CLR_UINT16)element.m_levels;
-                    expectedType.m_data.m_type = element.m_cls;
-
-                    NANOCLR_CHECK_HRESULT(targetType.InitializeFromReflection(expectedType));
-
-                    if (FAILED(sourceType.InitializeFromObject(arg)) ||
-                        CLR_RT_ExecutionEngine::IsInstanceOf(sourceType, targetType, false) == false)
+                    if (!isNullReference)
                     {
-                        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+                        CLR_RT_TypeDescriptor sourceType{};
+
+                        if (FAILED(sourceType.InitializeFromObject(arg)) ||
+                            CLR_RT_ExecutionEngine::IsInstanceOf(sourceType, targetType, false) == false)
+                        {
+                            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+                        }
                     }
                 }
             }

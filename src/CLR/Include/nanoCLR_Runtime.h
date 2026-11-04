@@ -1553,6 +1553,8 @@ struct CLR_RT_WellKnownTypes
     CLR_RT_TypeDef_Index m_ArrayList;
     CLR_RT_TypeDef_Index m_ICloneable;
     CLR_RT_TypeDef_Index m_IList;
+    CLR_RT_TypeDef_Index m_IEnumerable;
+    CLR_RT_TypeDef_Index m_ICollection;
 
     CLR_RT_TypeDef_Index m_Assembly;
     CLR_RT_TypeDef_Index m_TypeStatic;

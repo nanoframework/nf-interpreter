@@ -2842,6 +2842,8 @@ static const TypeIndexLookup c_TypeIndexLookup[] = {
     TIL("System.Collections", "ArrayList", m_ArrayList),
     TIL("System", "ICloneable", m_ICloneable),
     TIL("System.Collections", "IList", m_IList),
+    TIL("System.Collections", "IEnumerable", m_IEnumerable),
+    TIL("System.Collections", "ICollection", m_ICollection),
 
     TIL("System.Reflection", "Assembly", m_Assembly),
     TIL("System", "Type", m_TypeStatic),

@@ -2870,6 +2870,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
     bool isInstInstruction)
 {
     NATIVE_PROFILE_CLR_CORE();
+    (void)isInstInstruction;
 
     // Reflection objects carry the represented type's metadata, not their runtime array type.
     if (desc.m_reflex.m_levels > 0 && (desc.m_flags & CLR_RT_DataTypeLookup::c_Array) == 0)
@@ -2901,14 +2902,16 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
 
     if (desc.m_reflex.m_levels > descTarget.m_reflex.m_levels)
     {
-        if (descTarget.m_reflex.m_levels == 0 && !isInstInstruction)
+        if (descTarget.m_reflex.m_levels == 0)
         {
             //
-            // Casting from <type>[] to System.Array or System.Object is always allowed.
+            // Arrays can be assigned to their base types and implemented interfaces.
             //
             if (instTarget.m_data == g_CLR_RT_WellKnownTypes.m_Array.m_data ||
                 instTarget.m_data == g_CLR_RT_WellKnownTypes.m_Object.m_data ||
                 instTarget.m_data == g_CLR_RT_WellKnownTypes.m_IList.m_data ||
+                instTarget.m_data == g_CLR_RT_WellKnownTypes.m_ICollection.m_data ||
+                instTarget.m_data == g_CLR_RT_WellKnownTypes.m_IEnumerable.m_data ||
                 instTarget.m_data == g_CLR_RT_WellKnownTypes.m_ICloneable.m_data)
             {
                 return true;
