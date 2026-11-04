@@ -2911,9 +2911,8 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(CLR_RT_TypeDescriptor desc, CLR_RT_Typ
         if ((c_CLR_RT_DataTypeLookup[inst.m_target->dataType].m_flags & valueTypeFlags) != 0 ||
             (c_CLR_RT_DataTypeLookup[instTarget.m_target->dataType].m_flags & valueTypeFlags) != 0)
         {
-            return inst.m_data == instTarget.m_data ||
-                   (inst.m_target->dataType == instTarget.m_target->dataType &&
-                    inst.m_target->dataType != DATATYPE_VALUETYPE);
+            return inst.m_data == instTarget.m_data || (inst.m_target->dataType == instTarget.m_target->dataType &&
+                                                        inst.m_target->dataType != DATATYPE_VALUETYPE);
         }
 
         // Interface elements have no parent chain to reach System.Object.
