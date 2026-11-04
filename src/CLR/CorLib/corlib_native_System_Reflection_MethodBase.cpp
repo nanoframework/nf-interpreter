@@ -129,14 +129,10 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::Invoke___OBJECT__OBJ
             numArgs = pArray->m_numOfElements;
         }
 
-        if ((mdR->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
+        // Preserve null-target invocation for instance methods that do not access this.
+        if ((mdR->flags & CLR_RECORD_METHODDEF::MD_Static) == 0 && obj.Dereference() != NULL)
         {
             CLR_RT_TypeDef_Instance declaringType{};
-
-            if (obj.Dereference() == NULL)
-            {
-                NANOCLR_SET_AND_LEAVE(CLR_E_NULL_REFERENCE);
-            }
 
             if (declaringType.InitializeFromMethod(md) == false ||
                 CLR_RT_ExecutionEngine::IsInstanceOf(obj, declaringType) == false)
@@ -169,7 +165,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::Invoke___OBJECT__OBJ
 
                 NANOCLR_CHECK_HRESULT(targetType.InitializeFromReflection(expectedType));
 
-                if ((targetType.m_flags & CLR_RT_DataTypeLookup::c_Enum) == 0)
+                if ((targetType.m_flags & CLR_RT_DataTypeLookup::c_Enum) == 0 || element.m_levels > 0)
                 {
                     CLR_RT_HeapBlock &arg = args[argIndex];
                     bool isNullReference =
@@ -180,7 +176,30 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::Invoke___OBJECT__OBJ
                     {
                         CLR_RT_TypeDescriptor sourceType{};
 
-                        if (FAILED(sourceType.InitializeFromObject(arg)) ||
+                        if (FAILED(sourceType.InitializeFromObject(arg)))
+                        {
+                            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+                        }
+
+                        bool isCompatibleEnumArray = false;
+                        if ((targetType.m_flags & CLR_RT_DataTypeLookup::c_Enum) != 0 &&
+                            (sourceType.m_flags & CLR_RT_DataTypeLookup::c_Array) != 0 &&
+                            sourceType.m_reflex.m_levels == element.m_levels)
+                        {
+                            CLR_RT_TypeDef_Instance enumType{};
+                            CLR_RT_TypeDef_Instance sourceElementType{};
+
+                            if (enumType.InitializeFromIndex(element.m_cls) == false ||
+                                sourceElementType.InitializeFromIndex(sourceType.m_reflex.m_data.m_type) == false)
+                            {
+                                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+                            }
+
+                            // Enum arrays use their underlying numeric type's storage, not boxed enum elements.
+                            isCompatibleEnumArray = enumType.m_target->dataType == sourceElementType.m_target->dataType;
+                        }
+
+                        if (!isCompatibleEnumArray &&
                             CLR_RT_ExecutionEngine::IsInstanceOf(sourceType, targetType, false) == false)
                         {
                             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
