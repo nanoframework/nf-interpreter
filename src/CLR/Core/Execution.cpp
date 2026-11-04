@@ -8,6 +8,7 @@
 #include <nanoHAL_Time.h>
 
 #include <inttypes.h>
+#include <set>
 #include <stdint.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2936,36 +2937,46 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
         }
     }
 
-    do
+    std::set<CLR_UINT32> visited;
+    auto matchesType = [&](auto &&self, CLR_RT_TypeDef_Instance current) -> bool
     {
-        if (inst.m_data == instTarget.m_data)
+        do
         {
-            return true;
-        }
-
-        //
-        // Scan the list of interfaces.
-        //
-        if (semanticTarget == CLR_RECORD_TYPEDEF::TD_Semantics_Interface && inst.m_target->interfaces != CLR_EmptyIndex)
-        {
-            CLR_RT_SignatureParser parser{};
-            parser.Initialize_Interfaces(inst.m_assm, inst.m_target);
-            CLR_RT_SignatureParser::Element res;
-
-            while (parser.Available() > 0)
+            if (!visited.insert(current.m_data).second)
             {
-                if (FAILED(parser.Advance(res)))
-                    break;
+                return false;
+            }
 
-                if (res.m_cls.m_data == instTarget.m_data || IsInstanceOf(res.m_cls, instTarget))
+            if (current.m_data == instTarget.m_data)
+            {
+                return true;
+            }
+
+            if (semanticTarget == CLR_RECORD_TYPEDEF::TD_Semantics_Interface &&
+                current.m_target->interfaces != CLR_EmptyIndex)
+            {
+                CLR_RT_SignatureParser parser{};
+                parser.Initialize_Interfaces(current.m_assm, current.m_target);
+                CLR_RT_SignatureParser::Element res;
+
+                while (parser.Available() > 0)
                 {
-                    return true;
+                    if (FAILED(parser.Advance(res)))
+                        break;
+
+                    CLR_RT_TypeDef_Instance interfaceType{};
+                    if (interfaceType.InitializeFromIndex(res.m_cls) && self(self, interfaceType))
+                    {
+                        return true;
+                    }
                 }
             }
-        }
-    } while (inst.SwitchToParent());
+        } while (current.SwitchToParent());
 
-    return false;
+        return false;
+    };
+
+    return matchesType(matchesType, inst);
 }
 
 bool CLR_RT_ExecutionEngine::IsInstanceOf(const CLR_RT_TypeDef_Index &cls, const CLR_RT_TypeDef_Index &clsTarget)
