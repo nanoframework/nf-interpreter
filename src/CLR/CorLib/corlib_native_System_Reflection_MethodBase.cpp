@@ -129,6 +129,20 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::Invoke___OBJECT__OBJ
             argumentsCount = pArray->m_numOfElements;
         }
 
+        // Preserve null-target invocation for instance methods that do not access this.
+        if ((mdR->flags & CLR_RECORD_METHODDEF::MD_Static) == 0 && obj.Dereference() != nullptr)
+        {
+            CLR_RT_TypeDef_Instance declaringType{};
+
+            if (declaringType.InitializeFromMethod(md) == false ||
+                CLR_RT_ExecutionEngine::IsInstanceOf(obj, declaringType) == false)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+            }
+        }
+
+        NANOCLR_CHECK_HRESULT(CheckInvokeArguments(md, args, argumentsCount));
+
         NANOCLR_CHECK_HRESULT(stack.MakeCall(md, &obj, args, argumentsCount));
     }
     else
@@ -165,6 +179,85 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::GetMethodDescriptor(
 
     NATIVE_PROFILE_CLR_CORE();
     return CLR_RT_ReflectionDef_Index::Convert(arg, inst) ? S_OK : CLR_E_NULL_REFERENCE;
+}
+
+HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckInvokeArguments(
+    const CLR_RT_MethodDef_Instance &md,
+    CLR_RT_HeapBlock *args,
+    int numArgs)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    CLR_RT_SignatureParser parser{};
+    CLR_RT_SignatureParser::Element element{};
+    parser.Initialize_MethodSignature(md.assembly, md.target);
+
+    // Skip the return type; the remaining signature elements are the explicit parameters.
+    // A generic instantiation spans several elements, so each one is consumed until the parser has moved on.
+    int availableAfterReturn = parser.Available() - 1;
+
+    NANOCLR_CHECK_HRESULT(parser.Advance(element));
+
+    while (parser.Available() > availableAfterReturn)
+    {
+        NANOCLR_CHECK_HRESULT(parser.Advance(element));
+    }
+
+    for (int i = 0; i < numArgs && parser.Available() > 0; i++)
+    {
+        int availableAfterParam = parser.Available() - 1;
+
+        NANOCLR_CHECK_HRESULT(parser.Advance(element));
+
+        // generic parameters can't be checked without the generic context
+        bool isGeneric = element.IsGenericInst || element.DataType == DATATYPE_VAR ||
+                         element.DataType == DATATYPE_MVAR || element.DataType == DATATYPE_GENERICINST;
+
+        if (isGeneric)
+        {
+            CLR_RT_SignatureParser::Element discarded{};
+
+            while (parser.Available() > availableAfterParam)
+            {
+                NANOCLR_CHECK_HRESULT(parser.Advance(discarded));
+            }
+
+            continue;
+        }
+
+        CLR_RT_HeapBlock &arg = args[i];
+
+        if (arg.DataType() == DATATYPE_OBJECT && arg.Dereference() == nullptr)
+        {
+            continue;
+        }
+
+        CLR_RT_ReflectionDef_Index expectedType{};
+        CLR_RT_TypeDescriptor targetType{};
+        CLR_RT_TypeDescriptor sourceType{};
+
+        expectedType.kind = REFLECTION_TYPE;
+        expectedType.levels = (CLR_UINT16)element.Levels;
+        expectedType.data.type = element.Class;
+
+        NANOCLR_CHECK_HRESULT(targetType.InitializeFromReflection(expectedType));
+
+        // FixCall checks and converts these, including enums from their underlying type.
+        if (c_CLR_RT_DataTypeLookup[targetType.m_handlerCls.target->dataType].m_flags &
+            CLR_RT_DataTypeLookup::c_OptimizedValueType)
+        {
+            continue;
+        }
+
+        if (FAILED(sourceType.InitializeFromObject(arg)) ||
+            CLR_RT_ExecutionEngine::IsInstanceOf(sourceType, targetType) == false)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+        }
+    }
+
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckFlags(

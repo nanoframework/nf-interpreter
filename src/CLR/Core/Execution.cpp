@@ -3699,10 +3699,7 @@ void CLR_RT_ExecutionEngine::SignalEvents(CLR_UINT32 events)
 
 //--//
 
-bool CLR_RT_ExecutionEngine::IsInstanceOf(
-    CLR_RT_TypeDescriptor &desc,
-    CLR_RT_TypeDescriptor &descTarget,
-    bool isInstInstruction)
+bool CLR_RT_ExecutionEngine::IsInstanceOf(CLR_RT_TypeDescriptor desc, CLR_RT_TypeDescriptor descTarget)
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_TypeDef_Instance &inst = desc.m_handlerCls;
@@ -3713,8 +3710,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
     if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Info)
     {
         CLR_Debug::Printf(
-            "[DIAG] IsInstanceOf desc DT=%d hCls=%08X hGT=%08X lvl=%d  target DT=%d hCls=%08X hGT=%08X lvl=%d "
-            "isInst=%d\r\n",
+            "[DIAG] IsInstanceOf desc DT=%d hCls=%08X hGT=%08X lvl=%d  target DT=%d hCls=%08X hGT=%08X lvl=%d\r\n",
             (int)desc.GetDataType(),
             (unsigned)desc.m_handlerCls.data,
             (unsigned)desc.m_handlerGenericType.data,
@@ -3722,8 +3718,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
             (int)descTarget.GetDataType(),
             (unsigned)descTarget.m_handlerCls.data,
             (unsigned)descTarget.m_handlerGenericType.data,
-            (int)descTarget.m_reflex.levels,
-            (int)isInstInstruction);
+            (int)descTarget.m_reflex.levels);
     }
 #endif
 
@@ -3734,6 +3729,18 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
         return CLR_RT_HeapBlock::TypeDescriptorsMatch(descTarget, desc);
     }
 
+    // Reflection objects and array element references carry array levels in m_reflex without being arrays themselves.
+    // Compare them using their runtime class.
+    if (desc.m_reflex.levels > 0 && (desc.m_flags & CLR_RT_DataTypeLookup::c_Array) == 0)
+    {
+        CLR_RT_TypeDef_Index runtimeType = desc.m_handlerCls;
+
+        if (FAILED(desc.InitializeFromType(runtimeType)))
+        {
+            return false;
+        }
+    }
+
     while (desc.m_reflex.levels > 0 && descTarget.m_reflex.levels > 0)
     {
         desc.GetElementType(desc);
@@ -3742,40 +3749,33 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
         fArray = true;
     }
 
-    // only check reflection levels if this is not an array
-    if (!fArray && desc.m_reflex.levels < descTarget.m_reflex.levels)
+    if (desc.m_reflex.levels < descTarget.m_reflex.levels)
     {
         return false;
     }
 
-    if (desc.m_reflex.levels > descTarget.m_reflex.levels)
-    {
-        if (descTarget.m_reflex.levels == 0 && !isInstInstruction)
-        {
-            //
-            // Casting from <type>[] to System.Array or System.Object is always allowed.
-            //
-            if (inst.data == g_CLR_RT_WellKnownTypes.Array.data || inst.data == g_CLR_RT_WellKnownTypes.Object.data ||
-                inst.data == g_CLR_RT_WellKnownTypes.IList.data || inst.data == g_CLR_RT_WellKnownTypes.ICloneable.data)
-            {
-                return true;
-            }
-        }
+    // If the source still has array levels here, inst is System.Array and the walk below checks its base types and
+    // interfaces.
 
-        if (inst.target->dataType != instTarget.target->dataType)
-        {
-            return false;
-        }
-    }
-
-    CLR_UINT32 semantic = (inst.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask);
     CLR_UINT32 semanticTarget = (instTarget.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask);
 
     if (fArray)
     {
-        if (semantic != semanticTarget)
+        const CLR_UINT32 valueTypeFlags =
+            CLR_RT_DataTypeLookup::c_OptimizedValueType | CLR_RT_DataTypeLookup::c_ValueType;
+
+        // Value-type elements are invariant, except types sharing storage (enum and its underlying type).
+        if ((c_CLR_RT_DataTypeLookup[inst.target->dataType].m_flags & valueTypeFlags) != 0 ||
+            (c_CLR_RT_DataTypeLookup[instTarget.target->dataType].m_flags & valueTypeFlags) != 0)
         {
-            return false;
+            return inst.data == instTarget.data || (inst.target->dataType == instTarget.target->dataType &&
+                                                    inst.target->dataType != DATATYPE_VALUETYPE);
+        }
+
+        // Interface elements have no parent chain to reach System.Object.
+        if (instTarget.data == g_CLR_RT_WellKnownTypes.Object.data)
+        {
+            return true;
         }
     }
 
@@ -3787,7 +3787,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
         }
 
         //
-        // Scan the list of interfaces.
+        // Scan the list of interfaces. The compiler emits the transitive closure, so there's no need to recurse.
         //
         if (semanticTarget == CLR_RECORD_TYPEDEF::TD_Semantics_Interface && inst.target->interfaces != CLR_EmptyIndex)
         {
@@ -3822,7 +3822,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(const CLR_RT_TypeDef_Index &cls, const
     if (FAILED(descTarget.InitializeFromType(clsTarget)))
         return false;
 
-    return IsInstanceOf(desc, descTarget, false);
+    return IsInstanceOf(desc, descTarget);
 }
 
 bool CLR_RT_ExecutionEngine::IsInstanceOf(CLR_RT_HeapBlock &ref, const CLR_RT_TypeDef_Index &clsTarget)
@@ -3836,14 +3836,13 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(CLR_RT_HeapBlock &ref, const CLR_RT_Ty
     if (FAILED(descTarget.InitializeFromType(clsTarget)))
         return false;
 
-    return IsInstanceOf(desc, descTarget, false);
+    return IsInstanceOf(desc, descTarget);
 }
 
 bool CLR_RT_ExecutionEngine::IsInstanceOf(
     CLR_RT_HeapBlock &obj,
     CLR_RT_Assembly *assm,
     CLR_UINT32 token,
-    bool isInstInstruction,
     const CLR_RT_MethodDef_Instance *caller)
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -3858,7 +3857,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
     if (FAILED(descTarget.InitializeFromSignatureToken(assm, token, caller)))
         return false;
 
-    return IsInstanceOf(desc, descTarget, isInstInstruction);
+    return IsInstanceOf(desc, descTarget);
 }
 
 /// <summary>
@@ -3907,7 +3906,7 @@ HRESULT CLR_RT_ExecutionEngine::CastToType(
     {
         ;
     }
-    else if (g_CLR_RT_ExecutionEngine.IsInstanceOf(ref, assm, tk, isInstInstruction, caller) == true)
+    else if (g_CLR_RT_ExecutionEngine.IsInstanceOf(ref, assm, tk, caller) == true)
     {
         ;
     }
