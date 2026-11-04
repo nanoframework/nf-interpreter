@@ -46,6 +46,7 @@ HRESULT Library_nf_system_text_System_Text_UTF8Encoding::GetBytes___I4__STRING__
     const CLR_UINT8 *j;
     CLR_RT_UnicodeHelper uh;
     int strLength;
+    size_t bytesToCopy;
 
     FAULT_ON_NULL(str);
     FAULT_ON_NULL(pArrayBytes);
@@ -53,22 +54,35 @@ HRESULT Library_nf_system_text_System_Text_UTF8Encoding::GetBytes___I4__STRING__
     uh.SetInputUTF8(str);
     strLength = uh.CountNumberOfCharacters();
     if (strLength < 0)
+    {
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
 
-    if ((strIdx + strCnt) > (CLR_INT32)strLength)
+    if (strIdx < 0 || strCnt < 0 || strIdx > strLength || strCnt > strLength - strIdx)
+    {
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+    }
 
     uh.ConvertFromUTF8(strIdx, true);
     i = uh.m_inputUTF8;
     uh.ConvertFromUTF8(strCnt, true);
     j = uh.m_inputUTF8;
 
-    if ((byteIdx + j - i) > (CLR_INT32)pArrayBytes->m_numOfElements)
+    bytesToCopy = (size_t)(j - i);
+
+    if (byteIdx < 0 || (CLR_UINT32)byteIdx > pArrayBytes->m_numOfElements)
+    {
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+    }
 
-    memcpy(pArrayBytes->GetElement(byteIdx), i, j - i);
+    if (bytesToCopy > pArrayBytes->m_numOfElements - (CLR_UINT32)byteIdx)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+    }
 
-    stack.SetResult_I4(j - i);
+    memcpy(pArrayBytes->GetElement((CLR_UINT32)byteIdx), i, bytesToCopy);
+
+    stack.SetResult_I4((CLR_INT32)bytesToCopy);
 
     NANOCLR_NOCLEANUP();
 }
