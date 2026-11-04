@@ -61,7 +61,7 @@ HRESULT Library_corlib_native_System_Type::IsInstanceOfType___BOOLEAN__OBJECT(CL
     NANOCLR_CHECK_HRESULT(descTarget.InitializeFromReflection(hbType->ReflectionDataConst()));
     NANOCLR_CHECK_HRESULT(desc.InitializeFromObject(stack.Arg1()));
 
-    stack.SetResult_Boolean(CLR_RT_ExecutionEngine::IsInstanceOf(desc, descTarget, false));
+    stack.SetResult_Boolean(CLR_RT_ExecutionEngine::IsInstanceOf(desc, descTarget));
 
     NANOCLR_NOCLEANUP();
 }

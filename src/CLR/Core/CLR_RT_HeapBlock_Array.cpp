@@ -383,7 +383,7 @@ HRESULT CLR_RT_HeapBlock_Array::Copy(
                 {
                     NANOCLR_CHECK_HRESULT(descSrc.InitializeFromObject(*ptrSrc));
 
-                    if (CLR_RT_ExecutionEngine::IsInstanceOf(descSrc, descDst, false) == false)
+                    if (CLR_RT_ExecutionEngine::IsInstanceOf(descSrc, descDst) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
                     }
@@ -418,7 +418,7 @@ HRESULT CLR_RT_HeapBlock_Array::Copy(
                 {
                     NANOCLR_CHECK_HRESULT(descSrc.InitializeFromObject(elem));
 
-                    if (CLR_RT_ExecutionEngine::IsInstanceOf(descSrc, descDst, false) == false)
+                    if (CLR_RT_ExecutionEngine::IsInstanceOf(descSrc, descDst) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
                     }

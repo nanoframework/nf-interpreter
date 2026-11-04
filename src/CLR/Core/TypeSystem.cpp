@@ -2795,10 +2795,7 @@ struct TypeIndexLookup
 };
 
 static const TypeIndexLookup c_TypeIndexLookup[] = {
-#define TIL(ns, nm, fld)                                                                                               \
-    {                                                                                                                  \
-        ns, nm, &g_CLR_RT_WellKnownTypes.fld                                                                           \
-    }
+#define TIL(ns, nm, fld) {ns, nm, &g_CLR_RT_WellKnownTypes.fld}
     TIL("System", "Boolean", m_Boolean),
     TIL("System", "Char", m_Char),
     TIL("System", "SByte", m_Int8),
@@ -2845,8 +2842,6 @@ static const TypeIndexLookup c_TypeIndexLookup[] = {
     TIL("System.Collections", "ArrayList", m_ArrayList),
     TIL("System", "ICloneable", m_ICloneable),
     TIL("System.Collections", "IList", m_IList),
-    TIL("System.Collections", "IEnumerable", m_IEnumerable),
-    TIL("System.Collections", "ICollection", m_ICollection),
 
     TIL("System.Reflection", "Assembly", m_Assembly),
     TIL("System", "Type", m_TypeStatic),
@@ -2897,10 +2892,7 @@ struct MethodIndexLookup
 };
 
 static const MethodIndexLookup c_MethodIndexLookup[] = {
-#define MIL(nm, type, method)                                                                                          \
-    {                                                                                                                  \
-        nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method                                           \
-    }
+#define MIL(nm, type, method) {nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method}
 
     MIL("GetObjectFromId", m_ResourceManager, m_ResourceManager_GetObjectFromId),
     MIL("GetObjectChunkFromId", m_ResourceManager, m_ResourceManager_GetObjectChunkFromId),
@@ -4232,7 +4224,7 @@ bool CLR_RT_TypeSystem::MatchSignatureElement(
         if (FAILED(descRight.InitializeFromReflection(idxRight)))
             return false;
 
-        if (!CLR_RT_ExecutionEngine::IsInstanceOf(descRight, descLeft, false))
+        if (!CLR_RT_ExecutionEngine::IsInstanceOf(descRight, descLeft))
             return false;
     }
     else

@@ -1553,8 +1553,6 @@ struct CLR_RT_WellKnownTypes
     CLR_RT_TypeDef_Index m_ArrayList;
     CLR_RT_TypeDef_Index m_ICloneable;
     CLR_RT_TypeDef_Index m_IList;
-    CLR_RT_TypeDef_Index m_IEnumerable;
-    CLR_RT_TypeDef_Index m_ICollection;
 
     CLR_RT_TypeDef_Index m_Assembly;
     CLR_RT_TypeDef_Index m_TypeStatic;
@@ -3844,10 +3842,10 @@ struct CLR_RT_ExecutionEngine
     HRESULT InitTimeout(CLR_INT64 &timeExpire, const CLR_INT64 &timeout);
     HRESULT InitTimeout(CLR_INT64 &timeExpire, CLR_INT32 timeout);
 
-    static bool IsInstanceOf(CLR_RT_TypeDescriptor &desc, CLR_RT_TypeDescriptor &descTarget, bool isInstInstruction);
+    static bool IsInstanceOf(CLR_RT_TypeDescriptor desc, CLR_RT_TypeDescriptor descTarget);
     static bool IsInstanceOf(const CLR_RT_TypeDef_Index &cls, const CLR_RT_TypeDef_Index &clsTarget);
     static bool IsInstanceOf(CLR_RT_HeapBlock &obj, const CLR_RT_TypeDef_Index &clsTarget);
-    static bool IsInstanceOf(CLR_RT_HeapBlock &obj, CLR_RT_Assembly *assm, CLR_UINT32 token, bool isInstInstruction);
+    static bool IsInstanceOf(CLR_RT_HeapBlock &obj, CLR_RT_Assembly *assm, CLR_UINT32 token);
 
     static HRESULT CastToType(CLR_RT_HeapBlock &ref, CLR_UINT32 tk, CLR_RT_Assembly *assm, bool isInstInstruction);
 

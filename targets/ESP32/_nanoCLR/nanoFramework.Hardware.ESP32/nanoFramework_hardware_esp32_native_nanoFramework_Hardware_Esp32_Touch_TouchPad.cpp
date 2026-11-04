@@ -908,7 +908,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     esp32FilteringType.InitializeFromType(esp32FilteringTypeDef);
 
     // sanity check for parameter type
-    if (!CLR_RT_ExecutionEngine::IsInstanceOf(typeParamType, esp32FilteringType, false))
+    if (!CLR_RT_ExecutionEngine::IsInstanceOf(typeParamType, esp32FilteringType))
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
@@ -941,7 +941,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     s2s3FilteringType.InitializeFromType(s2s3FilteringTypeDef);
 
     // sanity check for parameter type
-    if (!CLR_RT_ExecutionEngine::IsInstanceOf(typeParamType, s2s3FilteringType, false))
+    if (!CLR_RT_ExecutionEngine::IsInstanceOf(typeParamType, s2s3FilteringType))
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
