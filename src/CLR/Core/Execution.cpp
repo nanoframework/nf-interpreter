@@ -2867,11 +2867,13 @@ void CLR_RT_ExecutionEngine::SignalEvents(CLR_UINT32 events)
 
 bool CLR_RT_ExecutionEngine::IsInstanceOf(
     CLR_RT_TypeDescriptor &desc,
-    CLR_RT_TypeDescriptor &descTarget,
+    CLR_RT_TypeDescriptor &target,
     bool isInstInstruction)
 {
     NATIVE_PROFILE_CLR_CORE();
     (void)isInstInstruction;
+
+    CLR_RT_TypeDescriptor descTarget = target;
 
     // Reflection objects carry the represented type's metadata, not their runtime array type.
     if (desc.m_reflex.m_levels > 0 && (desc.m_flags & CLR_RT_DataTypeLookup::c_Array) == 0)
@@ -2934,6 +2936,11 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
             (c_CLR_RT_DataTypeLookup[instTarget.m_target->dataType].m_flags & valueTypeFlags) != 0)
         {
             return inst.m_data == instTarget.m_data;
+        }
+
+        if (instTarget.m_data == g_CLR_RT_WellKnownTypes.m_Object.m_data)
+        {
+            return true;
         }
     }
 
