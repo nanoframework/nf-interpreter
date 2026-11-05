@@ -86,19 +86,26 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Configurat
     // validate arguments
     switch (adc)
     {
-#if STM32_ADC_USE_ADC1
+#if defined(STM32_ADC_USE_ADC1) && STM32_ADC_USE_ADC1
         case 1:
             // all good
             break;
 #endif
 
-#if STM32_ADC_USE_ADC2
+#if defined(STM32_ADC_USE_ADC12) && STM32_ADC_USE_ADC12
+        // STM32H7 ADC1 is accessed through the ADC12 driver (single mode)
+        case 1:
+            // all good
+            break;
+#endif
+
+#if defined(STM32_ADC_USE_ADC2) && STM32_ADC_USE_ADC2
         case 2:
             // all good
             break;
 #endif
 
-#if STM32_ADC_USE_ADC3
+#if defined(STM32_ADC_USE_ADC3) && STM32_ADC_USE_ADC3
         case 3:
             // all good
             break;
@@ -108,7 +115,12 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Configurat
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
+#if defined(STM32H7XX)
+    // STM32H7 ADCs have channels 0 to 19
+    if (adcChannel > 19)
+#else
     if (adcChannel > 15)
+#endif
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
@@ -218,22 +230,25 @@ int8_t GetNextFreeAdcChannel(NF_PAL_ADC_PORT_PIN_CHANNEL *&newChannel)
             (RuntimeAdcChannelCount + 1) * sizeof(NF_PAL_ADC_PORT_PIN_CHANNEL));
 
         // sanity check
-        if (RuntimeAdcPortPinConfig != nullptr)
+        if (newRuntimeAdcPortPinConfig != nullptr)
         {
-            // update the number of channels
-            RuntimeAdcChannelCount++;
+            if (RuntimeAdcPortPinConfig != nullptr)
+            {
+                // copy the existing channels to the new memory block
+                memcpy(
+                    newRuntimeAdcPortPinConfig,
+                    RuntimeAdcPortPinConfig,
+                    RuntimeAdcChannelCount * sizeof(NF_PAL_ADC_PORT_PIN_CHANNEL));
 
-            // copy the old channels to the new memory block
-            memcpy(
-                newRuntimeAdcPortPinConfig,
-                RuntimeAdcPortPinConfig,
-                RuntimeAdcChannelCount * sizeof(NF_PAL_ADC_PORT_PIN_CHANNEL));
-
-            // free the old memory block
-            platform_free(RuntimeAdcPortPinConfig);
+                // free the old memory block
+                platform_free(RuntimeAdcPortPinConfig);
+            }
 
             // set the new memory block
             RuntimeAdcPortPinConfig = newRuntimeAdcPortPinConfig;
+
+            // update the number of channels
+            RuntimeAdcChannelCount++;
 
             // clear the new channel
             memset(&RuntimeAdcPortPinConfig[RuntimeAdcChannelCount - 1], 0, sizeof(NF_PAL_ADC_PORT_PIN_CHANNEL));

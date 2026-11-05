@@ -1,0 +1,196 @@
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+
+# Generates the changelog from merged PRs and creates/updates the GitHub release for a version tag.
+# Runs automatically when a version tag is pushed and can be triggered manually for a specific tag
+
+name: Generate changelog
+run-name: Generate changelog for ${{ inputs.tag || github.ref_name }}
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Version tag to generate the changelog and release for (e.g. v1.10.0)'
+        required: true
+        type: string
+      from_tag:
+        description: 'Optional: tag to start from (default: previous version tag reachable from the tag)'
+        required: false
+        type: string
+        default: ''
+      dry_run:
+        description: 'Only render the changelog to the job summary, without creating/updating the release'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: generate-changelog-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  compose_changelog:
+    name: Compose changelog
+    runs-on: ubuntu-latest
+
+    env:
+      VERSION_TAG_REGEX: '^v[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?$'
+      # GitHub limit for a release body is 125000 characters; keep a safety margin
+      MAX_RELEASE_BODY: '120000'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Validate tag and resolve range
+        id: guard
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_TAG: ${{ inputs.tag }}
+          INPUT_FROM_TAG: ${{ inputs.from_tag }}
+        run: |
+          set -euo pipefail
+
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+              echo "::error::Manual runs must be started from the main branch (started from $GITHUB_REF)."
+              exit 1
+            fi
+            TAG="$INPUT_TAG"
+          else
+            TAG="$GITHUB_REF_NAME"
+          fi
+
+          if ! [[ "$TAG" =~ $VERSION_TAG_REGEX ]]; then
+            echo "::notice::'$TAG' is not a version tag. Nothing to do."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git fetch --force --tags origin
+          git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
+
+          if ! TAG_SHA=$(git rev-parse -q --verify "refs/tags/$TAG^{commit}"); then
+            echo "::error::Tag '$TAG' does not exist."
+            exit 1
+          fi
+
+          if ! git merge-base --is-ancestor "$TAG_SHA" origin/main; then
+            echo "::notice::Tag '$TAG' is not on the main branch. Changelog is only generated for tags on main."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # version tags reachable from main, sorted by version
+          mapfile -t MAIN_TAGS < <(git tag --merged origin/main --list 'v*' | grep -E "$VERSION_TAG_REGEX" | sort -V)
+
+          if [ -n "$INPUT_FROM_TAG" ]; then
+            if ! git rev-parse -q --verify "refs/tags/$INPUT_FROM_TAG^{commit}" > /dev/null; then
+              echo "::error::from_tag '$INPUT_FROM_TAG' does not exist."
+              exit 1
+            fi
+            FROM_TAG="$INPUT_FROM_TAG"
+          else
+            # highest version tag that is an ancestor of the tag (and not on the same commit)
+            FROM_TAG=""
+            for t in "${MAIN_TAGS[@]}"; do
+              [ "$t" = "$TAG" ] && continue
+              T_SHA=$(git rev-parse "refs/tags/$t^{commit}")
+              [ "$T_SHA" = "$TAG_SHA" ] && continue
+              if git merge-base --is-ancestor "$T_SHA" "$TAG_SHA"; then
+                FROM_TAG="$t"
+              fi
+            done
+
+            if [ -z "$FROM_TAG" ]; then
+              echo "::error::Couldn't find a previous version tag for '$TAG'. Run manually providing 'from_tag'."
+              exit 1
+            fi
+          fi
+
+          # only mark as latest release if this is the highest version tag on main
+          if [ "${MAIN_TAGS[-1]}" = "$TAG" ]; then
+            LATEST=true
+          else
+            LATEST=false
+          fi
+
+          echo "Changelog range: $FROM_TAG...$TAG (latest: $LATEST)"
+
+          {
+            echo "skip=false"
+            echo "tag=$TAG"
+            echo "from_tag=$FROM_TAG"
+            echo "latest=$LATEST"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Build changelog
+        id: build_changelog
+        if: steps.guard.outputs.skip == 'false'
+        uses: mikepenz/release-changelog-builder-action@v6
+        with:
+          configuration: '.github/.changelog-config.json'
+          fromTag: ${{ steps.guard.outputs.from_tag }}
+          toTag: ${{ steps.guard.outputs.tag }}
+          outputFile: 'CHANGELOG.md'
+          failOnError: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish changelog to release
+        if: steps.guard.outputs.skip == 'false'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.guard.outputs.tag }}
+          FROM_TAG: ${{ steps.guard.outputs.from_tag }}
+          LATEST: ${{ steps.guard.outputs.latest }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+
+          ATTACH_CHANGELOG=false
+          cp CHANGELOG.md release-notes.md
+
+          if [ "$(wc -m < CHANGELOG.md)" -gt "$MAX_RELEASE_BODY" ]; then
+            echo "::warning::Changelog exceeds the release body limit. Attaching it as CHANGELOG.md to the release."
+            ATTACH_CHANGELOG=true
+            {
+              echo "The changelog for this release is too large to be displayed here. Please see the attached **CHANGELOG.md**."
+              echo
+              echo "**Full Changelog:** https://github.com/$GITHUB_REPOSITORY/compare/$FROM_TAG...$TAG"
+              echo
+              echo "Firmware packages for all reference targets built from this release are available from our [Cloudsmith feed](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/)."
+            } > release-notes.md
+          fi
+
+          if [ "$DRY_RUN" = "true" ]; then
+            {
+              echo "## Dry run: changelog for $TAG (from $FROM_TAG, latest: $LATEST, attach file: $ATTACH_CHANGELOG)"
+              echo
+              cat CHANGELOG.md
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh release edit "$TAG" --notes-file release-notes.md --latest="$LATEST"
+          else
+            gh release create "$TAG" --verify-tag --title "$TAG" --notes-file release-notes.md --latest="$LATEST"
+          fi
+
+          if [ "$ATTACH_CHANGELOG" = "true" ]; then
+            gh release upload "$TAG" CHANGELOG.md --clobber
+          fi
+
+          echo "Release $TAG updated with changelog ($FROM_TAG...$TAG)." >> "$GITHUB_STEP_SUMMARY"

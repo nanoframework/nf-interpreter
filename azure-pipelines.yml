@@ -7,7 +7,6 @@ trigger:
       - main
       - develop*
       - release-*
-      - refs/tags/*
   paths:
     exclude:
       - .clang-format
@@ -493,6 +492,14 @@ jobs:
           NeedsSRECORD: true
           CMakePreset: ST_STM32F769I_DISCOVERY
           RequiredBuildFlag: ''
+
+        ST_STM32H735_DISCOVERY:
+          TargetBoard: ST_STM32H735_DISCOVERY
+          TargetSeries: "stm32h7xx"
+          BuildOptions:
+          NeedsDFU: false
+          NeedsSRECORD: true
+          CMakePreset: ST_STM32H735_DISCOVERY
 
         ST_B_L475E_IOT01A:
           TargetBoard: ST_B_L475E_IOT01A

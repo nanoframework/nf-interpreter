@@ -40,6 +40,9 @@ HRESULT Library_corlib_native_System_Reflection_ConstructorInfo::Invoke___OBJECT
             ArgumentsCount = pArray->m_numOfElements;
         }
 
+        NANOCLR_CHECK_HRESULT(
+            Library_corlib_native_System_Reflection_MethodBase::CheckInvokeArguments(md, args, ArgumentsCount));
+
         NANOCLR_CHECK_HRESULT(stack.MakeCall(md, nullptr, args, ArgumentsCount));
     }
 

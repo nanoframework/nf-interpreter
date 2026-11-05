@@ -4350,14 +4350,13 @@ struct CLR_RT_ExecutionEngine
     HRESULT InitTimeout(CLR_INT64 &timeExpire, const CLR_INT64 &timeout);
     HRESULT InitTimeout(CLR_INT64 &timeExpire, CLR_INT32 timeout);
 
-    static bool IsInstanceOf(CLR_RT_TypeDescriptor &desc, CLR_RT_TypeDescriptor &descTarget, bool isInstInstruction);
+    static bool IsInstanceOf(CLR_RT_TypeDescriptor desc, CLR_RT_TypeDescriptor descTarget);
     static bool IsInstanceOf(const CLR_RT_TypeDef_Index &cls, const CLR_RT_TypeDef_Index &clsTarget);
     static bool IsInstanceOf(CLR_RT_HeapBlock &obj, const CLR_RT_TypeDef_Index &clsTarget);
     static bool IsInstanceOf(
         CLR_RT_HeapBlock &obj,
         CLR_RT_Assembly *assm,
         CLR_UINT32 token,
-        bool isInstInstruction,
         const CLR_RT_MethodDef_Instance *caller = nullptr);
     bool IsInstanceOfToken(CLR_UINT32 token, CLR_RT_HeapBlock &obj, const CLR_RT_MethodDef_Instance &caller);
 

@@ -8184,7 +8184,7 @@ bool CLR_RT_TypeSystem::MatchSignatureElement(
             return false;
         }
 
-        if (!CLR_RT_ExecutionEngine::IsInstanceOf(descRight, descLeft, false))
+        if (!CLR_RT_ExecutionEngine::IsInstanceOf(descRight, descLeft))
         {
             return false;
         }
