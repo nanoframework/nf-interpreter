@@ -3811,6 +3811,61 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(CLR_RT_TypeDescriptor desc, CLR_RT_Typ
     return false;
 }
 
+bool CLR_RT_ExecutionEngine::IsCastableTo(CLR_RT_TypeDescriptor desc, CLR_RT_TypeDescriptor descTarget)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    static const struct
+    {
+        const char *assembly;
+        const char *name;
+    } c_ArrayGenericInterfaces[] = {
+        {"mscorlib", "IEnumerable`1"},
+        {"mscorlib", "ICollection`1"},
+        {"nanoFramework.System.Collections", "IList`1"},
+        {"nanoFramework.System.Collections", "IReadOnlyCollection`1"},
+        {"nanoFramework.System.Collections", "IReadOnlyList`1"}};
+
+    if (IsInstanceOf(desc, descTarget))
+    {
+        return true;
+    }
+
+    // Arrays convert to these interfaces only on assignment. See CLAUDE.md "Reflection invocation and casts".
+    if ((desc.m_flags & CLR_RT_DataTypeLookup::c_Array) == 0 || descTarget.GetDataType() == DATATYPE_GENERICINST)
+    {
+        return false;
+    }
+
+    while (desc.m_reflex.levels > 0 && descTarget.m_reflex.levels > 0)
+    {
+        desc.GetElementType(desc);
+        descTarget.GetElementType(descTarget);
+    }
+
+    const CLR_RT_TypeDef_Instance &instTarget = descTarget.m_handlerCls;
+
+    if (desc.m_reflex.levels == 0 || descTarget.m_reflex.levels > 0 ||
+        (instTarget.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) !=
+            CLR_RECORD_TYPEDEF::TD_Semantics_Interface ||
+        strcmp(instTarget.assembly->GetString(instTarget.target->nameSpace), "System.Collections.Generic") != 0)
+    {
+        return false;
+    }
+
+    const char *name = instTarget.assembly->GetString(instTarget.target->name);
+
+    for (const auto &candidate : c_ArrayGenericInterfaces)
+    {
+        if (strcmp(name, candidate.name) == 0 && strcmp(instTarget.assembly->name, candidate.assembly) == 0)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool CLR_RT_ExecutionEngine::IsInstanceOf(const CLR_RT_TypeDef_Index &cls, const CLR_RT_TypeDef_Index &clsTarget)
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -3843,6 +3898,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
     CLR_RT_HeapBlock &obj,
     CLR_RT_Assembly *assm,
     CLR_UINT32 token,
+    bool isInstInstruction,
     const CLR_RT_MethodDef_Instance *caller)
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -3857,7 +3913,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
     if (FAILED(descTarget.InitializeFromSignatureToken(assm, token, caller)))
         return false;
 
-    return IsInstanceOf(desc, descTarget);
+    return isInstInstruction ? IsInstanceOf(desc, descTarget) : IsCastableTo(desc, descTarget);
 }
 
 /// <summary>
@@ -3906,7 +3962,7 @@ HRESULT CLR_RT_ExecutionEngine::CastToType(
     {
         ;
     }
-    else if (g_CLR_RT_ExecutionEngine.IsInstanceOf(ref, assm, tk, caller) == true)
+    else if (g_CLR_RT_ExecutionEngine.IsInstanceOf(ref, assm, tk, isInstInstruction, caller) == true)
     {
         ;
     }
