@@ -74,6 +74,9 @@ extern "C"
 
     NANOCLRNATIVE_API void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings);
 
+    // Returns zero after CLR execution, or nonzero if host initialization prevents startup.
+    NANOCLRNATIVE_API int nanoCLR_RunWithStatus(NANO_CLR_SETTINGS nanoClrSettings);
+
     // name is passed as UTF-16 LE (2-byte chars) from the managed host via CharSet.Unicode.
     // char16_t is guaranteed to be 2 bytes on all platforms, matching what the C# marshaller sends.
     NANOCLRNATIVE_API int nanoCLR_LoadAssembly(const char16_t *name, const uint8_t *data, size_t size);

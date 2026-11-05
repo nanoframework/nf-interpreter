@@ -13,7 +13,7 @@
 #include <nanoPAL_COM.h>
 #include <nanoPAL_FileSystem.h>
 #include <nanoPAL_Time.h>
-#if NANOCLR_HOST_LINUX
+#if NANOCLR_USE_HOST_OS_SOCKETS
 #include <nanoPAL_Sockets.h>
 #endif
 
