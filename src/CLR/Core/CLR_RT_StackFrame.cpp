@@ -772,14 +772,17 @@ HRESULT CLR_RT_StackFrame::FixCall()
         //
         // Skip return value.
         //
-        NANOCLR_CHECK_HRESULT(parser.Advance(res));
+        NANOCLR_CHECK_HRESULT(parser.AdvanceParameter(res));
 
         for (; parser.Available() > 0; args++)
         {
-            NANOCLR_CHECK_HRESULT(parser.Advance(res));
+            NANOCLR_CHECK_HRESULT(parser.AdvanceParameter(res));
 
             if (res.Levels > 0)
                 continue; // Array, no need to fix.
+
+            if (!NANOCLR_INDEX_IS_VALID(res.Class))
+                continue; // VAR or MVAR, no generic context to resolve it.
 
             if (args->DataType() == DATATYPE_OBJECT)
             {

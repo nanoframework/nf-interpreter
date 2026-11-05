@@ -719,6 +719,53 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
     NANOCLR_CLEANUP_END();
 }
 
+// Drain one full GENERICINST sub-tree from `parser` by advancing until Available()
+// converges with `targetAvail`. Relies on the parser's ParamCount bookkeeping rather
+// than counting GenParamCount by hand — see CLAUDE.md "Signature parsing".
+static bool DrainGenericInstSubtree(CLR_RT_SignatureParser &parser, int targetAvail)
+{
+    while (parser.Available() > targetAvail)
+    {
+        CLR_RT_SignatureParser::Element drained{};
+
+        if (FAILED(parser.Advance(drained)))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+HRESULT CLR_RT_SignatureParser::AdvanceParameter(Element &res)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    // See CLAUDE.md "Reflection invocation and casts".
+    int end = Available() - 1;
+
+    NANOCLR_CHECK_HRESULT(Advance(res));
+
+    if (res.DataType == DATATYPE_GENERICINST)
+    {
+        bool isByRef = res.IsByRef;
+        int levels = res.Levels;
+
+        NANOCLR_CHECK_HRESULT(Advance(res));
+
+        res.IsByRef = isByRef;
+        res.Levels = levels;
+    }
+
+    if (!DrainGenericInstSubtree(*this, end))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool CLR_RT_Assembly_Instance::InitializeFromIndex(const CLR_RT_Assembly_Index &index)
@@ -2991,8 +3038,12 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureParser(
 
     if (res.DataType == DATATYPE_GENERICINST)
     {
-        // generic type, advance again to get the type
-        parser.Advance(res);
+        // generic type, advance again to get the type; the array levels are on the marker
+        int levels = res.Levels;
+
+        NANOCLR_CHECK_HRESULT(parser.Advance(res));
+
+        res.Levels = levels;
     }
 
     // Check if this is an unresolved generic parameter (VAR) and we have a context
@@ -3195,7 +3246,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
                     (caller && caller->genericType && NANOCLR_INDEX_IS_VALID(*caller->genericType))
                         ? caller->genericType
                         : nullptr;
-                this->InitializeFromSignatureParser(parser, contextTypeSpec);
+                NANOCLR_CHECK_HRESULT(this->InitializeFromSignatureParser(parser, contextTypeSpec));
             }
             else
             {
@@ -3218,7 +3269,9 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
                 }
             }
 
-            if ((elem.DataType == DATATYPE_VAR || elem.DataType == DATATYPE_MVAR) && elem.Levels > 0)
+            if ((elem.DataType == DATATYPE_VAR || elem.DataType == DATATYPE_MVAR ||
+                 elem.DataType == DATATYPE_GENERICINST) &&
+                elem.Levels > 0)
             {
                 m_reflex.levels = elem.Levels;
                 ConvertToArray();
@@ -9109,24 +9162,6 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
     index.Clear();
 
     return false;
-}
-
-// Drain one full GENERICINST sub-tree from `parser` by advancing until Available()
-// converges with `targetAvail`. Relies on the parser's ParamCount bookkeeping rather
-// than counting GenParamCount by hand — see CLAUDE.md "Signature parsing".
-static bool DrainGenericInstSubtree(CLR_RT_SignatureParser &parser, int targetAvail)
-{
-    while (parser.Available() > targetAvail)
-    {
-        CLR_RT_SignatureParser::Element drained{};
-
-        if (FAILED(parser.Advance(drained)))
-        {
-            return false;
-        }
-    }
-
-    return true;
 }
 
 static bool MatchSignatureForVirtualDispatch(CLR_RT_SignatureParser &parserLeft, CLR_RT_SignatureParser &parserRight)

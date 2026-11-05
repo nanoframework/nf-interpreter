@@ -194,36 +194,18 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckInvokeArguments
     parser.Initialize_MethodSignature(md.assembly, md.target);
 
     // Skip the return type; the remaining signature elements are the explicit parameters.
-    // A generic instantiation spans several elements, so each one is consumed until the parser has moved on.
-    int availableAfterReturn = parser.Available() - 1;
-
-    NANOCLR_CHECK_HRESULT(parser.Advance(element));
-
-    while (parser.Available() > availableAfterReturn)
-    {
-        NANOCLR_CHECK_HRESULT(parser.Advance(element));
-    }
+    NANOCLR_CHECK_HRESULT(parser.AdvanceParameter(element));
 
     for (int i = 0; i < numArgs && parser.Available() > 0; i++)
     {
-        int availableAfterParam = parser.Available() - 1;
+        NANOCLR_CHECK_HRESULT(parser.AdvanceParameter(element));
 
-        NANOCLR_CHECK_HRESULT(parser.Advance(element));
+        bool isUnresolved = !NANOCLR_INDEX_IS_VALID(element.Class);
 
-        // generic parameters can't be checked without the generic context
-        bool isGeneric = element.IsGenericInst || element.DataType == DATATYPE_VAR ||
-                         element.DataType == DATATYPE_MVAR || element.DataType == DATATYPE_GENERICINST;
-
-        if (isGeneric)
+        // Without a generic context FixCall can't convert a VAR or MVAR argument, not even a null one.
+        if (isUnresolved && element.Levels == 0)
         {
-            CLR_RT_SignatureParser::Element discarded{};
-
-            while (parser.Available() > availableAfterParam)
-            {
-                NANOCLR_CHECK_HRESULT(parser.Advance(discarded));
-            }
-
-            continue;
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
         }
 
         CLR_RT_HeapBlock &arg = args[i];
@@ -236,6 +218,19 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckInvokeArguments
         CLR_RT_ReflectionDef_Index expectedType{};
         CLR_RT_TypeDescriptor targetType{};
         CLR_RT_TypeDescriptor sourceType{};
+
+        if (isUnresolved)
+        {
+            // Only the array shape of T[] can be checked.
+            if (FAILED(sourceType.InitializeFromObject(arg)) ||
+                (sourceType.m_flags & CLR_RT_DataTypeLookup::c_Array) == 0 ||
+                sourceType.m_reflex.levels < element.Levels)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+            }
+
+            continue;
+        }
 
         expectedType.kind = REFLECTION_TYPE;
         expectedType.levels = (CLR_UINT16)element.Levels;
@@ -251,7 +246,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckInvokeArguments
         }
 
         if (FAILED(sourceType.InitializeFromObject(arg)) ||
-            CLR_RT_ExecutionEngine::IsInstanceOf(sourceType, targetType) == false)
+            CLR_RT_ExecutionEngine::IsCastableTo(sourceType, targetType) == false)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
         }
