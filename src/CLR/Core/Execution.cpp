@@ -3815,8 +3815,16 @@ bool CLR_RT_ExecutionEngine::IsCastableTo(CLR_RT_TypeDescriptor desc, CLR_RT_Typ
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    static const char *const c_ArrayGenericInterfaces[] =
-        {"IEnumerable`1", "ICollection`1", "IList`1", "IReadOnlyCollection`1", "IReadOnlyList`1"};
+    static const struct
+    {
+        const char *assembly;
+        const char *name;
+    } c_ArrayGenericInterfaces[] = {
+        {"mscorlib", "IEnumerable`1"},
+        {"mscorlib", "ICollection`1"},
+        {"nanoFramework.System.Collections", "IList`1"},
+        {"nanoFramework.System.Collections", "IReadOnlyCollection`1"},
+        {"nanoFramework.System.Collections", "IReadOnlyList`1"}};
 
     if (IsInstanceOf(desc, descTarget))
     {
@@ -3847,9 +3855,9 @@ bool CLR_RT_ExecutionEngine::IsCastableTo(CLR_RT_TypeDescriptor desc, CLR_RT_Typ
 
     const char *name = instTarget.assembly->GetString(instTarget.target->name);
 
-    for (const char *candidate : c_ArrayGenericInterfaces)
+    for (const auto &candidate : c_ArrayGenericInterfaces)
     {
-        if (strcmp(name, candidate) == 0)
+        if (strcmp(name, candidate.name) == 0 && strcmp(instTarget.assembly->name, candidate.assembly) == 0)
         {
             return true;
         }
