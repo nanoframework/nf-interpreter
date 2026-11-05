@@ -440,6 +440,33 @@ jobs:
           PackageName: ESP32_S2_CAM
           CMakePreset: ESP32_S2_CAM
 
+        ESP32_C3_MIN:
+          TargetBoard: ESP32_C3
+          TargetSeries: "esp32c3"
+          BuildOptions:
+          IDF_Target: esp32c3
+          TargetName: ESP32_C3_MIN
+          PackageName: ESP32_C3_MIN
+          CMakePreset: ESP32_C3_MIN
+
+        ESP32_C6_MIN:
+          TargetBoard: ESP32_C6
+          TargetSeries: "esp32c6"
+          BuildOptions:
+          IDF_Target: esp32c6
+          TargetName: ESP32_C6_MIN
+          PackageName: ESP32_C6_MIN
+          CMakePreset: ESP32_C6_MIN
+
+        ESP32_S3_MIN:
+          TargetBoard: ESP32_S3
+          TargetSeries: "esp32s3"
+          BuildOptions:
+          IDF_Target: esp32s3
+          TargetName: ESP32_S3_MIN
+          PackageName: ESP32_S3_MIN
+          CMakePreset: ESP32_S3_MIN
+
         ESP32_S3_QUAD_CAM:
           TargetBoard: ESP32_S3
           TargetSeries: "esp32s3"
