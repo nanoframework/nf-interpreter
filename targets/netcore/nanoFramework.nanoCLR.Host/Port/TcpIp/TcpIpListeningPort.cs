@@ -27,7 +27,7 @@ namespace nanoFramework.nanoCLR.Host.Port.TcpIp
         public const int MaxTokenLength = 64;
 
         // name announced by the discovery, it can't have ':'
-        private const string TargetName = "CLR_VIRTUAL";
+        private const string TargetName = "VIRTUAL_DEVICE";
 
         // time to reject new connections after too many failed authentications
         private static readonly TimeSpan s_holdOffAfterAuthenticationFailures = TimeSpan.FromSeconds(1);
