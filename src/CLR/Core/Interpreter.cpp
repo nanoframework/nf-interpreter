@@ -1024,10 +1024,10 @@ HRESULT CLR_RT_Thread::Execute_DelegateInvoke(CLR_RT_StackFrame &stackArg)
     NANOCLR_NOCLEANUP();
 }
 
-// True when the callee's owner is a closed instantiation of the caller's generic type other than the caller's own.
-static bool IsOtherClosedInstantiation(const CLR_RT_TypeSpec_Index *calleeTs, const CLR_RT_TypeSpec_Index *callerTs)
+static bool IsOtherInstantiation(const CLR_RT_TypeSpec_Index *calleeTs, const CLR_RT_TypeSpec_Index *callerTs)
 {
-    if (calleeTs == nullptr || !NANOCLR_INDEX_IS_VALID(*calleeTs) || calleeTs->data == callerTs->data)
+    if (calleeTs == nullptr || callerTs == nullptr || !NANOCLR_INDEX_IS_VALID(*calleeTs) ||
+        calleeTs->data == callerTs->data)
     {
         return false;
     }
@@ -1036,7 +1036,7 @@ static bool IsOtherClosedInstantiation(const CLR_RT_TypeSpec_Index *calleeTs, co
     CLR_RT_TypeSpec_Instance callerInst{};
 
     return calleeInst.InitializeFromIndex(*calleeTs) && callerInst.InitializeFromIndex(*callerTs) &&
-           calleeInst.genericTypeDef.data == callerInst.genericTypeDef.data && calleeInst.IsClosedGenericType();
+           calleeInst.genericTypeDef.data == callerInst.genericTypeDef.data;
 }
 
 // See CLAUDE.md "Generic .cctor lifecycle" for the call contract.
@@ -2829,7 +2829,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                             if (effectiveCallerGeneric && NANOCLR_INDEX_IS_VALID(*effectiveCallerGeneric) &&
                                 matchesCalleeOwner(effectiveCallerGeneric) &&
-                                !IsOtherClosedInstantiation(calleeInst.genericType, effectiveCallerGeneric))
+                                !IsOtherInstantiation(calleeInst.genericType, effectiveCallerGeneric))
                             {
                                 inlineCtx = effectiveCallerGeneric;
                             }
@@ -2883,8 +2883,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         NANOCLR_CHECK_HRESULT(CLR_RT_StackFrame::Push(th, calleeInst, -1));
 
                         // Generic context priority (see CLAUDE.md "Generic context propagation"):
-                        //   1. caller's TypeSpec if it owns the same TypeDef as callee,
-                        //      unless callee names a different closed instantiation of it
+                        //   1. caller's TypeSpec if it owns the same TypeDef as callee
                         //   2. callee's genericType if closed
                         //   3. caller's TypeSpec (TypeDef-mismatch fallback)
                         //   4. caller's inherited genericType
@@ -2924,7 +2923,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                         if (effectiveCallerGeneric && NANOCLR_INDEX_IS_VALID(*effectiveCallerGeneric) &&
                             refersToCalleeOwner(effectiveCallerGeneric) &&
-                            !IsOtherClosedInstantiation(calleeInst.genericType, effectiveCallerGeneric))
+                            !IsOtherInstantiation(calleeInst.genericType, effectiveCallerGeneric))
                         {
                             effectiveGenericContext = effectiveCallerGeneric;
                         }
@@ -2933,7 +2932,9 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             // Priority 2: only if calleeInst.genericType is CLOSED — open TypeSpec
                             // can't resolve VAR. Open → fall through to Priority 3.
                             CLR_RT_TypeSpec_Instance calleeTs{};
-                            if (calleeTs.InitializeFromIndex(*calleeInst.genericType) && calleeTs.IsClosedGenericType())
+                            if (calleeTs.InitializeFromIndex(*calleeInst.genericType) &&
+                                (calleeTs.IsClosedGenericType() ||
+                                 IsOtherInstantiation(calleeInst.genericType, effectiveCallerGeneric)))
                             {
                                 effectiveGenericContext = calleeInst.genericType;
                             }
@@ -3424,8 +3425,6 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         }
                         top->SetObjectReference(nullptr);
 
-                        // NEWOBJ: a closed owner of this type is the instantiation being created. Otherwise
-                        // prefer the caller's closed TypeSpec over the callee's (open) MethodRef TypeSpec.
                         // See CLAUDE.md §7, §9.
                         const CLR_RT_TypeSpec_Index *genericTypeForContext = nullptr;
                         CLR_RT_TypeSpec_Instance calleeOwnerTs{};
@@ -3437,7 +3436,9 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         else if (
                             calleeInst.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType) &&
                             calleeOwnerTs.InitializeFromIndex(*calleeInst.genericType) &&
-                            calleeOwnerTs.genericTypeDef.data == cls.data && calleeOwnerTs.IsClosedGenericType())
+                            calleeOwnerTs.genericTypeDef.data == cls.data &&
+                            (calleeOwnerTs.IsClosedGenericType() ||
+                             IsOtherInstantiation(calleeInst.genericType, stack->m_call.genericType)))
                         {
                             genericTypeForContext = calleeInst.genericType;
                         }
