@@ -5,11 +5,19 @@
     <HostNetworkSources>$(MSBuildThisFileDirectory)..\..\..\src\DeviceInterfaces\System.Net\</HostNetworkSources>
     <MbedTlsBuildDir>$(BuildDir)mbedtls\$(Platform)\</MbedTlsBuildDir>
     <MbedTlsInstallDir>$(MbedTlsBuildDir)install\$(Configuration)\</MbedTlsInstallDir>
+    <!-- the VS running MSBuild: VSInstallDir can point to another VS when the platform toolset (e.g. v143) lives there -->
+    <MbedTlsVsRoot>$(CurrentVsInstallRoot)</MbedTlsVsRoot>
+    <MbedTlsVsRoot Condition="'$(MbedTlsVsRoot)' == ''">$(VsInstallRoot)</MbedTlsVsRoot>
+    <MbedTlsVsRoot Condition="'$(MbedTlsVsRoot)' != '' and !HasTrailingSlash('$(MbedTlsVsRoot)')">$(MbedTlsVsRoot)\</MbedTlsVsRoot>
     <MbedTlsGenerator Condition="'$(MbedTlsGenerator)' == '' and '$(VisualStudioVersion)' == '18.0'">Visual Studio 18 2026</MbedTlsGenerator>
     <MbedTlsGenerator Condition="'$(MbedTlsGenerator)' == ''">Visual Studio 17 2022</MbedTlsGenerator>
     <MbedTlsArchitecture Condition="'$(Platform)' == 'x64'">x64</MbedTlsArchitecture>
     <MbedTlsArchitecture Condition="'$(Platform)' == 'Win32'">Win32</MbedTlsArchitecture>
-    <CMakeExecutable Condition="'$(CMakeExecutable)' == '' and Exists('$(VSInstallDir)Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe')">$(VSInstallDir)Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe</CMakeExecutable>
+    <CMakeExecutable Condition="'$(CMakeExecutable)' == '' and Exists('$(MbedTlsVsRoot)Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe')">$(MbedTlsVsRoot)Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe</CMakeExecutable>
+    <!-- fallback to the VS that provides the toolset: its CMake knows the VS 2022 generator (a newer generator needs the running VS CMake) -->
+    <MbedTlsFallbackCMake>$(VSInstallDir)</MbedTlsFallbackCMake>
+    <MbedTlsFallbackCMake Condition="'$(MbedTlsFallbackCMake)' != '' and !HasTrailingSlash('$(MbedTlsFallbackCMake)')">$(MbedTlsFallbackCMake)\</MbedTlsFallbackCMake>
+    <CMakeExecutable Condition="'$(CMakeExecutable)' == '' and '$(MbedTlsGenerator)' == 'Visual Studio 17 2022' and '$(MbedTlsFallbackCMake)' != '' and Exists('$(MbedTlsFallbackCMake)Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe')">$(MbedTlsFallbackCMake)Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe</CMakeExecutable>
     <CMakeExecutable Condition="'$(CMakeExecutable)' == ''">cmake</CMakeExecutable>
   </PropertyGroup>
   <ItemDefinitionGroup>
@@ -42,6 +50,10 @@
   </ItemGroup>
   <Target Name="BuildHostMbedTls" BeforeTargets="ClCompile">
     <Error Condition="'$(MbedTlsArchitecture)' == ''" Text="Windows host networking supports Win32 and x64." />
+    <PropertyGroup Condition="Exists('$(MbedTlsBuildDir)CMakeCache.txt')">
+      <MbedTlsCachedGenerator>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(MbedTlsBuildDir)CMakeCache.txt')), '(?m)^CMAKE_GENERATOR:INTERNAL=([^\r\n]*)').Groups[1].Value)</MbedTlsCachedGenerator>
+    </PropertyGroup>
+    <Error Condition="'$(MbedTlsCachedGenerator)' != '' and '$(MbedTlsCachedGenerator)' != '$(MbedTlsGenerator)'" Text="The mbedTLS build folder '$(MbedTlsBuildDir)' was configured with the '$(MbedTlsCachedGenerator)' generator but this MSBuild needs '$(MbedTlsGenerator)'. Delete that folder (or at least its CMakeCache.txt and CMakeFiles) and build again." />
     <Exec Command="&quot;$(CMakeExecutable)&quot; -S &quot;$(MSBuildThisFileDirectory)..&quot; -B &quot;$(MbedTlsBuildDir).&quot; -G &quot;$(MbedTlsGenerator)&quot; -A $(MbedTlsArchitecture) -T $(PlatformToolset) -DMBEDTLS_SOURCE=&quot;$(MBEDTLS_SOURCE)&quot;" />
     <Exec Command="&quot;$(CMakeExecutable)&quot; --build &quot;$(MbedTlsBuildDir).&quot; --config $(Configuration)" />
     <Exec Command="&quot;$(CMakeExecutable)&quot; --install &quot;$(MbedTlsBuildDir).&quot; --config $(Configuration) --prefix &quot;$(MbedTlsInstallDir).&quot;" />
