@@ -200,6 +200,12 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckInvokeArguments
     {
         NANOCLR_CHECK_HRESULT(parser.AdvanceParameter(element));
 
+        // MakeCall passes the value, not a reference, so the callee's writes would be lost.
+        if (element.IsByRef)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+        }
+
         bool isUnresolved = !NANOCLR_INDEX_IS_VALID(element.Class);
 
         // Without a generic context FixCall can't convert a VAR or MVAR argument, not even a null one.
@@ -309,14 +315,14 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::GetParametersNative_
     sigParser.Initialize_MethodSignature(inst.assembly, inst.target);
 
     // discard return value
-    sigParser.Advance(paramElement);
+    NANOCLR_CHECK_HRESULT(sigParser.AdvanceParameter(paramElement));
 
     // loop through all the parameters
     while (sigParser.Available() > 0)
     {
         paramCount++;
 
-        sigParser.Advance(paramElement);
+        NANOCLR_CHECK_HRESULT(sigParser.AdvanceParameter(paramElement));
     }
 
     // find <ParameterInfo> type definition, don't bother checking the result as it exists for sure
@@ -330,29 +336,33 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::GetParametersNative_
     sigParser.Initialize_MethodSignature(inst.assembly, inst.target);
 
     // discard return value
-    sigParser.Advance(paramElement);
+    NANOCLR_CHECK_HRESULT(sigParser.AdvanceParameter(paramElement));
 
     while (sigParser.Available() > 0)
     {
-        sigParser.Advance(paramElement);
+        NANOCLR_CHECK_HRESULT(sigParser.AdvanceParameter(paramElement));
 
         // create a new instance of <ParameterInfo>
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*paramInfoElement, paramInfoTypeDef));
         hbObj = paramInfoElement->Dereference();
 
-        // get reference to the <ParameterInfo> instance
-        CLR_RT_HeapBlock &paraTypeHB = hbObj[ParameterInfo::FIELD___parameterType];
-
-        // create a new instance of the parameter type
-        NANOCLR_CHECK_HRESULT(
-            g_CLR_RT_ExecutionEngine.NewObjectFromIndex(paraTypeHB, g_CLR_RT_WellKnownTypes.TypeStatic));
-        hbObj = paraTypeHB.Dereference();
-        hbObj->SetReflection(paramElement.Class);
-
-        // deal with array types
-        if (paramElement.Levels > 0)
+        // VAR, MVAR and arrays of them have no generic context to resolve, parameter type stays null
+        if (NANOCLR_INDEX_IS_VALID(paramElement.Class))
         {
-            hbObj->ReflectionData().levels = (CLR_UINT16)paramElement.Levels;
+            // get reference to the <ParameterInfo> instance
+            CLR_RT_HeapBlock &paraTypeHB = hbObj[ParameterInfo::FIELD___parameterType];
+
+            // create a new instance of the parameter type
+            NANOCLR_CHECK_HRESULT(
+                g_CLR_RT_ExecutionEngine.NewObjectFromIndex(paraTypeHB, g_CLR_RT_WellKnownTypes.TypeStatic));
+            hbObj = paraTypeHB.Dereference();
+            hbObj->SetReflection(paramElement.Class);
+
+            // deal with array types
+            if (paramElement.Levels > 0)
+            {
+                hbObj->ReflectionData().levels = (CLR_UINT16)paramElement.Levels;
+            }
         }
 
         // move pointer to the next element
