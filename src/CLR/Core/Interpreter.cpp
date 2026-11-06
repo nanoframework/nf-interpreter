@@ -1024,6 +1024,21 @@ HRESULT CLR_RT_Thread::Execute_DelegateInvoke(CLR_RT_StackFrame &stackArg)
     NANOCLR_NOCLEANUP();
 }
 
+static bool IsOtherInstantiation(const CLR_RT_TypeSpec_Index *calleeTs, const CLR_RT_TypeSpec_Index *callerTs)
+{
+    if (calleeTs == nullptr || callerTs == nullptr || !NANOCLR_INDEX_IS_VALID(*calleeTs) ||
+        calleeTs->data == callerTs->data)
+    {
+        return false;
+    }
+
+    CLR_RT_TypeSpec_Instance calleeInst{};
+    CLR_RT_TypeSpec_Instance callerInst{};
+
+    return calleeInst.InitializeFromIndex(*calleeTs) && callerInst.InitializeFromIndex(*callerTs) &&
+           calleeInst.genericTypeDef.data == callerInst.genericTypeDef.data;
+}
+
 // See CLAUDE.md "Generic .cctor lifecycle" for the call contract.
 static HRESULT EnsureGenericCctorCompleted(
     CLR_RT_TypeSpec_Instance &tsInst,
@@ -2813,7 +2828,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             const CLR_RT_TypeSpec_Index *inlineCtx = nullptr;
 
                             if (effectiveCallerGeneric && NANOCLR_INDEX_IS_VALID(*effectiveCallerGeneric) &&
-                                matchesCalleeOwner(effectiveCallerGeneric))
+                                matchesCalleeOwner(effectiveCallerGeneric) &&
+                                !IsOtherInstantiation(calleeInst.genericType, effectiveCallerGeneric))
                             {
                                 inlineCtx = effectiveCallerGeneric;
                             }
@@ -2906,7 +2922,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         };
 
                         if (effectiveCallerGeneric && NANOCLR_INDEX_IS_VALID(*effectiveCallerGeneric) &&
-                            refersToCalleeOwner(effectiveCallerGeneric))
+                            refersToCalleeOwner(effectiveCallerGeneric) &&
+                            !IsOtherInstantiation(calleeInst.genericType, effectiveCallerGeneric))
                         {
                             effectiveGenericContext = effectiveCallerGeneric;
                         }
@@ -2915,7 +2932,9 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             // Priority 2: only if calleeInst.genericType is CLOSED — open TypeSpec
                             // can't resolve VAR. Open → fall through to Priority 3.
                             CLR_RT_TypeSpec_Instance calleeTs{};
-                            if (calleeTs.InitializeFromIndex(*calleeInst.genericType) && calleeTs.IsClosedGenericType())
+                            if (calleeTs.InitializeFromIndex(*calleeInst.genericType) &&
+                                (calleeTs.IsClosedGenericType() ||
+                                 IsOtherInstantiation(calleeInst.genericType, effectiveCallerGeneric)))
                             {
                                 effectiveGenericContext = calleeInst.genericType;
                             }
@@ -3406,13 +3425,22 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         }
                         top->SetObjectReference(nullptr);
 
-                        // NEWOBJ: prefer the caller's closed TypeSpec over the callee's (open)
-                        // MethodRef TypeSpec. See CLAUDE.md §7, §9.
+                        // See CLAUDE.md §7, §9.
                         const CLR_RT_TypeSpec_Index *genericTypeForContext = nullptr;
+                        CLR_RT_TypeSpec_Instance calleeOwnerTs{};
 
                         if (nestedGenericTag != nullptr)
                         {
                             genericTypeForContext = nestedGenericTag;
+                        }
+                        else if (
+                            calleeInst.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType) &&
+                            calleeOwnerTs.InitializeFromIndex(*calleeInst.genericType) &&
+                            calleeOwnerTs.genericTypeDef.data == cls.data &&
+                            (calleeOwnerTs.IsClosedGenericType() ||
+                             IsOtherInstantiation(calleeInst.genericType, stack->m_call.genericType)))
+                        {
+                            genericTypeForContext = calleeInst.genericType;
                         }
                         // Prefer the caller's generic type if available and valid
                         else if (
