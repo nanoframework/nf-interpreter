@@ -35,6 +35,9 @@ extern "C"
         // X509 Device Certificates
         DeviceConfigurationOption_X509DeviceCertificates = 5,
 
+        // Wire Protocol authentication token configuration block (network channel)
+        DeviceConfigurationOption_WPAuthToken = 6,
+
         // All configuration blocks
         DeviceConfigurationOption_All = 255,
 
@@ -254,6 +257,18 @@ extern "C"
 
     } HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE;
 
+    // Wire Protocol authentication token configuration
+    // declared with a flexible array member to allow N config blocks totally independent of compilation
+    typedef struct HAL_CONFIGURATION_WPAUTHTOKEN
+    {
+        // count of the configs elements
+        uint8_t Count;
+
+        // pointer to the Wire Protocol authentication token configuration
+        HAL_Configuration_WPAuthToken *Configs[];
+
+    } HAL_CONFIGURATION_WPAUTHTOKEN;
+
 #if defined(_MSC_VER)
 #pragma warning(pop)
 #endif
@@ -268,6 +283,7 @@ extern "C"
         HAL_CONFIGURATION_NETWORK_WIRELESSAP *WirelessAPConfigs;
         HAL_CONFIGURATION_X509_CERTIFICATE *CertificateStore;
         HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *DeviceCertificates;
+        HAL_CONFIGURATION_WPAUTHTOKEN *WPAuthTokenConfigs;
 
     } HAL_TARGET_CONFIGURATION;
 
@@ -460,6 +476,9 @@ extern "C"
     void *ConfigurationManager_FindX509DeviceCertificatesConfigurationBlocks(
         uint32_t startAddress,
         uint32_t endAddress);
+
+    // function that sweeps a memory region searching for Wire Protocol authentication token configuration blocks
+    void *ConfigurationManager_FindWPAuthTokenConfigurationBlocks(uint32_t startAddress, uint32_t endAddress);
 
     // gets the HAL_Configuration_Wireless80211 configuration block that has the specified Id, if that exists
     // defined as weak needs to be free to implement the storage of the configuration block as they see fit

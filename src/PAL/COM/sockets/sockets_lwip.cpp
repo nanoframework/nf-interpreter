@@ -6,6 +6,10 @@
 
 #include "sockets_lwip.h"
 
+#if CONFIG_NF_WP_CHANNEL_NETWORK
+#include <WireProtocol_Transport.h>
+#endif
+
 //--//
 
 Sockets_LWIP_Driver g_Sockets_LWIP_Driver;
@@ -157,29 +161,27 @@ HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration(
 {
     NATIVE_PROFILE_PAL_COM();
     HRESULT hr = S_OK;
-    bool success = FALSE;
 
     const uint32_t c_reInitFlag = NetworkInterface_UpdateOperation_Dhcp | NetworkInterface_UpdateOperation_DhcpRenew |
                                   NetworkInterface_UpdateOperation_Mac;
 
     const uint32_t c_uninitFlag = c_reInitFlag | NetworkInterface_UpdateOperation_DhcpRelease;
 
+#if CONFIG_NF_WP_CHANNEL_NETWORK
+    // the network stack is about to be reconfigured: drop the Wire Protocol network channel
     if (0 != (updateFlags & c_uninitFlag))
     {
-        success = SOCKETS_DbgUninitialize(COM_SOCKET_DBG);
+        WP_Network_Stop();
     }
+#else
+    (void)c_uninitFlag;
+#endif
 
     hr = HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration(config, interfaceIndex, updateFlags);
 
     if (!SUCCEEDED(hr))
     {
         return S_FALSE;
-    }
-
-    if (0 != (updateFlags & c_reInitFlag))
-    {
-        if (success)
-            SOCKETS_DbgInitialize(COM_SOCKET_DBG);
     }
 
     return hr;
@@ -253,7 +255,6 @@ void Sockets_LWIP_Driver::CloseConnections(bool fCloseDbg)
     NATIVE_PROFILE_PAL_COM();
 
     int32_t cnt = g_Sockets_LWIP_Driver.m_cntSockets;
-    int32_t idx = 0;
 
     // round one - close all SSL sockets
     for (int32_t i = cnt - 1; i >= 0; i--)
@@ -267,6 +268,13 @@ void Sockets_LWIP_Driver::CloseConnections(bool fCloseDbg)
     }
 
     // round two - close all non-SSL sockets
+    // the sockets that are kept (debugger sockets) are moved to the beginning of the table
+    SOCK_SOCKET socketsToClose[SOCKETS_MAX_COUNT];
+    int32_t closeCount = 0;
+    int32_t kept = 0;
+
+    GLOBAL_LOCK();
+
     cnt = g_Sockets_LWIP_Driver.m_cntSockets;
 
     for (int32_t i = 0; i < cnt; i++)
@@ -277,22 +285,34 @@ void Sockets_LWIP_Driver::CloseConnections(bool fCloseDbg)
         {
             if (fCloseDbg || !ISSET_SOCKET_FLAG(entry, SocketRegisterMap::c_DebugSocket))
             {
-                // use the HAL method so we don't unregister the socket since we handle that here
-                HAL_SOCK_close(entry.m_socket);
-
-                g_Sockets_LWIP_Driver.m_socketHandles[i].m_socket = SOCK_SOCKET_ERROR;
-                g_Sockets_LWIP_Driver.m_socketHandles[i].m_flags = 0;
-                g_Sockets_LWIP_Driver.m_socketHandles[i].m_sslData = nullptr;
-                g_Sockets_LWIP_Driver.m_cntSockets--;
+                socketsToClose[closeCount++] = entry.m_socket;
             }
-            else if (i > 0)
+            else
             {
-                memcpy(
-                    &g_Sockets_LWIP_Driver.m_socketHandles[i],
-                    &g_Sockets_LWIP_Driver.m_socketHandles[idx++],
-                    sizeof(g_Sockets_LWIP_Driver.m_socketHandles[i]));
+                if (kept != i)
+                {
+                    g_Sockets_LWIP_Driver.m_socketHandles[kept] = entry;
+                }
+
+                kept++;
             }
         }
+    }
+
+    for (int32_t i = kept; i < cnt; i++)
+    {
+        g_Sockets_LWIP_Driver.m_socketHandles[i].m_socket = SOCK_SOCKET_ERROR;
+        g_Sockets_LWIP_Driver.m_socketHandles[i].m_flags = 0;
+        g_Sockets_LWIP_Driver.m_socketHandles[i].m_sslData = nullptr;
+    }
+
+    g_Sockets_LWIP_Driver.m_cntSockets = kept;
+
+    GLOBAL_UNLOCK();
+
+    for (int32_t i = 0; i < closeCount; i++)
+    {
+        HAL_SOCK_close(socketsToClose[i]);
     }
 }
 
@@ -435,14 +455,6 @@ bool Sockets_LWIP_Driver::Initialize()
     SOCKET_CHECK_EXIT_bool();
 }
 
-// Dummy methods in case Debbuger is not installed
-__nfweak void Sockets_LWIP_Driver::Debugger_Abort()
-{
-}
-__nfweak void Sockets_LWIP_Driver::Debugger_Uninitialize()
-{
-}
-
 bool Sockets_LWIP_Driver::Uninitialize()
 {
     NATIVE_PROFILE_PAL_COM();
@@ -450,14 +462,15 @@ bool Sockets_LWIP_Driver::Uninitialize()
 
     if (s_initialized)
     {
-        Debugger_Abort();
+#if CONFIG_NF_WP_CHANNEL_NETWORK
+        // the sockets of the Wire Protocol network channel are about to be closed
+        WP_Network_Stop();
+#endif
 
         // close all connections (including debugger sockets)
         CloseConnections(TRUE);
 
         SSL_Uninitialize();
-
-        Debugger_Uninitialize();
 
         ret = HAL_SOCK_Uninitialize();
 
@@ -489,21 +502,21 @@ void Sockets_LWIP_Driver::RegisterSocket(SOCK_SOCKET sock, bool selectable, bool
         return;
     }
 
-    if (g_Sockets_LWIP_Driver.m_cntSockets >= SOCKETS_MAX_COUNT)
-        return;
+    // need to protect table access as this can be called from more than one thread (CLR and Wire Protocol receiver)
+    GLOBAL_LOCK();
 
-    GLOBAL_LOCK_SOCKETS(lock);
+    if (g_Sockets_LWIP_Driver.m_cntSockets < SOCKETS_MAX_COUNT)
+    {
+        SocketRegisterMap &entry = g_Sockets_LWIP_Driver.m_socketHandles[g_Sockets_LWIP_Driver.m_cntSockets];
 
-    g_Sockets_LWIP_Driver.m_socketHandles[g_Sockets_LWIP_Driver.m_cntSockets].m_socket = sock;
-    g_Sockets_LWIP_Driver.m_socketHandles[g_Sockets_LWIP_Driver.m_cntSockets].m_flags = 0;
-    g_Sockets_LWIP_Driver.m_socketHandles[g_Sockets_LWIP_Driver.m_cntSockets].m_sslData = nullptr;
+        entry.m_socket = sock;
+        entry.m_flags = fDebug ? SocketRegisterMap::c_DebugSocket : 0;
+        entry.m_sslData = nullptr;
 
-    if (fDebug)
-        SET_SOCKET_FLAG(
-            g_Sockets_LWIP_Driver.m_socketHandles[g_Sockets_LWIP_Driver.m_cntSockets],
-            SocketRegisterMap::c_DebugSocket);
+        g_Sockets_LWIP_Driver.m_cntSockets++;
+    }
 
-    g_Sockets_LWIP_Driver.m_cntSockets++;
+    GLOBAL_UNLOCK();
 }
 
 //-----------------------------------------------------------------------------
@@ -517,25 +530,29 @@ void Sockets_LWIP_Driver::UnregisterSocket(SOCK_SOCKET sock)
     int32_t index = -1;
 
     NATIVE_PROFILE_PAL_COM();
-    GLOBAL_LOCK_SOCKETS(lock);
+
+    // need to protect table access as this can be called from more than one thread (CLR and Wire Protocol receiver)
+    GLOBAL_LOCK();
 
     g_Sockets_LWIP_Driver.GetSocketSslData(sock, index);
 
-    if (index == -1)
-        return;
-
-    g_Sockets_LWIP_Driver.m_cntSockets--;
-
-    if (index != g_Sockets_LWIP_Driver.m_cntSockets)
+    if (index != -1)
     {
-        memcpy(
-            &g_Sockets_LWIP_Driver.m_socketHandles[index],
-            &g_Sockets_LWIP_Driver.m_socketHandles[g_Sockets_LWIP_Driver.m_cntSockets],
-            sizeof(g_Sockets_LWIP_Driver.m_socketHandles[index]));
+        g_Sockets_LWIP_Driver.m_cntSockets--;
+
+        if (index != g_Sockets_LWIP_Driver.m_cntSockets)
+        {
+            memcpy(
+                &g_Sockets_LWIP_Driver.m_socketHandles[index],
+                &g_Sockets_LWIP_Driver.m_socketHandles[g_Sockets_LWIP_Driver.m_cntSockets],
+                sizeof(g_Sockets_LWIP_Driver.m_socketHandles[index]));
+        }
+
+        g_Sockets_LWIP_Driver.m_socketHandles[g_Sockets_LWIP_Driver.m_cntSockets].m_socket = SOCK_SOCKET_ERROR;
+        g_Sockets_LWIP_Driver.m_socketHandles[g_Sockets_LWIP_Driver.m_cntSockets].m_flags = 0;
     }
 
-    g_Sockets_LWIP_Driver.m_socketHandles[g_Sockets_LWIP_Driver.m_cntSockets].m_socket = SOCK_SOCKET_ERROR;
-    g_Sockets_LWIP_Driver.m_socketHandles[g_Sockets_LWIP_Driver.m_cntSockets].m_flags = 0;
+    GLOBAL_UNLOCK();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////

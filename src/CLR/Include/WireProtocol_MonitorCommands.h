@@ -211,7 +211,7 @@ typedef struct __nfpack Monitor_ConfigurationInfo_BlockInfo
 } Monitor_ConfigurationInfo_BlockInfo;
 
 // count of configuration block types reported
-#define MONITOR_CONFIGURATION_INFO_BLOCK_TYPES  5
+#define MONITOR_CONFIGURATION_INFO_BLOCK_TYPES  6
 
 typedef struct __nfpack Monitor_ConfigurationInfo_Reply
 {

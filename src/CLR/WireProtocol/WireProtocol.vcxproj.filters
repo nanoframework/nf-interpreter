@@ -18,6 +18,9 @@
     <ClCompile Include="WireProtocol_App_Interface.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="WireProtocol_Auth.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="WireProtocol_HAL_Interface.c">
       <Filter>Source Files</Filter>
     </ClCompile>

@@ -113,6 +113,10 @@ void ConfigStorage_GetConfigFileName(
             strcat(configName, (const char *)c_MARKER_CONFIGURATION_X509DEVICECERTIFICATE_V1);
             break;
 
+        case DeviceConfigurationOption_WPAuthToken:
+            strcat(configName, (const char *)c_MARKER_CONFIGURATION_WPAUTHTOKEN_V1);
+            break;
+
         default:
             // unknown device configuration
             // shouldn't EVER EVER get here
@@ -493,6 +497,56 @@ HAL_CONFIGURATION_NETWORK_WIRELESSAP *ConfigStorage_FindNetworkWirelessAPConfigu
     networkWirelessAPConfigs->Count = configCount;
 
     return networkWirelessAPConfigs;
+}
+
+HAL_CONFIGURATION_WPAUTHTOKEN *ConfigStorage_FindWPAuthTokenConfigurationBlocks()
+{
+    DIR *dir = opendir(NANO_LITTLEFS_BASE_PATH);
+    struct dirent *dirInfo = {0};
+
+    uint32_t configCount = 0;
+
+    // 1st pass, count the config files
+    for (;;)
+    {
+        dirInfo = dir != NULL ? readdir(dir) : NULL;
+
+        // check for "no more files"
+        if (!dirInfo)
+        {
+            break;
+        }
+
+        if (strstr(dirInfo->d_name, (const char *)c_MARKER_CONFIGURATION_WPAUTHTOKEN_V1))
+        {
+            configCount++;
+        }
+    }
+
+    if (dir != NULL)
+    {
+        closedir(dir);
+    }
+
+    // allocate config struct
+    int32_t allocationSize = sizeof(HAL_CONFIGURATION_WPAUTHTOKEN);
+
+    HAL_CONFIGURATION_WPAUTHTOKEN *wpAuthTokenConfigs =
+        (HAL_CONFIGURATION_WPAUTHTOKEN *)platform_malloc(allocationSize);
+
+    // check allocation
+    if (wpAuthTokenConfigs == NULL)
+    {
+        return NULL;
+    }
+
+    // clear memory
+    memset(wpAuthTokenConfigs, 0, allocationSize);
+
+    // set collection count
+    wpAuthTokenConfigs->Count = configCount;
+
+    return wpAuthTokenConfigs;
 }
 
 HAL_CONFIGURATION_X509_CERTIFICATE *ConfigStorage_FindX509CertificateConfigurationBlocks()

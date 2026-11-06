@@ -7,6 +7,7 @@
 
 #include "nanoCLR_native.h"
 #include <WireProtocol_HAL_interface.h>
+#include <WireProtocol_Transport.h>
 
 void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
 {
@@ -43,4 +44,13 @@ uint8_t WP_TransmitMessage(WP_Message *message)
 
 void WP_CheckAvailableIncomingData()
 {
+}
+
+void WP_Transport_DropClient(void)
+{
+    // the host owns the connection, ask it to drop it
+    if (WireProtocolDropClientCallback != nullptr)
+    {
+        WireProtocolDropClientCallback();
+    }
 }

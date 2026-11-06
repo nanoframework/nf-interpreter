@@ -89,6 +89,7 @@ typedef enum CLR_DBG_Commands_Monitor
     CLR_DBG_Commands_c_Monitor_StorageOperation         = 0x00000011,
     CLR_DBG_Commands_c_Monitor_ConfigurationInfo        = 0x00000012,
     CLR_DBG_Commands_c_Monitor_ConfigurationOperation   = 0x00000013,
+    CLR_DBG_Commands_c_Monitor_Authenticate             = 0x00000014, // The payload is the token: uint32 length followed by UTF-8 bytes (max 64). The reply is a uint32 result (0 is OK).
     CLR_DBG_Commands_c_Monitor_TargetInfo               = 0x00000020,
 }CLR_DBG_Commands_Monitor;
 

@@ -160,29 +160,11 @@ HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration(
 {
     NATIVE_PROFILE_PAL_COM();
     HRESULT hr = S_OK;
-    bool success = FALSE;
-
-    const uint32_t c_reInitFlag = NetworkInterface_UpdateOperation_Dhcp | NetworkInterface_UpdateOperation_DhcpRenew |
-                                  NetworkInterface_UpdateOperation_Mac;
-
-    const uint32_t c_uninitFlag = c_reInitFlag | NetworkInterface_UpdateOperation_DhcpRelease;
-
-    if (0 != (updateFlags & c_uninitFlag))
-    {
-        success = SOCKETS_DbgUninitialize(COM_SOCKET_DBG);
-    }
-
     hr = HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration(config, interfaceIndex, updateFlags);
 
     if (!SUCCEEDED(hr))
     {
         return S_FALSE;
-    }
-
-    if (0 != (updateFlags & c_reInitFlag))
-    {
-        if (success)
-            SOCKETS_DbgInitialize(COM_SOCKET_DBG);
     }
 
     return hr;

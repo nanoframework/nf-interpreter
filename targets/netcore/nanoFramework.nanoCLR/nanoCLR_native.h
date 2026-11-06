@@ -40,10 +40,12 @@ typedef void(__stdcall *ProfilerMessageCallback)(const char *szText);
 typedef void(__stdcall *ProfilerDataCallback)(const CLR_UINT8 *data, size_t size);
 typedef int(__stdcall *WireTransmitCallback)(const CLR_UINT8 *data, size_t size);
 typedef int(__stdcall *WireReceiveCallback)(const CLR_UINT8 *data, size_t size);
+typedef void(__stdcall *WireDropClientCallback)();
 
 extern DebugPrintCallback gDebugPrintCallback;
 extern WireTransmitCallback WireProtocolTransmitCallback;
 extern WireReceiveCallback WireProtocolReceiveCallback;
+extern WireDropClientCallback WireProtocolDropClientCallback;
 extern ProfilerMessageCallback g_ProfilerMessageCallback;
 extern ProfilerDataCallback g_ProfilerDataCallback;
 
@@ -67,6 +69,16 @@ extern "C" NANOCLRNATIVE_API void nanoCLR_WireProtocolClose();
 
 extern "C" NANOCLRNATIVE_API void nanoCLR_SetWireProtocolReceiveCallback(WireReceiveCallback receiveCallback);
 extern "C" NANOCLRNATIVE_API void nanoCLR_SetWireProtocolTransmitCallback(WireTransmitCallback transmitCallback);
+
+// Sets the callback to drop the connection of the debugger client (called after failed authentication attempts).
+extern "C" NANOCLRNATIVE_API void nanoCLR_SetWireProtocolDropClientCallback(WireDropClientCallback dropClientCallback);
+
+// Sets the state of the Wire Protocol session.
+// isNetwork: the session is over the network, so it requires authentication when there is a token.
+// token: the token the debugger has to present. NULL leaves it unchanged, empty means no authentication.
+// Call it when a network client connects and again when it disconnects (isNetwork false), so the session is no longer
+// authenticated.
+extern "C" NANOCLRNATIVE_API void nanoCLR_SetWireProtocolChannelInfo(bool isNetwork, const char *token);
 
 extern "C" NANOCLRNATIVE_API void nanoCLR_SetProfilerMessageCallback(ProfilerMessageCallback profilerMessageCallback);
 extern "C" NANOCLRNATIVE_API void nanoCLR_SetProfilerDataCallback(ProfilerDataCallback profilerDataCallback);

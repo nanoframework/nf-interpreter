@@ -54,6 +54,19 @@
 # CONFIG_NF_WP_TRACE_VERBOSE=n
 # CONFIG_NF_WP_TRACE_ALL=n
 
+# Debug the managed application over the network (TCP) on ESP32, ChibiOS and FreeRTOS NXP targets that have System.Net.
+# The device listens for a single debugger and announces itself with a UDP broadcast every 5 seconds.
+# CONFIG_NF_WP_CHANNEL_NETWORK=y
+# TCP port the debugger connects to.
+# CONFIG_NF_WP_NETWORK_PORT=26000
+# UDP broadcast announcing the device (set to n to not announce).
+# CONFIG_NF_WP_NETWORK_DISCOVERY=y
+# CONFIG_NF_WP_NETWORK_DISCOVERY_PORT=23657
+# Token that the debugger has to present (max 64 characters), empty means no authentication.
+# CONFIG_NF_WP_NETWORK_AUTH_TOKEN=""
+# Serial/USB debugging stays available unless it's turned off (nanoBooter always uses serial/USB).
+# CONFIG_NF_WP_CHANNEL_SERIAL=y
+
 # ── ChibiOS / STM32 ──────────────────────────────────────────────────────
 # ARM Cortex-M Single Wire Output (SWO) debug tracing.
 # Only relevant when building a ChibiOS target. Default is n.

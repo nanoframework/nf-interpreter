@@ -46,6 +46,9 @@ static const unsigned char c_MARKER_CONFIGURATION_X509CAROOTBUNDLE_V1[] = "XB1";
 // X509 device certificate configuration block start marker
 static const unsigned char c_MARKER_CONFIGURATION_X509DEVICECERTIFICATE_V1[] = "XD1";
 
+// Wire Protocol authentication token configuration block start marker
+static const unsigned char c_MARKER_CONFIGURATION_WPAUTHTOKEN_V1[] = "AT1";
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH System.Net.NetworkInformation.NetworkInterfaceType (in managed code) !!! //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -307,6 +310,24 @@ typedef struct __nfpack HAL_Configuration_X509DeviceCertificate
     uint8_t Certificate[1];
 
 } HAL_Configuration_X509DeviceCertificate;
+
+// maximum length of the Wire Protocol authentication token
+#define WPAUTHTOKEN_CONFIG_MAX_TOKEN_LENGTH 64
+
+// Wire Protocol authentication token for the network channel
+// when this block exists it takes precedence over the default of the build, an empty token turns the authentication off
+typedef struct __nfpack HAL_Configuration_WPAuthToken
+{
+    // this is the marker placeholder for this configuration block
+    uint8_t Marker[4];
+
+    // Length of the token, 0 for no authentication
+    uint8_t TokenLength;
+
+    // Authentication token (UTF-8, not null terminated)
+    uint8_t Token[WPAUTHTOKEN_CONFIG_MAX_TOKEN_LENGTH];
+
+} HAL_Configuration_WPAuthToken;
 
 void nanoHAL_Network_Initialize();
 void nanoHAL_Network_Uninitialize();

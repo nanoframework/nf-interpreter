@@ -191,7 +191,6 @@ struct Sockets_ISM43362_Driver
 
     static bool s_initialized;
     static bool s_initializedDbg;
-    static const int32_t c_WellKnownDebugPort = DEBUG_SOCKET_PORT;
     static bool s_wirelessInitialized;
     static bool s_discoveryInitialized;
 };

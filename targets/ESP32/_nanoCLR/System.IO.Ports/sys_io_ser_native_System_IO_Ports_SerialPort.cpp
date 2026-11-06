@@ -9,7 +9,7 @@
 #include <Esp32_DeviceMapping.h>
 #include <esp32_idf.h>
 #include <stdio.h>
-#include <WireProtocol_Transport.h>
+#include <WireProtocol_ESP32_SerialTransport.h>
 
 // in UWP the COM ports are named COM1, COM2, COM3. But ESP32 uses internally UART0, UART1, UART2. This maps the port
 // index 1, 2 or 3 to the uart number 0, 1 or 2
@@ -895,7 +895,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     }
 
     // When Wire protocol is using UART then COM1 is being used for VS debug, so it's not available
-    if (g_WP_Transport == WP_TRANSPORT_UART && uart_num == 0)
+    if (g_WP_ESP32_SerialTransport == WP_ESP32_SERIAL_TRANSPORT_UART && uart_num == 0)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
@@ -1510,7 +1510,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector_
     };
 
     // COM1 is reserved for VS debug when Wire Protocol is using UART.
-    if (g_WP_Transport != WP_TRANSPORT_UART)
+    if (g_WP_ESP32_SerialTransport != WP_ESP32_SERIAL_TRANSPORT_UART)
     {
         appendPort("COM1,");
     }
