@@ -1853,7 +1853,9 @@ bool CLR_RT_FieldDef_Instance::ResolveToken(
                         CLR_RT_TypeSpec_Instance instCaller, instMd;
                         if (instCaller.InitializeFromIndex(*caller->genericType) && instMd.InitializeFromIndex(*mdTS))
                         {
-                            if (instCaller.genericTypeDef.data == instMd.genericTypeDef.data)
+                            // A closed owner already names its instantiation, which may differ from the caller's.
+                            if (instCaller.genericTypeDef.data == instMd.genericTypeDef.data &&
+                                !instMd.IsClosedGenericType())
                             {
                                 effectiveTS = caller->genericType;
                             }
@@ -2208,7 +2210,7 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
 
                 if (mr->Owner() == TBL_TypeSpec)
                 {
-                    // Owner is a TypeSpec — possibly open. Prefer the caller's closed TypeSpec
+                    // Owner is a TypeSpec — possibly open. If open, prefer the caller's closed TypeSpec
                     // only when it points at the same TypeDef. See CLAUDE.md "Generic context
                     // propagation".
                     const CLR_RT_TypeSpec_Index *methodOwnerTS = &assm->crossReferenceMethodRef[index].genericType;
@@ -2255,7 +2257,9 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
 
                                 CLR_UINT32 ownerTypeDefToken = elemOwner.Class.data;
 
-                                if ((callerTypeDefToken == ownerTypeDefToken) && callerTypeDefToken != 0x0)
+                                // A closed owner already names its instantiation, which may differ from the caller's.
+                                if ((callerTypeDefToken == ownerTypeDefToken) && callerTypeDefToken != 0x0 &&
+                                    !ownerInst.IsClosedGenericType())
                                 {
                                     // same TypeDef → bind to the caller's closed TypeSpec
                                     useCaller = true;
