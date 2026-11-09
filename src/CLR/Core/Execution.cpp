@@ -1304,6 +1304,11 @@ bool CLR_RT_ExecutionEngine::SpawnGenericTypeStaticConstructorsHelper(
         // Compute hash for the closed generic type to check if .cctor already scheduled/executed
         CLR_UINT32 hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(genericTypeInstance);
 
+        if (hash == 0xFFFFFFFF)
+        {
+            continue;
+        }
+
         // Find or create the .cctor execution record for this closed type
         bool recordCreated = false;
         CLR_RT_GenericCctorExecutionRecord *record =
