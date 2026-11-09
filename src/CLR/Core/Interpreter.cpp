@@ -1054,9 +1054,13 @@ static HRESULT EnsureGenericCctorCompleted(
     }
 
     bool tsIsClosed = tsInst.IsClosedGenericType();
+    bool hashIsClosed = false;
 
-    CLR_UINT32 hash =
-        g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(tsInst, &stack->m_genericTypeSpecStorage, &stack->m_call);
+    CLR_UINT32 hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(
+        tsInst,
+        &stack->m_genericTypeSpecStorage,
+        &stack->m_call,
+        &hashIsClosed);
 
     if (hash == 0xFFFFFFFF)
     {
@@ -1145,6 +1149,28 @@ static HRESULT EnsureGenericCctorCompleted(
 
     CLR_RT_TypeSpec_Index tsIndex;
     tsIndex.data = tsInst.data;
+
+    // See CLAUDE.md "Open owner storage".
+    if (!tsIsClosed && hashIsClosed)
+    {
+        CLR_RT_TypeDef_Instance ownerInst{};
+
+        if (ownerInst.InitializeFromIndex(typeDef) && ownerInst.target->staticFieldsCount > 0)
+        {
+            HRESULT hrAlloc = ownerAsm->AllocateGenericStaticFieldsOnDemand(
+                tsIndex,
+                ownerInst,
+                &stack->m_genericTypeSpecStorage,
+                &stack->m_call);
+
+            if (FAILED(hrAlloc))
+            {
+                record->m_flags &=
+                    ~(CLR_RT_GenericCctorExecutionRecord::c_Scheduled | CLR_RT_GenericCctorExecutionRecord::c_Executed);
+                return hrAlloc;
+            }
+        }
+    }
 
     cctorInst.m_typeSpecStorage = tsIndex;
     cctorInst.genericType = &cctorInst.m_typeSpecStorage;

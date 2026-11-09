@@ -1065,7 +1065,12 @@ bool CLR_RT_TypeSpec_Instance::GetGenericParam(CLR_INT32 parameterPosition, CLR_
     CLR_RT_SignatureParser parser;
 
     // A generic argument is returned as its GENERICINST marker, which callers test for.
-    return PositionAtGenericParam(*this, parameterPosition, parser) && SUCCEEDED(parser.Advance(element));
+    return ::PositionAtGenericParam(*this, parameterPosition, parser) && SUCCEEDED(parser.Advance(element));
+}
+
+bool CLR_RT_TypeSpec_Instance::PositionAtGenericParam(CLR_INT32 parameterPosition, CLR_RT_SignatureParser &parser)
+{
+    return ::PositionAtGenericParam(*this, parameterPosition, parser);
 }
 
 //////////////////////////////
@@ -6139,8 +6144,15 @@ HRESULT CLR_RT_Assembly::ResolveAllocateGenericTypeStaticFields()
             // Initialize the storage using the field definition, resolving VAR against
             // the closed TypeSpec so bare-VAR fields get the concrete type argument.
             const CLR_RECORD_FIELDDEF *pFd = ownerAsm->GetFieldDef(fieldIndex);
-            NANOCLR_CHECK_HRESULT(
-                g_CLR_RT_ExecutionEngine.InitializeReference(fields[i], pFd, ownerAsm, &genericTypeInstance));
+            hr = g_CLR_RT_ExecutionEngine.InitializeReference(fields[i], pFd, ownerAsm, &genericTypeInstance);
+
+            if (FAILED(hr))
+            {
+                // Same rollback as AllocateGenericStaticFieldsOnDemand.
+                g_CLR_RT_TypeSystem.m_genericStaticFieldsCount--;
+                platform_free(fieldDefs);
+                NANOCLR_LEAVE();
+            }
         }
 
         // Link this assembly's cross-reference to the global registry entry
@@ -6183,6 +6195,48 @@ CLR_RT_HeapBlock *CLR_RT_Assembly::GetGenericStaticField(
     return nullptr;
 }
 
+static void LinkGenericStaticFields(
+    const CLR_RT_TypeSpec_Index &typeSpecIndex,
+    const CLR_RT_GenericStaticFieldRecord &record)
+{
+    CLR_RT_Assembly *tsOwner = g_CLR_RT_TypeSystem.m_assemblies[typeSpecIndex.Assembly() - 1];
+    CLR_RT_TypeSpec_CrossReference &tsCross = tsOwner->crossReferenceTypeSpec[typeSpecIndex.TypeSpec()];
+
+    tsCross.genericStaticFields = record.m_fields;
+    tsCross.genericStaticFieldDefs = record.m_fieldDefs;
+    tsCross.genericStaticFieldsCount = record.m_count;
+}
+
+// Also links the open row to the record, for frames whose context can't close the row.
+static CLR_RT_HeapBlock *FindGenericStaticFieldByHash(
+    CLR_UINT32 hash,
+    const CLR_RT_TypeSpec_Index &openTypeSpec,
+    const CLR_RT_FieldDef_Index &fdIndex)
+{
+    for (CLR_UINT32 i = 0; i < g_CLR_RT_TypeSystem.m_genericStaticFieldsCount; i++)
+    {
+        CLR_RT_GenericStaticFieldRecord &record = g_CLR_RT_TypeSystem.m_genericStaticFields[i];
+
+        if (record.m_hash != hash)
+        {
+            continue;
+        }
+
+        for (CLR_UINT32 j = 0; j < record.m_count; j++)
+        {
+            if (record.m_fieldDefs[j].data == fdIndex.data)
+            {
+                LinkGenericStaticFields(openTypeSpec, record);
+                return &record.m_fields[j];
+            }
+        }
+
+        return nullptr;
+    }
+
+    return nullptr;
+}
+
 CLR_RT_HeapBlock *CLR_RT_Assembly::GetStaticFieldByFieldDef(
     const CLR_RT_FieldDef_Index &fdIndex,
     const CLR_RT_TypeSpec_Index *genericType,
@@ -6194,7 +6248,31 @@ CLR_RT_HeapBlock *CLR_RT_Assembly::GetStaticFieldByFieldDef(
     // If genericType is provided and valid, try per-TypeSpec lookup first
     if (genericType != nullptr && NANOCLR_INDEX_IS_VALID(*genericType))
     {
-        CLR_RT_HeapBlock *hb = GetGenericStaticField(*genericType, fdIndex);
+        CLR_RT_TypeSpec_Instance tsInst;
+
+        if (!tsInst.InitializeFromIndex(*genericType))
+        {
+            return nullptr;
+        }
+
+        bool isOpen = !tsInst.IsClosedGenericType();
+        bool byHash = false;
+        CLR_UINT32 hash = 0;
+        CLR_RT_HeapBlock *hb;
+
+        // An open row is shared by every instantiation reached through it. See CLAUDE.md "Open owner storage".
+        if (isOpen)
+        {
+            hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(tsInst, contextTypeSpec, contextMethod, &byHash);
+
+            if (hash == 0xFFFFFFFF)
+            {
+                return nullptr;
+            }
+        }
+
+        hb = byHash ? FindGenericStaticFieldByHash(hash, *genericType, fdIndex)
+                    : GetGenericStaticField(*genericType, fdIndex);
 
 #if defined(NANOCLR_TRACE_GENERICS)
         if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Verbose)
@@ -6216,8 +6294,7 @@ CLR_RT_HeapBlock *CLR_RT_Assembly::GetStaticFieldByFieldDef(
 
         // On-demand allocation: if this is an open generic type that needs runtime binding,
         // allocate static fields now (closed generics should already be allocated via metadata)
-        CLR_RT_TypeSpec_Instance tsInst;
-        if (tsInst.InitializeFromIndex(*genericType) && !tsInst.IsClosedGenericType())
+        if (isOpen)
         {
             // Get the generic type definition to check if it has static fields
             CLR_RT_TypeDef_Instance genericTypeDef;
@@ -6234,7 +6311,8 @@ CLR_RT_HeapBlock *CLR_RT_Assembly::GetStaticFieldByFieldDef(
                             contextMethod)))
                     {
                         // Retry the lookup after allocation
-                        hb = GetGenericStaticField(*genericType, fdIndex);
+                        hb = byHash ? FindGenericStaticFieldByHash(hash, *genericType, fdIndex)
+                                    : GetGenericStaticField(*genericType, fdIndex);
                         if (hb != nullptr)
                         {
                             return hb;
@@ -6281,8 +6359,6 @@ HRESULT CLR_RT_Assembly::AllocateGenericStaticFieldsOnDemand(
 
     CLR_UINT32 hash;
     CLR_RT_TypeSpec_Instance tsInstance;
-    CLR_RT_Assembly *tsOwner;
-    CLR_RT_TypeSpec_CrossReference *tsCross;
     CLR_RT_GenericStaticFieldRecord *record;
     CLR_RT_Assembly *ownerAsm;
     const CLR_RECORD_TYPEDEF *ownerTd;
@@ -6315,18 +6391,7 @@ HRESULT CLR_RT_Assembly::AllocateGenericStaticFieldsOnDemand(
     {
         if (g_CLR_RT_TypeSystem.m_genericStaticFields[i].m_hash == hash)
         {
-            // Already exists, link to cross-reference if needed
-            tsOwner = g_CLR_RT_TypeSystem.m_assemblies[typeSpecIndex.Assembly() - 1];
-            tsCross = &tsOwner->crossReferenceTypeSpec[typeSpecIndex.TypeSpec()];
-
-            if (tsCross->genericStaticFields == nullptr)
-            {
-                record = &g_CLR_RT_TypeSystem.m_genericStaticFields[i];
-                tsCross->genericStaticFields = record->m_fields;
-                tsCross->genericStaticFieldDefs = record->m_fieldDefs;
-                tsCross->genericStaticFieldsCount = record->m_count;
-            }
-
+            LinkGenericStaticFields(typeSpecIndex, g_CLR_RT_TypeSystem.m_genericStaticFields[i]);
             NANOCLR_SET_AND_LEAVE(S_OK);
         }
     }
@@ -6418,17 +6483,26 @@ HRESULT CLR_RT_Assembly::AllocateGenericStaticFieldsOnDemand(
         }
 #endif
 
-        // Resolve VAR against the closed TypeSpec so bare-VAR fields get the concrete type argument.
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.InitializeReference(fields[i], pFd, ownerAsm, &tsInstance));
+        // The row is open, so a bare-VAR field resolves through the caller's context.
+        hr = g_CLR_RT_ExecutionEngine.InitializeReference(
+            fields[i],
+            pFd,
+            ownerAsm,
+            &tsInstance,
+            false,
+            contextTypeSpec,
+            contextMethod != nullptr ? &contextMethod->methodSpec : nullptr);
+
+        if (FAILED(hr))
+        {
+            // Nothing can have been published after this record, and the blob is reclaimed by the GC.
+            g_CLR_RT_TypeSystem.m_genericStaticFieldsCount--;
+            platform_free(fieldDefs);
+            NANOCLR_LEAVE();
+        }
     }
 
-    // Link this assembly's cross-reference to the global registry entry
-    tsOwner = g_CLR_RT_TypeSystem.m_assemblies[typeSpecIndex.Assembly() - 1];
-    tsCross = &tsOwner->crossReferenceTypeSpec[typeSpecIndex.TypeSpec()];
-
-    tsCross->genericStaticFields = record->m_fields;
-    tsCross->genericStaticFieldDefs = record->m_fieldDefs;
-    tsCross->genericStaticFieldsCount = record->m_count;
+    LinkGenericStaticFields(typeSpecIndex, *record);
 
     // Now that static fields are allocated, schedule the static constructor to initialize them
     // Find the .cctor method for the generic type definition
@@ -9468,7 +9542,8 @@ static bool HashGenericArguments(
     const CLR_RT_TypeSpec_Index *contextTypeSpec,
     const CLR_RT_MethodDef_Instance *contextMethod,
     int argCount,
-    CLR_UINT32 &hash)
+    CLR_UINT32 &hash,
+    bool &isClosed)
 {
     struct SubstitutionFrame
     {
@@ -9554,6 +9629,11 @@ static bool HashGenericArguments(
             continue;
         }
 
+        if (elem.DataType == DATATYPE_VAR || elem.DataType == DATATYPE_MVAR)
+        {
+            isClosed = false;
+        }
+
         hash = SUPPORT_ComputeCRC(&elem.DataType, sizeof(elem.DataType), hash);
         hash = SUPPORT_ComputeCRC(&levels, sizeof(levels), hash);
 
@@ -9600,10 +9680,12 @@ static bool HashGenericArguments(
 CLR_UINT32 CLR_RT_TypeSystem::ComputeHashForClosedGenericType(
     CLR_RT_TypeSpec_Instance &typeInstance,
     const CLR_RT_TypeSpec_Index *contextTypeSpec,
-    const CLR_RT_MethodDef_Instance *contextMethod)
+    const CLR_RT_MethodDef_Instance *contextMethod,
+    bool *isClosed)
 {
     CLR_UINT32 hash = 0;
     int argCount;
+    bool closed = true;
 
     // Start with the generic type definition
     hash = SUPPORT_ComputeCRC(&typeInstance.genericTypeDef.data, sizeof(CLR_UINT32), hash);
@@ -9630,12 +9712,17 @@ CLR_UINT32 CLR_RT_TypeSystem::ComputeHashForClosedGenericType(
     argCount = elem.GenParamCount;
 
     // Process each generic argument
-    if (!HashGenericArguments(parser, contextTypeSpec, contextMethod, argCount, hash))
+    if (!HashGenericArguments(parser, contextTypeSpec, contextMethod, argCount, hash, closed))
     {
         return 0xFFFFFFFF;
     }
 
 ComputeHash_End:
+    if (isClosed != nullptr)
+    {
+        *isClosed = closed;
+    }
+
     // 0 isn't a valid hash and 0xFFFFFFFF is reserved for failure
     return (hash == 0 || hash == 0xFFFFFFFF) ? 0xFFFFFFFE : hash;
 }
