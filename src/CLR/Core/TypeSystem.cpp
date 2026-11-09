@@ -6141,8 +6141,15 @@ HRESULT CLR_RT_Assembly::ResolveAllocateGenericTypeStaticFields()
             // Initialize the storage using the field definition, resolving VAR against
             // the closed TypeSpec so bare-VAR fields get the concrete type argument.
             const CLR_RECORD_FIELDDEF *pFd = ownerAsm->GetFieldDef(fieldIndex);
-            NANOCLR_CHECK_HRESULT(
-                g_CLR_RT_ExecutionEngine.InitializeReference(fields[i], pFd, ownerAsm, &genericTypeInstance));
+            hr = g_CLR_RT_ExecutionEngine.InitializeReference(fields[i], pFd, ownerAsm, &genericTypeInstance);
+
+            if (FAILED(hr))
+            {
+                // Same rollback as AllocateGenericStaticFieldsOnDemand.
+                g_CLR_RT_TypeSystem.m_genericStaticFieldsCount--;
+                platform_free(fieldDefs);
+                NANOCLR_LEAVE();
+            }
         }
 
         // Link this assembly's cross-reference to the global registry entry

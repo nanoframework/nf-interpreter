@@ -1157,11 +1157,18 @@ static HRESULT EnsureGenericCctorCompleted(
 
         if (ownerInst.InitializeFromIndex(typeDef) && ownerInst.target->staticFieldsCount > 0)
         {
-            ownerAsm->AllocateGenericStaticFieldsOnDemand(
+            HRESULT hrAlloc = ownerAsm->AllocateGenericStaticFieldsOnDemand(
                 tsIndex,
                 ownerInst,
                 &stack->m_genericTypeSpecStorage,
                 &stack->m_call);
+
+            if (FAILED(hrAlloc))
+            {
+                record->m_flags &=
+                    ~(CLR_RT_GenericCctorExecutionRecord::c_Scheduled | CLR_RT_GenericCctorExecutionRecord::c_Executed);
+                return hrAlloc;
+            }
         }
     }
 
