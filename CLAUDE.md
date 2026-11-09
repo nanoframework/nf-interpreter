@@ -26,6 +26,8 @@ Available presets are defined in `CMakePresets.json` and per-RTOS `targets/<RTOS
 
 **ESP32 `sdkconfig`:** ESP-IDF generates a `sdkconfig` file at the repository root. When building an ESP32 target for the first time, or switching to a different ESP32 variant, delete this file first so the new target's defconfig is applied cleanly. This is not needed for non-ESP32 platforms.
 
+**Deep folders on Windows (e.g. Claude worktrees):** the GNU toolchain executables (`cc1plus`, `ar`) are not long-path aware, so the Windows `LongPathsEnabled` setting does not help them. Object paths of the native assemblies (`<build dir>/targets/<RTOS>/<target>/CMakeFiles/NF_NativeAssemblies.dir/<hash>/<long source name>.obj`) go over the 259 characters limit when the checkout is in a deep folder, and the build fails with `opening dependency file ... No such file or directory` (CMake also warns about the object file directory length). Map the checkout to a drive and configure and build from it, e.g. `subst V: E:\GitHub\nf-interpreter\.claude\worktrees\<name>`, then `cd V:\`. Only relevant for Windows builds outside the usual short checkout path.
+
 **nanoCLR Win32:** `targets/netcore/nanoCLR.sln` is built with Visual Studio — it is a mixed solution of VCx projects covering HAL, PAL, CLR, C# wrappers, and a CLI tool.
 
 **There is no test runner.** Validation happens via CI (Azure Pipelines) and on-target testing. Do not look for `ctest` or a test suite.
