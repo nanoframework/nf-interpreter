@@ -1030,7 +1030,12 @@ void CLR_RT_ExecutionEngine::StaticConstructorTerminationCallback(void *arg)
         CLR_RT_TypeSpec_Instance genericTypeInstance{};
         if (genericTypeInstance.InitializeFromIndex(dlg->m_genericTypeSpec))
         {
-            CLR_UINT32 hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(genericTypeInstance);
+            CLR_RT_MethodDef_Instance contextMethod{};
+            contextMethod.ClearInstance();
+            contextMethod.methodSpec = dlg->m_genericMethodSpec;
+
+            CLR_UINT32 hash =
+                g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(genericTypeInstance, nullptr, &contextMethod);
             CLR_RT_GenericCctorExecutionRecord *record =
                 g_CLR_RT_TypeSystem.FindOrCreateGenericCctorRecord(hash, nullptr);
 
@@ -2693,21 +2698,34 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     {
                         CLR_RT_MethodSpec_Instance methodSpec;
                         CLR_RT_SignatureParser::Element element;
+                        CLR_RT_SignatureParser argParser;
 
-                        if (!methodSpec.InitializeFromIndex(methodDefInstance.methodSpec))
+                        if (!methodSpec.InitializeFromIndex(methodDefInstance.methodSpec) ||
+                            !methodSpec.PositionAtGenericArgument(genericParamPosition, argParser))
                         {
                             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
                         }
 
-                        // Use GetGenericArgument to get the concrete type from MethodSpec's signature
-                        if (methodSpec.GetGenericArgument(genericParamPosition, element))
+                        CLR_PMETADATA argSignature = argParser.Signature;
+                        CLR_PMETADATA argStart = argSignature;
+                        bool argIsGenericInst = CLR_UncompressElementType(argStart) == DATATYPE_GENERICINST;
+
+                        NANOCLR_CHECK_HRESULT(argParser.AdvanceParameter(element));
+
+                        cls = element.Class;
+                        dt = element.DataType;
+                        levels += element.Levels;
+
+                        if (argIsGenericInst && dt == DATATYPE_VALUETYPE)
                         {
-                            cls = element.Class;
-                            dt = element.DataType;
-                        }
-                        else
-                        {
-                            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                            CLR_RT_TypeSpec_Index argTypeSpec;
+
+                            if (!methodSpec.assembly->FindTypeSpec(argSignature, argTypeSpec))
+                            {
+                                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                            }
+
+                            genericInstance.InitializeFromIndex(argTypeSpec);
                         }
                     }
                     else

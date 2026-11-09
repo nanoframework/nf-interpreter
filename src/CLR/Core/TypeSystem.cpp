@@ -1418,9 +1418,11 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                                 }
 
                                 CLR_RT_SignatureParser::Element paramElement;
+                                CLR_RT_SignatureParser paramParser;
 
                                 // Try to map using the generic context (e.g. !T→Int32)
-                                if (callerTypeSpec.GetGenericParam(genericPosition, paramElement) &&
+                                if (PositionAtGenericParam(callerTypeSpec, genericPosition, paramParser) &&
+                                    SUCCEEDED(paramParser.AdvanceParameter(paramElement)) &&
                                     paramElement.DataType != DATATYPE_VAR)
                                 {
                                     // Successfully resolved from generic context
@@ -1642,7 +1644,9 @@ bool CLR_RT_TypeDef_Instance::ResolveNullableType(
             }
 
             CLR_RT_SignatureParser::Element paramElement;
-            if (!callerTypeSpec.GetGenericParam((CLR_UINT32)pos, paramElement))
+            CLR_RT_SignatureParser paramParser;
+            if (!PositionAtGenericParam(callerTypeSpec, pos, paramParser) ||
+                FAILED(paramParser.AdvanceParameter(paramElement)) || !NANOCLR_INDEX_IS_VALID(paramElement.Class))
             {
                 return false;
             }
@@ -2777,7 +2781,12 @@ bool CLR_RT_MethodSpec_Instance::GetGenericArgument(
 {
     CLR_RT_SignatureParser parser;
 
-    return PositionAtGenericArgument(*this, argumentPosition, parser) && SUCCEEDED(parser.Advance(element));
+    return ::PositionAtGenericArgument(*this, argumentPosition, parser) && SUCCEEDED(parser.Advance(element));
+}
+
+bool CLR_RT_MethodSpec_Instance::PositionAtGenericArgument(CLR_INT32 argumentPosition, CLR_RT_SignatureParser &parser)
+{
+    return ::PositionAtGenericArgument(*this, argumentPosition, parser);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -9499,6 +9508,11 @@ static bool HashGenericArguments(
         int levels = frame.OuterLevels + elem.Levels;
         frame.OuterLevels = 0;
 
+        if (elem.DataType == DATATYPE_MVAR && frame.MvarResolved)
+        {
+            return false;
+        }
+
         bool substituteVar = elem.DataType == DATATYPE_VAR && !frame.VarResolved && contextTypeSpec &&
                              NANOCLR_INDEX_IS_VALID(*contextTypeSpec);
         bool substituteMvar = elem.DataType == DATATYPE_MVAR && !frame.MvarResolved && contextMethod &&
@@ -9542,7 +9556,7 @@ static bool HashGenericArguments(
 
         if (elem.DataType == DATATYPE_GENERICINST)
         {
-            if (FAILED(frame.Parser.Advance(elem)))
+            if (FAILED(frame.Parser.Advance(elem)) || !NANOCLR_INDEX_IS_VALID(elem.Class))
             {
                 return false;
             }
@@ -9552,6 +9566,11 @@ static bool HashGenericArguments(
         }
         else if (elem.DataType == DATATYPE_CLASS || elem.DataType == DATATYPE_VALUETYPE)
         {
+            if (!NANOCLR_INDEX_IS_VALID(elem.Class))
+            {
+                return false;
+            }
+
             hash = SUPPORT_ComputeCRC(&elem.Class.data, sizeof(elem.Class.data), hash);
         }
 
@@ -9610,11 +9629,12 @@ CLR_UINT32 CLR_RT_TypeSystem::ComputeHashForClosedGenericType(
     // Process each generic argument
     if (!HashGenericArguments(parser, contextTypeSpec, contextMethod, argCount, hash))
     {
-        hash = 0;
+        return 0xFFFFFFFF;
     }
 
 ComputeHash_End:
-    return hash ? hash : 0xFFFFFFFF; // Don't allow zero as a hash value
+    // 0 isn't a valid hash and 0xFFFFFFFF is reserved for failure
+    return (hash == 0 || hash == 0xFFFFFFFF) ? 0xFFFFFFFE : hash;
 }
 
 //--//

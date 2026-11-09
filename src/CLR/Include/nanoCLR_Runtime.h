@@ -2424,6 +2424,7 @@ struct CLR_RT_MethodSpec_Instance : public CLR_RT_MethodSpec_Index
     CLR_EncodedMethodDefOrRef InstanceOfMethod;
 
     bool GetGenericArgument(CLR_INT32 argumentPosition, CLR_RT_SignatureParser::Element &element);
+    bool PositionAtGenericArgument(CLR_INT32 argumentPosition, CLR_RT_SignatureParser &parser);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
