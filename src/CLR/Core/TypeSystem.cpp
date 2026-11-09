@@ -766,6 +766,58 @@ HRESULT CLR_RT_SignatureParser::AdvanceParameter(Element &res)
     NANOCLR_NOCLEANUP();
 }
 
+static bool SkipParameters(CLR_RT_SignatureParser &parser, CLR_INT32 count)
+{
+    CLR_RT_SignatureParser::Element skipped;
+
+    for (CLR_INT32 i = 0; i < count; i++)
+    {
+        if (FAILED(parser.AdvanceParameter(skipped)))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+static bool PositionAtGenericParam(
+    CLR_RT_TypeSpec_Instance &typeSpec,
+    CLR_INT32 parameterPosition,
+    CLR_RT_SignatureParser &parser)
+{
+    CLR_RT_SignatureParser::Element element;
+
+    parser.Initialize_TypeSpec(typeSpec.assembly, typeSpec.target);
+
+    if (FAILED(parser.Advance(element)) || element.DataType != DATATYPE_GENERICINST)
+    {
+        return false;
+    }
+
+    if (FAILED(parser.Advance(element)) || parameterPosition >= element.GenParamCount)
+    {
+        return false;
+    }
+
+    return SkipParameters(parser, parameterPosition);
+}
+
+static bool PositionAtGenericArgument(
+    CLR_RT_MethodSpec_Instance &methodSpec,
+    CLR_INT32 argumentPosition,
+    CLR_RT_SignatureParser &parser)
+{
+    parser.Initialize_MethodSignature(&methodSpec);
+
+    if (argumentPosition >= parser.ParamCount)
+    {
+        return false;
+    }
+
+    return SkipParameters(parser, argumentPosition);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool CLR_RT_Assembly_Instance::InitializeFromIndex(const CLR_RT_Assembly_Index &index)
@@ -993,49 +1045,10 @@ bool CLR_RT_TypeSpec_Instance::IsClosedGenericType()
         return false;
     }
 
-    const int argCount = elem.GenParamCount;
-
-    // Helper: fully consume one type from the parser and report if it contains VAR/MVAR anywhere.
-    auto hasOpenParam = [&](auto &self) -> bool {
-        CLR_RT_SignatureParser::Element a{};
-
-        if (FAILED(parser.Advance(a)))
-        {
-            // treat malformed as open to avoid false "closed"
-            return true;
-        }
-
-        if (a.DataType == DATATYPE_VAR || a.DataType == DATATYPE_MVAR)
-        {
-            return true;
-        }
-
-        if (a.DataType == DATATYPE_GENERICINST)
-        {
-            // Skip the generic type definition and walk all nested arguments.
-            if (FAILED(parser.Advance(a)))
-            {
-                return true;
-            }
-
-            int nested = a.GenParamCount;
-
-            for (int j = 0; j < nested; j++)
-            {
-                if (self(self))
-                {
-                    return true;
-                }
-            }
-        }
-
-        // Arrays are represented via Levels in 'a' and already reduced to their element kind above.
-        return false;
-    };
-
-    for (int i = 0; i < argCount; i++)
+    while (parser.Available() > 0)
     {
-        if (hasOpenParam(hasOpenParam))
+        // treat malformed as open to avoid false "closed"
+        if (FAILED(parser.Advance(elem)) || elem.DataType == DATATYPE_VAR || elem.DataType == DATATYPE_MVAR)
         {
             return false;
         }
@@ -1050,42 +1063,9 @@ bool CLR_RT_TypeSpec_Instance::GetGenericParam(CLR_INT32 parameterPosition, CLR_
     NATIVE_PROFILE_CLR_CORE();
 
     CLR_RT_SignatureParser parser;
-    parser.Initialize_TypeSpec(assembly, target);
 
-    if (FAILED(parser.Advance(element)))
-    {
-        return false;
-    }
-
-    // sanity check for GENERICINST
-    if (element.DataType != DATATYPE_GENERICINST)
-    {
-        return false;
-    }
-
-    // move to type
-    if (FAILED(parser.Advance(element)))
-    {
-        return false;
-    }
-
-    // sanity check for invalid parameter position
-    if (parameterPosition >= element.GenParamCount)
-    {
-        // not enough parameters!!
-        return false;
-    }
-
-    // walk to the requested parameter position
-    for (int32_t i = 0; i <= parameterPosition; i++)
-    {
-        if (FAILED(parser.Advance(element)))
-        {
-            return false;
-        }
-    }
-
-    return true;
+    // A generic argument is returned as its GENERICINST marker, which callers test for.
+    return PositionAtGenericParam(*this, parameterPosition, parser) && SUCCEEDED(parser.Advance(element));
 }
 
 //////////////////////////////
@@ -1438,9 +1418,11 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                                 }
 
                                 CLR_RT_SignatureParser::Element paramElement;
+                                CLR_RT_SignatureParser paramParser;
 
                                 // Try to map using the generic context (e.g. !T→Int32)
-                                if (callerTypeSpec.GetGenericParam(genericPosition, paramElement) &&
+                                if (PositionAtGenericParam(callerTypeSpec, genericPosition, paramParser) &&
+                                    SUCCEEDED(paramParser.AdvanceParameter(paramElement)) &&
                                     paramElement.DataType != DATATYPE_VAR)
                                 {
                                     // Successfully resolved from generic context
@@ -1506,8 +1488,10 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                                 if (methodSpecInstance.InitializeFromIndex(caller->methodSpec))
                                 {
                                     CLR_RT_SignatureParser::Element element;
+                                    CLR_RT_SignatureParser argParser;
 
-                                    if (!methodSpecInstance.GetGenericArgument(genericPosition, element))
+                                    if (!PositionAtGenericArgument(methodSpecInstance, genericPosition, argParser) ||
+                                        FAILED(argParser.AdvanceParameter(element)))
                                     {
                                         return false;
                                     }
@@ -1521,7 +1505,11 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                                             return false;
                                         }
 
-                                        if (!contextTs.GetGenericParam(element.GenericParamPosition, element))
+                                        if (!PositionAtGenericParam(
+                                                contextTs,
+                                                element.GenericParamPosition,
+                                                argParser) ||
+                                            FAILED(argParser.AdvanceParameter(element)))
                                         {
                                             return false;
                                         }
@@ -1530,6 +1518,11 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                                     {
                                         // nested MVAR not implemented
                                         ASSERT(false);
+                                        return false;
+                                    }
+
+                                    if (!NANOCLR_INDEX_IS_VALID(element.Class))
+                                    {
                                         return false;
                                     }
 
@@ -1651,7 +1644,9 @@ bool CLR_RT_TypeDef_Instance::ResolveNullableType(
             }
 
             CLR_RT_SignatureParser::Element paramElement;
-            if (!callerTypeSpec.GetGenericParam((CLR_UINT32)pos, paramElement))
+            CLR_RT_SignatureParser paramParser;
+            if (!PositionAtGenericParam(callerTypeSpec, pos, paramParser) ||
+                FAILED(paramParser.AdvanceParameter(paramElement)) || !NANOCLR_INDEX_IS_VALID(paramElement.Class))
             {
                 return false;
             }
@@ -2785,24 +2780,13 @@ bool CLR_RT_MethodSpec_Instance::GetGenericArgument(
     CLR_RT_SignatureParser::Element &element)
 {
     CLR_RT_SignatureParser parser;
-    parser.Initialize_MethodSignature(this);
 
-    // sanity check
-    if (argumentPosition >= parser.ParamCount)
-    {
-        return false;
-    }
+    return ::PositionAtGenericArgument(*this, argumentPosition, parser) && SUCCEEDED(parser.Advance(element));
+}
 
-    // loop through parameters to find the desired one
-    for (CLR_INT32 i = 0; i <= argumentPosition; i++)
-    {
-        if (FAILED(parser.Advance(element)))
-        {
-            return false;
-        }
-    }
-
-    return true;
+bool CLR_RT_MethodSpec_Instance::PositionAtGenericArgument(CLR_INT32 argumentPosition, CLR_RT_SignatureParser &parser)
+{
+    return ::PositionAtGenericArgument(*this, argumentPosition, parser);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -6051,6 +6035,11 @@ HRESULT CLR_RT_Assembly::ResolveAllocateGenericTypeStaticFields()
         // Compute a hash for the closed generic type
         CLR_UINT32 hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(genericTypeInstance);
 
+        if (hash == 0xFFFFFFFF)
+        {
+            continue;
+        }
+
         // Look for existing entry in the global registry
         bool found = false;
 
@@ -6315,8 +6304,8 @@ HRESULT CLR_RT_Assembly::AllocateGenericStaticFieldsOnDemand(
     // Pass both TypeSpec context (for VAR) and MethodDef context (for MVAR)
     hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(tsInstance, contextTypeSpec, contextMethod);
 
-    // If hash computation failed (returned 0), we can't create unique storage for this generic type
-    if (hash == 0)
+    // If hash computation failed, we can't create unique storage for this generic type
+    if (hash == 0xFFFFFFFF)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
     }
@@ -6388,6 +6377,11 @@ HRESULT CLR_RT_Assembly::AllocateGenericStaticFieldsOnDemand(
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
     }
 
+    for (CLR_UINT32 i = 0; i < count; i++)
+    {
+        fieldDefs[i].Set(ownerAsm->assemblyIndex, ownerTd->firstStaticField + i);
+    }
+
     // Allocate storage for the static fields
     fields = CLR_AllocateGenericStaticFieldStorage(count);
 
@@ -6405,11 +6399,10 @@ HRESULT CLR_RT_Assembly::AllocateGenericStaticFieldsOnDemand(
     record->m_fieldDefs = fieldDefs;
     record->m_count = count;
 
-    // Initialize field definitions and values
+    // Initialize field values
     for (CLR_UINT32 i = 0; i < count; i++)
     {
         CLR_INDEX fieldIndex = ownerTd->firstStaticField + i;
-        fieldDefs[i].Set(ownerAsm->assemblyIndex, fieldIndex);
 
         // Initialize the storage using the field definition
         const CLR_RECORD_FIELDDEF *pFd = ownerAsm->GetFieldDef(fieldIndex);
@@ -9467,6 +9460,143 @@ CLR_RT_GenericStaticFieldRecord *CLR_RT_TypeSystem::FindOrCreateGenericStaticFie
     return record;
 }
 
+// See CLAUDE.md "Generic type identity hash".
+static const int c_MaxGenericNestingDepth = 4;
+
+static bool HashGenericArguments(
+    const CLR_RT_SignatureParser &rootParser,
+    const CLR_RT_TypeSpec_Index *contextTypeSpec,
+    const CLR_RT_MethodDef_Instance *contextMethod,
+    int argCount,
+    CLR_UINT32 &hash)
+{
+    struct SubstitutionFrame
+    {
+        CLR_RT_SignatureParser Parser;
+        int End;
+        int OuterLevels;
+        bool VarResolved;
+        bool MvarResolved;
+    };
+
+    // The signature, plus one substitution each for VAR and MVAR.
+    SubstitutionFrame frames[3];
+    CLR_UINT8 remainingArgs[c_MaxGenericNestingDepth];
+    CLR_RT_SignatureParser::Element elem;
+    int top = 0;
+    int depth = 1;
+
+    frames[0].Parser = rootParser;
+    frames[0].End = 0;
+    frames[0].OuterLevels = 0;
+    frames[0].VarResolved = false;
+    frames[0].MvarResolved = false;
+    remainingArgs[0] = (CLR_UINT8)argCount;
+
+    while (top >= 0)
+    {
+        SubstitutionFrame &frame = frames[top];
+
+        if (frame.Parser.Available() <= frame.End)
+        {
+            top--;
+            continue;
+        }
+
+        if (FAILED(frame.Parser.Advance(elem)))
+        {
+            return false;
+        }
+
+        int levels = frame.OuterLevels + elem.Levels;
+        frame.OuterLevels = 0;
+
+        if (elem.DataType == DATATYPE_MVAR && frame.MvarResolved)
+        {
+            return false;
+        }
+
+        bool substituteVar = elem.DataType == DATATYPE_VAR && !frame.VarResolved && contextTypeSpec &&
+                             NANOCLR_INDEX_IS_VALID(*contextTypeSpec);
+        bool substituteMvar = elem.DataType == DATATYPE_MVAR && !frame.MvarResolved && contextMethod &&
+                              NANOCLR_INDEX_IS_VALID(contextMethod->methodSpec);
+
+        if (substituteVar || substituteMvar)
+        {
+            SubstitutionFrame &next = frames[top + 1];
+
+            if (substituteVar)
+            {
+                CLR_RT_TypeSpec_Instance contextTs;
+
+                if (!contextTs.InitializeFromIndex(*contextTypeSpec) ||
+                    !PositionAtGenericParam(contextTs, elem.GenericParamPosition, next.Parser))
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                CLR_RT_MethodSpec_Instance methodSpecInst{};
+
+                if (!methodSpecInst.InitializeFromIndex(contextMethod->methodSpec) ||
+                    !PositionAtGenericArgument(methodSpecInst, elem.GenericParamPosition, next.Parser))
+                {
+                    return false;
+                }
+            }
+
+            next.End = next.Parser.Available() - 1;
+            next.OuterLevels = levels;
+            next.VarResolved = frame.VarResolved || substituteVar;
+            next.MvarResolved = frame.MvarResolved || substituteMvar;
+            top++;
+            continue;
+        }
+
+        hash = SUPPORT_ComputeCRC(&elem.DataType, sizeof(elem.DataType), hash);
+        hash = SUPPORT_ComputeCRC(&levels, sizeof(levels), hash);
+
+        if (elem.DataType == DATATYPE_GENERICINST)
+        {
+            if (FAILED(frame.Parser.Advance(elem)) || !NANOCLR_INDEX_IS_VALID(elem.Class))
+            {
+                return false;
+            }
+
+            hash = SUPPORT_ComputeCRC(&elem.DataType, sizeof(elem.DataType), hash);
+            hash = SUPPORT_ComputeCRC(&elem.Class.data, sizeof(elem.Class.data), hash);
+        }
+        else if (elem.DataType == DATATYPE_CLASS || elem.DataType == DATATYPE_VALUETYPE)
+        {
+            if (!NANOCLR_INDEX_IS_VALID(elem.Class))
+            {
+                return false;
+            }
+
+            hash = SUPPORT_ComputeCRC(&elem.Class.data, sizeof(elem.Class.data), hash);
+        }
+
+        if (elem.GenParamCount > 0)
+        {
+            if (depth == c_MaxGenericNestingDepth)
+            {
+                return false;
+            }
+
+            remainingArgs[depth++] = (CLR_UINT8)elem.GenParamCount;
+            continue;
+        }
+
+        while (depth > 0 && --remainingArgs[depth - 1] == 0)
+        {
+            depth--;
+        }
+    }
+
+    return true;
+}
+
 CLR_UINT32 CLR_RT_TypeSystem::ComputeHashForClosedGenericType(
     CLR_RT_TypeSpec_Instance &typeInstance,
     const CLR_RT_TypeSpec_Index *contextTypeSpec,
@@ -9474,7 +9604,6 @@ CLR_UINT32 CLR_RT_TypeSystem::ComputeHashForClosedGenericType(
 {
     CLR_UINT32 hash = 0;
     int argCount;
-    CLR_INDEX genericPosition;
 
     // Start with the generic type definition
     hash = SUPPORT_ComputeCRC(&typeInstance.genericTypeDef.data, sizeof(CLR_UINT32), hash);
@@ -9501,93 +9630,14 @@ CLR_UINT32 CLR_RT_TypeSystem::ComputeHashForClosedGenericType(
     argCount = elem.GenParamCount;
 
     // Process each generic argument
-    for (int i = 0; i < argCount; i++)
+    if (!HashGenericArguments(parser, contextTypeSpec, contextMethod, argCount, hash))
     {
-        if (FAILED(parser.Advance(elem)))
-        {
-            break;
-        }
-
-        // copy generic position
-        genericPosition = elem.GenericParamPosition;
-
-        // Check if this is an unresolved generic parameter (VAR or MVAR)
-        if (elem.DataType == DATATYPE_VAR && contextTypeSpec && NANOCLR_INDEX_IS_VALID(*contextTypeSpec))
-        {
-        resolve_type_param:
-
-            // Resolve VAR (type parameter) from context TypeSpec
-            CLR_RT_TypeSpec_Instance contextTs;
-            if (!contextTs.InitializeFromIndex(*contextTypeSpec))
-            {
-                hash = 0;
-                goto ComputeHash_End;
-            }
-
-            CLR_RT_SignatureParser::Element paramElement;
-            if (contextTs.GetGenericParam(genericPosition, paramElement))
-            {
-                // Use the resolved type from context
-                hash = SUPPORT_ComputeCRC(&paramElement.DataType, sizeof(paramElement.DataType), hash);
-
-                if (paramElement.DataType == DATATYPE_CLASS || paramElement.DataType == DATATYPE_VALUETYPE)
-                {
-                    hash = SUPPORT_ComputeCRC(&paramElement.Class.data, sizeof(paramElement.Class.data), hash);
-                }
-            }
-            else
-            {
-                // couldn't resolve VAR, return failure
-                hash = 0;
-                goto ComputeHash_End;
-            }
-        }
-        else if (elem.DataType == DATATYPE_MVAR && contextMethod && NANOCLR_INDEX_IS_VALID(contextMethod->methodSpec))
-        {
-            // Resolve MVAR (method parameter) from MethodSpec instance
-
-            CLR_RT_MethodSpec_Instance methodSpecInst{};
-            if (methodSpecInst.InitializeFromIndex(contextMethod->methodSpec))
-            {
-                CLR_RT_SignatureParser::Element argElement;
-
-                if (methodSpecInst.GetGenericArgument(genericPosition, argElement))
-                {
-                    if (argElement.DataType == DATATYPE_VAR)
-                    {
-                        // need another pass to resolve a generic type parameter
-
-                        // copy generic parameter position
-                        genericPosition = argElement.GenericParamPosition;
-
-                        goto resolve_type_param;
-                    }
-
-                    // Use the resolved type from MethodSpec
-                    hash = SUPPORT_ComputeCRC(&argElement.DataType, sizeof(argElement.DataType), hash);
-                }
-                else
-                {
-                    // couldn't resolve MVAR, return failure
-                    hash = 0;
-                    goto ComputeHash_End;
-                }
-            }
-        }
-        else
-        {
-            // Add each argument's type information to the hash
-            hash = SUPPORT_ComputeCRC(&elem.DataType, sizeof(elem.DataType), hash);
-
-            if (elem.DataType == DATATYPE_CLASS || elem.DataType == DATATYPE_VALUETYPE)
-            {
-                hash = SUPPORT_ComputeCRC(&elem.Class.data, sizeof(elem.Class.data), hash);
-            }
-        }
+        return 0xFFFFFFFF;
     }
 
 ComputeHash_End:
-    return hash ? hash : 0xFFFFFFFF; // Don't allow zero as a hash value
+    // 0 isn't a valid hash and 0xFFFFFFFF is reserved for failure
+    return (hash == 0 || hash == 0xFFFFFFFF) ? 0xFFFFFFFE : hash;
 }
 
 //--//
