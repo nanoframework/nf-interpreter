@@ -29,18 +29,23 @@ static volatile WP_ActiveChannel s_activeChannel = WP_ActiveChannel_None;
 
 #if WP_NETWORK_ENABLED
 
-static void SwitchChannel(WP_ActiveChannel channel)
+// returns true if the channel changed
+static bool SwitchChannel(WP_ActiveChannel channel)
 {
-    if (s_activeChannel != channel)
+    if (s_activeChannel == channel)
     {
-        s_activeChannel = channel;
-
-        // anything received so far belongs to the previous channel
-        WP_Message_ResetReception();
-
-        // new session, authentication starts over
-        WP_Auth_SessionChanged(channel == WP_ActiveChannel_Network);
+        return false;
     }
+
+    s_activeChannel = channel;
+
+    // anything received so far belongs to the previous channel
+    WP_Message_ResetReception();
+
+    // new session, authentication starts over
+    WP_Auth_SessionChanged(channel == WP_ActiveChannel_Network);
+
+    return true;
 }
 
 #endif
@@ -56,11 +61,16 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
 
     // drives the network state machine (accept, takeover, discovery)
     // when the network is the only channel this is also where the thread waits for a client
-    WP_Network_Poll(WP_SERIAL_ENABLED ? 0 : 100);
+    bool newClient = WP_Network_Poll(WP_SERIAL_ENABLED ? 0 : 100);
 
     if (WP_Network_IsConnected())
     {
-        SwitchChannel(WP_ActiveChannel_Network);
+        // the reception is reset by the caller before its next call, so what is read when a session starts would be
+        // lost: read nothing now
+        if (SwitchChannel(WP_ActiveChannel_Network) || newClient)
+        {
+            return;
+        }
 
         WP_Network_Receive(ptr, size);
 
@@ -68,7 +78,10 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
     }
 
     // client is gone (or never was), back to serial
-    SwitchChannel(WP_SERIAL_ENABLED ? WP_ActiveChannel_Serial : WP_ActiveChannel_None);
+    if (SwitchChannel(WP_SERIAL_ENABLED ? WP_ActiveChannel_Serial : WP_ActiveChannel_None))
+    {
+        return;
+    }
 
 #else
 

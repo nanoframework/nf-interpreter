@@ -737,6 +737,14 @@
 #endif
 
 /**
+ * TCP_SND_BUF: the debugger connection sends many small messages (debug output), the default (2 * TCP_MSS) allows only
+ * 8 queued segments. The resulting TCP_SND_QUEUELEN has to be at most MEMP_NUM_TCP_SEG.
+ */
+#if CONFIG_NF_WP_CHANNEL_NETWORK
+#define TCP_SND_BUF (4 * TCP_MSS)
+#endif
+
+/**
  * LWIP_SO_SNDTIMEO==1: Enable send timeout for sockets/netconns and
  * SO_SNDTIMEO processing.
  */

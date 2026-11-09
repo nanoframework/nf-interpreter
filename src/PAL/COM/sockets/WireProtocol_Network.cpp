@@ -29,6 +29,7 @@
 #if CONFIG_NF_WP_CHANNEL_NETWORK && !defined(I_AM_NANOBOOTER)
 
 #include <lwip/sockets.h>
+#include <lwip/sys.h>
 
 #ifndef TARGETNAMESTRING
 #define TARGETNAMESTRING "nanoCLR"
@@ -74,6 +75,11 @@ static bool s_started = false;
 
 // incremented for each accepted client
 static uint32_t s_clientGeneration = 0;
+
+// lwIP is built without full duplex netconn: the calls that send, receive and close the client socket can't run at the
+// same time in different threads (the receiver thread and the CLR thread)
+static sys_mutex_t s_ioLock;
+static bool s_ioLockCreated = false;
 
 // all times in milliseconds
 static uint32_t s_takeoverDeadline = 0;
@@ -164,13 +170,43 @@ static void CloseSocket(SOCK_SOCKET sock)
     }
 }
 
+static void IoLock()
+{
+    if (s_ioLockCreated)
+    {
+        sys_mutex_lock(&s_ioLock);
+    }
+}
+
+static void IoUnlock()
+{
+    if (s_ioLockCreated)
+    {
+        sys_mutex_unlock(&s_ioLock);
+    }
+}
+
 // closes the client, but only if it is still the given one
 static void CloseClient(SOCK_SOCKET client)
 {
-    if (client != SOCK_SOCKET_ERROR && ReplaceClient(client, SOCK_SOCKET_ERROR))
-    {
-        CloseSocket(client);
+    bool closed = false;
 
+    if (client != SOCK_SOCKET_ERROR)
+    {
+        IoLock();
+
+        closed = ReplaceClient(client, SOCK_SOCKET_ERROR);
+
+        if (closed)
+        {
+            CloseSocket(client);
+        }
+
+        IoUnlock();
+    }
+
+    if (closed)
+    {
         s_takeoverArmed = false;
     }
 }
@@ -442,7 +478,7 @@ static void StopDiscovery()
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // state machine
 
-static void AcceptClients()
+static bool AcceptClients()
 {
     SOCK_SOCKET listener = GetListener();
     SOCK_sockaddr addr;
@@ -450,7 +486,7 @@ static void AcceptClients()
 
     if (listener == SOCK_SOCKET_ERROR)
     {
-        return;
+        return false;
     }
 
     // holding off after an authentication failure: leave the connection waiting
@@ -458,7 +494,7 @@ static void AcceptClients()
     {
         if (!TimeReached(NowMs(), s_holdOffUntil))
         {
-            return;
+            return false;
         }
 
         s_holdOff = false;
@@ -468,7 +504,7 @@ static void AcceptClients()
 
     if (sock == SOCK_SOCKET_ERROR)
     {
-        return;
+        return false;
     }
 
     if (GetClient() != SOCK_SOCKET_ERROR)
@@ -483,7 +519,7 @@ static void AcceptClients()
             s_takeoverDeadline = NowMs() + c_TakeoverWindowMs;
         }
 
-        return;
+        return false;
     }
 
     ConfigureClient(sock);
@@ -498,6 +534,8 @@ static void AcceptClients()
     // new session: nothing from previous ones is valid
     WP_Auth_SessionChanged(true);
     WP_Message_ResetReception();
+
+    return true;
 }
 
 void WP_Network_ReloadAuthToken(void)
@@ -507,6 +545,11 @@ void WP_Network_ReloadAuthToken(void)
 
 bool WP_Network_Initialize(void)
 {
+    if (!s_ioLockCreated)
+    {
+        s_ioLockCreated = sys_mutex_new(&s_ioLock) == ERR_OK;
+    }
+
     if (!s_started)
     {
         s_started = true;
@@ -540,7 +583,10 @@ void WP_Network_Stop(void)
     s_client = SOCK_SOCKET_ERROR;
     GLOBAL_UNLOCK();
 
+    IoLock();
     CloseSocket(client);
+    IoUnlock();
+
     StopListener();
     StopDiscovery();
 
@@ -556,9 +602,10 @@ void WP_Network_Uninitialize(void)
     s_started = false;
 }
 
-void WP_Network_Poll(uint32_t waitMs)
+bool WP_Network_Poll(uint32_t waitMs)
 {
     uint32_t now = NowMs();
+    bool newClient = false;
 
     if (!s_started)
     {
@@ -600,13 +647,15 @@ void WP_Network_Poll(uint32_t waitMs)
 
         if (WaitReadable(listener, wait) > 0)
         {
-            AcceptClients();
+            newClient = AcceptClients();
         }
     }
     else if (GetClient() == SOCK_SOCKET_ERROR)
     {
         SleepMs(waitMs);
     }
+
+    return newClient;
 }
 
 void WP_Network_Receive(uint8_t **ptr, uint32_t *size)
@@ -623,7 +672,12 @@ void WP_Network_Receive(uint8_t **ptr, uint32_t *size)
         return;
     }
 
+    IoLock();
+
     int received = SOCK_recv(client, (char *)*ptr, (int)*size, 0);
+    int error = received > 0 ? 0 : SOCK_getlasterror();
+
+    IoUnlock();
 
     if (received > 0)
     {
@@ -633,7 +687,7 @@ void WP_Network_Receive(uint8_t **ptr, uint32_t *size)
         // client is active, it's not to be replaced
         s_takeoverArmed = false;
     }
-    else if (received == 0 || SOCK_getlasterror() != SOCK_EWOULDBLOCK)
+    else if (received == 0 || error != SOCK_EWOULDBLOCK)
     {
         // client closed the connection or there is an error
         CloseClient(client);
@@ -649,14 +703,27 @@ static bool SendToClient(SOCK_SOCKET client, uint32_t generation, const uint8_t 
     while (sent < size)
     {
         uint32_t currentGeneration;
+        int result;
+        int error = 0;
+
+        IoLock();
 
         if (GetClientAndGeneration(&currentGeneration) != client || currentGeneration != generation)
         {
+            IoUnlock();
+
             // client is gone, a new one can't get what was meant for the previous one
             return false;
         }
 
-        int result = SOCK_send(client, (const char *)(data + sent), (int)(size - sent), 0);
+        result = SOCK_send(client, (const char *)(data + sent), (int)(size - sent), 0);
+
+        if (result <= 0)
+        {
+            error = SOCK_getlasterror();
+        }
+
+        IoUnlock();
 
         if (result > 0)
         {
@@ -664,7 +731,7 @@ static bool SendToClient(SOCK_SOCKET client, uint32_t generation, const uint8_t 
             continue;
         }
 
-        if (result < 0 && SOCK_getlasterror() != SOCK_EWOULDBLOCK)
+        if (result < 0 && error != SOCK_EWOULDBLOCK)
         {
             // connection is gone
             CloseClient(client);
@@ -694,6 +761,10 @@ static bool SendToClient(SOCK_SOCKET client, uint32_t generation, const uint8_t 
     return true;
 }
 
+// a message goes out in a single segment: the send queue is short and there are many small messages (debug output)
+// only used with the transmission lock taken
+static uint8_t s_txBuffer[sizeof(WP_Packet) + WP_PACKET_SIZE];
+
 bool WP_Network_Transmit(const uint8_t *header, uint32_t headerSize, const uint8_t *payload, uint32_t payloadSize)
 {
     uint32_t generation;
@@ -704,13 +775,26 @@ bool WP_Network_Transmit(const uint8_t *header, uint32_t headerSize, const uint8
         return false;
     }
 
-    // header and payload go to the same client
-    if (!SendToClient(client, generation, header, headerSize))
+    if (payload == nullptr)
     {
-        return false;
+        payloadSize = 0;
     }
 
-    return payloadSize == 0 || payload == nullptr || SendToClient(client, generation, payload, payloadSize);
+    if (headerSize + payloadSize <= sizeof(s_txBuffer))
+    {
+        memcpy(s_txBuffer, header, headerSize);
+
+        if (payloadSize > 0)
+        {
+            memcpy(s_txBuffer + headerSize, payload, payloadSize);
+        }
+
+        return SendToClient(client, generation, s_txBuffer, headerSize + payloadSize);
+    }
+
+    // header and payload go to the same client
+    return SendToClient(client, generation, header, headerSize) &&
+           (payloadSize == 0 || SendToClient(client, generation, payload, payloadSize));
 }
 
 bool WP_Network_IsConnected(void)

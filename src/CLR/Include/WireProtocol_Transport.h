@@ -146,7 +146,9 @@ extern "C"
     ///
     /// @param waitMs time to wait for a new connection when there is no client connected.
     ///
-    void WP_Network_Poll(uint32_t waitMs);
+    /// @return true if a new client was accepted.
+    ///
+    bool WP_Network_Poll(uint32_t waitMs);
 
     ///
     /// @brief Receives bytes from the connected client. Waits for a short time if nothing is available.
