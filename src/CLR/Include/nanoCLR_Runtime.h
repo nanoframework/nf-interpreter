@@ -2194,7 +2194,8 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
     static CLR_UINT32 ComputeHashForClosedGenericType(
         CLR_RT_TypeSpec_Instance &typeInstance,
         const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr,
-        const CLR_RT_MethodDef_Instance *contextMethod = nullptr);
+        const CLR_RT_MethodDef_Instance *contextMethod = nullptr,
+        bool *isClosed = nullptr);
 
     // Helper to find or create a generic .cctor execution record by hash
     static CLR_RT_GenericCctorExecutionRecord *FindOrCreateGenericCctorRecord(CLR_UINT32 hash, bool *created);
@@ -2237,6 +2238,7 @@ struct CLR_RT_TypeSpec_Instance : public CLR_RT_TypeSpec_Index
     bool IsClosedGenericType();
 
     bool GetGenericParam(CLR_INT32 parameterPosition, CLR_RT_SignatureParser::Element &element);
+    bool PositionAtGenericParam(CLR_INT32 parameterPosition, CLR_RT_SignatureParser &parser);
 };
 
 //--//
@@ -4310,13 +4312,17 @@ struct CLR_RT_ExecutionEngine
         CLR_RT_HeapBlock &ref,
         CLR_RT_SignatureParser &parser,
         const CLR_RT_TypeSpec_Instance *genericInstance = nullptr,
-        bool allowUnresolvedVarFallback = false);
+        bool allowUnresolvedVarFallback = false,
+        const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr,
+        const CLR_RT_MethodSpec_Index *contextMethodSpec = nullptr);
     HRESULT InitializeReference(
         CLR_RT_HeapBlock &ref,
         const CLR_RECORD_FIELDDEF *target,
         CLR_RT_Assembly *assm,
         const CLR_RT_TypeSpec_Instance *genericInstance = nullptr,
-        bool allowUnresolvedVarFallback = false);
+        bool allowUnresolvedVarFallback = false,
+        const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr,
+        const CLR_RT_MethodSpec_Index *contextMethodSpec = nullptr);
 
     HRESULT InitializeLocals(CLR_RT_HeapBlock *locals, const CLR_RT_MethodDef_Instance &methodDefInstance);
 

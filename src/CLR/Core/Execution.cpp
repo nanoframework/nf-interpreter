@@ -2274,42 +2274,95 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::AccessStaticField(const CLR_RT_FieldDe
     return nullptr;
 }
 
-// Helper function to resolve generic type parameters (VAR/MVAR) to their concrete types
-// Used by both InitializeReference and InitializeLocals to reduce code duplication
+// Resolves a VAR to its whole argument in the closed TypeSpec. See CLAUDE.md "Bare T fields and locals".
 static HRESULT ResolveGenericTypeParameter(
     const CLR_RT_TypeSpec_Index &genericTypeIndex,
-    CLR_UINT8 paramPosition,
-    CLR_RT_TypeDef_Index &outClass,
-    NanoCLRDataType &outDataType)
+    CLR_INT32 paramPosition,
+    const CLR_RT_TypeSpec_Index *contextTypeSpec,
+    const CLR_RT_MethodSpec_Index *contextMethodSpec,
+    CLR_RT_SignatureParser::Element &arg,
+    CLR_RT_TypeSpec_Index &argTypeSpec)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    if (!NANOCLR_INDEX_IS_VALID(genericTypeIndex))
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-    }
-
     CLR_RT_TypeSpec_Instance typeSpec;
-    if (!typeSpec.InitializeFromIndex(genericTypeIndex))
+    CLR_RT_MethodSpec_Instance methodSpec;
+    CLR_RT_SignatureParser argParser;
+    CLR_RT_Assembly *argAssembly;
+    CLR_PMETADATA argSignature;
+    CLR_PMETADATA argStart;
+    bool argIsGenericInst;
+    bool varResolved = false;
+    bool mvarResolved = false;
+    int outerLevels = 0;
+
+    argTypeSpec.Clear();
+
+    if (!NANOCLR_INDEX_IS_VALID(genericTypeIndex) || !typeSpec.InitializeFromIndex(genericTypeIndex) ||
+        !typeSpec.PositionAtGenericParam(paramPosition, argParser))
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
 
-    CLR_RT_SignatureParser::Element paramElement;
-    if (!typeSpec.GetGenericParam(paramPosition, paramElement))
+    argAssembly = typeSpec.assembly;
+
+    // An open owner's argument can be a VAR or MVAR of the caller: each is resolved at most once.
+    while (true)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+        argSignature = argParser.Signature;
+        argStart = argSignature;
+        argIsGenericInst = CLR_UncompressElementType(argStart) == DATATYPE_GENERICINST;
+
+        NANOCLR_CHECK_HRESULT(argParser.AdvanceParameter(arg));
+
+        arg.Levels += outerLevels;
+        outerLevels = arg.Levels;
+
+        if (arg.DataType == DATATYPE_VAR && !varResolved && contextTypeSpec != nullptr &&
+            NANOCLR_INDEX_IS_VALID(*contextTypeSpec))
+        {
+            varResolved = true;
+
+            if (!typeSpec.InitializeFromIndex(*contextTypeSpec) ||
+                !typeSpec.PositionAtGenericParam(arg.GenericParamPosition, argParser))
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            }
+
+            argAssembly = typeSpec.assembly;
+            continue;
+        }
+
+        if (arg.DataType == DATATYPE_MVAR && !mvarResolved && contextMethodSpec != nullptr &&
+            NANOCLR_INDEX_IS_VALID(*contextMethodSpec))
+        {
+            mvarResolved = true;
+
+            if (!methodSpec.InitializeFromIndex(*contextMethodSpec) ||
+                !methodSpec.PositionAtGenericArgument(arg.GenericParamPosition, argParser))
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            }
+
+            argAssembly = methodSpec.assembly;
+            continue;
+        }
+
+        break;
     }
 
     // Fail here so the caller's allowUnresolvedVarFallback path handles it.
-    if (paramElement.DataType == DATATYPE_VAR || paramElement.DataType == DATATYPE_MVAR)
+    if (arg.DataType == DATATYPE_VAR || arg.DataType == DATATYPE_MVAR)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
 
-    outClass = paramElement.Class;
-    outDataType = paramElement.DataType;
+    if (argIsGenericInst && arg.Levels == 0 && arg.DataType == DATATYPE_VALUETYPE &&
+        !argAssembly->FindTypeSpec(argSignature, argTypeSpec))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
 
     NANOCLR_NOCLEANUP();
 }
@@ -2318,7 +2371,9 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
     CLR_RT_HeapBlock &ref,
     CLR_RT_SignatureParser &parser,
     const CLR_RT_TypeSpec_Instance *genericInstance,
-    bool allowUnresolvedVarFallback)
+    bool allowUnresolvedVarFallback,
+    const CLR_RT_TypeSpec_Index *contextTypeSpec,
+    const CLR_RT_MethodSpec_Index *contextMethodSpec)
 {
     NATIVE_PROFILE_CLR_CORE();
     //
@@ -2365,11 +2420,16 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
             }
             else
             {
+                CLR_RT_SignatureParser::Element arg;
+                CLR_RT_TypeSpec_Index argTypeSpec;
                 HRESULT hrParam = ResolveGenericTypeParameter(
                     *genericInstance,
-                    static_cast<CLR_UINT8>(res.GenericParamPosition),
-                    realTypeDef,
-                    dt);
+                    res.GenericParamPosition,
+                    contextTypeSpec,
+                    contextMethodSpec,
+                    arg,
+                    argTypeSpec);
+
                 if (FAILED(hrParam))
                 {
                     if (allowUnresolvedVarFallback)
@@ -2381,8 +2441,20 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
                         NANOCLR_CHECK_HRESULT(hrParam);
                     }
                 }
+                else if (arg.Levels > 0)
+                {
+                    dt = DATATYPE_OBJECT;
+                }
                 else
                 {
+                    dt = arg.DataType;
+                    realTypeDef = arg.Class;
+
+                    if (NANOCLR_INDEX_IS_VALID(argTypeSpec))
+                    {
+                        internalGenericInstance.InitializeFromIndex(argTypeSpec);
+                    }
+
                     goto process_datatype;
                 }
             }
@@ -2464,7 +2536,9 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
     const CLR_RECORD_FIELDDEF *target,
     CLR_RT_Assembly *assm,
     const CLR_RT_TypeSpec_Instance *genericInstance,
-    bool allowUnresolvedVarFallback)
+    bool allowUnresolvedVarFallback,
+    const CLR_RT_TypeSpec_Index *contextTypeSpec,
+    const CLR_RT_MethodSpec_Index *contextMethodSpec)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -2472,7 +2546,13 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
     CLR_RT_SignatureParser parser{};
     parser.Initialize_FieldDef(assm, target);
 
-    NANOCLR_SET_AND_LEAVE(InitializeReference(ref, parser, genericInstance, allowUnresolvedVarFallback));
+    NANOCLR_SET_AND_LEAVE(InitializeReference(
+        ref,
+        parser,
+        genericInstance,
+        allowUnresolvedVarFallback,
+        contextTypeSpec,
+        contextMethodSpec));
 
     NANOCLR_NOCLEANUP();
 }
@@ -2667,8 +2747,25 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                         methodDefInstance.genericType && NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType) &&
                         methodDefInstance.genericType->data != CLR_EmptyToken)
                     {
-                        NANOCLR_CHECK_HRESULT(
-                            ResolveGenericTypeParameter(*methodDefInstance.genericType, genericParamPosition, cls, dt));
+                        CLR_RT_SignatureParser::Element arg;
+                        CLR_RT_TypeSpec_Index argTypeSpec;
+
+                        NANOCLR_CHECK_HRESULT(ResolveGenericTypeParameter(
+                            *methodDefInstance.genericType,
+                            genericParamPosition,
+                            nullptr,
+                            &methodDefInstance.methodSpec,
+                            arg,
+                            argTypeSpec));
+
+                        cls = arg.Class;
+                        dt = arg.DataType;
+                        levels += arg.Levels;
+
+                        if (NANOCLR_INDEX_IS_VALID(argTypeSpec))
+                        {
+                            genericInstance.InitializeFromIndex(argTypeSpec);
+                        }
                     }
                     else
                     {
