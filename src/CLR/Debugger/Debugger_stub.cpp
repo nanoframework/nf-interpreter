@@ -94,19 +94,3 @@ __nfweak void NFReleaseInfo::Init(
         NFReleaseInfo.PlatformName[len] = 0;
     }
 }
-
-__nfweak bool SOCKETS_DbgInitialize(int ComPortNum)
-{
-    NATIVE_PROFILE_CLR_DEBUGGER();
-
-    (void)ComPortNum;
-    return true;
-}
-
-__nfweak bool SOCKETS_DbgUninitialize(int ComPortNum)
-{
-    NATIVE_PROFILE_CLR_DEBUGGER();
-
-    (void)ComPortNum;
-    return true;
-}

@@ -183,6 +183,7 @@ static void FreeConfigurationBlocks(HAL_TARGET_CONFIGURATION *configuration)
     platform_free(configuration->WirelessAPConfigs);
     platform_free(configuration->CertificateStore);
     platform_free(configuration->DeviceCertificates);
+    platform_free(configuration->WPAuthTokenConfigs);
 
     memset(configuration, 0, sizeof(HAL_TARGET_CONFIGURATION));
 }
@@ -274,9 +275,11 @@ static bool EnumerateConfigurationBlocks()
     enumerated.WirelessAPConfigs = ConfigStorage_FindNetworkWirelessAPConfigurationBlocks();
     enumerated.CertificateStore = ConfigStorage_FindX509CertificateConfigurationBlocks();
     enumerated.DeviceCertificates = ConfigStorage_FindX509DeviceCertificatesConfigurationBlocks();
+    enumerated.WPAuthTokenConfigs = ConfigStorage_FindWPAuthTokenConfigurationBlocks();
 
     if (enumerated.Wireless80211Configs == nullptr || enumerated.WirelessAPConfigs == nullptr ||
-        enumerated.CertificateStore == nullptr || enumerated.DeviceCertificates == nullptr)
+        enumerated.CertificateStore == nullptr || enumerated.DeviceCertificates == nullptr ||
+        enumerated.WPAuthTokenConfigs == nullptr)
     {
         ESP_LOGE(TAG, "Enumeration of config failed (out of memory)");
 
@@ -530,6 +533,17 @@ bool ConfigurationManager_GetConfigurationBlock(
         // because X509 certificate has a variable length need to compute the block size in two steps
         sizeOfBlock =
             ConfigurationManager_GetConfigurationBlockSize(DeviceConfigurationOption_X509DeviceCertificates, 0);
+    }
+    else if (configuration == DeviceConfigurationOption_WPAuthToken)
+    {
+        if (g_TargetConfiguration.WPAuthTokenConfigs->Count == 0 ||
+            (configurationIndex + 1) > g_TargetConfiguration.WPAuthTokenConfigs->Count)
+        {
+            return false;
+        }
+
+        // set block size
+        sizeOfBlock = sizeof(HAL_Configuration_WPAuthToken);
     }
     else
     {
@@ -978,6 +992,16 @@ void ConfigurationManager_GetBlockInfo(DeviceConfigurationOption configuration, 
             {
                 info->MaxBlockSize = totalSize - usedSize;
             }
+            break;
+
+        case DeviceConfigurationOption_WPAuthToken:
+            // only if the device can debug over the network, a single block that can't be read back (it's a secret)
+#if CONFIG_NF_WP_CHANNEL_NETWORK
+            info->MaxCount = 1;
+            info->Flags =
+                ConfigurationBlockFlags_CanAdd | ConfigurationBlockFlags_CanReplace | ConfigurationBlockFlags_CanDelete;
+            info->MaxBlockSize = sizeof(HAL_Configuration_WPAuthToken);
+#endif
             break;
 
         default:

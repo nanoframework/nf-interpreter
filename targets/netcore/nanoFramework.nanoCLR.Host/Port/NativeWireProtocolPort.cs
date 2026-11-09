@@ -62,7 +62,7 @@ namespace nanoFramework.nanoCLR.Host.Port
 
             Status = PortStatus.Opened;
 
-            _processingThread = new Thread(ProcessMessages);
+            _processingThread = new Thread(ProcessMessages) { IsBackground = true };
             _processingThread.Start();
         }
 

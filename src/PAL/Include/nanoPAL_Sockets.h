@@ -339,28 +339,6 @@ typedef struct SOCK_discoveryinfo
 #define SOCKET_READ_PEEK_OPTION 2
 #endif
 
-#ifndef DEBUG_SOCKET_PORT
-#define DEBUG_SOCKET_PORT 26000
-#endif
-
-#ifndef SOCK_DISCOVERY_MULTICAST_PORT
-#define SOCK_DISCOVERY_MULTICAST_PORT 26001
-#endif
-
-// A multicast address is an IP address which belongs to classe D included in the range between 224.0.0.0 and
-// 239.255.255.255
-#ifndef SOCK_DISCOVERY_MULTICAST_IPADDR
-#define SOCK_DISCOVERY_MULTICAST_IPADDR SOCK_MAKE_IP_ADDR(234, 102, 98, 44)
-#endif
-
-#ifndef SOCK_DISCOVERY_MULTICAST_IPADDR_SND
-#define SOCK_DISCOVERY_MULTICAST_IPADDR_SND SOCK_MAKE_IP_ADDR(234, 102, 98, 45)
-#endif
-
-#ifndef SOCK_DISCOVERY_MULTICAST_TOKEN
-#define SOCK_DISCOVERY_MULTICAST_TOKEN "DOTNETMF"
-#endif
-
 #define SOCKET_EVENT_WAIT_FOREVER          0xFFFFFFFF
 #define SOCKET_EVENT_FLAG_SOCKETS_SHUTDOWN 0x00000001
 #define SOCKET_EVENT_FLAG_SOCKETS_READY    0x00000002
@@ -536,10 +514,6 @@ __inline void SOCK_FD_CLR(int y, SOCK_fd_set *x)
 
 #endif // NANOCLR_SOCK_STRUCTURES
 
-#ifndef DEBUG_SOCKET_PORT // default debug socket port
-#define DEBUG_SOCKET_PORT 26000
-#endif
-
 // struct HAL_Configuration_NetworkInterface;
 struct HAL_Configuration_Wireless80211;
 
@@ -600,22 +574,6 @@ typedef enum __nfpack NetworkChange_NetworkEvents
 } NetworkChange_NetworkEvents;
 
 void Network_PostEvent(unsigned int eventType, unsigned int flags, unsigned int index);
-
-//--//
-// Debugger Methods
-bool SOCKETS_DbgInitialize(int ComPortNum);
-bool SOCKETS_DbgUninitialize(int ComPortNum);
-int SOCKETS_Write(int ComPortNum, const char *Data, size_t size);
-int SOCKETS_Read(int ComPortNum, char *Data, size_t size);
-bool SOCKETS_Flush(int ComPortNum);
-bool SOCKETS_UpgradeToSsl(
-    int ComPortNum,
-    const uint8_t *pCACert,
-    uint32_t caCertLen,
-    const uint8_t *pDeviceCert,
-    uint32_t deviceCertLen,
-    const char *szTargetHost);
-bool SOCKETS_IsUsingSsl(int32_t ComPortNum);
 
 void SOCKETS_CloseConnections();
 // RTIP

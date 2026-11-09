@@ -27,6 +27,7 @@ static uint8_t _rxState;
 static uint8_t *_pos;
 static uint32_t _size;
 static WP_Message _inboundMessage;
+static volatile bool _resetRequested = false;
 
 #if defined(TRACE_MASK) && (TRACE_MASK & TRACE_VERBOSE) != 0
 // used WP_Message_Process() and methods it calls to avoid flooding TRACE
@@ -202,6 +203,11 @@ void WP_Message_PrepareReception()
     WP_Message_PrepareReception_Platform();
 }
 
+void WP_Message_ResetReception()
+{
+    _resetRequested = true;
+}
+
 void WP_Message_PrepareRequest(
     WP_Message *message,
     uint32_t cmd,
@@ -340,6 +346,11 @@ void WP_Message_Process()
 
     while (true)
     {
+        if (_resetRequested)
+        {
+            _resetRequested = false;
+            _rxState = ReceiveState_Initialize;
+        }
 
 #if !defined(VIRTUAL_DEVICE)
         ASSERT(_rxState >= ReceiveState_Idle && _rxState <= ReceiveState_CompletePayload);

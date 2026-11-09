@@ -918,23 +918,3 @@ const char *SOCK_IPV4AddressToString(uint32_t address)
 
     return ip4addr_ntoa(&ip4Address);
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////
-// Socket-based debugger transport is not supported in this first pass (it would require
-// SOCK_listen/SOCK_accept, which are explicitly out of scope - see SOCK_listen/SOCK_accept
-// above). Debugging on this board is expected to happen over a different transport (UART/USB).
-////////////////////////////////////////////////////////////////////////////////////////////
-
-bool SOCKETS_DbgInitialize(int comPortNum)
-{
-    (void)comPortNum;
-
-    return false;
-}
-
-bool SOCKETS_DbgUninitialize(int comPortNum)
-{
-    (void)comPortNum;
-
-    return false;
-}
