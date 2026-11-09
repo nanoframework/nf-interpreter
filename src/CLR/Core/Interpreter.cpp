@@ -1053,35 +1053,20 @@ static HRESULT EnsureGenericCctorCompleted(
         return S_OK;
     }
 
-    bool tsIsClosed = tsInst.IsClosedGenericType();
-    bool hashIsClosed = false;
-
-    CLR_UINT32 hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(
-        tsInst,
-        &stack->m_genericTypeSpecStorage,
-        &stack->m_call,
-        &hashIsClosed);
-
-    if (hash == 0xFFFFFFFF)
-    {
-        return S_OK;
-    }
-
-    bool created = false;
-    CLR_RT_GenericCctorExecutionRecord *record = g_CLR_RT_TypeSystem.FindOrCreateGenericCctorRecord(hash, &created);
+    CLR_RT_GenericInstance *record =
+        CLR_RT_TypeSystem::FindOrCreateGenericInstance(tsInst, &stack->m_genericTypeSpecStorage, &stack->m_call);
 
     if (record == nullptr)
     {
         return S_OK;
     }
 
-    if (record->m_flags & CLR_RT_GenericCctorExecutionRecord::c_Executed)
+    if (record->m_flags & CLR_RT_GenericInstance::c_Executed)
     {
         return S_OK;
     }
 
-    if ((record->m_flags & CLR_RT_GenericCctorExecutionRecord::c_Scheduled) &&
-        !(record->m_flags & CLR_RT_GenericCctorExecutionRecord::c_Executed))
+    if (record->m_flags & CLR_RT_GenericInstance::c_Scheduled)
     {
         CLR_RT_StackFrame *frame = th->CurrentFrame();
 
@@ -1110,7 +1095,7 @@ static HRESULT EnsureGenericCctorCompleted(
 
     if (!ownerAsm->HasStaticConstructor(typeDef))
     {
-        record->m_flags |= CLR_RT_GenericCctorExecutionRecord::c_Executed;
+        record->m_flags |= CLR_RT_GenericInstance::c_Executed;
         return S_OK;
     }
 
@@ -1133,43 +1118,35 @@ static HRESULT EnsureGenericCctorCompleted(
 
     if (!foundCctor)
     {
-        record->m_flags |= CLR_RT_GenericCctorExecutionRecord::c_Executed;
+        record->m_flags |= CLR_RT_GenericInstance::c_Executed;
         return S_OK;
     }
 
-    record->m_flags |= CLR_RT_GenericCctorExecutionRecord::c_Scheduled | CLR_RT_GenericCctorExecutionRecord::c_Executed;
+    record->m_flags |= CLR_RT_GenericInstance::c_Scheduled | CLR_RT_GenericInstance::c_Executed;
 
     CLR_RT_MethodDef_Instance cctorInst{};
     if (!cctorInst.InitializeFromIndex(cctorIndex))
     {
-        record->m_flags &=
-            ~(CLR_RT_GenericCctorExecutionRecord::c_Scheduled | CLR_RT_GenericCctorExecutionRecord::c_Executed);
+        record->m_flags &= ~(CLR_RT_GenericInstance::c_Scheduled | CLR_RT_GenericInstance::c_Executed);
         return CLR_E_WRONG_TYPE;
     }
 
+    // A closed instantiation is the .cctor's whole context. See CLAUDE.md "Generic .cctor lifecycle".
+    bool selfContext = NANOCLR_INDEX_IS_VALID(record->m_self);
     CLR_RT_TypeSpec_Index tsIndex;
-    tsIndex.data = tsInst.data;
+    tsIndex.data = selfContext ? record->m_self.data : tsInst.data;
 
-    // See CLAUDE.md "Open owner storage".
-    if (!tsIsClosed && hashIsClosed)
+    // The .cctor must write to the storage of the instantiation that triggered it.
+    HRESULT hrAlloc = CLR_RT_TypeSystem::AllocateGenericInstanceStatics(
+        *record,
+        tsInst,
+        &stack->m_genericTypeSpecStorage,
+        &stack->m_call);
+
+    if (FAILED(hrAlloc))
     {
-        CLR_RT_TypeDef_Instance ownerInst{};
-
-        if (ownerInst.InitializeFromIndex(typeDef) && ownerInst.target->staticFieldsCount > 0)
-        {
-            HRESULT hrAlloc = ownerAsm->AllocateGenericStaticFieldsOnDemand(
-                tsIndex,
-                ownerInst,
-                &stack->m_genericTypeSpecStorage,
-                &stack->m_call);
-
-            if (FAILED(hrAlloc))
-            {
-                record->m_flags &=
-                    ~(CLR_RT_GenericCctorExecutionRecord::c_Scheduled | CLR_RT_GenericCctorExecutionRecord::c_Executed);
-                return hrAlloc;
-            }
-        }
+        record->m_flags &= ~(CLR_RT_GenericInstance::c_Scheduled | CLR_RT_GenericInstance::c_Executed);
+        return hrAlloc;
     }
 
     cctorInst.m_typeSpecStorage = tsIndex;
@@ -1179,8 +1156,7 @@ static HRESULT EnsureGenericCctorCompleted(
 
     if (FAILED(hr))
     {
-        record->m_flags &=
-            ~(CLR_RT_GenericCctorExecutionRecord::c_Scheduled | CLR_RT_GenericCctorExecutionRecord::c_Executed);
+        record->m_flags &= ~(CLR_RT_GenericInstance::c_Scheduled | CLR_RT_GenericInstance::c_Executed);
         return hr;
     }
 
@@ -1188,11 +1164,8 @@ static HRESULT EnsureGenericCctorCompleted(
     cctorFrame->m_genericTypeSpecStorage = tsIndex;
     cctorFrame->m_call.genericType = &cctorFrame->m_genericTypeSpecStorage;
 
-    // Open declaring TypeSpec (reached via VAR/MVAR, e.g.
-    // SZGenericArrayEnumerator<!!0>::Empty inside List<int>::GetEnumerator):
-    // propagate the caller's method generic context so the cctor body's VARs
-    // resolve two-level to the same closed form the field access resolved to.
-    if (!tsIsClosed)
+    // Still open after resolution: the body resolves !0 two-level through the caller's MethodSpec.
+    if (!selfContext)
     {
         cctorFrame->m_call.methodSpec = stack->m_call.methodSpec;
     }
@@ -3190,147 +3163,6 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
-                    // Nested generic construction (Holder<T> builds Box<!0>). See CLAUDE.md §9.
-                    const CLR_RT_TypeSpec_Index *nestedGenericTag = nullptr;
-
-                    if (cls.target->genericParamCount > 0 && stack->m_call.genericType != nullptr &&
-                        NANOCLR_INDEX_IS_VALID(*stack->m_call.genericType) && calleeInst.genericType != nullptr &&
-                        NANOCLR_INDEX_IS_VALID(*calleeInst.genericType))
-                    {
-                        CLR_RT_TypeSpec_Instance callerTs{};
-                        CLR_RT_TypeSpec_Instance calleeOwnerTs{};
-
-                        if (callerTs.InitializeFromIndex(*stack->m_call.genericType) &&
-                            calleeOwnerTs.InitializeFromIndex(*calleeInst.genericType) &&
-                            NANOCLR_INDEX_IS_VALID(calleeOwnerTs.genericTypeDef) &&
-                            calleeOwnerTs.genericTypeDef.data == cls.data && callerTs.genericTypeDef.data != cls.data &&
-                            callerTs.IsClosedGenericType() && !calleeOwnerTs.IsClosedGenericType())
-                        {
-                            CLR_RT_SignatureParser ownerParser{};
-                            ownerParser.Initialize_TypeSpec(calleeOwnerTs);
-
-                            CLR_RT_SignatureParser::Element ownerElem{};
-                            if (SUCCEEDED(ownerParser.Advance(ownerElem)) &&
-                                ownerElem.DataType == DATATYPE_GENERICINST && SUCCEEDED(ownerParser.Advance(ownerElem)))
-                            {
-                                int argCount = ownerElem.GenParamCount;
-                                CLR_RT_TypeDef_Index resolvedArgs[8];
-                                bool allResolved = (argCount > 0 && argCount <= 8);
-
-                                for (int a = 0; a < argCount && allResolved; a++)
-                                {
-                                    int targetAvail = ownerParser.Available() - 1;
-
-                                    CLR_RT_SignatureParser::Element argElem{};
-                                    if (FAILED(ownerParser.Advance(argElem)))
-                                    {
-                                        allResolved = false;
-                                        break;
-                                    }
-
-                                    if (argElem.Levels > 0 || argElem.DataType == DATATYPE_GENERICINST)
-                                    {
-                                        allResolved = false;
-                                    }
-                                    else if (argElem.DataType == DATATYPE_VAR)
-                                    {
-                                        CLR_RT_SignatureParser::Element paramElem{};
-                                        if (callerTs.GetGenericParam(argElem.GenericParamPosition, paramElem) &&
-                                            NANOCLR_INDEX_IS_VALID(paramElem.Class))
-                                        {
-                                            resolvedArgs[a] = paramElem.Class;
-                                        }
-                                        else
-                                        {
-                                            allResolved = false;
-                                        }
-                                    }
-                                    else if (NANOCLR_INDEX_IS_VALID(argElem.Class))
-                                    {
-                                        resolvedArgs[a] = argElem.Class;
-                                    }
-                                    else
-                                    {
-                                        allResolved = false;
-                                    }
-
-                                    while (ownerParser.Available() > targetAvail)
-                                    {
-                                        CLR_RT_SignatureParser::Element drained{};
-                                        if (FAILED(ownerParser.Advance(drained)))
-                                        {
-                                            allResolved = false;
-                                            break;
-                                        }
-                                    }
-                                }
-
-                                if (allResolved)
-                                {
-                                    const CLR_RT_TypeSpec_Index *closedMatch = nullptr;
-
-                                    for (size_t ai = 0;
-                                         ai < g_CLR_RT_TypeSystem.m_assembliesMax && closedMatch == nullptr;
-                                         ai++)
-                                    {
-                                        CLR_RT_Assembly *pASSM = g_CLR_RT_TypeSystem.m_assemblies[ai];
-                                        if (pASSM == nullptr)
-                                        {
-                                            continue;
-                                        }
-
-                                        for (int tsIdx = 0; tsIdx < pASSM->tablesSize[TBL_TypeSpec]; tsIdx++)
-                                        {
-                                            const CLR_RT_TypeSpec_Index *candidateIdx =
-                                                &pASSM->crossReferenceTypeSpec[tsIdx].genericType;
-
-                                            if (!NANOCLR_INDEX_IS_VALID(*candidateIdx))
-                                            {
-                                                continue;
-                                            }
-
-                                            CLR_RT_TypeSpec_Instance candidateInst{};
-                                            if (!candidateInst.InitializeFromIndex(*candidateIdx) ||
-                                                candidateInst.genericTypeDef.data != cls.data ||
-                                                !candidateInst.IsClosedGenericType())
-                                            {
-                                                continue;
-                                            }
-
-                                            bool argsMatch = true;
-                                            for (int a = 0; a < argCount && argsMatch; a++)
-                                            {
-                                                CLR_RT_SignatureParser::Element candidateArg{};
-                                                if (!candidateInst.GetGenericParam(a, candidateArg) ||
-                                                    candidateArg.Class.data != resolvedArgs[a].data)
-                                                {
-                                                    argsMatch = false;
-                                                }
-                                            }
-
-                                            if (argsMatch)
-                                            {
-                                                closedMatch = candidateIdx;
-                                                break;
-                                            }
-                                        }
-                                    }
-
-                                    if (closedMatch != nullptr)
-                                    {
-                                        calleeInst.genericType = closedMatch;
-                                        nestedGenericTag = closedMatch;
-                                    }
-                                    else if (argCount == 1)
-                                    {
-                                        // Never set alongside genericType above — see CLAUDE.md §9.
-                                        calleeInst.arrayElementType = resolvedArgs[0];
-                                    }
-                                }
-                            }
-                        }
-                    }
-
                     {
                         const CLR_RT_TypeSpec_Index *tsForCctor = nullptr;
 
@@ -3455,12 +3287,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         const CLR_RT_TypeSpec_Index *genericTypeForContext = nullptr;
                         CLR_RT_TypeSpec_Instance calleeOwnerTs{};
 
-                        if (nestedGenericTag != nullptr)
-                        {
-                            genericTypeForContext = nestedGenericTag;
-                        }
-                        else if (
-                            calleeInst.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType) &&
+                        if (calleeInst.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType) &&
                             calleeOwnerTs.InitializeFromIndex(*calleeInst.genericType) &&
                             calleeOwnerTs.genericTypeDef.data == cls.data &&
                             (calleeOwnerTs.IsClosedGenericType() ||

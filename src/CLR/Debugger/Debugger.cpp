@@ -2007,6 +2007,13 @@ static bool FillValues(
             if (ptr->IsAGenericInstance())
             {
                 dst->m_ts = ptr->ObjectGenericType();
+
+                // The debugger only knows TypeSpec rows.
+                if (dst->m_ts.IsRuntime())
+                {
+                    CLR_RT_GenericInstance *instance = CLR_RT_TypeSystem::GetGenericInstance(dst->m_ts);
+                    dst->m_ts.data = instance != nullptr ? instance->m_origin.data : 0;
+                }
             }
             break;
 

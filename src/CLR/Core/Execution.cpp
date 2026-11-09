@@ -1038,16 +1038,13 @@ void CLR_RT_ExecutionEngine::StaticConstructorTerminationCallback(void *arg)
             contextMethod.ClearInstance();
             contextMethod.methodSpec = dlg->m_genericMethodSpec;
 
-            CLR_UINT32 hash =
-                g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(genericTypeInstance, nullptr, &contextMethod);
-            CLR_RT_GenericCctorExecutionRecord *record =
-                g_CLR_RT_TypeSystem.FindOrCreateGenericCctorRecord(hash, nullptr);
+            CLR_RT_GenericInstance *record =
+                CLR_RT_TypeSystem::FindOrCreateGenericInstance(genericTypeInstance, nullptr, &contextMethod);
 
             if (record != nullptr)
             {
-                // Clear scheduled flag and set executed flag
-                record->m_flags &= ~CLR_RT_GenericCctorExecutionRecord::c_Scheduled;
-                record->m_flags |= CLR_RT_GenericCctorExecutionRecord::c_Executed;
+                record->m_flags &= ~CLR_RT_GenericInstance::c_Scheduled;
+                record->m_flags |= CLR_RT_GenericInstance::c_Executed;
             }
         }
     }
@@ -1310,35 +1307,21 @@ bool CLR_RT_ExecutionEngine::SpawnGenericTypeStaticConstructorsHelper(
             continue;
         }
 
-        // Compute hash for the closed generic type to check if .cctor already scheduled/executed
-        CLR_UINT32 hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(genericTypeInstance);
-
-        if (hash == 0xFFFFFFFF)
-        {
-            continue;
-        }
-
-        // Find or create the .cctor execution record for this closed type
-        bool recordCreated = false;
-        CLR_RT_GenericCctorExecutionRecord *record =
-            g_CLR_RT_TypeSystem.FindOrCreateGenericCctorRecord(hash, &recordCreated);
+        // Over the limits or out of memory: skip this .cctor
+        CLR_RT_GenericInstance *record = CLR_RT_TypeSystem::FindOrCreateGenericInstance(genericTypeInstance);
 
         if (record == nullptr)
         {
-            // Out of memory - skip this .cctor
             continue;
         }
 
-        // Check if .cctor already scheduled or executed
-        if (record->m_flags &
-            (CLR_RT_GenericCctorExecutionRecord::c_Scheduled | CLR_RT_GenericCctorExecutionRecord::c_Executed))
+        if (record->m_flags & (CLR_RT_GenericInstance::c_Scheduled | CLR_RT_GenericInstance::c_Executed))
         {
-            // Already handled - skip to next TypeSpec
             continue;
         }
 
         // Mark as scheduled to prevent duplicate scheduling
-        record->m_flags |= CLR_RT_GenericCctorExecutionRecord::c_Scheduled;
+        record->m_flags |= CLR_RT_GenericInstance::c_Scheduled;
 
         // Create delegate for the generic type .cctor
         CLR_RT_HeapBlock_Delegate *dlg;
@@ -1362,7 +1345,7 @@ bool CLR_RT_ExecutionEngine::SpawnGenericTypeStaticConstructorsHelper(
         }
 
         // If we failed to schedule, clear the scheduled flag
-        record->m_flags &= ~CLR_RT_GenericCctorExecutionRecord::c_Scheduled;
+        record->m_flags &= ~CLR_RT_GenericInstance::c_Scheduled;
     }
 
     // no more generic type .cctors for this assembly - set flag
@@ -1392,16 +1375,20 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread
         // Check if this is a generic type .cctor (has m_genericTypeSpec.data != 0 in the delegate)
         if (dlg->m_genericTypeSpec.data != 0)
         {
-            // Extract the TypeSpec index from the delegate and increment to next TypeSpec
-            CLR_RT_TypeSpec_Index tsIndex = dlg->m_genericTypeSpec;
-            CLR_RT_Assembly *assembly = g_CLR_RT_TypeSystem.m_assemblies[tsIndex.Assembly() - 1];
-
-            // Increment to next TypeSpec (same pattern as regular .cctor)
-            tsIndex.data++;
-
-            if (SpawnGenericTypeStaticConstructorsHelper(assembly, tsIndex))
+            // One reached at runtime has no row to resume the crawl after.
+            if (!dlg->m_genericTypeSpec.IsRuntime())
             {
-                return;
+                // Extract the TypeSpec index from the delegate and increment to next TypeSpec
+                CLR_RT_TypeSpec_Index tsIndex = dlg->m_genericTypeSpec;
+                CLR_RT_Assembly *assembly = g_CLR_RT_TypeSystem.m_assemblies[tsIndex.Assembly() - 1];
+
+                // Increment to next TypeSpec (same pattern as regular .cctor)
+                tsIndex.data++;
+
+                if (SpawnGenericTypeStaticConstructorsHelper(assembly, tsIndex))
+                {
+                    return;
+                }
             }
         }
         else
