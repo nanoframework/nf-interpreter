@@ -618,11 +618,14 @@ void ClrStartup(CLR_SETTINGS params)
         // DO NOT USE 'ELSE IF' here because the state can change in Debugger_WaitForCommands() call
         if (CLR_EE_DBG_IS(RebootPending))
         {
-            if (CLR_EE_REBOOT_IS(ClrOnly))
+            if (CLR_EE_REBOOT_IS(ClrOnly) || params.EnterDebuggerLoopAfterExit)
             {
                 softReboot = true;
 
-                params.WaitForDebugger = CLR_EE_REBOOT_IS(WaitForDebugger);
+                if (CLR_EE_REBOOT_IS(ClrOnly))
+                {
+                    params.WaitForDebugger = CLR_EE_REBOOT_IS(WaitForDebugger);
+                }
 
                 s_ClrSettings.Cleanup();
 

@@ -131,7 +131,7 @@ nanoclr run --resolve (--assemblies ...)
 
 ### Options to control debugger connection
 
-There are two options that control how the nanoCLR execution interacts with a debugger. If it's intended that after a program terminates and exits the execution a debugger will be connecting, the option `--loopafterexit` should be included.
+There are two options that control how the nanoCLR execution interacts with a debugger. If it's intended that after a program terminates and exits the execution a debugger will be connecting, the option `--loopafterexit` should be included. With this option a reboot request from the debugger restarts the execution engine instead of ending the run.
 In case it's expected that imediatly after nanoCLR is started,a debugger is to connect to it, the option `--waitfordebugger` should be included.
 
 ## Maintenance operations with the nanoCLR

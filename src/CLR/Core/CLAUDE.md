@@ -832,6 +832,24 @@ value) only when the GC compacts.**
   than a bad value is the same bug reaching a slot that holds an object
   reference instead of an `int`.
 
+**Debug session ends right after a CLR-only reboot on the virtual device.**
+- The cleanup of `Execute` also runs when leaving for a reboot. A
+  `Monitor_ProgramExit` sent from there makes the debugger terminate the
+  session, and on the way out it asks for a normal reboot, which shuts the
+  virtual device down. So it is only sent when no reboot is pending, the same
+  check `ClrStartup` has for its own broadcast.
+
+**Virtual device gone after the debugger stops.**
+- Stopping a debug session sends a normal reboot. In the netcore
+  `ClrStartup` loop a normal reboot ends the run, unless the device was started
+  with `--loopafterexit` (`EnterDebuggerLoopAfterExit`): then it restarts the
+  execution engine like a `ClrOnly` reboot, keeping the `WaitForDebugger` it
+  started with, and the device stays listening and announcing.
+- The virtual device VS starts over serial passes `--loopafterexit`, so it
+  also keeps running after Stop Debugging instead of exiting.
+- The host's native Wire Protocol processing thread is a background thread.
+  As a foreground thread it kept the process alive, busy, after the run ended.
+
 **Generic `.cctor` not firing or firing twice.**
 - `FindOrCreateGenericStaticFields` hash mismatch — two TypeSpec rows
   encode the same closed type but hash differently, or vice versa. See §10.

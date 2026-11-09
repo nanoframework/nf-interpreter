@@ -115,7 +115,7 @@ The virtual device can be debugged over TCP, with the same Wire Protocol used on
 without any cable or virtual serial port.
 
 ```
-nanoclr run --assemblies <pe files> --networkport 26000 --debugtoken <token> --waitfordebugger
+nanoclr run --assemblies <pe files> --networkport 26000 --debugtoken <token> --waitfordebugger --loopafterexit
 ```
 
 | Option | Description |
@@ -128,6 +128,9 @@ nanoclr run --assemblies <pe files> --networkport 26000 --debugtoken <token> --w
 Behavior:
 
 - The device accepts a single debugger at a time. A new connection replaces the current one.
+- With `--loopafterexit`, a reboot request (for example when the debugger stops) restarts the execution engine and the
+  device stays listening and announcing itself, like a hardware device. Stop it with Ctrl+C. Without it, the run ends
+  on a normal reboot.
 - **Discovery**: every 5 seconds the device broadcasts `+:<port>:<targetName>` over UDP. When the device exits it sends `-:<port>`. The debugger takes
   the IP address from the sender of the datagram. With `--host 127.0.0.1` the announcements go to this computer only.
 - **Authentication**: the debugger sends `Monitor_Authenticate` (`0x14`) after connecting. Without a token it always
