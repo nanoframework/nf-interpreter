@@ -858,7 +858,13 @@ struct CLR_RT_ReflectionDef_Index
 {
     // CLR_ReflectionType
     CLR_UINT16 kind;
-    CLR_UINT16 levels;
+
+    union {
+        // array levels of a type
+        CLR_UINT16 levels;
+        // method, constructor and field: registry slot + 1 of the owner's closed generic type, 0 if none
+        CLR_UINT16 genericOwner;
+    };
 
     union {
         CLR_RT_Assembly_Index assembly;
@@ -876,6 +882,8 @@ struct CLR_RT_ReflectionDef_Index
     CLR_UINT32 GetTypeHash() const;
 
     void InitializeFromHash(CLR_UINT32 hash);
+
+    bool GetGenericOwner(CLR_RT_TypeSpec_Index &typeSpec) const;
 
     CLR_UINT64 GetRawData() const;
     void SetRawData(CLR_UINT64 data);
@@ -2213,6 +2221,9 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
 
     static CLR_RT_GenericInstance *GetGenericInstance(const CLR_RT_TypeSpec_Index &index);
 
+    static CLR_UINT16 GetGenericOwnerSlot(const CLR_RT_TypeSpec_Index &typeSpec);
+    static bool IsSameGenericInstance(const CLR_RT_TypeSpec_Index &left, const CLR_RT_TypeSpec_Index &right);
+
     static HRESULT CollectGenericTarget(
         const CLR_RT_SignatureParser &at,
         const CLR_RT_TypeSpec_Index *contextTypeSpec,
@@ -2641,7 +2652,10 @@ struct CLR_RT_TypeDescriptor
     HRESULT InitializeFromType(const CLR_RT_TypeDef_Index &cls);
     HRESULT InitializeFromTypeDef(const CLR_RT_TypeDef_Index &cls);
     HRESULT InitializeFromGenericType(const CLR_RT_TypeSpec_Index &genericType);
-    HRESULT InitializeFromFieldDefinition(const CLR_RT_FieldDef_Instance &fd);
+    HRESULT InitializeFromFieldDefinition(
+        const CLR_RT_FieldDef_Instance &fd,
+        const CLR_RT_TypeSpec_Index *ownerTypeSpec = nullptr);
+    HRESULT InitializeFromClosedSignature(CLR_RT_SignatureParser &parser, const CLR_RT_TypeSpec_Index *ownerTypeSpec);
     HRESULT InitializeFromSignatureParser(
         CLR_RT_SignatureParser &parser,
         const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr);
@@ -4455,6 +4469,7 @@ struct CLR_RT_ExecutionEngine
     void SpawnFinalizer();
     void SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread);
     HRESULT EnsureStaticConstructorCompleted(CLR_RT_TypeDef_Instance &type, CLR_RT_Thread *thread);
+    HRESULT EnsureGenericStaticConstructorCompleted(const CLR_RT_TypeSpec_Index &typeSpec, CLR_RT_Thread *thread);
     void CompleteStaticConstructor(CLR_RT_MethodDef_Instance method, CLR_RT_Thread *thread);
     CLR_UINT8 GetStaticConstructorState(
         const CLR_RT_TypeDef_Instance &type,

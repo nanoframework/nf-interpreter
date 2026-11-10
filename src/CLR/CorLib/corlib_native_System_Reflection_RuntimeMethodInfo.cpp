@@ -13,13 +13,17 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeMethodInfo::get_ReturnTyp
     CLR_RT_MethodDef_Instance md;
     CLR_RT_SignatureParser parser{};
     CLR_RT_TypeDescriptor desc{};
+    CLR_RT_TypeSpec_Index owner;
     CLR_RT_HeapBlock *hbMeth = stack.This();
 
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_Reflection_MethodBase::GetMethodDescriptor(stack, *hbMeth, md));
 
     parser.Initialize_MethodSignature(md.assembly, md.target);
 
-    NANOCLR_CHECK_HRESULT(desc.InitializeFromSignatureParser(parser));
+    owner.Clear();
+    hbMeth->ReflectionDataConst().GetGenericOwner(owner);
+
+    NANOCLR_CHECK_HRESULT(desc.InitializeFromClosedSignature(parser, &owner));
 
     {
         CLR_RT_HeapBlock &top = stack.PushValue();

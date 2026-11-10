@@ -1166,6 +1166,24 @@ static HRESULT EnsureGenericCctorCompleted(
     return CLR_E_PROCESS_EXCEPTION;
 }
 
+HRESULT CLR_RT_ExecutionEngine::EnsureGenericStaticConstructorCompleted(
+    const CLR_RT_TypeSpec_Index &typeSpec,
+    CLR_RT_Thread *thread)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    CLR_RT_TypeSpec_Instance tsInst{};
+
+    if (!tsInst.InitializeFromIndex(typeSpec))
+    {
+        return CLR_E_WRONG_TYPE;
+    }
+
+    HRESULT hr = EnsureGenericCctorCompleted(tsInst, thread->CurrentFrame(), thread);
+
+    return hr == CLR_E_PROCESS_EXCEPTION ? CLR_E_RESTART_EXECUTION : hr;
+}
+
 static HRESULT EnsureOrdinaryCctorCompleted(
     CLR_RT_TypeDef_Instance &type,
     CLR_RT_StackFrame *stack,

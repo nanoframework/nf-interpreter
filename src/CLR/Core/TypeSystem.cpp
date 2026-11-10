@@ -120,6 +120,21 @@ void CLR_RT_ReflectionDef_Index::InitializeFromHash(CLR_UINT32 hash)
     data.raw = hash;
 }
 
+bool CLR_RT_ReflectionDef_Index::GetGenericOwner(CLR_RT_TypeSpec_Index &typeSpec) const
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    if ((kind != REFLECTION_METHOD && kind != REFLECTION_CONSTRUCTOR && kind != REFLECTION_FIELD) ||
+        genericOwner == 0 || genericOwner > g_CLR_RT_TypeSystem.m_genericInstancesCount)
+    {
+        return false;
+    }
+
+    typeSpec = g_CLR_RT_TypeSystem.m_genericInstances[genericOwner - 1]->m_self;
+
+    return true;
+}
+
 CLR_UINT64 CLR_RT_ReflectionDef_Index::GetRawData() const
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -2987,7 +3002,9 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromGenericType(const CLR_RT_TypeSpec_I
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_TypeDescriptor::InitializeFromFieldDefinition(const CLR_RT_FieldDef_Instance &fd)
+HRESULT CLR_RT_TypeDescriptor::InitializeFromFieldDefinition(
+    const CLR_RT_FieldDef_Instance &fd,
+    const CLR_RT_TypeSpec_Index *ownerTypeSpec)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -2995,7 +3012,86 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromFieldDefinition(const CLR_RT_FieldD
     CLR_RT_SignatureParser parser{};
     parser.Initialize_FieldDef(fd.assembly, fd.target);
 
-    NANOCLR_SET_AND_LEAVE(InitializeFromSignatureParser(parser));
+    if (ownerTypeSpec == nullptr)
+    {
+        NANOCLR_SET_AND_LEAVE(InitializeFromSignatureParser(parser));
+    }
+
+    NANOCLR_SET_AND_LEAVE(InitializeFromClosedSignature(parser, ownerTypeSpec));
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT CLR_RT_TypeDescriptor::InitializeFromClosedSignature(
+    CLR_RT_SignatureParser &parser,
+    const CLR_RT_TypeSpec_Index *ownerTypeSpec)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    CLR_RT_SignatureParser at = parser;
+    CLR_RT_SignatureParser::Element res;
+    CLR_RT_GenericTarget target;
+    CLR_RT_TypeSpec_Instance owner{};
+    int levels;
+    HRESULT collected;
+
+    NANOCLR_CHECK_HRESULT(parser.AdvanceParameter(res));
+
+    if ((ownerTypeSpec == nullptr || !NANOCLR_INDEX_IS_VALID(*ownerTypeSpec)) && res.DataType == DATATYPE_VAR)
+    {
+        NANOCLR_SET_AND_LEAVE(InitializeFromSignatureParser(at));
+    }
+
+    levels = res.Levels;
+
+    if (res.DataType == DATATYPE_VAR)
+    {
+        CLR_RT_SignatureParser argument;
+
+        if (!owner.InitializeFromIndex(*ownerTypeSpec) ||
+            !owner.PositionAtGenericParam(res.GenericParamPosition, argument))
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        }
+
+        at = argument;
+        NANOCLR_CHECK_HRESULT(argument.AdvanceParameter(res));
+        levels += res.Levels;
+        ownerTypeSpec = nullptr;
+    }
+
+    collected = CLR_RT_TypeSystem::CollectGenericTarget(at, ownerTypeSpec, nullptr, target);
+
+    NANOCLR_CHECK_HRESULT(collected);
+
+    if (collected == S_OK && target.m_count > 0 && levels == 0)
+    {
+        CLR_RT_GenericInstance *record =
+            CLR_RT_TypeSystem::FindOrCreateGenericInstanceByNodes(target.m_nodes, target.m_count);
+
+        if (record == nullptr)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        }
+
+        NANOCLR_CHECK_HRESULT(InitializeFromType(res.Class));
+
+        m_reflex.kind = REFLECTION_TYPESPEC;
+        m_reflex.levels = 0;
+        m_reflex.data.typeSpec = record->m_self;
+
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
+
+    NANOCLR_CHECK_HRESULT(InitializeFromType(res.Class));
+
+    if (levels > 0)
+    {
+        m_reflex.levels = (CLR_UINT16)levels;
+
+        ConvertToArray();
+    }
 
     NANOCLR_NOCLEANUP();
 }
@@ -9309,6 +9405,59 @@ CLR_RT_GenericInstance *CLR_RT_TypeSystem::GetGenericInstance(const CLR_RT_TypeS
     return g_CLR_RT_TypeSystem.m_genericInstances[slot];
 }
 
+CLR_UINT16 CLR_RT_TypeSystem::GetGenericOwnerSlot(const CLR_RT_TypeSpec_Index &typeSpec)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    CLR_RT_TypeSpec_Instance inst{};
+    CLR_RT_GenericInstance *record;
+
+    if (!NANOCLR_INDEX_IS_VALID(typeSpec) || !inst.InitializeFromIndex(typeSpec) || inst.levels != 0)
+    {
+        return 0;
+    }
+
+    record = FindOrCreateGenericInstance(inst);
+
+    if (record == nullptr)
+    {
+        return 0;
+    }
+
+    for (CLR_UINT32 i = 0; i < g_CLR_RT_TypeSystem.m_genericInstancesCount; i++)
+    {
+        if (g_CLR_RT_TypeSystem.m_genericInstances[i] == record)
+        {
+            return (CLR_UINT16)(i + 1);
+        }
+    }
+
+    return 0;
+}
+
+bool CLR_RT_TypeSystem::IsSameGenericInstance(const CLR_RT_TypeSpec_Index &left, const CLR_RT_TypeSpec_Index &right)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    CLR_RT_TypeSpec_Instance leftInst{};
+    CLR_RT_TypeSpec_Instance rightInst{};
+    CLR_RT_GenericInstance *leftRecord;
+
+    if (left.data == right.data)
+    {
+        return true;
+    }
+
+    if (!leftInst.InitializeFromIndex(left) || !rightInst.InitializeFromIndex(right))
+    {
+        return false;
+    }
+
+    leftRecord = FindOrCreateGenericInstance(leftInst);
+
+    return leftRecord != nullptr && leftRecord == FindOrCreateGenericInstance(rightInst);
+}
+
 // The registry lookup shared by every way of reaching an instantiation. A closed node stream is found or created here.
 static CLR_RT_GenericInstance *RegisterGenericInstance(
     const CLR_RT_GenericInstanceNode *nodes,
@@ -9529,6 +9678,21 @@ HRESULT CLR_RT_TypeSystem::CollectGenericTarget(
     HRESULT hr;
 
     target.m_count = 0;
+
+    if (SUCCEEDED(peek.Advance(elem)) && elem.DataType == DATATYPE_VAR && elem.Levels == 0 &&
+        contextTypeSpec != nullptr && NANOCLR_INDEX_IS_VALID(*contextTypeSpec))
+    {
+        CLR_RT_TypeSpec_Instance owner{};
+        CLR_RT_SignatureParser argument;
+
+        if (owner.InitializeFromIndex(*contextTypeSpec) &&
+            owner.PositionAtGenericParam(elem.GenericParamPosition, argument))
+        {
+            return CollectGenericTarget(argument, nullptr, nullptr, target);
+        }
+    }
+
+    peek = at;
 
     if (FAILED(peek.Advance(elem)) || elem.DataType != DATATYPE_GENERICINST || elem.Levels > 0)
     {

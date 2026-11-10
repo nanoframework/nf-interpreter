@@ -666,7 +666,14 @@ HRESULT CLR_RT_StackFrame::MakeCall(
 
         _SIDE_ASSERTE(owner.InitializeFromMethod(md));
 
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(tmp, owner));
+        {
+            CLR_RT_TypeSpec_Instance ownerType{};
+            bool isClosedOwner = md.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*md.genericType) &&
+                                 ownerType.InitializeFromIndex(*md.genericType) &&
+                                 ownerType.genericTypeDef.data == owner.data;
+
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(tmp, owner, isClosedOwner ? &ownerType : nullptr));
+        }
 
         obj = &tmp;
 
@@ -704,7 +711,28 @@ HRESULT CLR_RT_StackFrame::MakeCall(
             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }
 
+        CLR_RT_TypeSpec_Index ownerContext;
+        CLR_RT_TypeDef_Instance declaring{};
+
+        ownerContext.Clear();
+
+        if (md.genericType != nullptr)
+        {
+            ownerContext = *md.genericType;
+        }
+
         md.InitializeFromIndex(mdReal);
+
+        if (NANOCLR_INDEX_IS_VALID(ownerContext) && declaring.InitializeFromMethod(md))
+        {
+            CLR_RT_TypeSpec_Instance ownerType{};
+
+            if (ownerType.InitializeFromIndex(ownerContext) && ownerType.genericTypeDef.data == declaring.data)
+            {
+                md.m_typeSpecStorage = ownerContext;
+                md.genericType = &md.m_typeSpecStorage;
+            }
+        }
 
         mdR = md.target;
     }
@@ -725,6 +753,12 @@ HRESULT CLR_RT_StackFrame::MakeCall(
         NANOCLR_CHECK_HRESULT(CLR_RT_StackFrame::Push(m_owningThread, md, md.target->argumentsCount));
 
         stackSub = m_owningThread->CurrentFrame();
+
+        if (md.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*md.genericType))
+        {
+            stackSub->m_genericTypeSpecStorage = *md.genericType;
+            stackSub->m_call.genericType = &stackSub->m_genericTypeSpecStorage;
+        }
 
         if (!fStatic)
         {
@@ -780,6 +814,24 @@ HRESULT CLR_RT_StackFrame::FixCall()
 
             if (res.Levels > 0)
                 continue; // Array, no need to fix.
+
+            if (res.DataType == DATATYPE_VAR && m_call.genericType != nullptr &&
+                NANOCLR_INDEX_IS_VALID(*m_call.genericType))
+            {
+                CLR_RT_TypeSpec_Instance owner{};
+                CLR_RT_SignatureParser argument;
+                CLR_RT_SignatureParser::Element resolved;
+
+                if (!owner.InitializeFromIndex(*m_call.genericType) ||
+                    !owner.PositionAtGenericParam(res.GenericParamPosition, argument) ||
+                    FAILED(argument.AdvanceParameter(resolved)) || resolved.Levels > 0)
+                {
+                    continue;
+                }
+
+                res.Class = resolved.Class;
+                res.DataType = resolved.DataType;
+            }
 
             if (!NANOCLR_INDEX_IS_VALID(res.Class))
                 continue; // VAR or MVAR, no generic context to resolve it.

@@ -56,12 +56,16 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeFieldInfo::get_FieldType_
 
     CLR_RT_TypeDescriptor desc{};
     CLR_RT_FieldDef_Instance fd;
+    CLR_RT_TypeSpec_Index owner;
     CLR_RT_HeapBlock *hbField = stack.This();
 
     if (GetFieldDescriptor(stack, *hbField, fd) == false)
         NANOCLR_SET_AND_LEAVE(CLR_E_NULL_REFERENCE);
 
-    NANOCLR_CHECK_HRESULT(desc.InitializeFromFieldDefinition(fd));
+    owner.Clear();
+    hbField->ReflectionDataConst().GetGenericOwner(owner);
+
+    NANOCLR_CHECK_HRESULT(desc.InitializeFromFieldDefinition(fd, &owner));
 
     {
         CLR_RT_HeapBlock &top = stack.PushValue();
