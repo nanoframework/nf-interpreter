@@ -3122,7 +3122,9 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
                     }
 
                     CLR_RT_SignatureParser::Element paramElement;
-                    if (callerTypeSpec.GetGenericParam(elem.GenericParamPosition, paramElement))
+                    CLR_RT_SignatureParser paramParser;
+                    if (callerTypeSpec.PositionAtGenericParam(elem.GenericParamPosition, paramParser) &&
+                        SUCCEEDED(paramParser.AdvanceParameter(paramElement)))
                     {
                         if (NANOCLR_INDEX_IS_VALID(paramElement.Class))
                         {
@@ -5761,10 +5763,7 @@ struct MethodIndexLookup
 };
 
 static const MethodIndexLookup c_MethodIndexLookup[] = {
-#define MIL(nm, type, method)                                                                                          \
-    {                                                                                                                  \
-        nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method                                           \
-    }
+#define MIL(nm, type, method) {nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method}
 
     // clang-format off
 
