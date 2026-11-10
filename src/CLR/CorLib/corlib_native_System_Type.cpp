@@ -176,14 +176,19 @@ HRESULT Library_corlib_native_System_Type::GetGenericArguments___SZARRAY_SystemT
         // fill the array with Type objects for each generic argument
         for (int i = 0; i < count; i++)
         {
-            NANOCLR_CHECK_HRESULT(parser.Advance(elem));
+            CLR_RT_SignatureParser argument = parser;
+            CLR_RT_TypeDescriptor argumentType{};
+
+            NANOCLR_CHECK_HRESULT(argumentType.InitializeFromClosedSignature(argument, nullptr));
+
+            parser = argument;
 
             CLR_RT_HeapBlock &slot = pElems[i];
             NANOCLR_CHECK_HRESULT(
                 g_CLR_RT_ExecutionEngine.NewObjectFromIndex(slot, g_CLR_RT_WellKnownTypes.TypeStatic));
 
             CLR_RT_HeapBlock *hbObj = slot.Dereference();
-            hbObj->SetReflection(elem.Class);
+            hbObj->SetReflection(argumentType.m_reflex);
         }
     }
 

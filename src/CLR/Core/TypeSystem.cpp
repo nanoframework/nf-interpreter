@@ -9671,6 +9671,21 @@ HRESULT CLR_RT_TypeSystem::CollectGenericTarget(
 
     target.m_count = 0;
 
+    if (SUCCEEDED(peek.Advance(elem)) && elem.DataType == DATATYPE_VAR && elem.Levels == 0 &&
+        contextTypeSpec != nullptr && NANOCLR_INDEX_IS_VALID(*contextTypeSpec))
+    {
+        CLR_RT_TypeSpec_Instance owner{};
+        CLR_RT_SignatureParser argument;
+
+        if (owner.InitializeFromIndex(*contextTypeSpec) &&
+            owner.PositionAtGenericParam(elem.GenericParamPosition, argument))
+        {
+            return CollectGenericTarget(argument, nullptr, nullptr, target);
+        }
+    }
+
+    peek = at;
+
     if (FAILED(peek.Advance(elem)) || elem.DataType != DATATYPE_GENERICINST || elem.Levels > 0)
     {
         return S_OK;
