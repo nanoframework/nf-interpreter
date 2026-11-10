@@ -217,14 +217,10 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckInvokeArguments
             NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
         }
 
-        hr = CLR_RT_TypeSystem::CollectGenericTarget(parameter, nullptr, nullptr, target);
-
-        if (hr == S_FALSE)
+        if (CLR_RT_TypeSystem::CollectGenericTarget(parameter, nullptr, nullptr, target) == S_FALSE)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
         }
-
-        NANOCLR_CHECK_HRESULT(hr);
 
         CLR_RT_HeapBlock &arg = args[i];
 

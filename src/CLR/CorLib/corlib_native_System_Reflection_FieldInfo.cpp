@@ -57,7 +57,13 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::SetValue___VOID__OBJE
         if ((fd->flags & CLR_RECORD_FIELDDEF::FD_Static) == 0 && SUCCEEDED(stack.Arg1().EnsureObjectReference(owner)) &&
             owner->IsAGenericInstance())
         {
-            ownerTypeSpec = owner->ObjectGenericType();
+            CLR_RT_TypeSpec_Instance ownerInstance{};
+
+            if (ownerInstance.InitializeFromIndex(owner->ObjectGenericType()) &&
+                ownerInstance.genericTypeDef.data == instTD.data)
+            {
+                ownerTypeSpec = owner->ObjectGenericType();
+            }
         }
 
         if (CLR_RT_TypeSystem::CollectGenericTarget(
