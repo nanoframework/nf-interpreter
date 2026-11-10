@@ -45,6 +45,35 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::SetValue___VOID__OBJE
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }
+
+        CLR_RT_SignatureParser fieldParser{};
+        CLR_RT_GenericTarget target;
+        CLR_RT_HeapBlock *owner = nullptr;
+        CLR_RT_TypeSpec_Index ownerTypeSpec;
+
+        ownerTypeSpec.Clear();
+        fieldParser.Initialize_FieldDef(instFD.assembly, instFD.target);
+
+        if ((fd->flags & CLR_RECORD_FIELDDEF::FD_Static) == 0 && SUCCEEDED(stack.Arg1().EnsureObjectReference(owner)) &&
+            owner->IsAGenericInstance())
+        {
+            ownerTypeSpec = owner->ObjectGenericType();
+        }
+
+        if (CLR_RT_TypeSystem::CollectGenericTarget(
+                fieldParser,
+                NANOCLR_INDEX_IS_VALID(ownerTypeSpec) ? &ownerTypeSpec : nullptr,
+                nullptr,
+                target) == S_OK &&
+            target.m_count > 0)
+        {
+            CLR_RT_GenericMatch match = CLR_RT_TypeSystem::MatchGenericArguments(val, target);
+
+            if (match == GenericMatch_Different || match == GenericMatch_NoTypeSpec)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            }
+        }
     }
 
     fValueType = obj->IsAValueType();
