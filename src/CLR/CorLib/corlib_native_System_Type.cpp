@@ -96,6 +96,7 @@ HRESULT Library_corlib_native_System_Type::IsInstanceOfType___BOOLEAN__OBJECT(CL
     CLR_RT_TypeDescriptor descTarget;
     CLR_RT_TypeDescriptor desc{};
     CLR_RT_HeapBlock *hbType = stack.This();
+    bool isInstance;
 
     if (hbType->DataType() != DATATYPE_REFLECTION)
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
@@ -103,7 +104,27 @@ HRESULT Library_corlib_native_System_Type::IsInstanceOfType___BOOLEAN__OBJECT(CL
     NANOCLR_CHECK_HRESULT(descTarget.InitializeFromReflection(hbType->ReflectionDataConst()));
     NANOCLR_CHECK_HRESULT(desc.InitializeFromObject(stack.Arg1()));
 
-    stack.SetResult_Boolean(CLR_RT_ExecutionEngine::IsInstanceOf(desc, descTarget));
+    isInstance = CLR_RT_ExecutionEngine::IsInstanceOf(desc, descTarget);
+
+    if (isInstance && hbType->ReflectionDataConst().kind == CLR_ReflectionType::REFLECTION_TYPESPEC)
+    {
+        CLR_RT_TypeSpec_Instance typeSpec{};
+        CLR_RT_SignatureParser parser{};
+        CLR_RT_GenericTarget target;
+
+        if (typeSpec.InitializeFromIndex(hbType->ObjectGenericType()))
+        {
+            parser.Initialize_TypeSpec(typeSpec);
+
+            if (CLR_RT_TypeSystem::CollectGenericTarget(parser, nullptr, nullptr, target) == S_OK &&
+                CLR_RT_TypeSystem::MatchGenericArguments(stack.Arg1(), target) == GenericMatch_Different)
+            {
+                isInstance = false;
+            }
+        }
+    }
+
+    stack.SetResult_Boolean(isInstance);
 
     NANOCLR_NOCLEANUP();
 }
