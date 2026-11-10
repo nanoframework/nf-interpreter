@@ -2045,6 +2045,20 @@ struct CLR_RT_GenericInstance
     CLR_RT_GenericInstanceNode m_nodes[1];
 };
 
+struct CLR_RT_GenericTarget
+{
+    CLR_RT_GenericInstanceNode m_nodes[CLR_RT_GenericInstance::c_MaxNodes];
+    int m_count;
+};
+
+enum CLR_RT_GenericMatch
+{
+    GenericMatch_Same,
+    GenericMatch_Different,
+    GenericMatch_NoTypeSpec,
+    GenericMatch_Unresolved,
+};
+
 //--//
 
 struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
@@ -2198,6 +2212,14 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
         HRESULT *result = nullptr);
 
     static CLR_RT_GenericInstance *GetGenericInstance(const CLR_RT_TypeSpec_Index &index);
+
+    static HRESULT CollectGenericTarget(
+        const CLR_RT_SignatureParser &at,
+        const CLR_RT_TypeSpec_Index *contextTypeSpec,
+        const CLR_RT_MethodDef_Instance *contextMethod,
+        CLR_RT_GenericTarget &target);
+
+    static CLR_RT_GenericMatch MatchGenericArguments(const CLR_RT_HeapBlock &ref, const CLR_RT_GenericTarget &target);
 
     static HRESULT AllocateGenericInstanceStatics(CLR_RT_GenericInstance &instance);
 

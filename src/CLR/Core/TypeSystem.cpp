@@ -5761,7 +5761,10 @@ struct MethodIndexLookup
 };
 
 static const MethodIndexLookup c_MethodIndexLookup[] = {
-#define MIL(nm, type, method) {nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method}
+#define MIL(nm, type, method)                                                                                          \
+    {                                                                                                                  \
+        nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method                                           \
+    }
 
     // clang-format off
 
@@ -9139,13 +9142,20 @@ static HRESULT CollectGenericArguments(
         {
             depth--;
         }
+
+        // The parser may continue with the next parameter of a method signature.
+        if (depth == 0)
+        {
+            break;
+        }
     }
 
     return S_OK;
 }
 
-static HRESULT CollectGenericInstanceNodes(
-    CLR_RT_TypeSpec_Instance &typeInstance,
+// The parser is positioned at the GENERICINST marker.
+static HRESULT CollectGenericNodesAt(
+    CLR_RT_SignatureParser parser,
     const CLR_RT_TypeSpec_Index *contextTypeSpec,
     const CLR_RT_MethodDef_Instance *contextMethod,
     const CLR_RT_TypeDef_Index *mvarFallback,
@@ -9154,14 +9164,11 @@ static HRESULT CollectGenericInstanceNodes(
     bool &isClosed,
     bool &substituted)
 {
-    CLR_RT_SignatureParser parser;
     CLR_RT_SignatureParser::Element elem;
 
     nodeCount = 0;
     isClosed = true;
     substituted = false;
-
-    parser.Initialize_TypeSpec(typeInstance);
 
     if (FAILED(parser.Advance(elem)) || elem.DataType != DATATYPE_GENERICINST || FAILED(parser.Advance(elem)) ||
         !NANOCLR_INDEX_IS_VALID(elem.Class) || elem.GenParamCount <= 0)
@@ -9180,6 +9187,31 @@ static HRESULT CollectGenericInstanceNodes(
         contextTypeSpec,
         contextMethod,
         elem.GenParamCount,
+        mvarFallback,
+        nodes,
+        nodeCount,
+        isClosed,
+        substituted);
+}
+
+static HRESULT CollectGenericInstanceNodes(
+    CLR_RT_TypeSpec_Instance &typeInstance,
+    const CLR_RT_TypeSpec_Index *contextTypeSpec,
+    const CLR_RT_MethodDef_Instance *contextMethod,
+    const CLR_RT_TypeDef_Index *mvarFallback,
+    CLR_RT_GenericInstanceNode *nodes,
+    int &nodeCount,
+    bool &isClosed,
+    bool &substituted)
+{
+    CLR_RT_SignatureParser parser;
+
+    parser.Initialize_TypeSpec(typeInstance);
+
+    return CollectGenericNodesAt(
+        parser,
+        contextTypeSpec,
+        contextMethod,
         mvarFallback,
         nodes,
         nodeCount,
@@ -9458,6 +9490,205 @@ CLR_RT_GenericInstance *CLR_RT_TypeSystem::FindOrCreateGenericInstanceByNodes(
     }
 
     return instance;
+}
+
+// S_OK with a count of 0 when the signature isn't a generic instance or is an array of one, S_FALSE when it's open.
+HRESULT CLR_RT_TypeSystem::CollectGenericTarget(
+    const CLR_RT_SignatureParser &at,
+    const CLR_RT_TypeSpec_Index *contextTypeSpec,
+    const CLR_RT_MethodDef_Instance *contextMethod,
+    CLR_RT_GenericTarget &target)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    CLR_RT_SignatureParser peek = at;
+    CLR_RT_SignatureParser::Element elem;
+    bool closed;
+    bool substituted;
+    HRESULT hr;
+
+    target.m_count = 0;
+
+    if (FAILED(peek.Advance(elem)) || elem.DataType != DATATYPE_GENERICINST || elem.Levels > 0)
+    {
+        return S_OK;
+    }
+
+    hr = CollectGenericNodesAt(
+        at,
+        contextTypeSpec,
+        contextMethod,
+        nullptr,
+        target.m_nodes,
+        target.m_count,
+        closed,
+        substituted);
+
+    if (FAILED(hr))
+    {
+        target.m_count = 0;
+        return hr;
+    }
+
+    if (!closed)
+    {
+        target.m_count = 0;
+        return S_FALSE;
+    }
+
+    return S_OK;
+}
+
+CLR_RT_GenericMatch CLR_RT_TypeSystem::MatchGenericArguments(
+    const CLR_RT_HeapBlock &ref,
+    const CLR_RT_GenericTarget &target)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    const CLR_RT_HeapBlock *obj = &ref;
+    const CLR_RT_TypeDef_Index &targetClass = target.m_nodes[0].Class;
+    CLR_RT_GenericInstance *own = nullptr;
+    CLR_RT_TypeDef_Instance inst{};
+    CLR_RT_TypeDef_Instance targetDef{};
+    bool different = false;
+    bool openAtOwnLevel = false;
+    int level = 0;
+
+    while (obj->DataType() == DATATYPE_OBJECT || obj->DataType() == DATATYPE_BYREF)
+    {
+        obj = obj->Dereference();
+
+        if (obj == nullptr)
+        {
+            return GenericMatch_Unresolved;
+        }
+    }
+
+    if (target.m_count == 0)
+    {
+        return GenericMatch_Unresolved;
+    }
+
+    if (obj->DataType() == DATATYPE_SZARRAY)
+    {
+        const CLR_RT_ReflectionDef_Index &reflex = obj->ReflectionDataConst();
+
+        if (target.m_nodes[0].ArgCount != 1 || target.m_count < 2 || reflex.levels == 0)
+        {
+            return GenericMatch_Unresolved;
+        }
+
+        return (target.m_nodes[1].Class.data == reflex.data.type.data && target.m_nodes[1].Levels + 1 == reflex.levels)
+                   ? GenericMatch_Same
+                   : GenericMatch_Different;
+    }
+
+    if ((obj->DataType() != DATATYPE_CLASS && obj->DataType() != DATATYPE_VALUETYPE) ||
+        !inst.InitializeFromIndex(obj->ObjectCls()))
+    {
+        return GenericMatch_Unresolved;
+    }
+
+    // A stored TypeSpec of another class is the context of whoever created the object, not its own.
+    if (obj->IsAGenericInstance())
+    {
+        CLR_RT_TypeSpec_Instance stored{};
+
+        if (stored.InitializeFromIndex(obj->ObjectGenericType()))
+        {
+            own = FindOrCreateGenericInstance(stored);
+
+            if (own != nullptr && own->m_nodes[0].Class.data != inst.data)
+            {
+                own = nullptr;
+            }
+        }
+    }
+
+    if (inst.data == targetClass.data)
+    {
+        if (own == nullptr)
+        {
+            return GenericMatch_NoTypeSpec;
+        }
+
+        return (own->m_nodeCount == target.m_count &&
+                SameGenericInstanceNodes(own->m_nodes, target.m_nodes, target.m_count))
+                   ? GenericMatch_Same
+                   : GenericMatch_Different;
+    }
+
+    // Through an interface: the arguments are in the interface entry, resolved against the implementing class.
+    if (!targetDef.InitializeFromIndex(targetClass) ||
+        (targetDef.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) != CLR_RECORD_TYPEDEF::TD_Semantics_Interface)
+    {
+        return GenericMatch_Unresolved;
+    }
+
+    do
+    {
+        CLR_RT_SignatureParser parser{};
+
+        parser.Initialize_Interfaces(inst.assembly, inst.target);
+
+        while (parser.Available() > 0)
+        {
+            CLR_RT_SignatureParser peek = parser;
+            CLR_RT_SignatureParser::Element elem;
+            CLR_UINT32 tk = CLR_TkFromStream(peek.Signature);
+
+            if (FAILED(parser.Advance(elem)))
+            {
+                break;
+            }
+
+            if (elem.Class.data != targetClass.data || CLR_TypeFromTk(tk) != TBL_TypeSpec)
+            {
+                continue;
+            }
+
+            CLR_RT_TypeSpec_Index entryIndex;
+            CLR_RT_TypeSpec_Instance entry{};
+            CLR_RT_SignatureParser at{};
+            CLR_RT_GenericTarget entryTarget;
+
+            entryIndex.Set(inst.assembly->assemblyIndex, CLR_DataFromTk(tk));
+
+            if (!entry.InitializeFromIndex(entryIndex))
+            {
+                continue;
+            }
+
+            at.Initialize_TypeSpec(entry);
+
+            // Only the implementing class itself has a context. A generic parent's arguments aren't known here.
+            HRESULT hr =
+                CollectGenericTarget(at, (level == 0 && own != nullptr) ? &own->m_self : nullptr, nullptr, entryTarget);
+
+            if (hr != S_OK || entryTarget.m_count == 0)
+            {
+                openAtOwnLevel = openAtOwnLevel || level == 0;
+                continue;
+            }
+
+            if (entryTarget.m_count == target.m_count &&
+                SameGenericInstanceNodes(entryTarget.m_nodes, target.m_nodes, target.m_count))
+            {
+                return GenericMatch_Same;
+            }
+
+            different = true;
+        }
+
+        level++;
+    } while (inst.SwitchToParent());
+
+    if (different)
+    {
+        return GenericMatch_Different;
+    }
+
+    return openAtOwnLevel ? GenericMatch_NoTypeSpec : GenericMatch_Unresolved;
 }
 
 HRESULT CLR_RT_TypeSystem::AllocateGenericInstanceStatics(CLR_RT_GenericInstance &instance)

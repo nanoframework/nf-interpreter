@@ -4105,7 +4105,24 @@ HRESULT CLR_RT_ExecutionEngine::CastToType(
     }
     else if (g_CLR_RT_ExecutionEngine.IsInstanceOf(ref, assm, tk, isInstInstruction, caller) == true)
     {
-        ;
+        if (isInstInstruction == false && CLR_TypeFromTk(tk) == TBL_TypeSpec)
+        {
+            CLR_RT_SignatureParser parser{};
+            CLR_RT_GenericTarget target;
+            bool hasContext = caller != nullptr && caller->genericType != nullptr;
+
+            parser.Initialize_TypeSpec(assm, assm->GetTypeSpec(CLR_DataFromTk(tk)));
+
+            if (CLR_RT_TypeSystem::CollectGenericTarget(
+                    parser,
+                    hasContext ? caller->genericType : nullptr,
+                    caller,
+                    target) == S_OK &&
+                CLR_RT_TypeSystem::MatchGenericArguments(ref, target) == GenericMatch_Different)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+            }
+        }
     }
     else
     {

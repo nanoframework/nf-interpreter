@@ -198,6 +198,9 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckInvokeArguments
 
     for (int i = 0; i < numArgs && parser.Available() > 0; i++)
     {
+        CLR_RT_SignatureParser parameter = parser;
+        CLR_RT_GenericTarget target;
+
         NANOCLR_CHECK_HRESULT(parser.AdvanceParameter(element));
 
         // MakeCall passes the value, not a reference, so the callee's writes would be lost.
@@ -210,6 +213,11 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckInvokeArguments
 
         // Without a generic context FixCall can't convert a VAR or MVAR argument, not even a null one.
         if (isUnresolved && element.Levels == 0)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+        }
+
+        if (CLR_RT_TypeSystem::CollectGenericTarget(parameter, nullptr, nullptr, target) == S_FALSE)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
         }
@@ -255,6 +263,16 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckInvokeArguments
             CLR_RT_ExecutionEngine::IsCastableTo(sourceType, targetType) == false)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+        }
+
+        if (target.m_count > 0)
+        {
+            CLR_RT_GenericMatch match = CLR_RT_TypeSystem::MatchGenericArguments(arg, target);
+
+            if (match == GenericMatch_Different || match == GenericMatch_NoTypeSpec)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+            }
         }
     }
 
