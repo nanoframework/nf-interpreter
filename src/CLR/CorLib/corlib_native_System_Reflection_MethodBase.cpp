@@ -260,7 +260,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckInvokeArguments
         }
 
         if (FAILED(sourceType.InitializeFromObject(arg)) ||
-            CLR_RT_ExecutionEngine::IsCastableTo(sourceType, targetType) == false)
+            CLR_RT_ExecutionEngine::IsInstanceOf(sourceType, targetType) == false)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
         }

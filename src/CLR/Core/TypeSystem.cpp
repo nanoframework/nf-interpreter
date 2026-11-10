@@ -1619,6 +1619,13 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                                     return false;
                                 }
                             }
+                            else if (NANOCLR_INDEX_IS_VALID(caller->arrayElementType) && genericPosition == 0)
+                            {
+                                // SZArrayHelper methods have no MethodSpec, T is the element type of the array.
+                                data = caller->arrayElementType.data;
+                                assembly = g_CLR_RT_TypeSystem.m_assemblies[caller->arrayElementType.Assembly() - 1];
+                                target = assembly->GetTypeDef(caller->arrayElementType.Type());
+                            }
                             else
                             {
                                 return false;
@@ -5763,7 +5770,10 @@ struct MethodIndexLookup
 };
 
 static const MethodIndexLookup c_MethodIndexLookup[] = {
-#define MIL(nm, type, method) {nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method}
+#define MIL(nm, type, method)                                                                                          \
+    {                                                                                                                  \
+        nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method                                           \
+    }
 
     // clang-format off
 
@@ -8825,7 +8835,19 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
     const CLR_RECORD_METHODDEF *calleeMDR = calleeInst.target;
     CLR_UINT8 calleeArgumentsCount = calleeMDR->argumentsCount;
 
-    while (NANOCLR_INDEX_IS_VALID(clsInst))
+    // A generic interface on an array goes to SZArrayHelper, not to the explicit non-generic members of Array.
+    bool helperOnly = false;
+
+    if (isArrayClass && NANOCLR_INDEX_IS_VALID(g_CLR_RT_WellKnownTypes.SZArrayHelper))
+    {
+        CLR_RT_TypeDef_Instance owner{};
+
+        helperOnly =
+            owner.InitializeFromMethod(calleeInst) && owner.target->genericParamCount > 0 &&
+            (owner.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_Interface;
+    }
+
+    while (!helperOnly && NANOCLR_INDEX_IS_VALID(clsInst))
     {
         CLR_RT_Assembly *targetAssm = clsInst.assembly;
         const CLR_RECORD_TYPEDEF *targetTDR = clsInst.target;
@@ -9577,9 +9599,35 @@ CLR_RT_GenericMatch CLR_RT_TypeSystem::MatchGenericArguments(
             return GenericMatch_Unresolved;
         }
 
-        return (target.m_nodes[1].Class.data == reflex.data.type.data && target.m_nodes[1].Levels + 1 == reflex.levels)
-                   ? GenericMatch_Same
-                   : GenericMatch_Different;
+        if (target.m_nodes[1].Levels + 1 != reflex.levels)
+        {
+            return GenericMatch_Different;
+        }
+
+        if (target.m_nodes[1].Class.data == reflex.data.type.data)
+        {
+            return GenericMatch_Same;
+        }
+
+        // Reference-type elements are covariant, one level only.
+        if (reflex.levels == 1 && target.m_nodes[1].ArgCount == 0 &&
+            (target.m_nodes[1].Class.data == g_CLR_RT_WellKnownTypes.Object.data ||
+             CLR_RT_ExecutionEngine::IsInstanceOf(reflex.data.type, target.m_nodes[1].Class)))
+        {
+            CLR_RT_TypeDef_Instance element{};
+            const CLR_UINT32 valueTypeFlags =
+                CLR_RT_DataTypeLookup::c_OptimizedValueType | CLR_RT_DataTypeLookup::c_ValueType;
+
+            if (element.InitializeFromIndex(reflex.data.type) &&
+                (c_CLR_RT_DataTypeLookup[element.target->dataType].m_flags & valueTypeFlags) == 0 &&
+                (element.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) !=
+                    CLR_RECORD_TYPEDEF::TD_Semantics_Enum)
+            {
+                return GenericMatch_Same;
+            }
+        }
+
+        return GenericMatch_Different;
     }
 
     if ((obj->DataType() != DATATYPE_CLASS && obj->DataType() != DATATYPE_VALUETYPE) ||
