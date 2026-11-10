@@ -419,6 +419,8 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::GetParametersNative_
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*paramInfoElement, paramInfoTypeDef));
         hbObj = paramInfoElement->Dereference();
 
+        bool isClosed = false;
+
         if (NANOCLR_INDEX_IS_VALID(owner))
         {
             CLR_RT_TypeDescriptor desc{};
@@ -430,10 +432,12 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::GetParametersNative_
                 NANOCLR_CHECK_HRESULT(
                     g_CLR_RT_ExecutionEngine.NewObjectFromIndex(paraTypeHB, g_CLR_RT_WellKnownTypes.TypeStatic));
                 paraTypeHB.Dereference()->SetReflection(desc.m_reflex);
+                isClosed = true;
             }
         }
-        // VAR, MVAR and arrays of them have no generic context to resolve, parameter type stays null
-        else if (NANOCLR_INDEX_IS_VALID(paramElement.Class))
+
+        // VAR, MVAR and arrays of them that couldn't be closed have no generic context, parameter type stays null
+        if (!isClosed && NANOCLR_INDEX_IS_VALID(paramElement.Class))
         {
             // get reference to the <ParameterInfo> instance
             CLR_RT_HeapBlock &paraTypeHB = hbObj[ParameterInfo::FIELD___parameterType];

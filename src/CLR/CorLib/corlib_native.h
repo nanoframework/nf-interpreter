@@ -82,7 +82,8 @@ struct Library_corlib_native_System_Reflection_FieldInfo
         CLR_RT_StackFrame &stack,
         CLR_RT_FieldDef_Instance &instFD,
         CLR_RT_TypeDef_Instance &instTD,
-        CLR_RT_HeapBlock *&obj);
+        CLR_RT_HeapBlock *&obj,
+        CLR_RT_TypeSpec_Index *effectiveOwner = nullptr);
 #endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 };
 

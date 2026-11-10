@@ -24,7 +24,10 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::SetValue___VOID__OBJE
     val.Assign(srcVal);
     CLR_RT_ProtectFromGC gc(val);
 
-    NANOCLR_CHECK_HRESULT(Library_corlib_native_System_Reflection_FieldInfo::Initialize(stack, instFD, instTD, obj));
+    ownerTypeSpec.Clear();
+
+    NANOCLR_CHECK_HRESULT(
+        Library_corlib_native_System_Reflection_FieldInfo::Initialize(stack, instFD, instTD, obj, &ownerTypeSpec));
 
     fd = instFD.target;
 
@@ -32,25 +35,6 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::SetValue___VOID__OBJE
         CLR_RECORD_FIELDDEF::FD_NoReflection) // don't allow reflection for fields with NoReflection attribute
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
-    }
-
-    ownerTypeSpec.Clear();
-
-    if (!stack.This()->ReflectionDataConst().GetGenericOwner(ownerTypeSpec) &&
-        (fd->flags & CLR_RECORD_FIELDDEF::FD_Static) == 0)
-    {
-        CLR_RT_HeapBlock *owner = nullptr;
-
-        if (SUCCEEDED(stack.Arg1().EnsureObjectReference(owner)) && owner->IsAGenericInstance())
-        {
-            CLR_RT_TypeSpec_Instance ownerInstance{};
-
-            if (ownerInstance.InitializeFromIndex(owner->ObjectGenericType()) &&
-                ownerInstance.genericTypeDef.data == instTD.data)
-            {
-                ownerTypeSpec = owner->ObjectGenericType();
-            }
-        }
     }
 
     NANOCLR_CHECK_HRESULT(instTDescObj.InitializeFromFieldDefinition(instFD, &ownerTypeSpec));
@@ -151,7 +135,8 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::Initialize(
     CLR_RT_StackFrame &stack,
     CLR_RT_FieldDef_Instance &instFD,
     CLR_RT_TypeDef_Instance &instTD,
-    CLR_RT_HeapBlock *&obj)
+    CLR_RT_HeapBlock *&obj,
+    CLR_RT_TypeSpec_Index *effectiveOwner)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -205,7 +190,23 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::Initialize(
             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }
 
+        if (NANOCLR_INDEX_IS_INVALID(owner) && obj->IsAGenericInstance())
+        {
+            CLR_RT_TypeSpec_Instance ownerInstance{};
+
+            if (ownerInstance.InitializeFromIndex(obj->ObjectGenericType()) &&
+                ownerInstance.genericTypeDef.data == instTD.data)
+            {
+                owner = obj->ObjectGenericType();
+            }
+        }
+
         obj = &obj[instFD.CrossReference().offset];
+    }
+
+    if (effectiveOwner != nullptr)
+    {
+        *effectiveOwner = owner;
     }
 
     NANOCLR_NOCLEANUP();

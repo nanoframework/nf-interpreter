@@ -3012,6 +3012,11 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromFieldDefinition(
     CLR_RT_SignatureParser parser{};
     parser.Initialize_FieldDef(fd.assembly, fd.target);
 
+    if (ownerTypeSpec == nullptr)
+    {
+        NANOCLR_SET_AND_LEAVE(InitializeFromSignatureParser(parser));
+    }
+
     NANOCLR_SET_AND_LEAVE(InitializeFromClosedSignature(parser, ownerTypeSpec));
 
     NANOCLR_NOCLEANUP();
