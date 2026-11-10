@@ -3840,7 +3840,7 @@ void CLR_RT_ExecutionEngine::SignalEvents(CLR_UINT32 events)
 
 //--//
 
-bool CLR_RT_ExecutionEngine::IsInstanceOf(CLR_RT_TypeDescriptor desc, CLR_RT_TypeDescriptor descTarget)
+static bool IsAssignableByHierarchy(CLR_RT_TypeDescriptor desc, CLR_RT_TypeDescriptor descTarget)
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_TypeDef_Instance &inst = desc.m_handlerCls;
@@ -3952,7 +3952,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(CLR_RT_TypeDescriptor desc, CLR_RT_Typ
     return false;
 }
 
-bool CLR_RT_ExecutionEngine::IsCastableTo(CLR_RT_TypeDescriptor desc, CLR_RT_TypeDescriptor descTarget)
+bool CLR_RT_ExecutionEngine::IsInstanceOf(CLR_RT_TypeDescriptor desc, CLR_RT_TypeDescriptor descTarget)
 {
     NATIVE_PROFILE_CLR_CORE();
 
@@ -3967,12 +3967,12 @@ bool CLR_RT_ExecutionEngine::IsCastableTo(CLR_RT_TypeDescriptor desc, CLR_RT_Typ
         {"nanoFramework.System.Collections", "IReadOnlyCollection`1"},
         {"nanoFramework.System.Collections", "IReadOnlyList`1"}};
 
-    if (IsInstanceOf(desc, descTarget))
+    if (IsAssignableByHierarchy(desc, descTarget))
     {
         return true;
     }
 
-    // Arrays convert to these interfaces only on assignment. See CLAUDE.md "Reflection invocation and casts".
+    // See CLAUDE.md "Reflection invocation and casts".
     if ((desc.m_flags & CLR_RT_DataTypeLookup::c_Array) == 0 || descTarget.GetDataType() == DATATYPE_GENERICINST)
     {
         return false;
@@ -4039,7 +4039,6 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
     CLR_RT_HeapBlock &obj,
     CLR_RT_Assembly *assm,
     CLR_UINT32 token,
-    bool isInstInstruction,
     const CLR_RT_MethodDef_Instance *caller)
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -4054,7 +4053,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
     if (FAILED(descTarget.InitializeFromSignatureToken(assm, token, caller)))
         return false;
 
-    return isInstInstruction ? IsInstanceOf(desc, descTarget) : IsCastableTo(desc, descTarget);
+    return IsInstanceOf(desc, descTarget);
 }
 
 /// <summary>
@@ -4103,9 +4102,9 @@ HRESULT CLR_RT_ExecutionEngine::CastToType(
     {
         ;
     }
-    else if (g_CLR_RT_ExecutionEngine.IsInstanceOf(ref, assm, tk, isInstInstruction, caller) == true)
+    else if (g_CLR_RT_ExecutionEngine.IsInstanceOf(ref, assm, tk, caller) == true)
     {
-        if (isInstInstruction == false && CLR_TypeFromTk(tk) == TBL_TypeSpec)
+        if (CLR_TypeFromTk(tk) == TBL_TypeSpec)
         {
             CLR_RT_SignatureParser parser{};
             CLR_RT_GenericTarget target;
@@ -4120,7 +4119,12 @@ HRESULT CLR_RT_ExecutionEngine::CastToType(
                     target) == S_OK &&
                 CLR_RT_TypeSystem::MatchGenericArguments(ref, target) == GenericMatch_Different)
             {
-                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+                if (isInstInstruction == false)
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+                }
+
+                ref.SetObjectReference(nullptr);
             }
         }
     }

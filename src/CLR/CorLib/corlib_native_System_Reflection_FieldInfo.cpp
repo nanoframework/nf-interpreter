@@ -41,7 +41,7 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::SetValue___VOID__OBJE
         CLR_RT_TypeDescriptor descVal{};
 
         // compare with the full field descriptor: its handler class is System.Array for any array field
-        if (FAILED(descVal.InitializeFromObject(val)) || !CLR_RT_ExecutionEngine::IsCastableTo(descVal, instTDescObj))
+        if (FAILED(descVal.InitializeFromObject(val)) || !CLR_RT_ExecutionEngine::IsInstanceOf(descVal, instTDescObj))
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }

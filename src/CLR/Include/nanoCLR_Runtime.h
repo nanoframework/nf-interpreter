@@ -4392,9 +4392,7 @@ struct CLR_RT_ExecutionEngine
         CLR_RT_HeapBlock &obj,
         CLR_RT_Assembly *assm,
         CLR_UINT32 token,
-        bool isInstInstruction,
         const CLR_RT_MethodDef_Instance *caller = nullptr);
-    static bool IsCastableTo(CLR_RT_TypeDescriptor desc, CLR_RT_TypeDescriptor descTarget);
     bool IsInstanceOfToken(CLR_UINT32 token, CLR_RT_HeapBlock &obj, const CLR_RT_MethodDef_Instance &caller);
 
     static HRESULT CastToType(
