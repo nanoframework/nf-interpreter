@@ -356,6 +356,7 @@ struct CLR_RT_TypeDescriptor;
 
 struct CLR_RT_Assembly_Instance;
 struct CLR_RT_TypeSpec_Instance;
+struct CLR_RT_GenericInstance;
 struct CLR_RT_TypeDef_Instance;
 struct CLR_RT_MethodDef_Instance;
 struct CLR_RT_FieldDef_Instance;
@@ -669,6 +670,14 @@ struct CLR_RT_TypeSpec_Index
     {
         return (CLR_INDEX)(data);
     }
+
+    // A closed instantiation with no TypeSpec row, see CLAUDE.md "Runtime-closed instantiations".
+    static const CLR_UINT32 c_RuntimeAssembly = 0xFF;
+
+    bool IsRuntime() const
+    {
+        return (data >> 24) == c_RuntimeAssembly;
+    }
 };
 
 struct CLR_RT_TypeDef_Index
@@ -979,17 +988,9 @@ struct CLR_RT_TypeSpec_CrossReference
     CLR_RT_TypeSpec_Index genericType;
     CLR_RT_TypeDef_Index ownerType;
 
-    /// @brief Array of static fields (one entry per bound static field)
+    /// @brief Instantiation of a closed row, set on first use. Never set for an open row.
     ///
-    CLR_RT_HeapBlock *genericStaticFields;
-
-    /// @brief Array of indices (one entry per bound static field, parallel with genericStaticFields)
-    ///
-    CLR_RT_FieldDef_Index *genericStaticFieldDefs;
-
-    /// @brief Number of static fields
-    ///
-    CLR_UINT32 genericStaticFieldsCount;
+    CLR_RT_GenericInstance *genericInstance;
 };
 
 struct CLR_RT_MethodDef_Patch
@@ -1192,6 +1193,7 @@ struct CLR_RT_SignatureParser
     static const int c_GenericParamType = 6;
     static const int c_MethodSpec = 7;
     static const int c_LocalVar = 8;
+    static const int c_RuntimeTypeSpec = 9;
 
     struct Element
     {
@@ -1237,6 +1239,9 @@ struct CLR_RT_SignatureParser
     /// cumulative enclosing-type arg counts into the signature.
     /// Always reset to false by every Initialize_* function.
     bool m_pendingGenericInst;
+
+    /// @brief Nodes left to read in c_RuntimeTypeSpec mode.
+    CLR_UINT8 m_runtimeNodesLeft;
 
     //--//
 
@@ -1459,17 +1464,9 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     HRESULT ResolveComputeHashes();
     HRESULT ResolveAllocateStaticFields(CLR_RT_HeapBlock *pStaticFields);
     HRESULT ResolveAllocateGenericTypeStaticFields();
-    CLR_RT_HeapBlock *GetGenericStaticField(
-        const CLR_RT_TypeSpec_Index &typeSpecIndex,
-        const CLR_RT_FieldDef_Index &fdIndex);
     CLR_RT_HeapBlock *GetStaticFieldByFieldDef(
         const CLR_RT_FieldDef_Index &fdIndex,
         const CLR_RT_TypeSpec_Index *genericType,
-        const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr,
-        const CLR_RT_MethodDef_Instance *contextMethod = nullptr);
-    HRESULT AllocateGenericStaticFieldsOnDemand(
-        const CLR_RT_TypeSpec_Index &typeSpecIndex,
-        const CLR_RT_TypeDef_Instance &genericTypeDef,
         const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr,
         const CLR_RT_MethodDef_Instance *contextMethod = nullptr);
     HRESULT PrepareForExecution();
@@ -2011,33 +2008,41 @@ extern const CLR_RT_LogicalOpcodeLookup c_CLR_RT_LogicalOpcodeLookup[];
 
 //--//
 
-struct CLR_RT_GenericStaticFieldRecord
+// One canonical element of a closed instantiation, see CLAUDE.md "Runtime-closed instantiations".
+struct CLR_RT_GenericInstanceNode
 {
-    // Unique identifier for this closed generic type
-    CLR_UINT32 m_hash;
-
-    // Storage for static fields
-    CLR_RT_HeapBlock *m_fields;
-
-    // Field definition mapping
-    CLR_RT_FieldDef_Index *m_fieldDefs;
-
-    // Number of static fields
-    CLR_UINT32 m_count;
+    CLR_RT_TypeDef_Index Class;
+    CLR_UINT8 DataType;
+    CLR_UINT8 Levels;
+    CLR_UINT8 ArgCount;
+    CLR_UINT8 Position;
 };
 
-//--//
+CT_ASSERT(sizeof(CLR_RT_GenericInstanceNode) == 8)
 
-struct CLR_RT_GenericCctorExecutionRecord
+struct CLR_RT_GenericInstance
 {
-    // Unique hash identifier for the closed generic type
-    CLR_UINT32 m_hash;
-
-    // Execution state flags
     static const CLR_UINT8 c_Scheduled = 0x01;
     static const CLR_UINT8 c_Executed = 0x02;
 
+    static const int c_MaxNodes = 16;
+
+    CLR_UINT32 m_hash;
+
+    // closed row or runtime index
+    CLR_RT_TypeSpec_Index m_self;
+
+    // row it was first reached through
+    CLR_RT_TypeSpec_Index m_origin;
+
+    CLR_RT_HeapBlock *m_fields;
+    CLR_RT_FieldDef_Index *m_fieldDefs;
+    CLR_UINT16 m_count;
+
     CLR_UINT8 m_flags;
+    CLR_UINT8 m_nodeCount;
+
+    CLR_RT_GenericInstanceNode m_nodes[1];
 };
 
 //--//
@@ -2068,15 +2073,10 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
 
     CLR_RT_MethodDef_Index m_entryPoint;
 
-    // Global registry for generic static fields
-    CLR_RT_GenericStaticFieldRecord *m_genericStaticFields;
-    CLR_UINT32 m_genericStaticFieldsCount;
-    CLR_UINT32 m_genericStaticFieldsMaxCount;
-
-    // Global registry for generic .cctor execution tracking
-    CLR_RT_GenericCctorExecutionRecord *m_genericCctorRegistry;
-    CLR_UINT32 m_genericCctorRegistryCount;
-    CLR_UINT32 m_genericCctorRegistryMaxCount;
+    // Closed generic instantiations: identity, static storage and .cctor state
+    CLR_RT_GenericInstance **m_genericInstances;
+    CLR_UINT32 m_genericInstancesCount;
+    CLR_UINT32 m_genericInstancesMaxCount;
 
     //--//
 
@@ -2185,20 +2185,23 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
     void Dump(const wchar_t *szFileName, bool fNoByteCode);
 #endif
 
-    CLR_RT_GenericStaticFieldRecord *FindOrCreateGenericStaticFields(
-        CLR_UINT32 hash,
-        CLR_RT_Assembly *ownerAssembly,
-        CLR_UINT32 staticFieldCount);
-
-    // Helper to compute hash for a closed generic type
-    static CLR_UINT32 ComputeHashForClosedGenericType(
+    static CLR_RT_GenericInstance *FindOrCreateGenericInstance(
         CLR_RT_TypeSpec_Instance &typeInstance,
         const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr,
         const CLR_RT_MethodDef_Instance *contextMethod = nullptr,
-        bool *isClosed = nullptr);
+        HRESULT *result = nullptr,
+        const CLR_RT_TypeDef_Index *mvarFallback = nullptr);
 
-    // Helper to find or create a generic .cctor execution record by hash
-    static CLR_RT_GenericCctorExecutionRecord *FindOrCreateGenericCctorRecord(CLR_UINT32 hash, bool *created);
+    static CLR_RT_GenericInstance *FindOrCreateGenericInstanceByNodes(
+        const CLR_RT_GenericInstanceNode *nodes,
+        int nodeCount,
+        HRESULT *result = nullptr);
+
+    static CLR_RT_GenericInstance *GetGenericInstance(const CLR_RT_TypeSpec_Index &index);
+
+    static HRESULT AllocateGenericInstanceStatics(CLR_RT_GenericInstance &instance);
+
+    void TruncateGenericInstances(CLR_UINT32 count);
 
     //--//
 
@@ -3231,7 +3234,7 @@ struct CLR_RT_GarbageCollector
 
     //--//
 
-    static void RelocateGenericStaticField(CLR_RT_GenericStaticFieldRecord *field)
+    static void RelocateGenericStaticField(CLR_RT_GenericInstance *field)
     {
         if (field->m_fields)
         {
