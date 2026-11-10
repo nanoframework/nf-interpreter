@@ -2029,7 +2029,7 @@ struct CLR_RT_GenericInstance
 
     CLR_UINT32 m_hash;
 
-    // closed row or runtime index; empty while a VAR or MVAR is still open
+    // closed row or runtime index
     CLR_RT_TypeSpec_Index m_self;
 
     // row it was first reached through
@@ -2192,13 +2192,14 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
         HRESULT *result = nullptr,
         const CLR_RT_TypeDef_Index *mvarFallback = nullptr);
 
+    static CLR_RT_GenericInstance *FindOrCreateGenericInstanceByNodes(
+        const CLR_RT_GenericInstanceNode *nodes,
+        int nodeCount,
+        HRESULT *result = nullptr);
+
     static CLR_RT_GenericInstance *GetGenericInstance(const CLR_RT_TypeSpec_Index &index);
 
-    static HRESULT AllocateGenericInstanceStatics(
-        CLR_RT_GenericInstance &instance,
-        CLR_RT_TypeSpec_Instance &typeInstance,
-        const CLR_RT_TypeSpec_Index *contextTypeSpec,
-        const CLR_RT_MethodDef_Instance *contextMethod);
+    static HRESULT AllocateGenericInstanceStatics(CLR_RT_GenericInstance &instance);
 
     void TruncateGenericInstances(CLR_UINT32 count);
 

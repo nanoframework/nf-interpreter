@@ -2284,6 +2284,8 @@ static HRESULT ResolveGenericTypeParameter(
     CLR_PMETADATA argSignature;
     CLR_PMETADATA argStart;
     bool argIsGenericInst;
+    bool argIsRuntime;
+    int argNodesLeft;
     bool varResolved = false;
     bool mvarResolved = false;
     int outerLevels = 0;
@@ -2303,7 +2305,12 @@ static HRESULT ResolveGenericTypeParameter(
     {
         argSignature = argParser.Signature;
         argStart = argSignature;
-        argIsGenericInst = CLR_UncompressElementType(argStart) == DATATYPE_GENERICINST;
+        argIsRuntime = argParser.Type == CLR_RT_SignatureParser::c_RuntimeTypeSpec;
+        argNodesLeft = argIsRuntime ? argParser.m_runtimeNodesLeft : 0;
+
+        argIsGenericInst = argIsRuntime
+                               ? (argNodesLeft > 0 && ((const CLR_RT_GenericInstanceNode *)argSignature)->ArgCount > 0)
+                               : CLR_UncompressElementType(argStart) == DATATYPE_GENERICINST;
 
         NANOCLR_CHECK_HRESULT(argParser.AdvanceParameter(arg));
 
@@ -2349,10 +2356,33 @@ static HRESULT ResolveGenericTypeParameter(
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
 
-    if (argIsGenericInst && arg.Levels == 0 && arg.DataType == DATATYPE_VALUETYPE &&
-        !argAssembly->FindTypeSpec(argSignature, argTypeSpec))
+    if (argIsGenericInst && arg.Levels == 0 && arg.DataType == DATATYPE_VALUETYPE)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        if (argIsRuntime)
+        {
+            const CLR_RT_GenericInstanceNode *argNodes = (const CLR_RT_GenericInstanceNode *)argSignature;
+            int pending = 1;
+            int count = 0;
+
+            while (pending > 0 && count < argNodesLeft)
+            {
+                pending += argNodes[count++].ArgCount - 1;
+            }
+
+            CLR_RT_GenericInstance *argInstance =
+                pending == 0 ? CLR_RT_TypeSystem::FindOrCreateGenericInstanceByNodes(argNodes, count) : nullptr;
+
+            if (argInstance == nullptr)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            }
+
+            argTypeSpec = argInstance->m_self;
+        }
+        else if (!argAssembly->FindTypeSpec(argSignature, argTypeSpec))
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        }
     }
 
     NANOCLR_NOCLEANUP();

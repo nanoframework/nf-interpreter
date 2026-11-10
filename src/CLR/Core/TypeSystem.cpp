@@ -1909,12 +1909,7 @@ static const CLR_RT_TypeSpec_Index *FindClosedOwnerTypeSpec(
 
     overLimit = hr == CLR_E_NOT_SUPPORTED;
 
-    if (instance == nullptr || !NANOCLR_INDEX_IS_VALID(instance->m_self))
-    {
-        return nullptr;
-    }
-
-    return &instance->m_self;
+    return instance != nullptr ? &instance->m_self : nullptr;
 }
 
 bool CLR_RT_FieldDef_Instance::ResolveToken(
@@ -5975,6 +5970,14 @@ static CLR_RT_HeapBlock *CLR_AllocateGenericStaticFieldStorage(CLR_UINT32 count)
     return fields;
 }
 
+// The blob is an event block, so only an explicit release returns it. See CLAUDE.md "Static fields on generic types".
+static void CLR_ReleaseGenericStaticFieldStorage(CLR_RT_HeapBlock *fields)
+{
+    const CLR_UINT32 headerBlocks = CONVERTFROMSIZETOHEAPBLOCKS(sizeof(CLR_RT_HeapBlock_BinaryBlob));
+
+    ((CLR_RT_HeapBlock_BinaryBlob *)(fields - headerBlocks))->Release(true);
+}
+
 HRESULT CLR_RT_Assembly::ResolveAllocateGenericTypeStaticFields()
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -6012,8 +6015,7 @@ HRESULT CLR_RT_Assembly::ResolveAllocateGenericTypeStaticFields()
             continue;
         }
 
-        NANOCLR_CHECK_HRESULT(
-            CLR_RT_TypeSystem::AllocateGenericInstanceStatics(*instance, genericTypeInstance, nullptr, nullptr));
+        NANOCLR_CHECK_HRESULT(CLR_RT_TypeSystem::AllocateGenericInstanceStatics(*instance));
     }
 
     NANOCLR_CLEANUP();
@@ -6026,10 +6028,7 @@ HRESULT CLR_RT_Assembly::ResolveAllocateGenericTypeStaticFields()
     NANOCLR_CLEANUP_END();
 }
 
-static void ScheduleGenericCctor(
-    CLR_RT_GenericInstance &instance,
-    const CLR_RT_TypeSpec_Instance &typeInstance,
-    const CLR_RT_MethodDef_Instance *contextMethod)
+static void ScheduleGenericCctor(CLR_RT_GenericInstance &instance)
 {
     CLR_RT_TypeDef_Index typeDef = instance.m_nodes[0].Class;
     CLR_RT_Assembly *ownerAsm = g_CLR_RT_TypeSystem.m_assemblies[typeDef.Assembly() - 1];
@@ -6070,25 +6069,9 @@ static void ScheduleGenericCctor(
 
         CLR_RT_HeapBlock_Delegate *dlg = refDlg.DereferenceDelegate();
 
-        // A closed instantiation is its own context. See CLAUDE.md "Generic .cctor lifecycle".
-        if (NANOCLR_INDEX_IS_VALID(instance.m_self))
-        {
-            dlg->m_genericTypeSpec = instance.m_self;
-            dlg->m_genericMethodSpec.Clear();
-        }
-        else
-        {
-            dlg->m_genericTypeSpec.data = typeInstance.data;
-
-            if (contextMethod != nullptr)
-            {
-                dlg->m_genericMethodSpec = contextMethod->methodSpec;
-            }
-            else
-            {
-                dlg->m_genericMethodSpec.Clear();
-            }
-        }
+        // The instantiation is its own context. See CLAUDE.md "Generic .cctor lifecycle".
+        dlg->m_genericTypeSpec = instance.m_self;
+        dlg->m_genericMethodSpec.Clear();
 
         if (SUCCEEDED(g_CLR_RT_ExecutionEngine.m_cctorThread->PushThreadProcDelegate(dlg)))
         {
@@ -6119,8 +6102,15 @@ CLR_RT_HeapBlock *CLR_RT_Assembly::GetStaticFieldByFieldDef(
             return nullptr;
         }
 
-        CLR_RT_GenericInstance *instance =
-            CLR_RT_TypeSystem::FindOrCreateGenericInstance(tsInst, contextTypeSpec, contextMethod);
+        // The owner has to be closed, with the same fallback as ResolveToken, before any storage is used.
+        CLR_RT_GenericInstance *instance = CLR_RT_TypeSystem::FindOrCreateGenericInstance(
+            tsInst,
+            contextTypeSpec,
+            contextMethod,
+            nullptr,
+            contextMethod != nullptr && !NANOCLR_INDEX_IS_VALID(contextMethod->methodSpec)
+                ? &contextMethod->arrayElementType
+                : nullptr);
 
         if (instance == nullptr)
         {
@@ -6129,18 +6119,14 @@ CLR_RT_HeapBlock *CLR_RT_Assembly::GetStaticFieldByFieldDef(
 
         if (instance->m_fields == nullptr)
         {
-            if (FAILED(CLR_RT_TypeSystem::AllocateGenericInstanceStatics(
-                    *instance,
-                    tsInst,
-                    contextTypeSpec,
-                    contextMethod)))
+            if (FAILED(CLR_RT_TypeSystem::AllocateGenericInstanceStatics(*instance)))
             {
                 return nullptr;
             }
 
             if (instance->m_fields != nullptr)
             {
-                ScheduleGenericCctor(*instance, tsInst, contextMethod);
+                ScheduleGenericCctor(*instance);
             }
         }
 
@@ -9105,9 +9091,13 @@ static HRESULT CollectGenericArguments(
                 return CLR_E_WRONG_TYPE;
             }
 
+            // An enum is a VALUETYPE in signatures, while its TypeDef reports the underlying type.
+            bool isEnum = (fallback.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
+                          CLR_RECORD_TYPEDEF::TD_Semantics_Enum;
+
             elem.DataType = mvarFallback->data == g_CLR_RT_WellKnownTypes.Object.data
                                 ? DATATYPE_OBJECT
-                                : (NanoCLRDataType)fallback.target->dataType;
+                                : (isEnum ? DATATYPE_VALUETYPE : (NanoCLRDataType)fallback.target->dataType);
             elem.Class = *mvarFallback;
             elem.GenParamCount = 0;
             substituted = true;
@@ -9269,6 +9259,97 @@ CLR_RT_GenericInstance *CLR_RT_TypeSystem::GetGenericInstance(const CLR_RT_TypeS
     return g_CLR_RT_TypeSystem.m_genericInstances[slot];
 }
 
+// The registry lookup shared by every way of reaching an instantiation. A closed node stream is found or created here.
+static CLR_RT_GenericInstance *RegisterGenericInstance(
+    const CLR_RT_GenericInstanceNode *nodes,
+    int nodeCount,
+    const CLR_RT_TypeSpec_Index &knownRow,
+    const CLR_RT_TypeSpec_Index &origin,
+    HRESULT &hr)
+{
+    CLR_RT_TypeSystem &ts = g_CLR_RT_TypeSystem;
+    CLR_UINT32 hash = SUPPORT_ComputeCRC(nodes, (int)(sizeof(CLR_RT_GenericInstanceNode) * nodeCount), 0);
+
+    hr = S_OK;
+
+    for (CLR_UINT32 i = 0; i < ts.m_genericInstancesCount; i++)
+    {
+        CLR_RT_GenericInstance *candidate = ts.m_genericInstances[i];
+
+        if (candidate->m_hash == hash && candidate->m_nodeCount == nodeCount &&
+            SameGenericInstanceNodes(candidate->m_nodes, nodes, nodeCount))
+        {
+            return candidate;
+        }
+    }
+
+    if (ts.m_genericInstancesCount >= 0xFFFF)
+    {
+        hr = CLR_E_OUT_OF_MEMORY;
+        return nullptr;
+    }
+
+    if (ts.m_genericInstancesCount >= ts.m_genericInstancesMaxCount)
+    {
+        CLR_UINT32 newMax = ts.m_genericInstancesMaxCount == 0 ? 8 : ts.m_genericInstancesMaxCount * 2;
+        CLR_RT_GenericInstance **newArray =
+            (CLR_RT_GenericInstance **)platform_malloc(sizeof(CLR_RT_GenericInstance *) * newMax);
+
+        if (newArray == nullptr)
+        {
+            hr = CLR_E_OUT_OF_MEMORY;
+            return nullptr;
+        }
+
+        if (ts.m_genericInstances != nullptr)
+        {
+            memcpy(newArray, ts.m_genericInstances, sizeof(CLR_RT_GenericInstance *) * ts.m_genericInstancesCount);
+            platform_free(ts.m_genericInstances);
+        }
+
+        ts.m_genericInstances = newArray;
+        ts.m_genericInstancesMaxCount = newMax;
+    }
+
+    CLR_RT_GenericInstance *instance = (CLR_RT_GenericInstance *)platform_malloc(
+        offsetof(CLR_RT_GenericInstance, m_nodes) + sizeof(CLR_RT_GenericInstanceNode) * nodeCount);
+
+    if (instance == nullptr)
+    {
+        hr = CLR_E_OUT_OF_MEMORY;
+        return nullptr;
+    }
+
+    instance->m_hash = hash;
+    instance->m_self.Clear();
+    instance->m_origin.data = origin.data;
+    instance->m_fields = nullptr;
+    instance->m_fieldDefs = nullptr;
+    instance->m_count = 0;
+    instance->m_flags = 0;
+    instance->m_nodeCount = (CLR_UINT8)nodeCount;
+    memcpy(instance->m_nodes, nodes, sizeof(CLR_RT_GenericInstanceNode) * nodeCount);
+
+    if (NANOCLR_INDEX_IS_VALID(knownRow))
+    {
+        instance->m_self.data = knownRow.data;
+    }
+    else if (!FindClosedTypeSpecRow(nodes, nodeCount, instance->m_self))
+    {
+        instance->m_self.Set(CLR_RT_TypeSpec_Index::c_RuntimeAssembly, ts.m_genericInstancesCount);
+    }
+
+    ts.m_genericInstances[ts.m_genericInstancesCount++] = instance;
+
+    if (!instance->m_self.IsRuntime())
+    {
+        CLR_RT_Assembly *selfAssembly = ts.m_assemblies[instance->m_self.Assembly() - 1];
+        selfAssembly->crossReferenceTypeSpec[instance->m_self.TypeSpec()].genericInstance = instance;
+    }
+
+    return instance;
+}
+
 CLR_RT_GenericInstance *CLR_RT_TypeSystem::FindOrCreateGenericInstance(
     CLR_RT_TypeSpec_Instance &typeInstance,
     const CLR_RT_TypeSpec_Index *contextTypeSpec,
@@ -9278,15 +9359,16 @@ CLR_RT_GenericInstance *CLR_RT_TypeSystem::FindOrCreateGenericInstance(
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    CLR_RT_TypeSystem &ts = g_CLR_RT_TypeSystem;
     CLR_RT_GenericInstanceNode nodes[CLR_RT_GenericInstance::c_MaxNodes];
     CLR_RT_TypeSpec_CrossReference *row = nullptr;
+    CLR_RT_TypeSpec_Index knownRow;
     CLR_RT_GenericInstance *instance = nullptr;
     HRESULT hr;
     int nodeCount;
     bool closed;
     bool substituted;
-    CLR_UINT32 hash;
+
+    knownRow.Clear();
 
     if (typeInstance.IsRuntime())
     {
@@ -9322,92 +9404,21 @@ CLR_RT_GenericInstance *CLR_RT_TypeSystem::FindOrCreateGenericInstance(
         goto Done;
     }
 
-    hash = SUPPORT_ComputeCRC(nodes, (int)(sizeof(CLR_RT_GenericInstanceNode) * nodeCount), 0);
-
-    for (CLR_UINT32 i = 0; i < ts.m_genericInstancesCount; i++)
+    // Still open after resolution: there's no instantiation yet, and nothing may use storage for it.
+    if (!closed)
     {
-        CLR_RT_GenericInstance *candidate = ts.m_genericInstances[i];
-
-        if (candidate->m_hash == hash && candidate->m_nodeCount == nodeCount &&
-            SameGenericInstanceNodes(candidate->m_nodes, nodes, nodeCount))
-        {
-            instance = candidate;
-            break;
-        }
+        hr = S_FALSE;
+        goto Done;
     }
 
-    if (instance == nullptr)
+    if (!substituted && row != nullptr && typeInstance.levels == 0)
     {
-        if (ts.m_genericInstancesCount >= 0xFFFF)
-        {
-            hr = CLR_E_OUT_OF_MEMORY;
-            goto Done;
-        }
-
-        if (ts.m_genericInstancesCount >= ts.m_genericInstancesMaxCount)
-        {
-            CLR_UINT32 newMax = ts.m_genericInstancesMaxCount == 0 ? 8 : ts.m_genericInstancesMaxCount * 2;
-            CLR_RT_GenericInstance **newArray =
-                (CLR_RT_GenericInstance **)platform_malloc(sizeof(CLR_RT_GenericInstance *) * newMax);
-
-            if (newArray == nullptr)
-            {
-                hr = CLR_E_OUT_OF_MEMORY;
-                goto Done;
-            }
-
-            if (ts.m_genericInstances != nullptr)
-            {
-                memcpy(newArray, ts.m_genericInstances, sizeof(CLR_RT_GenericInstance *) * ts.m_genericInstancesCount);
-                platform_free(ts.m_genericInstances);
-            }
-
-            ts.m_genericInstances = newArray;
-            ts.m_genericInstancesMaxCount = newMax;
-        }
-
-        instance = (CLR_RT_GenericInstance *)platform_malloc(
-            offsetof(CLR_RT_GenericInstance, m_nodes) + sizeof(CLR_RT_GenericInstanceNode) * nodeCount);
-
-        if (instance == nullptr)
-        {
-            hr = CLR_E_OUT_OF_MEMORY;
-            goto Done;
-        }
-
-        instance->m_hash = hash;
-        instance->m_self.Clear();
-        instance->m_origin.data = typeInstance.data;
-        instance->m_fields = nullptr;
-        instance->m_fieldDefs = nullptr;
-        instance->m_count = 0;
-        instance->m_flags = 0;
-        instance->m_nodeCount = (CLR_UINT8)nodeCount;
-        memcpy(instance->m_nodes, nodes, sizeof(CLR_RT_GenericInstanceNode) * nodeCount);
-
-        if (closed)
-        {
-            if (!substituted && row != nullptr && typeInstance.levels == 0)
-            {
-                instance->m_self.data = typeInstance.data;
-            }
-            else if (!FindClosedTypeSpecRow(nodes, nodeCount, instance->m_self))
-            {
-                instance->m_self.Set(CLR_RT_TypeSpec_Index::c_RuntimeAssembly, ts.m_genericInstancesCount);
-            }
-        }
-
-        ts.m_genericInstances[ts.m_genericInstancesCount++] = instance;
-
-        if (instance->m_self.data != typeInstance.data && NANOCLR_INDEX_IS_VALID(instance->m_self) &&
-            !instance->m_self.IsRuntime())
-        {
-            CLR_RT_Assembly *selfAssembly = ts.m_assemblies[instance->m_self.Assembly() - 1];
-            selfAssembly->crossReferenceTypeSpec[instance->m_self.TypeSpec()].genericInstance = instance;
-        }
+        knownRow.data = typeInstance.data;
     }
 
-    if (row != nullptr && closed && !substituted)
+    instance = RegisterGenericInstance(nodes, nodeCount, knownRow, typeInstance, hr);
+
+    if (instance != nullptr && row != nullptr && !substituted)
     {
         row->genericInstance = instance;
     }
@@ -9421,11 +9432,38 @@ Done:
     return SUCCEEDED(hr) ? instance : nullptr;
 }
 
-HRESULT CLR_RT_TypeSystem::AllocateGenericInstanceStatics(
-    CLR_RT_GenericInstance &instance,
-    CLR_RT_TypeSpec_Instance &typeInstance,
-    const CLR_RT_TypeSpec_Index *contextTypeSpec,
-    const CLR_RT_MethodDef_Instance *contextMethod)
+CLR_RT_GenericInstance *CLR_RT_TypeSystem::FindOrCreateGenericInstanceByNodes(
+    const CLR_RT_GenericInstanceNode *nodes,
+    int nodeCount,
+    HRESULT *result)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    CLR_RT_TypeSpec_Index none;
+    HRESULT hr = S_OK;
+
+    none.Clear();
+
+    for (int i = 0; i < nodeCount; i++)
+    {
+        if (nodes[i].DataType == DATATYPE_VAR || nodes[i].DataType == DATATYPE_MVAR)
+        {
+            hr = CLR_E_WRONG_TYPE;
+        }
+    }
+
+    CLR_RT_GenericInstance *instance =
+        SUCCEEDED(hr) ? RegisterGenericInstance(nodes, nodeCount, none, none, hr) : nullptr;
+
+    if (result != nullptr)
+    {
+        *result = hr;
+    }
+
+    return instance;
+}
+
+HRESULT CLR_RT_TypeSystem::AllocateGenericInstanceStatics(CLR_RT_GenericInstance &instance)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -9435,7 +9473,6 @@ HRESULT CLR_RT_TypeSystem::AllocateGenericInstanceStatics(
     CLR_RT_FieldDef_Index *fieldDefs;
     CLR_RT_HeapBlock *fields;
     CLR_UINT32 count;
-    bool useSelf;
 
     if (instance.m_fields != nullptr)
     {
@@ -9454,10 +9491,7 @@ HRESULT CLR_RT_TypeSystem::AllocateGenericInstanceStatics(
         NANOCLR_SET_AND_LEAVE(S_OK);
     }
 
-    // A closed instantiation is stamped from itself, an open one through the caller's context.
-    useSelf = NANOCLR_INDEX_IS_VALID(instance.m_self);
-
-    if (useSelf && !self.InitializeFromIndex(instance.m_self))
+    if (!self.InitializeFromIndex(instance.m_self))
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
@@ -9492,28 +9526,15 @@ HRESULT CLR_RT_TypeSystem::AllocateGenericInstanceStatics(
     {
         const CLR_RECORD_FIELDDEF *pFd = owner.assembly->GetFieldDef(owner.target->firstStaticField + i);
 
-        if (useSelf)
-        {
-            hr = g_CLR_RT_ExecutionEngine.InitializeReference(fields[i], pFd, owner.assembly, &self);
-        }
-        else
-        {
-            hr = g_CLR_RT_ExecutionEngine.InitializeReference(
-                fields[i],
-                pFd,
-                owner.assembly,
-                &typeInstance,
-                false,
-                contextTypeSpec,
-                contextMethod != nullptr ? &contextMethod->methodSpec : nullptr);
-        }
+        hr = g_CLR_RT_ExecutionEngine.InitializeReference(fields[i], pFd, owner.assembly, &self);
 
         if (FAILED(hr))
         {
-            // The blob isn't referenced any more, so the GC reclaims it.
+            // An event block is never collected, so the blob is released here.
             instance.m_fields = nullptr;
             instance.m_fieldDefs = nullptr;
             instance.m_count = 0;
+            CLR_ReleaseGenericStaticFieldStorage(fields);
             platform_free(fieldDefs);
             NANOCLR_LEAVE();
         }
@@ -9549,6 +9570,11 @@ void CLR_RT_TypeSystem::TruncateGenericInstances(CLR_UINT32 count)
     while (m_genericInstancesCount > count)
     {
         CLR_RT_GenericInstance *instance = m_genericInstances[--m_genericInstancesCount];
+
+        if (instance->m_fields != nullptr)
+        {
+            CLR_ReleaseGenericStaticFieldStorage(instance->m_fields);
+        }
 
         if (instance->m_fieldDefs != nullptr)
         {

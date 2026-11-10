@@ -1046,15 +1046,19 @@ static HRESULT EnsureGenericCctorCompleted(
     CLR_RT_Thread *th)
 {
     // Accept closed instantiations and open ones that resolve to a closed form
-    // via the caller's generic context (VAR/MVAR) — the hash guard below rejects
-    // anything still open after resolution. Non-generic TypeSpecs are ignored.
+    // via the caller's generic context (VAR/MVAR). One still open after resolution
+    // has no instantiation, so there is nothing to run. Non-generic TypeSpecs are ignored.
     if (!NANOCLR_INDEX_IS_VALID(tsInst.genericTypeDef))
     {
         return S_OK;
     }
 
-    CLR_RT_GenericInstance *record =
-        CLR_RT_TypeSystem::FindOrCreateGenericInstance(tsInst, &stack->m_genericTypeSpecStorage, &stack->m_call);
+    CLR_RT_GenericInstance *record = CLR_RT_TypeSystem::FindOrCreateGenericInstance(
+        tsInst,
+        &stack->m_genericTypeSpecStorage,
+        &stack->m_call,
+        nullptr,
+        !NANOCLR_INDEX_IS_VALID(stack->m_call.methodSpec) ? &stack->m_call.arrayElementType : nullptr);
 
     if (record == nullptr)
     {
@@ -1131,17 +1135,12 @@ static HRESULT EnsureGenericCctorCompleted(
         return CLR_E_WRONG_TYPE;
     }
 
-    // A closed instantiation is the .cctor's whole context. See CLAUDE.md "Generic .cctor lifecycle".
-    bool selfContext = NANOCLR_INDEX_IS_VALID(record->m_self);
+    // The instantiation is the .cctor's whole context. See CLAUDE.md "Generic .cctor lifecycle".
     CLR_RT_TypeSpec_Index tsIndex;
-    tsIndex.data = selfContext ? record->m_self.data : tsInst.data;
+    tsIndex.data = record->m_self.data;
 
     // The .cctor must write to the storage of the instantiation that triggered it.
-    HRESULT hrAlloc = CLR_RT_TypeSystem::AllocateGenericInstanceStatics(
-        *record,
-        tsInst,
-        &stack->m_genericTypeSpecStorage,
-        &stack->m_call);
+    HRESULT hrAlloc = CLR_RT_TypeSystem::AllocateGenericInstanceStatics(*record);
 
     if (FAILED(hrAlloc))
     {
@@ -1163,12 +1162,6 @@ static HRESULT EnsureGenericCctorCompleted(
     CLR_RT_StackFrame *cctorFrame = th->CurrentFrame();
     cctorFrame->m_genericTypeSpecStorage = tsIndex;
     cctorFrame->m_call.genericType = &cctorFrame->m_genericTypeSpecStorage;
-
-    // Still open after resolution: the body resolves !0 two-level through the caller's MethodSpec.
-    if (!selfContext)
-    {
-        cctorFrame->m_call.methodSpec = stack->m_call.methodSpec;
-    }
 
     return CLR_E_PROCESS_EXCEPTION;
 }
