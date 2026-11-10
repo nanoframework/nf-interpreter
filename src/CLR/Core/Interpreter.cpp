@@ -2381,13 +2381,11 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     // Set arrayElementType before ResolveToken so generic type resolution can use it
                     calleeInst.arrayElementType = propagatedArrayElementType;
 
-                    // For interface method calls on generic instances, try to extract the closed generic TypeSpec
-                    // from the caller's assembly by matching the object's TypeDef
+                    // Interface call on a generic instance: use the object's own TypeSpec.
+                    // See CLAUDE.md "Generic context propagation".
                     const CLR_RT_TypeSpec_Index *effectiveCallerGeneric = stack->m_call.genericType;
+                    CLR_RT_TypeSpec_Index objTypeSpec{};
 
-                    // TypeSpec search is expensive — gate it on CALLVIRT + no existing
-                    // generic context + MethodRef token. See CLAUDE.md "Generic context
-                    // propagation".
                     if (op == CEE_CALLVIRT && stack->m_call.genericType == nullptr &&
                         CLR_TypeFromTk(arg) == TBL_MethodRef)
                     {
@@ -2414,29 +2412,14 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                     {
                                         CLR_RT_TypeDef_Index objCls = obj->ObjectCls();
 
-                                        // 8. Object has a valid TypeDef
-                                        if (NANOCLR_INDEX_IS_VALID(objCls))
+                                        CLR_RT_TypeSpec_Instance objTs{};
+
+                                        if (NANOCLR_INDEX_IS_VALID(objCls) && obj->IsAGenericInstance() &&
+                                            objTs.InitializeFromIndex(obj->ObjectGenericType()) &&
+                                            objTs.genericTypeDef.data == objCls.data)
                                         {
-                                            // NOW search for a TypeSpec that matches this object's TypeDef
-                                            // This is only needed for closed generic instances like List<int>
-                                            for (int i = 0; i < assm->tablesSize[TBL_TypeSpec]; i++)
-                                            {
-                                                const CLR_RT_TypeSpec_Index *tsIdx =
-                                                    &assm->crossReferenceTypeSpec[i].genericType;
-                                                if (NANOCLR_INDEX_IS_VALID(*tsIdx))
-                                                {
-                                                    CLR_RT_TypeSpec_Instance tsInst{};
-                                                    if (tsInst.InitializeFromIndex(*tsIdx) &&
-                                                        NANOCLR_INDEX_IS_VALID(tsInst.genericTypeDef) &&
-                                                        tsInst.genericTypeDef.data == objCls.data)
-                                                    {
-                                                        // Found a TypeSpec in the caller's assembly that matches the
-                                                        // object's class
-                                                        effectiveCallerGeneric = tsIdx;
-                                                        break;
-                                                    }
-                                                }
-                                            }
+                                            objTypeSpec = obj->ObjectGenericType();
+                                            effectiveCallerGeneric = &objTypeSpec;
                                         }
                                     }
                                 }

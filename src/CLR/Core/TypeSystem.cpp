@@ -3122,7 +3122,9 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
                     }
 
                     CLR_RT_SignatureParser::Element paramElement;
-                    if (callerTypeSpec.GetGenericParam(elem.GenericParamPosition, paramElement))
+                    CLR_RT_SignatureParser paramParser;
+                    if (callerTypeSpec.PositionAtGenericParam(elem.GenericParamPosition, paramParser) &&
+                        SUCCEEDED(paramParser.AdvanceParameter(paramElement)))
                     {
                         if (NANOCLR_INDEX_IS_VALID(paramElement.Class))
                         {
