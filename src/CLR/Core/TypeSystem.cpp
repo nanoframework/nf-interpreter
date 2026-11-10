@@ -120,6 +120,21 @@ void CLR_RT_ReflectionDef_Index::InitializeFromHash(CLR_UINT32 hash)
     data.raw = hash;
 }
 
+bool CLR_RT_ReflectionDef_Index::GetGenericOwner(CLR_RT_TypeSpec_Index &typeSpec) const
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    if ((kind != REFLECTION_METHOD && kind != REFLECTION_CONSTRUCTOR && kind != REFLECTION_FIELD) ||
+        genericOwner == 0 || genericOwner > g_CLR_RT_TypeSystem.m_genericInstancesCount)
+    {
+        return false;
+    }
+
+    typeSpec = g_CLR_RT_TypeSystem.m_genericInstances[genericOwner - 1]->m_self;
+
+    return true;
+}
+
 CLR_UINT64 CLR_RT_ReflectionDef_Index::GetRawData() const
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -225,13 +240,24 @@ void CLR_RT_SignatureParser::Initialize_TypeSpec(CLR_RT_TypeSpec_Instance tsInst
     NATIVE_PROFILE_CLR_CORE();
 
     Assembly = tsInstance.assembly;
-    Signature = Assembly->GetSignature(tsInstance.target->signature);
-
     Type = CLR_RT_SignatureParser::c_TypeSpec;
     Flags = 0;
     ParamCount = 1;
     GenParamCount = 0;
     m_pendingGenericInst = false;
+
+    if (tsInstance.IsRuntime())
+    {
+        CLR_RT_GenericInstance *instance = CLR_RT_TypeSystem::GetGenericInstance(tsInstance);
+
+        Type = CLR_RT_SignatureParser::c_RuntimeTypeSpec;
+        Signature = instance != nullptr ? (CLR_PMETADATA)instance->m_nodes : nullptr;
+        m_runtimeNodesLeft = instance != nullptr ? instance->m_nodeCount : 0;
+
+        return;
+    }
+
+    Signature = Assembly->GetSignature(tsInstance.target->signature);
 }
 //--//
 
@@ -483,6 +509,50 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
 
     switch (Type)
     {
+        case c_RuntimeTypeSpec:
+        {
+            const CLR_RT_GenericInstanceNode *node = (const CLR_RT_GenericInstanceNode *)Signature;
+
+            if (m_runtimeNodesLeft == 0)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            }
+
+            res.DataType = (NanoCLRDataType)node->DataType;
+            res.Class = node->Class;
+
+            if (m_pendingGenericInst)
+            {
+                m_pendingGenericInst = false;
+                res.GenParamCount = node->ArgCount;
+                ParamCount += node->ArgCount;
+            }
+            else if (node->ArgCount > 0)
+            {
+                res.DataType = DATATYPE_GENERICINST;
+                res.Class.Clear();
+                res.Levels = node->Levels;
+                res.IsGenericInst = true;
+                m_pendingGenericInst = true;
+                ParamCount++;
+
+                NANOCLR_SET_AND_LEAVE(S_OK);
+            }
+            else
+            {
+                res.Levels = node->Levels;
+
+                if (res.DataType == DATATYPE_VAR || res.DataType == DATATYPE_MVAR)
+                {
+                    res.GenericParamPosition = node->Position;
+                }
+            }
+
+            Signature = (CLR_PMETADATA)(node + 1);
+            m_runtimeNodesLeft--;
+        }
+        break;
+
         case c_Interfaces:
         {
             CLR_RT_TypeDef_Instance cls{};
@@ -719,6 +789,105 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
     NANOCLR_CLEANUP_END();
 }
 
+// Drain one full GENERICINST sub-tree from `parser` by advancing until Available()
+// converges with `targetAvail`. Relies on the parser's ParamCount bookkeeping rather
+// than counting GenParamCount by hand — see CLAUDE.md "Signature parsing".
+static bool DrainGenericInstSubtree(CLR_RT_SignatureParser &parser, int targetAvail)
+{
+    while (parser.Available() > targetAvail)
+    {
+        CLR_RT_SignatureParser::Element drained{};
+
+        if (FAILED(parser.Advance(drained)))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+HRESULT CLR_RT_SignatureParser::AdvanceParameter(Element &res)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    // See CLAUDE.md "Reflection invocation and casts".
+    int end = Available() - 1;
+
+    NANOCLR_CHECK_HRESULT(Advance(res));
+
+    if (res.DataType == DATATYPE_GENERICINST)
+    {
+        bool isByRef = res.IsByRef;
+        int levels = res.Levels;
+
+        NANOCLR_CHECK_HRESULT(Advance(res));
+
+        res.IsByRef = isByRef;
+        res.Levels = levels;
+    }
+
+    if (!DrainGenericInstSubtree(*this, end))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
+static bool SkipParameters(CLR_RT_SignatureParser &parser, CLR_INT32 count)
+{
+    CLR_RT_SignatureParser::Element skipped;
+
+    for (CLR_INT32 i = 0; i < count; i++)
+    {
+        if (FAILED(parser.AdvanceParameter(skipped)))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+static bool PositionAtGenericParam(
+    CLR_RT_TypeSpec_Instance &typeSpec,
+    CLR_INT32 parameterPosition,
+    CLR_RT_SignatureParser &parser)
+{
+    CLR_RT_SignatureParser::Element element;
+
+    parser.Initialize_TypeSpec(typeSpec);
+
+    if (FAILED(parser.Advance(element)) || element.DataType != DATATYPE_GENERICINST)
+    {
+        return false;
+    }
+
+    if (FAILED(parser.Advance(element)) || parameterPosition >= element.GenParamCount)
+    {
+        return false;
+    }
+
+    return SkipParameters(parser, parameterPosition);
+}
+
+static bool PositionAtGenericArgument(
+    CLR_RT_MethodSpec_Instance &methodSpec,
+    CLR_INT32 argumentPosition,
+    CLR_RT_SignatureParser &parser)
+{
+    parser.Initialize_MethodSignature(&methodSpec);
+
+    if (argumentPosition >= parser.ParamCount)
+    {
+        return false;
+    }
+
+    return SkipParameters(parser, argumentPosition);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool CLR_RT_Assembly_Instance::InitializeFromIndex(const CLR_RT_Assembly_Index &index)
@@ -751,6 +920,27 @@ void CLR_RT_Assembly_Instance::ClearInstance()
 bool CLR_RT_TypeSpec_Instance::InitializeFromIndex(const CLR_RT_TypeSpec_Index &index)
 {
     NATIVE_PROFILE_CLR_CORE();
+    if (index.IsRuntime())
+    {
+        CLR_RT_GenericInstance *instance = CLR_RT_TypeSystem::GetGenericInstance(index);
+
+        if (instance == nullptr)
+        {
+            ClearInstance();
+
+            return false;
+        }
+
+        data = index.data;
+        genericTypeDef = instance->m_nodes[0].Class;
+        assembly = g_CLR_RT_TypeSystem.m_assemblies[genericTypeDef.Assembly() - 1];
+        target = nullptr;
+        levels = 0;
+        cachedElementType.Clear();
+
+        return true;
+    }
+
     if (NANOCLR_INDEX_IS_VALID(index))
     {
         data = index.data;
@@ -887,12 +1077,9 @@ bool CLR_RT_TypeSpec_Instance::ResolveToken(
             }
 
             // Use the resolved parameter's type for this TypeSpec
-            auto &tsi = *caller->genericType;
-            CLR_UINT32 closedTsRow = tsi.TypeSpec();
-
-            Set(caller->genericType->Assembly(), closedTsRow);
-            assembly = g_CLR_RT_TypeSystem.m_assemblies[caller->genericType->Assembly() - 1];
-            target = assembly->GetTypeSpec(closedTsRow);
+            data = caller->genericType->data;
+            assembly = callerTypeSpec.assembly;
+            target = callerTypeSpec.target;
             cachedElementType = paramElement.Class;
         }
         else if (element.DataType == DATATYPE_MVAR)
@@ -946,49 +1133,10 @@ bool CLR_RT_TypeSpec_Instance::IsClosedGenericType()
         return false;
     }
 
-    const int argCount = elem.GenParamCount;
-
-    // Helper: fully consume one type from the parser and report if it contains VAR/MVAR anywhere.
-    auto hasOpenParam = [&](auto &self) -> bool {
-        CLR_RT_SignatureParser::Element a{};
-
-        if (FAILED(parser.Advance(a)))
-        {
-            // treat malformed as open to avoid false "closed"
-            return true;
-        }
-
-        if (a.DataType == DATATYPE_VAR || a.DataType == DATATYPE_MVAR)
-        {
-            return true;
-        }
-
-        if (a.DataType == DATATYPE_GENERICINST)
-        {
-            // Skip the generic type definition and walk all nested arguments.
-            if (FAILED(parser.Advance(a)))
-            {
-                return true;
-            }
-
-            int nested = a.GenParamCount;
-
-            for (int j = 0; j < nested; j++)
-            {
-                if (self(self))
-                {
-                    return true;
-                }
-            }
-        }
-
-        // Arrays are represented via Levels in 'a' and already reduced to their element kind above.
-        return false;
-    };
-
-    for (int i = 0; i < argCount; i++)
+    while (parser.Available() > 0)
     {
-        if (hasOpenParam(hasOpenParam))
+        // treat malformed as open to avoid false "closed"
+        if (FAILED(parser.Advance(elem)) || elem.DataType == DATATYPE_VAR || elem.DataType == DATATYPE_MVAR)
         {
             return false;
         }
@@ -1003,42 +1151,14 @@ bool CLR_RT_TypeSpec_Instance::GetGenericParam(CLR_INT32 parameterPosition, CLR_
     NATIVE_PROFILE_CLR_CORE();
 
     CLR_RT_SignatureParser parser;
-    parser.Initialize_TypeSpec(assembly, target);
 
-    if (FAILED(parser.Advance(element)))
-    {
-        return false;
-    }
+    // A generic argument is returned as its GENERICINST marker, which callers test for.
+    return ::PositionAtGenericParam(*this, parameterPosition, parser) && SUCCEEDED(parser.Advance(element));
+}
 
-    // sanity check for GENERICINST
-    if (element.DataType != DATATYPE_GENERICINST)
-    {
-        return false;
-    }
-
-    // move to type
-    if (FAILED(parser.Advance(element)))
-    {
-        return false;
-    }
-
-    // sanity check for invalid parameter position
-    if (parameterPosition >= element.GenParamCount)
-    {
-        // not enough parameters!!
-        return false;
-    }
-
-    // walk to the requested parameter position
-    for (int32_t i = 0; i <= parameterPosition; i++)
-    {
-        if (FAILED(parser.Advance(element)))
-        {
-            return false;
-        }
-    }
-
-    return true;
+bool CLR_RT_TypeSpec_Instance::PositionAtGenericParam(CLR_INT32 parameterPosition, CLR_RT_SignatureParser &parser)
+{
+    return ::PositionAtGenericParam(*this, parameterPosition, parser);
 }
 
 //////////////////////////////
@@ -1073,12 +1193,18 @@ bool CLR_RT_TypeDef_Instance::InitializeFromReflection(const CLR_RT_ReflectionDe
             break;
 
         case REFLECTION_TYPESPEC:
-            assembly = g_CLR_RT_TypeSystem.m_assemblies[reflex.data.typeSpec.Assembly() - 1];
+        {
+            CLR_RT_TypeSpec_Instance tsInst{};
 
-            const CLR_RECORD_TYPESPEC *ts = assembly->GetTypeSpec(reflex.data.typeSpec.TypeSpec());
+            if (!tsInst.InitializeFromIndex(reflex.data.typeSpec))
+            {
+                return false;
+            }
+
+            assembly = tsInst.assembly;
 
             CLR_RT_SignatureParser parser;
-            parser.Initialize_TypeSpec(assembly, ts);
+            parser.Initialize_TypeSpec(tsInst);
 
             CLR_RT_SignatureParser::Element element;
             if (FAILED(parser.Advance(element)))
@@ -1097,8 +1223,8 @@ bool CLR_RT_TypeDef_Instance::InitializeFromReflection(const CLR_RT_ReflectionDe
                 parser.Advance(element);
             }
 
-            ptr = &element.Class;
-            break;
+            return InitializeFromIndex(element.Class);
+        }
     }
 
     return ptr ? InitializeFromIndex(*ptr) : false;
@@ -1391,9 +1517,11 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                                 }
 
                                 CLR_RT_SignatureParser::Element paramElement;
+                                CLR_RT_SignatureParser paramParser;
 
                                 // Try to map using the generic context (e.g. !T→Int32)
-                                if (callerTypeSpec.GetGenericParam(genericPosition, paramElement) &&
+                                if (PositionAtGenericParam(callerTypeSpec, genericPosition, paramParser) &&
+                                    SUCCEEDED(paramParser.AdvanceParameter(paramElement)) &&
                                     paramElement.DataType != DATATYPE_VAR)
                                 {
                                     // Successfully resolved from generic context
@@ -1459,8 +1587,10 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                                 if (methodSpecInstance.InitializeFromIndex(caller->methodSpec))
                                 {
                                     CLR_RT_SignatureParser::Element element;
+                                    CLR_RT_SignatureParser argParser;
 
-                                    if (!methodSpecInstance.GetGenericArgument(genericPosition, element))
+                                    if (!PositionAtGenericArgument(methodSpecInstance, genericPosition, argParser) ||
+                                        FAILED(argParser.AdvanceParameter(element)))
                                     {
                                         return false;
                                     }
@@ -1474,7 +1604,11 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                                             return false;
                                         }
 
-                                        if (!contextTs.GetGenericParam(element.GenericParamPosition, element))
+                                        if (!PositionAtGenericParam(
+                                                contextTs,
+                                                element.GenericParamPosition,
+                                                argParser) ||
+                                            FAILED(argParser.AdvanceParameter(element)))
                                         {
                                             return false;
                                         }
@@ -1486,6 +1620,11 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                                         return false;
                                     }
 
+                                    if (!NANOCLR_INDEX_IS_VALID(element.Class))
+                                    {
+                                        return false;
+                                    }
+
                                     data = element.Class.data;
                                     assembly = g_CLR_RT_TypeSystem.m_assemblies[element.Class.Assembly() - 1];
                                     target = assembly->GetTypeDef(element.Class.Type());
@@ -1494,6 +1633,13 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                                 {
                                     return false;
                                 }
+                            }
+                            else if (NANOCLR_INDEX_IS_VALID(caller->arrayElementType) && genericPosition == 0)
+                            {
+                                // SZArrayHelper methods have no MethodSpec, T is the element type of the array.
+                                data = caller->arrayElementType.data;
+                                assembly = g_CLR_RT_TypeSystem.m_assemblies[caller->arrayElementType.Assembly() - 1];
+                                target = assembly->GetTypeDef(caller->arrayElementType.Type());
                             }
                             else
                             {
@@ -1604,7 +1750,9 @@ bool CLR_RT_TypeDef_Instance::ResolveNullableType(
             }
 
             CLR_RT_SignatureParser::Element paramElement;
-            if (!callerTypeSpec.GetGenericParam((CLR_UINT32)pos, paramElement))
+            CLR_RT_SignatureParser paramParser;
+            if (!PositionAtGenericParam(callerTypeSpec, pos, paramParser) ||
+                FAILED(paramParser.AdvanceParameter(paramElement)) || !NANOCLR_INDEX_IS_VALID(paramElement.Class))
             {
                 return false;
             }
@@ -1741,6 +1889,51 @@ void CLR_RT_FieldDef_Instance::ClearInstance()
     genericType = nullptr;
 }
 
+static bool IsInstantiatedOverOwnParameters(const CLR_RT_TypeSpec_Instance &typeSpec)
+{
+    CLR_RT_SignatureParser parser{};
+    parser.Initialize_TypeSpec(typeSpec);
+
+    CLR_RT_SignatureParser::Element element{};
+
+    if (FAILED(parser.Advance(element)) || element.DataType != DATATYPE_GENERICINST || FAILED(parser.Advance(element)))
+    {
+        return false;
+    }
+
+    const int argCount = element.GenParamCount;
+
+    for (int i = 0; i < argCount; i++)
+    {
+        if (FAILED(parser.Advance(element)) || element.DataType != DATATYPE_VAR || element.Levels != 0 ||
+            element.GenericParamPosition != i)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+// Closes an open owner in the caller's context, see CLAUDE.md "A closed owner outranks the caller".
+// nullptr when it stays open; overLimit when it can't be represented.
+static const CLR_RT_TypeSpec_Index *FindClosedOwnerTypeSpec(
+    CLR_RT_TypeSpec_Instance &openTsInst,
+    const CLR_RT_MethodDef_Instance *caller,
+    bool &overLimit)
+{
+    HRESULT hr;
+    const CLR_RT_TypeDef_Index *mvarFallback =
+        NANOCLR_INDEX_IS_VALID(caller->methodSpec) ? nullptr : &caller->arrayElementType;
+
+    CLR_RT_GenericInstance *instance =
+        CLR_RT_TypeSystem::FindOrCreateGenericInstance(openTsInst, caller->genericType, caller, &hr, mvarFallback);
+
+    overLimit = hr == CLR_E_NOT_SUPPORTED;
+
+    return instance != nullptr ? &instance->m_self : nullptr;
+}
+
 bool CLR_RT_FieldDef_Instance::ResolveToken(
     CLR_UINT32 tk,
     CLR_RT_Assembly *assm,
@@ -1806,9 +1999,22 @@ bool CLR_RT_FieldDef_Instance::ResolveToken(
                         CLR_RT_TypeSpec_Instance instCaller, instMd;
                         if (instCaller.InitializeFromIndex(*caller->genericType) && instMd.InitializeFromIndex(*mdTS))
                         {
-                            if (instCaller.genericTypeDef.data == instMd.genericTypeDef.data)
+                            // See CLAUDE.md "A closed owner outranks the caller".
+                            if (instCaller.genericTypeDef.data == instMd.genericTypeDef.data &&
+                                !instMd.IsClosedGenericType())
                             {
-                                effectiveTS = caller->genericType;
+                                bool overLimit = false;
+                                const CLR_RT_TypeSpec_Index *closedOwner =
+                                    IsInstantiatedOverOwnParameters(instMd)
+                                        ? nullptr
+                                        : FindClosedOwnerTypeSpec(instMd, caller, overLimit);
+
+                                if (overLimit)
+                                {
+                                    return false;
+                                }
+
+                                effectiveTS = closedOwner != nullptr ? closedOwner : caller->genericType;
                             }
                         }
                     }
@@ -1912,10 +2118,8 @@ bool CLR_RT_MethodDef_Instance::InitializeFromIndex(
     }
 
     // parse the signature to get to the GENERICINST and then the definition token
-    CLR_RT_Assembly *tsAsm = tsInst.assembly;
-    auto tsRec = tsAsm->GetTypeSpec(typeSpec.TypeSpec());
     CLR_RT_SignatureParser parser;
-    parser.Initialize_TypeSpec(tsAsm, tsRec);
+    parser.Initialize_TypeSpec(tsInst);
 
     CLR_RT_SignatureParser::Element elem;
     if (FAILED(parser.Advance(elem)))
@@ -1949,7 +2153,7 @@ bool CLR_RT_MethodDef_Instance::InitializeFromIndex(
             // The resolved parameter is itself a constructed generic instance.
             // Its Class field is not valid; re-parse the TypeSpec to get the underlying generic definition.
             CLR_RT_SignatureParser subParser{};
-            subParser.Initialize_TypeSpec(tsInst.assembly, tsInst.target);
+            subParser.Initialize_TypeSpec(tsInst);
 
             CLR_RT_SignatureParser::Element subElem{};
             if (FAILED(subParser.Advance(subElem)))
@@ -2168,6 +2372,7 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
 
                     // check if MethodRef TypeDef token is the same TypeDef as in that caller
                     bool useCaller = false;
+                    bool callerIsFallback = false;
 
                     if (callerGeneric != nullptr && NANOCLR_INDEX_IS_VALID(*callerGeneric))
                     {
@@ -2208,10 +2413,12 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
 
                                 CLR_UINT32 ownerTypeDefToken = elemOwner.Class.data;
 
-                                if ((callerTypeDefToken == ownerTypeDefToken) && callerTypeDefToken != 0x0)
+                                if ((callerTypeDefToken == ownerTypeDefToken) && callerTypeDefToken != 0x0 &&
+                                    !ownerInst.IsClosedGenericType())
                                 {
                                     // same TypeDef → bind to the caller's closed TypeSpec
-                                    useCaller = true;
+                                    useCaller = IsInstantiatedOverOwnParameters(ownerInst);
+                                    callerIsFallback = !useCaller;
                                 }
                             }
                         }
@@ -2219,211 +2426,34 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
 
                     genericType = useCaller ? callerGeneric : methodOwnerTS;
 
-                    // Open TypeSpec — resolve MVAR via MethodSpec, with arrayElementType
-                    // fallback for runtime-inferred bindings.
-                    if (!useCaller && caller != nullptr &&
-                        (NANOCLR_INDEX_IS_VALID(caller->methodSpec) ||
-                         NANOCLR_INDEX_IS_VALID(caller->arrayElementType)))
+                    // Any other open owner is closed in the caller's context.
+                    if (!useCaller && caller != nullptr)
                     {
                         CLR_RT_TypeSpec_Instance openTsInst{};
                         if (openTsInst.InitializeFromIndex(*methodOwnerTS) &&
                             NANOCLR_INDEX_IS_VALID(openTsInst.genericTypeDef) && !openTsInst.IsClosedGenericType())
                         {
-                            CLR_RT_MethodSpec_Instance msInst{};
-                            bool hasMethodSpec = NANOCLR_INDEX_IS_VALID(caller->methodSpec) &&
-                                                 msInst.InitializeFromIndex(caller->methodSpec);
-                            if (hasMethodSpec || NANOCLR_INDEX_IS_VALID(caller->arrayElementType))
+                            bool overLimit = false;
+                            const CLR_RT_TypeSpec_Index *closedOwner =
+                                FindClosedOwnerTypeSpec(openTsInst, caller, overLimit);
+
+                            if (overLimit)
                             {
-                                // Parse the open TypeSpec to get arg count and resolve each MVAR
-                                CLR_RT_SignatureParser openParser{};
-                                openParser.Initialize_TypeSpec(openTsInst);
+                                return false;
+                            }
 
-                                CLR_RT_SignatureParser::Element openElem{};
-                                if (SUCCEEDED(openParser.Advance(openElem)) &&
-                                    openElem.DataType == DATATYPE_GENERICINST &&
-                                    SUCCEEDED(openParser.Advance(openElem)))
-                                {
-                                    int argCount = openElem.GenParamCount;
-                                    CLR_RT_TypeDef_Index resolvedArgs[8];
-                                    bool allResolved = (argCount > 0 && argCount <= 8);
-
-                                    for (int a = 0; a < argCount && allResolved; a++)
-                                    {
-                                        CLR_RT_SignatureParser::Element argElem{};
-                                        if (FAILED(openParser.Advance(argElem)))
-                                        {
-                                            allResolved = false;
-                                            break;
-                                        }
-
-                                        if (argElem.DataType == DATATYPE_MVAR)
-                                        {
-                                            // MethodSpec is authoritative for MVAR; arrayElementType is only a
-                                            // runtime-inferred fallback and can be stale across generic boundaries.
-                                            if (hasMethodSpec)
-                                            {
-                                                CLR_RT_SignatureParser::Element msArgElem{};
-                                                if (msInst.GetGenericArgument(argElem.GenericParamPosition, msArgElem))
-                                                {
-                                                    if (msArgElem.DataType == DATATYPE_VAR &&
-                                                        caller->genericType != nullptr &&
-                                                        NANOCLR_INDEX_IS_VALID(*caller->genericType))
-                                                    {
-                                                        CLR_RT_TypeSpec_Instance callerTsInst{};
-                                                        CLR_RT_SignatureParser::Element paramElem{};
-                                                        if (callerTsInst.InitializeFromIndex(*caller->genericType) &&
-                                                            callerTsInst.GetGenericParam(
-                                                                msArgElem.GenericParamPosition,
-                                                                paramElem) &&
-                                                            NANOCLR_INDEX_IS_VALID(paramElem.Class))
-                                                        {
-                                                            resolvedArgs[a] = paramElem.Class;
-                                                        }
-                                                        else
-                                                        {
-                                                            allResolved = false;
-                                                        }
-                                                    }
-                                                    else if (NANOCLR_INDEX_IS_VALID(msArgElem.Class))
-                                                    {
-                                                        resolvedArgs[a] = msArgElem.Class;
-                                                    }
-                                                    else
-                                                    {
-                                                        // No concrete Class — fail rather than bind to an empty index.
-                                                        allResolved = false;
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    allResolved = false;
-                                                }
-                                            }
-                                            else if (
-                                                caller != nullptr && NANOCLR_INDEX_IS_VALID(caller->arrayElementType) &&
-                                                argElem.GenericParamPosition == 0)
-                                            {
-                                                resolvedArgs[a] = caller->arrayElementType;
-                                            }
-                                            else
-                                            {
-                                                allResolved = false;
-                                            }
-                                        }
-                                        else if (argElem.DataType == DATATYPE_VAR)
-                                        {
-                                            if (caller->genericType != nullptr &&
-                                                NANOCLR_INDEX_IS_VALID(*caller->genericType))
-                                            {
-                                                CLR_RT_TypeSpec_Instance callerTsInst{};
-                                                CLR_RT_SignatureParser::Element paramElem{};
-                                                if (callerTsInst.InitializeFromIndex(*caller->genericType) &&
-                                                    callerTsInst.GetGenericParam(
-                                                        argElem.GenericParamPosition,
-                                                        paramElem))
-                                                {
-                                                    resolvedArgs[a] = paramElem.Class;
-                                                }
-                                                else
-                                                {
-                                                    allResolved = false;
-                                                }
-                                            }
-                                            else
-                                            {
-                                                allResolved = false;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            resolvedArgs[a] = argElem.Class;
-                                        }
-                                    }
-
-                                    if (allResolved)
-                                    {
-                                        CLR_RT_TypeDef_Index targetGenericDef = openTsInst.genericTypeDef;
-
-                                        // Search caller's assembly first, then all assemblies
-                                        for (int pass = 0; pass < 2; pass++)
-                                        {
-                                            CLR_RT_Assembly **ppASSM = g_CLR_RT_TypeSystem.m_assemblies;
-                                            size_t count = g_CLR_RT_TypeSystem.m_assembliesMax;
-
-                                            for (size_t ai = 0; ai < count; ai++, ppASSM++)
-                                            {
-                                                CLR_RT_Assembly *pASSM = *ppASSM;
-                                                if (!pASSM)
-                                                    continue;
-
-                                                // First pass: only caller's assembly
-                                                if (pass == 0 && pASSM != assm)
-                                                {
-                                                    continue;
-                                                }
-
-                                                // Second pass: skip already-checked assembly
-                                                if (pass == 1 && pASSM == assm)
-                                                {
-                                                    continue;
-                                                }
-
-                                                for (int tsIdx = 0; tsIdx < pASSM->tablesSize[TBL_TypeSpec]; tsIdx++)
-                                                {
-                                                    const CLR_RT_TypeSpec_Index *candidateIdx =
-                                                        &pASSM->crossReferenceTypeSpec[tsIdx].genericType;
-
-                                                    if (!NANOCLR_INDEX_IS_VALID(*candidateIdx))
-                                                    {
-                                                        continue;
-                                                    }
-
-                                                    CLR_RT_TypeSpec_Instance candidateInst{};
-                                                    if (!candidateInst.InitializeFromIndex(*candidateIdx))
-                                                    {
-                                                        continue;
-                                                    }
-
-                                                    if (candidateInst.genericTypeDef.data != targetGenericDef.data)
-                                                    {
-                                                        continue;
-                                                    }
-
-                                                    if (!candidateInst.IsClosedGenericType())
-                                                    {
-                                                        continue;
-                                                    }
-
-                                                    bool argsMatch = true;
-                                                    for (int a = 0; a < argCount && argsMatch; a++)
-                                                    {
-                                                        CLR_RT_SignatureParser::Element candidateArg{};
-                                                        if (candidateInst.GetGenericParam(a, candidateArg))
-                                                        {
-                                                            if (candidateArg.Class.data != resolvedArgs[a].data)
-                                                            {
-                                                                argsMatch = false;
-                                                            }
-                                                        }
-                                                        else
-                                                        {
-                                                            argsMatch = false;
-                                                        }
-                                                    }
-
-                                                    if (argsMatch)
-                                                    {
-                                                        genericType = candidateIdx;
-                                                        goto mvarResolved;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    mvarResolved:;
-                                    }
-                                }
+                            if (closedOwner != nullptr)
+                            {
+                                genericType = closedOwner;
+                                callerIsFallback = false;
                             }
                         }
+                    }
+
+                    // See CLAUDE.md "A closed owner outranks the caller".
+                    if (callerIsFallback && (caller == nullptr || !NANOCLR_INDEX_IS_VALID(caller->methodSpec)))
+                    {
+                        genericType = callerGeneric;
                     }
 
                     // Use the pre-resolved method target from startup instead of a fresh
@@ -2508,9 +2538,29 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
                 }
 
                 // get generic type - guard against invalid container index (CLR_EmptyIndex == 65535)
-                if (ms->container != CLR_EmptyIndex && ms->container < (CLR_UINT16)assembly->tablesSize[TBL_TypeSpec])
+                if (ms->container != CLR_EmptyIndex && ms->container < (CLR_UINT16)assm->tablesSize[TBL_TypeSpec])
                 {
-                    genericType = &assembly->crossReferenceTypeSpec[ms->container].genericType;
+                    genericType = &assm->crossReferenceTypeSpec[ms->container].genericType;
+
+                    CLR_RT_TypeSpec_Instance containerInst{};
+
+                    if (caller != nullptr && containerInst.InitializeFromIndex(*genericType) &&
+                        NANOCLR_INDEX_IS_VALID(containerInst.genericTypeDef) && !containerInst.IsClosedGenericType())
+                    {
+                        bool overLimit = false;
+                        const CLR_RT_TypeSpec_Index *closedOwner =
+                            FindClosedOwnerTypeSpec(containerInst, caller, overLimit);
+
+                        if (overLimit)
+                        {
+                            return false;
+                        }
+
+                        if (closedOwner != nullptr)
+                        {
+                            genericType = closedOwner;
+                        }
+                    }
                 }
                 else
                 {
@@ -2601,13 +2651,16 @@ bool CLR_RT_MethodDef_Instance::GetDeclaringType(CLR_RT_TypeDef_Instance &declTy
     // 2. The method's declaring type is actually generic
     if (genericType && NANOCLR_INDEX_IS_VALID(*genericType) && ownerType.target->genericParamCount > 0)
     {
-        // Look up the assembly that actually owns that TypeSpec
-        auto tsAsm = g_CLR_RT_TypeSystem.m_assemblies[genericType->Assembly() - 1];
-        auto tsRec = tsAsm->GetTypeSpec(genericType->TypeSpec());
+        CLR_RT_TypeSpec_Instance tsInst{};
+
+        if (!tsInst.InitializeFromIndex(*genericType))
+        {
+            return false;
+        }
 
         // Parse the signature so we can peel off [GENERICINST CLASS <type> <args>].
         CLR_RT_SignatureParser parser;
-        parser.Initialize_TypeSpec(tsAsm, tsRec);
+        parser.Initialize_TypeSpec(tsInst);
 
         CLR_RT_SignatureParser::Element elem;
         parser.Advance(elem);
@@ -2742,24 +2795,13 @@ bool CLR_RT_MethodSpec_Instance::GetGenericArgument(
     CLR_RT_SignatureParser::Element &element)
 {
     CLR_RT_SignatureParser parser;
-    parser.Initialize_MethodSignature(this);
 
-    // sanity check
-    if (argumentPosition >= parser.ParamCount)
-    {
-        return false;
-    }
+    return ::PositionAtGenericArgument(*this, argumentPosition, parser) && SUCCEEDED(parser.Advance(element));
+}
 
-    // loop through parameters to find the desired one
-    for (CLR_INT32 i = 0; i <= argumentPosition; i++)
-    {
-        if (FAILED(parser.Advance(element)))
-        {
-            return false;
-        }
-    }
-
-    return true;
+bool CLR_RT_MethodSpec_Instance::PositionAtGenericArgument(CLR_INT32 argumentPosition, CLR_RT_SignatureParser &parser)
+{
+    return ::PositionAtGenericArgument(*this, argumentPosition, parser);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2850,7 +2892,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromTypeSpec(
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
-    parser.Initialize_TypeSpec(inst.assembly, inst.assembly->GetTypeSpec(inst.TypeSpec()));
+    parser.Initialize_TypeSpec(inst);
 
     NANOCLR_SET_AND_LEAVE(InitializeFromSignatureParser(parser, contextTypeSpec));
 
@@ -2960,7 +3002,9 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromGenericType(const CLR_RT_TypeSpec_I
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_TypeDescriptor::InitializeFromFieldDefinition(const CLR_RT_FieldDef_Instance &fd)
+HRESULT CLR_RT_TypeDescriptor::InitializeFromFieldDefinition(
+    const CLR_RT_FieldDef_Instance &fd,
+    const CLR_RT_TypeSpec_Index *ownerTypeSpec)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -2968,7 +3012,86 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromFieldDefinition(const CLR_RT_FieldD
     CLR_RT_SignatureParser parser{};
     parser.Initialize_FieldDef(fd.assembly, fd.target);
 
-    NANOCLR_SET_AND_LEAVE(InitializeFromSignatureParser(parser));
+    if (ownerTypeSpec == nullptr)
+    {
+        NANOCLR_SET_AND_LEAVE(InitializeFromSignatureParser(parser));
+    }
+
+    NANOCLR_SET_AND_LEAVE(InitializeFromClosedSignature(parser, ownerTypeSpec));
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT CLR_RT_TypeDescriptor::InitializeFromClosedSignature(
+    CLR_RT_SignatureParser &parser,
+    const CLR_RT_TypeSpec_Index *ownerTypeSpec)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    CLR_RT_SignatureParser at = parser;
+    CLR_RT_SignatureParser::Element res;
+    CLR_RT_GenericTarget target;
+    CLR_RT_TypeSpec_Instance owner{};
+    int levels;
+    HRESULT collected;
+
+    NANOCLR_CHECK_HRESULT(parser.AdvanceParameter(res));
+
+    if ((ownerTypeSpec == nullptr || !NANOCLR_INDEX_IS_VALID(*ownerTypeSpec)) && res.DataType == DATATYPE_VAR)
+    {
+        NANOCLR_SET_AND_LEAVE(InitializeFromSignatureParser(at));
+    }
+
+    levels = res.Levels;
+
+    if (res.DataType == DATATYPE_VAR)
+    {
+        CLR_RT_SignatureParser argument;
+
+        if (!owner.InitializeFromIndex(*ownerTypeSpec) ||
+            !owner.PositionAtGenericParam(res.GenericParamPosition, argument))
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        }
+
+        at = argument;
+        NANOCLR_CHECK_HRESULT(argument.AdvanceParameter(res));
+        levels += res.Levels;
+        ownerTypeSpec = nullptr;
+    }
+
+    collected = CLR_RT_TypeSystem::CollectGenericTarget(at, ownerTypeSpec, nullptr, target);
+
+    NANOCLR_CHECK_HRESULT(collected);
+
+    if (collected == S_OK && target.m_count > 0 && levels == 0)
+    {
+        CLR_RT_GenericInstance *record =
+            CLR_RT_TypeSystem::FindOrCreateGenericInstanceByNodes(target.m_nodes, target.m_count);
+
+        if (record == nullptr)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        }
+
+        NANOCLR_CHECK_HRESULT(InitializeFromType(res.Class));
+
+        m_reflex.kind = REFLECTION_TYPESPEC;
+        m_reflex.levels = 0;
+        m_reflex.data.typeSpec = record->m_self;
+
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
+
+    NANOCLR_CHECK_HRESULT(InitializeFromType(res.Class));
+
+    if (levels > 0)
+    {
+        m_reflex.levels = (CLR_UINT16)levels;
+
+        ConvertToArray();
+    }
 
     NANOCLR_NOCLEANUP();
 }
@@ -2991,8 +3114,12 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureParser(
 
     if (res.DataType == DATATYPE_GENERICINST)
     {
-        // generic type, advance again to get the type
-        parser.Advance(res);
+        // generic type, advance again to get the type; the array levels are on the marker
+        int levels = res.Levels;
+
+        NANOCLR_CHECK_HRESULT(parser.Advance(res));
+
+        res.Levels = levels;
     }
 
     // Check if this is an unresolved generic parameter (VAR) and we have a context
@@ -3098,7 +3225,9 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
                     }
 
                     CLR_RT_SignatureParser::Element paramElement;
-                    if (callerTypeSpec.GetGenericParam(elem.GenericParamPosition, paramElement))
+                    CLR_RT_SignatureParser paramParser;
+                    if (callerTypeSpec.PositionAtGenericParam(elem.GenericParamPosition, paramParser) &&
+                        SUCCEEDED(paramParser.AdvanceParameter(paramElement)))
                     {
                         if (NANOCLR_INDEX_IS_VALID(paramElement.Class))
                         {
@@ -3195,7 +3324,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
                     (caller && caller->genericType && NANOCLR_INDEX_IS_VALID(*caller->genericType))
                         ? caller->genericType
                         : nullptr;
-                this->InitializeFromSignatureParser(parser, contextTypeSpec);
+                NANOCLR_CHECK_HRESULT(this->InitializeFromSignatureParser(parser, contextTypeSpec));
             }
             else
             {
@@ -3218,7 +3347,9 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
                 }
             }
 
-            if ((elem.DataType == DATATYPE_VAR || elem.DataType == DATATYPE_MVAR) && elem.Levels > 0)
+            if ((elem.DataType == DATATYPE_VAR || elem.DataType == DATATYPE_MVAR ||
+                 elem.DataType == DATATYPE_GENERICINST) &&
+                elem.Levels > 0)
             {
                 m_reflex.levels = elem.Levels;
                 ConvertToArray();
@@ -3839,9 +3970,7 @@ void CLR_RT_Assembly::AssemblyInitialize(CLR_RT_Assembly::Offsets &offsets)
         for (i = 0; i < this->tablesSize[TBL_TypeSpec]; i++, src++, dst++)
         {
             dst->genericType.data = 0;
-            dst->genericStaticFields = nullptr;
-            dst->genericStaticFieldDefs = nullptr;
-            dst->genericStaticFieldsCount = 0;
+            dst->genericInstance = nullptr;
         }
     }
 
@@ -4723,10 +4852,13 @@ HRESULT CLR_RT_Assembly::ResolveMethodRef()
                 methodName);
 #endif
 
-            while (NANOCLR_INDEX_IS_VALID(typeDefInstance))
+            // walk the hierarchy on a copy: typeDefInstance must stay valid for the error message below
+            CLR_RT_TypeDef_Instance searchInstance = typeDefInstance;
+
+            while (NANOCLR_INDEX_IS_VALID(searchInstance))
             {
-                if (typeDefInstance.assembly
-                        ->FindMethodDef(typeDefInstance.target, methodName, this, src->signature, dst->target))
+                if (searchInstance.assembly
+                        ->FindMethodDef(searchInstance.target, methodName, this, src->signature, dst->target))
                 {
                     fGot = true;
 
@@ -4736,34 +4868,31 @@ HRESULT CLR_RT_Assembly::ResolveMethodRef()
                     break;
                 }
 
-                typeDefInstance.SwitchToParent();
+                searchInstance.SwitchToParent();
             }
 
             if (fGot == false)
             {
 #if !defined(BUILD_RTM)
-                const CLR_RECORD_TYPEDEF *qTD = typeDefInstance.target;
-                CLR_RT_Assembly *qASSM = typeDefInstance.assembly;
-
                 CLR_Debug::Printf(
                     "Unknown MethodRef: %s.%s.%s\r\n",
-                    qASSM->GetString(qTD->nameSpace),
-                    qASSM->GetString(qTD->name),
+                    typeDefInstance.assembly->GetString(typeDefInstance.target->nameSpace),
+                    typeDefInstance.assembly->GetString(typeDefInstance.target->name),
                     methodName);
 #endif
 #if defined(VIRTUAL_DEVICE)
                 NANOCLR_CHARMSG_SET_AND_LEAVE(
                     CLR_E_FAIL,
                     "Unknown MethodRef: %s.%s.%s\r\n",
-                    qASSM->GetString(qTD->nameSpace),
-                    qASSM->GetString(qTD->name),
+                    typeDefInstance.assembly->GetString(typeDefInstance.target->nameSpace),
+                    typeDefInstance.assembly->GetString(typeDefInstance.target->name),
                     methodName);
 #else
                 NANOCLR_MSG1_SET_AND_LEAVE(
                     CLR_E_FAIL,
                     L"Unknown MethodRef: %s.%s.%s\r\n",
-                    qASSM->GetString(qTD->NameSpace),
-                    qASSM->GetString(qTD->Name),
+                    typeDefInstance.assembly->GetString(typeDefInstance.target->nameSpace),
+                    typeDefInstance.assembly->GetString(typeDefInstance.target->name),
                     methodName);
 #endif
             }
@@ -4774,7 +4903,7 @@ HRESULT CLR_RT_Assembly::ResolveMethodRef()
                 char *szBuffer = rgBuffer;
                 size_t iBuffer = MAXSTRLEN(rgBuffer);
 
-                g_CLR_RT_TypeSystem.BuildTypeName(typeDefInstance, szBuffer, iBuffer);
+                g_CLR_RT_TypeSystem.BuildTypeName(searchInstance, szBuffer, iBuffer);
                 rgBuffer[MAXSTRLEN(rgBuffer)] = 0;
 
                 CLR_Debug::Printf("        [%04X] Resolving '%s' from '%s'\r\n", i, methodName, rgBuffer);
@@ -5537,7 +5666,8 @@ HRESULT CLR_RT_AppDomainAssembly::CreateInstance(
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    int size = CONVERTFROMSIZETOHEAPBLOCKS(sizeof(CLR_RT_AppDomainAssembly)) + assm->m_iStaticFields;
+    int size = CONVERTFROMSIZETOHEAPBLOCKS(sizeof(CLR_RT_AppDomainAssembly)) + assm->m_iStaticFields +
+               CONVERTFROMSIZETOHEAPBLOCKS(assm->tablesSize[TBL_TypeDef] * sizeof(CLR_UINT8));
 
     appDomainAssembly = EVENTCACHE_EXTRACT_NODE_AS_BLOCKS(
         g_CLR_RT_EventCache,
@@ -5736,7 +5866,10 @@ struct MethodIndexLookup
 };
 
 static const MethodIndexLookup c_MethodIndexLookup[] = {
-#define MIL(nm, type, method) {nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method}
+#define MIL(nm, type, method)                                                                                          \
+    {                                                                                                                  \
+        nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method                                           \
+    }
 
     // clang-format off
 
@@ -5942,203 +6075,118 @@ static CLR_RT_HeapBlock *CLR_AllocateGenericStaticFieldStorage(CLR_UINT32 count)
     return fields;
 }
 
+// The blob is an event block, so only an explicit release returns it. See CLAUDE.md "Static fields on generic types".
+static void CLR_ReleaseGenericStaticFieldStorage(CLR_RT_HeapBlock *fields)
+{
+    const CLR_UINT32 headerBlocks = CONVERTFROMSIZETOHEAPBLOCKS(sizeof(CLR_RT_HeapBlock_BinaryBlob));
+
+    ((CLR_RT_HeapBlock_BinaryBlob *)(fields - headerBlocks))->Release(true);
+}
+
 HRESULT CLR_RT_Assembly::ResolveAllocateGenericTypeStaticFields()
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    // For each TypeSpec that represents a closed generic instantiation, count the static fields bound to it,
-    // and either allocate new CLR_RT_HeapBlock array or reuse existing global registry entry.
-    CLR_RT_TypeSpec_CrossReference *tsCross = this->crossReferenceTypeSpec;
+    // A failed Assembly.Load must leave no instantiation behind that a later load would reuse.
+    CLR_UINT32 firstNew = g_CLR_RT_TypeSystem.m_genericInstancesCount;
     int numTypeSpec = this->tablesSize[TBL_TypeSpec];
 
-    for (int iTs = 0; iTs < numTypeSpec; iTs++, tsCross++)
+    for (int iTs = 0; iTs < numTypeSpec; iTs++)
     {
-        // Skip if already allocated
-        if (tsCross->genericStaticFields != nullptr)
-        {
-            continue;
-        }
-
-        // Build a TypeSpec_Instance from the TypeSpec index to see if this is a closed generic instance
         CLR_RT_TypeSpec_Instance genericTypeInstance{};
         CLR_RT_TypeSpec_Index tsIndex;
+        CLR_RT_TypeDef_Instance owner{};
         tsIndex.Set(assemblyIndex, iTs);
 
-        if (!genericTypeInstance.InitializeFromIndex(tsIndex))
-        {
-            // Can't initialize, skip
-            continue;
-        }
-
-        // Only for closed generic instantiations (have genericTypeDef)
-        if (!genericTypeInstance.IsClosedGenericType())
+        if (!genericTypeInstance.InitializeFromIndex(tsIndex) || !genericTypeInstance.IsClosedGenericType() ||
+            !owner.InitializeFromIndex(genericTypeInstance.genericTypeDef) || owner.target->staticFieldsCount == 0)
         {
             continue;
         }
 
-        // The generic definition TypeDef that declares the static fields:
-        CLR_RT_TypeDef_Index ownerTypeDef = genericTypeInstance.genericTypeDef;
-        CLR_RT_Assembly *ownerAsm = g_CLR_RT_TypeSystem.m_assemblies[ownerTypeDef.Assembly() - 1];
-        const CLR_RECORD_TYPEDEF *ownerTd = ownerAsm->GetTypeDef(ownerTypeDef.Type());
+        CLR_RT_GenericInstance *instance =
+            CLR_RT_TypeSystem::FindOrCreateGenericInstance(genericTypeInstance, nullptr, nullptr, &hr);
 
-#ifdef NANOCLR_INSTANCE_NAMES
-        const char *typeName = ownerAsm->GetString(ownerTd->name);
-#endif
-
-        // Get how many static FieldDefs are bound to the generic type definition
-        uint8_t count = ownerTd->staticFieldsCount;
-
-        if (count == 0)
+        if (instance == nullptr)
         {
-            // No static fields in this generic type definition, nothing to do
+            if (hr == CLR_E_OUT_OF_MEMORY)
+            {
+                NANOCLR_LEAVE();
+            }
+
+            // Over the limits or unresolvable: no storage, its static field accesses throw.
+            hr = S_OK;
             continue;
         }
 
-        // Compute a hash for the closed generic type
-        CLR_UINT32 hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(genericTypeInstance);
-
-        // Look for existing entry in the global registry
-        bool found = false;
-
-        for (CLR_UINT32 i = 0; i < g_CLR_RT_TypeSystem.m_genericStaticFieldsCount; i++)
-        {
-            if (g_CLR_RT_TypeSystem.m_genericStaticFields[i].m_hash == hash)
-            {
-                // Found existing entry, reuse it
-                tsCross->genericStaticFields = g_CLR_RT_TypeSystem.m_genericStaticFields[i].m_fields;
-                tsCross->genericStaticFieldDefs = g_CLR_RT_TypeSystem.m_genericStaticFields[i].m_fieldDefs;
-                tsCross->genericStaticFieldsCount = g_CLR_RT_TypeSystem.m_genericStaticFields[i].m_count;
-
-                found = true;
-                break;
-            }
-        }
-
-        if (found)
-        {
-            // Already found and reused an existing entry
-            continue;
-        }
-
-        // Need to create a new entry
-
-        // Check if we need to expand the array
-        if (g_CLR_RT_TypeSystem.m_genericStaticFieldsCount >= g_CLR_RT_TypeSystem.m_genericStaticFieldsMaxCount)
-        {
-            // Expand the array
-            CLR_UINT32 newMax = g_CLR_RT_TypeSystem.m_genericStaticFieldsMaxCount * 2;
-
-            if (newMax == 0)
-            {
-                // use 4 as the initial minimum size to avoid too many reallocs
-                newMax = 4;
-            }
-
-            CLR_RT_GenericStaticFieldRecord *newArray =
-                (CLR_RT_GenericStaticFieldRecord *)platform_malloc(sizeof(CLR_RT_GenericStaticFieldRecord) * newMax);
-
-            if (newArray == nullptr)
-            {
-                NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-            }
-
-            // Copy existing records
-            if (g_CLR_RT_TypeSystem.m_genericStaticFields != nullptr &&
-                g_CLR_RT_TypeSystem.m_genericStaticFieldsCount > 0)
-            {
-                memcpy(
-                    newArray,
-                    g_CLR_RT_TypeSystem.m_genericStaticFields,
-                    sizeof(CLR_RT_GenericStaticFieldRecord) * g_CLR_RT_TypeSystem.m_genericStaticFieldsCount);
-
-                platform_free(g_CLR_RT_TypeSystem.m_genericStaticFields);
-            }
-
-            g_CLR_RT_TypeSystem.m_genericStaticFields = newArray;
-            g_CLR_RT_TypeSystem.m_genericStaticFieldsMaxCount = newMax;
-        }
-
-        // Allocate mapping for field definitions first: a platform_malloc failure here is trivial to
-        // unwind, whereas the GC heap blob allocated below has no direct release path and would
-        // otherwise leak until the next GC cycle if allocated first and this failed.
-        CLR_RT_FieldDef_Index *fieldDefs =
-            (CLR_RT_FieldDef_Index *)platform_malloc(sizeof(CLR_RT_FieldDef_Index) * count);
-
-        if (fieldDefs == nullptr)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-        }
-
-        // Allocate storage for the static fields
-        CLR_RT_HeapBlock *fields = CLR_AllocateGenericStaticFieldStorage(count);
-
-        if (fields == nullptr)
-        {
-            // Field defs mapping isn't published anywhere yet, so it can be freed directly
-            platform_free(fieldDefs);
-            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-        }
-
-        // Initialize the record
-        CLR_RT_GenericStaticFieldRecord *record =
-            &g_CLR_RT_TypeSystem.m_genericStaticFields[g_CLR_RT_TypeSystem.m_genericStaticFieldsCount++];
-        record->m_hash = hash;
-        record->m_fields = fields;
-        record->m_fieldDefs = fieldDefs;
-        record->m_count = count;
-
-        // Initialize field definitions and values
-        for (CLR_UINT32 i = 0; i < count; i++)
-        {
-            CLR_INDEX fieldIndex = ownerTd->firstStaticField + i;
-            fieldDefs[i].Set(ownerAsm->assemblyIndex, fieldIndex);
-
-            // Initialize the storage using the field definition, resolving VAR against
-            // the closed TypeSpec so bare-VAR fields get the concrete type argument.
-            const CLR_RECORD_FIELDDEF *pFd = ownerAsm->GetFieldDef(fieldIndex);
-            NANOCLR_CHECK_HRESULT(
-                g_CLR_RT_ExecutionEngine.InitializeReference(fields[i], pFd, ownerAsm, &genericTypeInstance));
-        }
-
-        // Link this assembly's cross-reference to the global registry entry
-        tsCross->genericStaticFields = record->m_fields;
-        tsCross->genericStaticFieldDefs = record->m_fieldDefs;
-        tsCross->genericStaticFieldsCount = record->m_count;
+        NANOCLR_CHECK_HRESULT(CLR_RT_TypeSystem::AllocateGenericInstanceStatics(*instance));
     }
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_CLEANUP();
+
+    if (FAILED(hr))
+    {
+        g_CLR_RT_TypeSystem.TruncateGenericInstances(firstNew);
+    }
+
+    NANOCLR_CLEANUP_END();
 }
 
-CLR_RT_HeapBlock *CLR_RT_Assembly::GetGenericStaticField(
-    const CLR_RT_TypeSpec_Index &typeSpecIndex,
-    const CLR_RT_FieldDef_Index &fdIndex)
+static void ScheduleGenericCctor(CLR_RT_GenericInstance &instance)
 {
-    NATIVE_PROFILE_CLR_CORE();
+    CLR_RT_TypeDef_Index typeDef = instance.m_nodes[0].Class;
+    CLR_RT_Assembly *ownerAsm = g_CLR_RT_TypeSystem.m_assemblies[typeDef.Assembly() - 1];
+    const CLR_RECORD_TYPEDEF *ownerTd = ownerAsm->GetTypeDef(typeDef.Type());
+    const CLR_RECORD_METHODDEF *md = ownerAsm->GetMethodDef(ownerTd->firstMethod);
+    int methodCount = ownerTd->virtualMethodCount + ownerTd->instanceMethodCount + ownerTd->staticMethodCount;
 
-    if (!NANOCLR_INDEX_IS_VALID(typeSpecIndex))
+    if (instance.m_flags & (CLR_RT_GenericInstance::c_Scheduled | CLR_RT_GenericInstance::c_Executed))
     {
-        return nullptr;
+        return;
     }
 
-    // Use the assembly that owns the TypeSpec row.
-    CLR_RT_Assembly *tsOwner = g_CLR_RT_TypeSystem.m_assemblies[typeSpecIndex.Assembly() - 1];
-    CLR_RT_TypeSpec_CrossReference &ts = tsOwner->crossReferenceTypeSpec[typeSpecIndex.TypeSpec()];
-
-    if (ts.genericStaticFields == nullptr || ts.genericStaticFieldsCount == 0)
+    for (int i = 0; i < methodCount; i++, md++)
     {
-        return nullptr;
-    }
-
-    for (CLR_UINT32 i = 0; i < ts.genericStaticFieldsCount; i++)
-    {
-        if (ts.genericStaticFieldDefs[i].data == fdIndex.data)
+        if ((md->flags & CLR_RECORD_METHODDEF::MD_StaticConstructor) == 0)
         {
-            return &ts.genericStaticFields[i];
+            continue;
         }
-    }
 
-    return nullptr;
+        CLR_RT_MethodDef_Index cctorIndex;
+        cctorIndex.Set(ownerAsm->assemblyIndex, ownerTd->firstMethod + i);
+
+        if (!g_CLR_RT_ExecutionEngine.EnsureSystemThread(
+                g_CLR_RT_ExecutionEngine.m_cctorThread,
+                ThreadPriority::System_Highest))
+        {
+            return;
+        }
+
+        CLR_RT_HeapBlock refDlg;
+        refDlg.SetObjectReference(nullptr);
+        CLR_RT_ProtectFromGC gc(refDlg);
+
+        if (FAILED(CLR_RT_HeapBlock_Delegate::CreateInstance(refDlg, cctorIndex, nullptr)))
+        {
+            return;
+        }
+
+        CLR_RT_HeapBlock_Delegate *dlg = refDlg.DereferenceDelegate();
+
+        // The instantiation is its own context. See CLAUDE.md "Generic .cctor lifecycle".
+        dlg->m_genericTypeSpec = instance.m_self;
+        dlg->m_genericMethodSpec.Clear();
+
+        if (SUCCEEDED(g_CLR_RT_ExecutionEngine.m_cctorThread->PushThreadProcDelegate(dlg)))
+        {
+            instance.m_flags |= CLR_RT_GenericInstance::c_Scheduled;
+            g_CLR_RT_ExecutionEngine.m_cctorThread->m_terminationCallback =
+                CLR_RT_ExecutionEngine::StaticConstructorTerminationCallback;
+        }
+
+        return;
+    }
 }
 
 CLR_RT_HeapBlock *CLR_RT_Assembly::GetStaticFieldByFieldDef(
@@ -6149,61 +6197,52 @@ CLR_RT_HeapBlock *CLR_RT_Assembly::GetStaticFieldByFieldDef(
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    // If genericType is provided and valid, try per-TypeSpec lookup first
+    // Generic static fields live with their instantiation. See CLAUDE.md "Static fields on generic types".
     if (genericType != nullptr && NANOCLR_INDEX_IS_VALID(*genericType))
     {
-        CLR_RT_HeapBlock *hb = GetGenericStaticField(*genericType, fdIndex);
-
-#if defined(NANOCLR_TRACE_GENERICS)
-        if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Verbose)
-        {
-            CLR_Debug::Printf(
-                "GenericStatic: GetStaticFieldByFieldDef ts=[%04X:%04X] fd=[%04X:%04X] hb=%08X\r\n",
-                genericType->Assembly(),
-                genericType->TypeSpec(),
-                fdIndex.Assembly(),
-                fdIndex.Field(),
-                (uintptr_t)hb);
-        }
-#endif
-
-        if (hb != nullptr)
-        {
-            return hb;
-        }
-
-        // On-demand allocation: if this is an open generic type that needs runtime binding,
-        // allocate static fields now (closed generics should already be allocated via metadata)
         CLR_RT_TypeSpec_Instance tsInst;
-        if (tsInst.InitializeFromIndex(*genericType) && !tsInst.IsClosedGenericType())
+
+        if (!tsInst.InitializeFromIndex(*genericType))
         {
-            // Get the generic type definition to check if it has static fields
-            CLR_RT_TypeDef_Instance genericTypeDef;
-            if (genericTypeDef.InitializeFromIndex(tsInst.genericTypeDef))
+            return nullptr;
+        }
+
+        // The owner has to be closed, with the same fallback as ResolveToken, before any storage is used.
+        CLR_RT_GenericInstance *instance = CLR_RT_TypeSystem::FindOrCreateGenericInstance(
+            tsInst,
+            contextTypeSpec,
+            contextMethod,
+            nullptr,
+            contextMethod != nullptr && !NANOCLR_INDEX_IS_VALID(contextMethod->methodSpec)
+                ? &contextMethod->arrayElementType
+                : nullptr);
+
+        if (instance == nullptr)
+        {
+            return nullptr;
+        }
+
+        if (instance->m_fields == nullptr)
+        {
+            if (FAILED(CLR_RT_TypeSystem::AllocateGenericInstanceStatics(*instance)))
             {
-                if (genericTypeDef.target->staticFieldsCount > 0)
-                {
-                    // Allocate static fields on-demand for this runtime-bound generic
-                    // Pass both context parameters for proper VAR and MVAR resolution
-                    if (SUCCEEDED(AllocateGenericStaticFieldsOnDemand(
-                            *genericType,
-                            genericTypeDef,
-                            contextTypeSpec,
-                            contextMethod)))
-                    {
-                        // Retry the lookup after allocation
-                        hb = GetGenericStaticField(*genericType, fdIndex);
-                        if (hb != nullptr)
-                        {
-                            return hb;
-                        }
-                    }
-                }
+                return nullptr;
+            }
+
+            if (instance->m_fields != nullptr)
+            {
+                ScheduleGenericCctor(*instance);
             }
         }
 
-        // Generic static fields have no assembly-level storage slot; do not fall through
-        // to the assembly static fields path. See CLAUDE.md "Static fields on generic types".
+        for (CLR_UINT32 i = 0; i < instance->m_count; i++)
+        {
+            if (instance->m_fieldDefs[i].data == fdIndex.data)
+            {
+                return &instance->m_fields[i];
+            }
+        }
+
         return nullptr;
     }
 
@@ -6226,270 +6265,6 @@ CLR_RT_HeapBlock *CLR_RT_Assembly::GetStaticFieldByFieldDef(
 #else
     return GetStaticField(fdCross.offset);
 #endif
-}
-
-HRESULT CLR_RT_Assembly::AllocateGenericStaticFieldsOnDemand(
-    const CLR_RT_TypeSpec_Index &typeSpecIndex,
-    const CLR_RT_TypeDef_Instance &genericTypeDef,
-    const CLR_RT_TypeSpec_Index *contextTypeSpec,
-    const CLR_RT_MethodDef_Instance *contextMethod)
-{
-    NATIVE_PROFILE_CLR_CORE();
-    NANOCLR_HEADER();
-
-    CLR_UINT32 hash;
-    CLR_RT_TypeSpec_Instance tsInstance;
-    CLR_RT_Assembly *tsOwner;
-    CLR_RT_TypeSpec_CrossReference *tsCross;
-    CLR_RT_GenericStaticFieldRecord *record;
-    CLR_RT_Assembly *ownerAsm;
-    const CLR_RECORD_TYPEDEF *ownerTd;
-    CLR_UINT32 count;
-    CLR_UINT32 newMax;
-    CLR_RT_GenericStaticFieldRecord *newArray;
-    CLR_RT_HeapBlock *fields;
-    CLR_RT_FieldDef_Index *fieldDefs;
-    const CLR_RECORD_METHODDEF *md;
-    int methodCount;
-
-    // Initialize TypeSpec instance for hash computation
-    if (!tsInstance.InitializeFromIndex(typeSpecIndex))
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-    }
-
-    // Compute hash for this closed generic type, using context to resolve VAR/MVAR if needed
-    // Pass both TypeSpec context (for VAR) and MethodDef context (for MVAR)
-    hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(tsInstance, contextTypeSpec, contextMethod);
-
-    // If hash computation failed (returned 0), we can't create unique storage for this generic type
-    if (hash == 0)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
-    }
-
-    // Check if already allocated (shouldn't happen if called from GetStaticFieldByFieldDef, but be safe)
-    for (CLR_UINT32 i = 0; i < g_CLR_RT_TypeSystem.m_genericStaticFieldsCount; i++)
-    {
-        if (g_CLR_RT_TypeSystem.m_genericStaticFields[i].m_hash == hash)
-        {
-            // Already exists, link to cross-reference if needed
-            tsOwner = g_CLR_RT_TypeSystem.m_assemblies[typeSpecIndex.Assembly() - 1];
-            tsCross = &tsOwner->crossReferenceTypeSpec[typeSpecIndex.TypeSpec()];
-
-            if (tsCross->genericStaticFields == nullptr)
-            {
-                record = &g_CLR_RT_TypeSystem.m_genericStaticFields[i];
-                tsCross->genericStaticFields = record->m_fields;
-                tsCross->genericStaticFieldDefs = record->m_fieldDefs;
-                tsCross->genericStaticFieldsCount = record->m_count;
-            }
-
-            NANOCLR_SET_AND_LEAVE(S_OK);
-        }
-    }
-
-    // Get owner assembly and typedef
-    ownerAsm = genericTypeDef.assembly;
-    ownerTd = genericTypeDef.target;
-    count = ownerTd->staticFieldsCount;
-
-    if (count == 0)
-    {
-        // No static fields to allocate
-        NANOCLR_SET_AND_LEAVE(S_OK);
-    }
-
-    // Grow global registry if needed
-    if (g_CLR_RT_TypeSystem.m_genericStaticFieldsCount >= g_CLR_RT_TypeSystem.m_genericStaticFieldsMaxCount)
-    {
-        newMax = g_CLR_RT_TypeSystem.m_genericStaticFieldsMaxCount + 10;
-        newArray = (CLR_RT_GenericStaticFieldRecord *)platform_malloc(sizeof(CLR_RT_GenericStaticFieldRecord) * newMax);
-
-        if (newArray == nullptr)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-        }
-
-        // Copy existing records
-        if (g_CLR_RT_TypeSystem.m_genericStaticFields != nullptr && g_CLR_RT_TypeSystem.m_genericStaticFieldsCount > 0)
-        {
-            memcpy(
-                newArray,
-                g_CLR_RT_TypeSystem.m_genericStaticFields,
-                sizeof(CLR_RT_GenericStaticFieldRecord) * g_CLR_RT_TypeSystem.m_genericStaticFieldsCount);
-
-            platform_free(g_CLR_RT_TypeSystem.m_genericStaticFields);
-        }
-
-        g_CLR_RT_TypeSystem.m_genericStaticFields = newArray;
-        g_CLR_RT_TypeSystem.m_genericStaticFieldsMaxCount = newMax;
-    }
-
-    // Allocate mapping for field definitions first: a platform_malloc failure here is trivial to
-    // unwind, whereas the GC heap blob allocated below has no direct release path.
-    fieldDefs = (CLR_RT_FieldDef_Index *)platform_malloc(sizeof(CLR_RT_FieldDef_Index) * count);
-
-    if (fieldDefs == nullptr)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-    }
-
-    // Allocate storage for the static fields
-    fields = CLR_AllocateGenericStaticFieldStorage(count);
-
-    if (fields == nullptr)
-    {
-        // Field defs mapping isn't published anywhere yet, so it can be freed directly
-        platform_free(fieldDefs);
-        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-    }
-
-    // Initialize the record in global registry
-    record = &g_CLR_RT_TypeSystem.m_genericStaticFields[g_CLR_RT_TypeSystem.m_genericStaticFieldsCount++];
-    record->m_hash = hash;
-    record->m_fields = fields;
-    record->m_fieldDefs = fieldDefs;
-    record->m_count = count;
-
-    // Initialize field definitions and values
-    for (CLR_UINT32 i = 0; i < count; i++)
-    {
-        CLR_INDEX fieldIndex = ownerTd->firstStaticField + i;
-        fieldDefs[i].Set(ownerAsm->assemblyIndex, fieldIndex);
-
-        // Initialize the storage using the field definition
-        const CLR_RECORD_FIELDDEF *pFd = ownerAsm->GetFieldDef(fieldIndex);
-
-#if defined(NANOCLR_TRACE_GENERICS)
-        if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Verbose)
-        {
-            CLR_Debug::Printf(
-                "GenericStatic: AllocateGenericStaticFieldsOnDemand field[%u]='%s' ptr=%08X\r\n",
-                i,
-                ownerAsm->GetString(pFd->name),
-                (uintptr_t)&fields[i]);
-        }
-#endif
-
-        // Resolve VAR against the closed TypeSpec so bare-VAR fields get the concrete type argument.
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.InitializeReference(fields[i], pFd, ownerAsm, &tsInstance));
-    }
-
-    // Link this assembly's cross-reference to the global registry entry
-    tsOwner = g_CLR_RT_TypeSystem.m_assemblies[typeSpecIndex.Assembly() - 1];
-    tsCross = &tsOwner->crossReferenceTypeSpec[typeSpecIndex.TypeSpec()];
-
-    tsCross->genericStaticFields = record->m_fields;
-    tsCross->genericStaticFieldDefs = record->m_fieldDefs;
-    tsCross->genericStaticFieldsCount = record->m_count;
-
-    // Now that static fields are allocated, schedule the static constructor to initialize them
-    // Find the .cctor method for the generic type definition
-    md = ownerAsm->GetMethodDef(ownerTd->firstMethod);
-    methodCount = ownerTd->virtualMethodCount + ownerTd->instanceMethodCount + ownerTd->staticMethodCount;
-
-    for (int i = 0; i < methodCount; i++, md++)
-    {
-        if (md->flags & CLR_RECORD_METHODDEF::MD_StaticConstructor)
-        {
-            // Found the .cctor - check execution status
-            CLR_RT_GenericCctorExecutionRecord *cctorRecord =
-                g_CLR_RT_TypeSystem.FindOrCreateGenericCctorRecord(hash, nullptr);
-
-            if (cctorRecord != nullptr)
-            {
-                // Check if .cctor is already executed
-                if (cctorRecord->m_flags & CLR_RT_GenericCctorExecutionRecord::c_Executed)
-                {
-                    // .cctor already completed - fields should be initialized
-                    NANOCLR_SET_AND_LEAVE(S_OK);
-                }
-
-                // Check if .cctor is already scheduled
-                if (cctorRecord->m_flags & CLR_RT_GenericCctorExecutionRecord::c_Scheduled)
-                {
-                    // .cctor is already scheduled/running - nothing more to do
-                    // The caller will retry after the .cctor completes
-                    NANOCLR_SET_AND_LEAVE(S_OK);
-                }
-
-                // Need to schedule the .cctor - mark it as scheduled
-                cctorRecord->m_flags |= CLR_RT_GenericCctorExecutionRecord::c_Scheduled;
-            }
-
-            // Schedule the .cctor to run
-            CLR_RT_MethodDef_Index cctorIndex;
-            cctorIndex.Set(ownerAsm->assemblyIndex, ownerTd->firstMethod + i);
-
-            // Ensure the .cctor thread exists (it may have been destroyed after initial startup)
-            if (g_CLR_RT_ExecutionEngine.EnsureSystemThread(
-                    g_CLR_RT_ExecutionEngine.m_cctorThread,
-                    ThreadPriority::System_Highest))
-            {
-                // Create delegate for the static constructor
-                CLR_RT_HeapBlock refDlg;
-                refDlg.SetObjectReference(nullptr);
-                CLR_RT_ProtectFromGC gc(refDlg);
-
-                if (SUCCEEDED(CLR_RT_HeapBlock_Delegate::CreateInstance(refDlg, cctorIndex, nullptr)))
-                {
-                    CLR_RT_HeapBlock_Delegate *dlg = refDlg.DereferenceDelegate();
-
-                    // Store the closed TypeSpec (NOT the caller's context) for VAR resolution
-                    // inside the .cctor. See CLAUDE.md "Generic .cctor lifecycle".
-                    dlg->m_genericTypeSpec = typeSpecIndex;
-
-                    // Store the caller's MethodSpec for MVAR resolution inside the .cctor.
-                    if (contextMethod != nullptr)
-                    {
-                        dlg->m_genericMethodSpec = contextMethod->methodSpec;
-                    }
-                    else
-                    {
-                        dlg->m_genericMethodSpec.Clear();
-                    }
-
-                    // Push to the .cctor thread and schedule for execution
-                    if (SUCCEEDED(g_CLR_RT_ExecutionEngine.m_cctorThread->PushThreadProcDelegate(dlg)))
-                    {
-                        g_CLR_RT_ExecutionEngine.m_cctorThread->m_terminationCallback =
-                            CLR_RT_ExecutionEngine::StaticConstructorTerminationCallback;
-
-                        // The .cctor is now scheduled and will run when this thread yields
-                        // The caller will get nullptr and should reschedule to allow .cctor to complete
-                    }
-                    else
-                    {
-                        // Failed to schedule - clear the flag
-                        if (cctorRecord != nullptr)
-                        {
-                            cctorRecord->m_flags &= ~CLR_RT_GenericCctorExecutionRecord::c_Scheduled;
-                        }
-                    }
-                }
-                else
-                {
-                    // Failed to create delegate - clear the flag
-                    if (cctorRecord != nullptr)
-                    {
-                        cctorRecord->m_flags &= ~CLR_RT_GenericCctorExecutionRecord::c_Scheduled;
-                    }
-                }
-            }
-            else
-            {
-                // Failed to ensure thread - clear the flag
-                if (cctorRecord != nullptr)
-                {
-                    cctorRecord->m_flags &= ~CLR_RT_GenericCctorExecutionRecord::c_Scheduled;
-                }
-            }
-            break;
-        }
-    }
-
-    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_Assembly::PrepareForExecution()
@@ -7295,9 +7070,9 @@ void CLR_RT_TypeSystem::Relocate()
 
     // The registry is global, so this runs once per relocation pass, never per assembly:
     // see CLAUDE.md "Static fields on generic types".
-    for (CLR_UINT32 i = 0; i < m_genericStaticFieldsCount; i++)
+    for (CLR_UINT32 i = 0; i < m_genericInstancesCount; i++)
     {
-        CLR_RT_GarbageCollector::RelocateGenericStaticField(&m_genericStaticFields[i]);
+        CLR_RT_GarbageCollector::RelocateGenericStaticField(m_genericInstances[i]);
     }
 }
 
@@ -7309,15 +7084,9 @@ void CLR_RT_TypeSystem::TypeSystem_Initialize()
     NANOCLR_CLEAR(g_CLR_RT_TypeSystem);
     NANOCLR_CLEAR(g_CLR_RT_WellKnownTypes);
 
-    // Initialize generic static field registry
-    g_CLR_RT_TypeSystem.m_genericStaticFields = nullptr;
-    g_CLR_RT_TypeSystem.m_genericStaticFieldsCount = 0;
-    g_CLR_RT_TypeSystem.m_genericStaticFieldsMaxCount = 0;
-
-    // Initialize generic .cctor execution registry
-    g_CLR_RT_TypeSystem.m_genericCctorRegistry = nullptr;
-    g_CLR_RT_TypeSystem.m_genericCctorRegistryCount = 0;
-    g_CLR_RT_TypeSystem.m_genericCctorRegistryMaxCount = 0;
+    g_CLR_RT_TypeSystem.m_genericInstances = nullptr;
+    g_CLR_RT_TypeSystem.m_genericInstancesCount = 0;
+    g_CLR_RT_TypeSystem.m_genericInstancesMaxCount = 0;
 }
 
 void CLR_RT_TypeSystem::TypeSystem_Cleanup()
@@ -7333,32 +7102,13 @@ void CLR_RT_TypeSystem::TypeSystem_Cleanup()
 
     m_assembliesMax = 0;
 
-    // Clean up generic static field registry
-    if (m_genericStaticFields != nullptr)
-    {
-        // Free individual field definitions memory
-        for (CLR_UINT32 i = 0; i < m_genericStaticFieldsCount; i++)
-        {
-            if (m_genericStaticFields[i].m_fieldDefs != nullptr)
-            {
-                platform_free(m_genericStaticFields[i].m_fieldDefs);
-            }
-        }
+    TruncateGenericInstances(0);
 
-        // Free the entire array
-        platform_free(m_genericStaticFields);
-        m_genericStaticFields = nullptr;
-        m_genericStaticFieldsCount = 0;
-        m_genericStaticFieldsMaxCount = 0;
-    }
-
-    // Clean up generic .cctor execution registry
-    if (m_genericCctorRegistry != nullptr)
+    if (m_genericInstances != nullptr)
     {
-        platform_free(m_genericCctorRegistry);
-        m_genericCctorRegistry = nullptr;
-        m_genericCctorRegistryCount = 0;
-        m_genericCctorRegistryMaxCount = 0;
+        platform_free(m_genericInstances);
+        m_genericInstances = nullptr;
+        m_genericInstancesMaxCount = 0;
     }
 }
 
@@ -8180,7 +7930,7 @@ bool CLR_RT_TypeSystem::MatchSignatureElement(
             return false;
         }
 
-        if (!CLR_RT_ExecutionEngine::IsInstanceOf(descRight, descLeft, false))
+        if (!CLR_RT_ExecutionEngine::IsInstanceOf(descRight, descLeft))
         {
             return false;
         }
@@ -9107,24 +8857,6 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
     return false;
 }
 
-// Drain one full GENERICINST sub-tree from `parser` by advancing until Available()
-// converges with `targetAvail`. Relies on the parser's ParamCount bookkeeping rather
-// than counting GenParamCount by hand — see CLAUDE.md "Signature parsing".
-static bool DrainGenericInstSubtree(CLR_RT_SignatureParser &parser, int targetAvail)
-{
-    while (parser.Available() > targetAvail)
-    {
-        CLR_RT_SignatureParser::Element drained{};
-
-        if (FAILED(parser.Advance(drained)))
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-
 static bool MatchSignatureForVirtualDispatch(CLR_RT_SignatureParser &parserLeft, CLR_RT_SignatureParser &parserRight)
 {
     if (parserLeft.Type != parserRight.Type)
@@ -9199,7 +8931,19 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
     const CLR_RECORD_METHODDEF *calleeMDR = calleeInst.target;
     CLR_UINT8 calleeArgumentsCount = calleeMDR->argumentsCount;
 
-    while (NANOCLR_INDEX_IS_VALID(clsInst))
+    // A generic interface on an array goes to SZArrayHelper, not to the explicit non-generic members of Array.
+    bool helperOnly = false;
+
+    if (isArrayClass && NANOCLR_INDEX_IS_VALID(g_CLR_RT_WellKnownTypes.SZArrayHelper))
+    {
+        CLR_RT_TypeDef_Instance owner{};
+
+        helperOnly =
+            owner.InitializeFromMethod(calleeInst) && owner.target->genericParamCount > 0 &&
+            (owner.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_Interface;
+    }
+
+    while (!helperOnly && NANOCLR_INDEX_IS_VALID(clsInst))
     {
         CLR_RT_Assembly *targetAssm = clsInst.assembly;
         const CLR_RECORD_TYPEDEF *targetTDR = clsInst.target;
@@ -9330,296 +9074,954 @@ CLR_UINT32 CLR_RT_TypeSystem::MapDataTypeToElementType(NanoCLRDataType dt)
     return c_CLR_RT_DataTypeLookup[dt].m_convertToElementType;
 }
 
-CLR_RT_GenericStaticFieldRecord *CLR_RT_TypeSystem::FindOrCreateGenericStaticFields(
-    CLR_UINT32 hash,
-    CLR_RT_Assembly *ownerAssembly,
-    CLR_UINT32 staticFieldCount)
+// See CLAUDE.md "Generic type identity hash" and "Runtime-closed instantiations".
+static const int c_MaxGenericNestingDepth = 4;
+
+static bool AppendGenericInstanceNode(
+    CLR_RT_GenericInstanceNode *nodes,
+    int &nodeCount,
+    const CLR_RT_SignatureParser::Element &elem,
+    int levels)
 {
-    NATIVE_PROFILE_CLR_CORE();
-
-    // Check if we already have this hash in the registry
-    for (CLR_UINT32 i = 0; i < m_genericStaticFieldsCount; i++)
+    if (nodeCount >= CLR_RT_GenericInstance::c_MaxNodes || levels > 0xFF || elem.GenParamCount > 0xFF)
     {
-        if (m_genericStaticFields[i].m_hash == hash)
-        {
-            return &m_genericStaticFields[i];
-        }
+        return false;
     }
 
-    // Need to create a new entry
+    CLR_RT_GenericInstanceNode &node = nodes[nodeCount++];
+    bool isParameter = elem.DataType == DATATYPE_VAR || elem.DataType == DATATYPE_MVAR;
 
-    // First, ensure we have room in the registry
-    if (m_genericStaticFieldsCount >= m_genericStaticFieldsMaxCount)
-    {
-        // Need to grow the registry
-        CLR_UINT32 newMax = m_genericStaticFieldsMaxCount * 2;
-        if (newMax == 0)
-            newMax = 16; // Initial size
+    node.Class.data = isParameter ? 0 : elem.Class.data;
+    node.DataType = (CLR_UINT8)elem.DataType;
+    node.Levels = (CLR_UINT8)levels;
+    node.ArgCount = (CLR_UINT8)elem.GenParamCount;
+    node.Position = isParameter ? (CLR_UINT8)elem.GenericParamPosition : 0;
 
-        CLR_RT_GenericStaticFieldRecord *newArray =
-            (CLR_RT_GenericStaticFieldRecord *)platform_malloc(sizeof(CLR_RT_GenericStaticFieldRecord) * newMax);
-
-        if (newArray == nullptr)
-        {
-            return nullptr; // Out of memory
-        }
-
-        // Copy existing records
-        if (m_genericStaticFields != nullptr && m_genericStaticFieldsCount > 0)
-        {
-            memcpy(
-                newArray,
-                m_genericStaticFields,
-                sizeof(CLR_RT_GenericStaticFieldRecord) * m_genericStaticFieldsCount);
-
-            platform_free(m_genericStaticFields);
-        }
-
-        m_genericStaticFields = newArray;
-        m_genericStaticFieldsMaxCount = newMax;
-    }
-
-    // Find the generic type definition by hash
-    CLR_RT_TypeDef_Index typeDef = ownerAssembly->GenericDefFromHash(hash);
-    if (!NANOCLR_INDEX_IS_VALID(typeDef))
-    {
-        // Could not find the type definition
-        return nullptr;
-    }
-
-    // Get the type definition record
-    const CLR_RECORD_TYPEDEF *ownerTd = ownerAssembly->GetTypeDef(typeDef.Type());
-
-    // Allocate mapping for field definitions first using platform_malloc: if this fails there's
-    // nothing to unwind. Doing this before the GC heap blob avoids leaking GC-managed memory
-    // that has no direct release path.
-    CLR_RT_FieldDef_Index *pFieldDefs =
-        (CLR_RT_FieldDef_Index *)platform_malloc(sizeof(CLR_RT_FieldDef_Index) * staticFieldCount);
-
-    if (pFieldDefs == nullptr)
-    {
-        return nullptr; // Out of memory
-    }
-
-    // Allocate storage for the static fields
-    CLR_RT_HeapBlock *pFields = CLR_AllocateGenericStaticFieldStorage(staticFieldCount);
-
-    if (pFields == nullptr)
-    {
-        // Field defs mapping isn't published anywhere yet, so it can be freed directly
-        platform_free(pFieldDefs);
-        return nullptr; // Out of memory
-    }
-
-    // Initialize the record
-    CLR_RT_GenericStaticFieldRecord *record = &m_genericStaticFields[m_genericStaticFieldsCount++];
-    record->m_hash = hash;
-    record->m_fields = pFields;
-    record->m_fieldDefs = pFieldDefs;
-    record->m_count = staticFieldCount;
-
-    // Initialize field definitions and values
-    for (CLR_UINT32 i = 0; i < staticFieldCount; i++)
-    {
-        CLR_INDEX fieldIndex = ownerTd->firstStaticField + i;
-        pFieldDefs[i].Set(ownerAssembly->assemblyIndex, fieldIndex);
-
-        // Initialize the storage using the field definition
-        const CLR_RECORD_FIELDDEF *pFd = ownerAssembly->GetFieldDef(fieldIndex);
-        g_CLR_RT_ExecutionEngine.InitializeReference(pFields[i], pFd, ownerAssembly);
-    }
-
-    return record;
+    return true;
 }
 
-CLR_UINT32 CLR_RT_TypeSystem::ComputeHashForClosedGenericType(
-    CLR_RT_TypeSpec_Instance &typeInstance,
+// S_OK, CLR_E_NOT_SUPPORTED over the limits, CLR_E_WRONG_TYPE when a position doesn't resolve.
+static HRESULT CollectGenericArguments(
+    const CLR_RT_SignatureParser &rootParser,
     const CLR_RT_TypeSpec_Index *contextTypeSpec,
-    const CLR_RT_MethodDef_Instance *contextMethod)
+    const CLR_RT_MethodDef_Instance *contextMethod,
+    int argCount,
+    const CLR_RT_TypeDef_Index *mvarFallback,
+    CLR_RT_GenericInstanceNode *nodes,
+    int &nodeCount,
+    bool &isClosed,
+    bool &substituted)
 {
-    CLR_UINT32 hash = 0;
-    int argCount;
-    CLR_INDEX genericPosition;
+    struct SubstitutionFrame
+    {
+        CLR_RT_SignatureParser Parser;
+        int End;
+        int OuterLevels;
+        bool VarResolved;
+        bool MvarResolved;
+    };
 
-    // Start with the generic type definition
-    hash = SUPPORT_ComputeCRC(&typeInstance.genericTypeDef.data, sizeof(CLR_UINT32), hash);
-
-    // Parse the TypeSpec signature to extract generic arguments
-    CLR_RT_SignatureParser parser;
-    parser.Initialize_TypeSpec(typeInstance);
-
+    // The signature, plus one substitution each for VAR and MVAR.
+    SubstitutionFrame frames[3];
+    CLR_UINT8 remainingArgs[c_MaxGenericNestingDepth];
     CLR_RT_SignatureParser::Element elem;
+    int top = 0;
+    int depth = 1;
 
-    // Advance to the generic instance marker
-    if (FAILED(parser.Advance(elem)) || elem.DataType != DATATYPE_GENERICINST)
+    frames[0].Parser = rootParser;
+    frames[0].End = 0;
+    frames[0].OuterLevels = 0;
+    frames[0].VarResolved = false;
+    frames[0].MvarResolved = false;
+    remainingArgs[0] = (CLR_UINT8)argCount;
+
+    while (top >= 0)
     {
-        goto ComputeHash_End;
-    }
+        SubstitutionFrame &frame = frames[top];
 
-    // Advance to the generic type definition
-    if (FAILED(parser.Advance(elem)))
-    {
-        goto ComputeHash_End;
-    }
-
-    // Get argument count
-    argCount = elem.GenParamCount;
-
-    // Process each generic argument
-    for (int i = 0; i < argCount; i++)
-    {
-        if (FAILED(parser.Advance(elem)))
+        if (frame.Parser.Available() <= frame.End)
         {
-            break;
+            top--;
+            continue;
         }
 
-        // copy generic position
-        genericPosition = elem.GenericParamPosition;
-
-        // Check if this is an unresolved generic parameter (VAR or MVAR)
-        if (elem.DataType == DATATYPE_VAR && contextTypeSpec && NANOCLR_INDEX_IS_VALID(*contextTypeSpec))
+        if (FAILED(frame.Parser.Advance(elem)))
         {
-        resolve_type_param:
+            return CLR_E_WRONG_TYPE;
+        }
 
-            // Resolve VAR (type parameter) from context TypeSpec
-            CLR_RT_TypeSpec_Instance contextTs;
-            if (!contextTs.InitializeFromIndex(*contextTypeSpec))
+        int levels = frame.OuterLevels + elem.Levels;
+        frame.OuterLevels = 0;
+
+        if (elem.DataType == DATATYPE_MVAR && frame.MvarResolved)
+        {
+            return CLR_E_WRONG_TYPE;
+        }
+
+        bool substituteVar = elem.DataType == DATATYPE_VAR && !frame.VarResolved && contextTypeSpec &&
+                             NANOCLR_INDEX_IS_VALID(*contextTypeSpec);
+        bool substituteMvar = elem.DataType == DATATYPE_MVAR && !frame.MvarResolved && contextMethod &&
+                              NANOCLR_INDEX_IS_VALID(contextMethod->methodSpec);
+
+        if (substituteVar || substituteMvar)
+        {
+            SubstitutionFrame &next = frames[top + 1];
+
+            if (substituteVar)
             {
-                hash = 0;
-                goto ComputeHash_End;
-            }
+                CLR_RT_TypeSpec_Instance contextTs;
 
-            CLR_RT_SignatureParser::Element paramElement;
-            if (contextTs.GetGenericParam(genericPosition, paramElement))
-            {
-                // Use the resolved type from context
-                hash = SUPPORT_ComputeCRC(&paramElement.DataType, sizeof(paramElement.DataType), hash);
-
-                if (paramElement.DataType == DATATYPE_CLASS || paramElement.DataType == DATATYPE_VALUETYPE)
+                if (!contextTs.InitializeFromIndex(*contextTypeSpec) ||
+                    !PositionAtGenericParam(contextTs, elem.GenericParamPosition, next.Parser))
                 {
-                    hash = SUPPORT_ComputeCRC(&paramElement.Class.data, sizeof(paramElement.Class.data), hash);
+                    return CLR_E_WRONG_TYPE;
                 }
             }
             else
             {
-                // couldn't resolve VAR, return failure
-                hash = 0;
-                goto ComputeHash_End;
-            }
-        }
-        else if (elem.DataType == DATATYPE_MVAR && contextMethod && NANOCLR_INDEX_IS_VALID(contextMethod->methodSpec))
-        {
-            // Resolve MVAR (method parameter) from MethodSpec instance
+                CLR_RT_MethodSpec_Instance methodSpecInst{};
 
-            CLR_RT_MethodSpec_Instance methodSpecInst{};
-            if (methodSpecInst.InitializeFromIndex(contextMethod->methodSpec))
-            {
-                CLR_RT_SignatureParser::Element argElement;
-
-                if (methodSpecInst.GetGenericArgument(genericPosition, argElement))
+                if (!methodSpecInst.InitializeFromIndex(contextMethod->methodSpec) ||
+                    !PositionAtGenericArgument(methodSpecInst, elem.GenericParamPosition, next.Parser))
                 {
-                    if (argElement.DataType == DATATYPE_VAR)
-                    {
-                        // need another pass to resolve a generic type parameter
-
-                        // copy generic parameter position
-                        genericPosition = argElement.GenericParamPosition;
-
-                        goto resolve_type_param;
-                    }
-
-                    // Use the resolved type from MethodSpec
-                    hash = SUPPORT_ComputeCRC(&argElement.DataType, sizeof(argElement.DataType), hash);
-                }
-                else
-                {
-                    // couldn't resolve MVAR, return failure
-                    hash = 0;
-                    goto ComputeHash_End;
+                    return CLR_E_WRONG_TYPE;
                 }
             }
-        }
-        else
-        {
-            // Add each argument's type information to the hash
-            hash = SUPPORT_ComputeCRC(&elem.DataType, sizeof(elem.DataType), hash);
 
-            if (elem.DataType == DATATYPE_CLASS || elem.DataType == DATATYPE_VALUETYPE)
+            next.End = next.Parser.Available() - 1;
+            next.OuterLevels = levels;
+            next.VarResolved = frame.VarResolved || substituteVar;
+            next.MvarResolved = frame.MvarResolved || substituteMvar;
+            substituted = true;
+            top++;
+            continue;
+        }
+
+        // Runtime-inferred element type, only for a frame with no MethodSpec. See CLAUDE.md §5.
+        if (elem.DataType == DATATYPE_MVAR && !frame.MvarResolved && mvarFallback != nullptr &&
+            NANOCLR_INDEX_IS_VALID(*mvarFallback) && elem.GenericParamPosition == 0)
+        {
+            CLR_RT_TypeDef_Instance fallback{};
+
+            if (!fallback.InitializeFromIndex(*mvarFallback))
             {
-                hash = SUPPORT_ComputeCRC(&elem.Class.data, sizeof(elem.Class.data), hash);
+                return CLR_E_WRONG_TYPE;
             }
+
+            // An enum is a VALUETYPE in signatures, while its TypeDef reports the underlying type.
+            bool isEnum = (fallback.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
+                          CLR_RECORD_TYPEDEF::TD_Semantics_Enum;
+
+            elem.DataType = mvarFallback->data == g_CLR_RT_WellKnownTypes.Object.data
+                                ? DATATYPE_OBJECT
+                                : (isEnum ? DATATYPE_VALUETYPE : (NanoCLRDataType)fallback.target->dataType);
+            elem.Class = *mvarFallback;
+            elem.GenParamCount = 0;
+            substituted = true;
+        }
+
+        if (elem.DataType == DATATYPE_VAR || elem.DataType == DATATYPE_MVAR)
+        {
+            isClosed = false;
+        }
+
+        if (elem.DataType == DATATYPE_GENERICINST)
+        {
+            if (FAILED(frame.Parser.Advance(elem)) || !NANOCLR_INDEX_IS_VALID(elem.Class))
+            {
+                return CLR_E_WRONG_TYPE;
+            }
+        }
+        else if (
+            (elem.DataType == DATATYPE_CLASS || elem.DataType == DATATYPE_VALUETYPE) &&
+            !NANOCLR_INDEX_IS_VALID(elem.Class))
+        {
+            return CLR_E_WRONG_TYPE;
+        }
+
+        if (!AppendGenericInstanceNode(nodes, nodeCount, elem, levels))
+        {
+            return CLR_E_NOT_SUPPORTED;
+        }
+
+        if (elem.GenParamCount > 0)
+        {
+            if (depth == c_MaxGenericNestingDepth)
+            {
+                return CLR_E_NOT_SUPPORTED;
+            }
+
+            remainingArgs[depth++] = (CLR_UINT8)elem.GenParamCount;
+            continue;
+        }
+
+        while (depth > 0 && --remainingArgs[depth - 1] == 0)
+        {
+            depth--;
+        }
+
+        // The parser may continue with the next parameter of a method signature.
+        if (depth == 0)
+        {
+            break;
         }
     }
 
-ComputeHash_End:
-    return hash ? hash : 0xFFFFFFFF; // Don't allow zero as a hash value
+    return S_OK;
 }
 
-//--//
-
-CLR_RT_GenericCctorExecutionRecord *CLR_RT_TypeSystem::FindOrCreateGenericCctorRecord(CLR_UINT32 hash, bool *created)
+// The parser is positioned at the GENERICINST marker.
+static HRESULT CollectGenericNodesAt(
+    CLR_RT_SignatureParser parser,
+    const CLR_RT_TypeSpec_Index *contextTypeSpec,
+    const CLR_RT_MethodDef_Instance *contextMethod,
+    const CLR_RT_TypeDef_Index *mvarFallback,
+    CLR_RT_GenericInstanceNode *nodes,
+    int &nodeCount,
+    bool &isClosed,
+    bool &substituted)
 {
-    if (created)
+    CLR_RT_SignatureParser::Element elem;
+
+    nodeCount = 0;
+    isClosed = true;
+    substituted = false;
+
+    if (FAILED(parser.Advance(elem)) || elem.DataType != DATATYPE_GENERICINST || FAILED(parser.Advance(elem)) ||
+        !NANOCLR_INDEX_IS_VALID(elem.Class) || elem.GenParamCount <= 0)
     {
-        *created = false;
+        return CLR_E_WRONG_TYPE;
     }
 
-    // Look for existing entry
-    for (CLR_UINT32 i = 0; i < g_CLR_RT_TypeSystem.m_genericCctorRegistryCount; i++)
+    // The outermost levels belong to an array of the type, not to the type.
+    if (!AppendGenericInstanceNode(nodes, nodeCount, elem, 0))
     {
-        if (g_CLR_RT_TypeSystem.m_genericCctorRegistry[i].m_hash == hash)
+        return CLR_E_NOT_SUPPORTED;
+    }
+
+    return CollectGenericArguments(
+        parser,
+        contextTypeSpec,
+        contextMethod,
+        elem.GenParamCount,
+        mvarFallback,
+        nodes,
+        nodeCount,
+        isClosed,
+        substituted);
+}
+
+static HRESULT CollectGenericInstanceNodes(
+    CLR_RT_TypeSpec_Instance &typeInstance,
+    const CLR_RT_TypeSpec_Index *contextTypeSpec,
+    const CLR_RT_MethodDef_Instance *contextMethod,
+    const CLR_RT_TypeDef_Index *mvarFallback,
+    CLR_RT_GenericInstanceNode *nodes,
+    int &nodeCount,
+    bool &isClosed,
+    bool &substituted)
+{
+    CLR_RT_SignatureParser parser;
+
+    parser.Initialize_TypeSpec(typeInstance);
+
+    return CollectGenericNodesAt(
+        parser,
+        contextTypeSpec,
+        contextMethod,
+        mvarFallback,
+        nodes,
+        nodeCount,
+        isClosed,
+        substituted);
+}
+
+static bool SameGenericInstanceNodes(
+    const CLR_RT_GenericInstanceNode *left,
+    const CLR_RT_GenericInstanceNode *right,
+    int nodeCount)
+{
+    return memcmp(left, right, sizeof(CLR_RT_GenericInstanceNode) * nodeCount) == 0;
+}
+
+// A closed row of the same instantiation, so objects created at runtime get the same TypeSpec as typeof().
+static bool FindClosedTypeSpecRow(const CLR_RT_GenericInstanceNode *nodes, int nodeCount, CLR_RT_TypeSpec_Index &row)
+{
+    CLR_RT_GenericInstanceNode candidateNodes[CLR_RT_GenericInstance::c_MaxNodes];
+
+    NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
+    {
+        for (int i = 0; i < pASSM->tablesSize[TBL_TypeSpec]; i++)
         {
-            return &g_CLR_RT_TypeSystem.m_genericCctorRegistry[i];
+            CLR_RT_TypeSpec_Instance candidate{};
+            CLR_RT_TypeSpec_Index candidateIndex;
+            int candidateCount;
+            bool closed;
+            bool substituted;
+
+            if (pASSM->crossReferenceTypeSpec[i].genericInstance != nullptr)
+            {
+                continue;
+            }
+
+            candidateIndex.Set(pASSM->assemblyIndex, i);
+
+            if (!candidate.InitializeFromIndex(candidateIndex) || candidate.levels != 0 ||
+                candidate.genericTypeDef.data != nodes[0].Class.data)
+            {
+                continue;
+            }
+
+            if (SUCCEEDED(CollectGenericInstanceNodes(
+                    candidate,
+                    nullptr,
+                    nullptr,
+                    nullptr,
+                    candidateNodes,
+                    candidateCount,
+                    closed,
+                    substituted)) &&
+                closed && candidateCount == nodeCount && SameGenericInstanceNodes(nodes, candidateNodes, nodeCount))
+            {
+                row = candidateIndex;
+                return true;
+            }
+        }
+    }
+    NANOCLR_FOREACH_ASSEMBLY_END();
+
+    return false;
+}
+
+CLR_RT_GenericInstance *CLR_RT_TypeSystem::GetGenericInstance(const CLR_RT_TypeSpec_Index &index)
+{
+    CLR_UINT32 slot = index.TypeSpec();
+
+    if (!index.IsRuntime() || slot >= g_CLR_RT_TypeSystem.m_genericInstancesCount)
+    {
+        return nullptr;
+    }
+
+    return g_CLR_RT_TypeSystem.m_genericInstances[slot];
+}
+
+CLR_UINT16 CLR_RT_TypeSystem::GetGenericOwnerSlot(const CLR_RT_TypeSpec_Index &typeSpec)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    CLR_RT_TypeSpec_Instance inst{};
+    CLR_RT_GenericInstance *record;
+
+    if (!NANOCLR_INDEX_IS_VALID(typeSpec) || !inst.InitializeFromIndex(typeSpec) || inst.levels != 0)
+    {
+        return 0;
+    }
+
+    record = FindOrCreateGenericInstance(inst);
+
+    if (record == nullptr)
+    {
+        return 0;
+    }
+
+    for (CLR_UINT32 i = 0; i < g_CLR_RT_TypeSystem.m_genericInstancesCount; i++)
+    {
+        if (g_CLR_RT_TypeSystem.m_genericInstances[i] == record)
+        {
+            return (CLR_UINT16)(i + 1);
         }
     }
 
-    // Need to create a new entry - check if we need to expand the array
-    if (g_CLR_RT_TypeSystem.m_genericCctorRegistryCount >= g_CLR_RT_TypeSystem.m_genericCctorRegistryMaxCount)
+    return 0;
+}
+
+bool CLR_RT_TypeSystem::IsSameGenericInstance(const CLR_RT_TypeSpec_Index &left, const CLR_RT_TypeSpec_Index &right)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    CLR_RT_TypeSpec_Instance leftInst{};
+    CLR_RT_TypeSpec_Instance rightInst{};
+    CLR_RT_GenericInstance *leftRecord;
+
+    if (left.data == right.data)
     {
-        CLR_UINT32 newMax = g_CLR_RT_TypeSystem.m_genericCctorRegistryMaxCount * 2;
+        return true;
+    }
 
-        if (newMax == 0)
+    if (!leftInst.InitializeFromIndex(left) || !rightInst.InitializeFromIndex(right))
+    {
+        return false;
+    }
+
+    leftRecord = FindOrCreateGenericInstance(leftInst);
+
+    return leftRecord != nullptr && leftRecord == FindOrCreateGenericInstance(rightInst);
+}
+
+// The registry lookup shared by every way of reaching an instantiation. A closed node stream is found or created here.
+static CLR_RT_GenericInstance *RegisterGenericInstance(
+    const CLR_RT_GenericInstanceNode *nodes,
+    int nodeCount,
+    const CLR_RT_TypeSpec_Index &knownRow,
+    const CLR_RT_TypeSpec_Index &origin,
+    HRESULT &hr)
+{
+    CLR_RT_TypeSystem &ts = g_CLR_RT_TypeSystem;
+    CLR_UINT32 hash = SUPPORT_ComputeCRC(nodes, (int)(sizeof(CLR_RT_GenericInstanceNode) * nodeCount), 0);
+
+    hr = S_OK;
+
+    for (CLR_UINT32 i = 0; i < ts.m_genericInstancesCount; i++)
+    {
+        CLR_RT_GenericInstance *candidate = ts.m_genericInstances[i];
+
+        if (candidate->m_hash == hash && candidate->m_nodeCount == nodeCount &&
+            SameGenericInstanceNodes(candidate->m_nodes, nodes, nodeCount))
         {
-            newMax = 4; // Initial minimum size
+            return candidate;
         }
+    }
 
-        CLR_RT_GenericCctorExecutionRecord *newArray =
-            (CLR_RT_GenericCctorExecutionRecord *)platform_malloc(sizeof(CLR_RT_GenericCctorExecutionRecord) * newMax);
+    if (ts.m_genericInstancesCount >= 0xFFFF)
+    {
+        hr = CLR_E_OUT_OF_MEMORY;
+        return nullptr;
+    }
+
+    if (ts.m_genericInstancesCount >= ts.m_genericInstancesMaxCount)
+    {
+        CLR_UINT32 newMax = ts.m_genericInstancesMaxCount == 0 ? 8 : ts.m_genericInstancesMaxCount * 2;
+        CLR_RT_GenericInstance **newArray =
+            (CLR_RT_GenericInstance **)platform_malloc(sizeof(CLR_RT_GenericInstance *) * newMax);
 
         if (newArray == nullptr)
         {
-            return nullptr; // Out of memory
+            hr = CLR_E_OUT_OF_MEMORY;
+            return nullptr;
         }
 
-        // Copy existing records
-        if (g_CLR_RT_TypeSystem.m_genericCctorRegistry != nullptr &&
-            g_CLR_RT_TypeSystem.m_genericCctorRegistryCount > 0)
+        if (ts.m_genericInstances != nullptr)
         {
-            memcpy(
-                newArray,
-                g_CLR_RT_TypeSystem.m_genericCctorRegistry,
-                sizeof(CLR_RT_GenericCctorExecutionRecord) * g_CLR_RT_TypeSystem.m_genericCctorRegistryCount);
-
-            platform_free(g_CLR_RT_TypeSystem.m_genericCctorRegistry);
+            memcpy(newArray, ts.m_genericInstances, sizeof(CLR_RT_GenericInstance *) * ts.m_genericInstancesCount);
+            platform_free(ts.m_genericInstances);
         }
 
-        g_CLR_RT_TypeSystem.m_genericCctorRegistry = newArray;
-        g_CLR_RT_TypeSystem.m_genericCctorRegistryMaxCount = newMax;
+        ts.m_genericInstances = newArray;
+        ts.m_genericInstancesMaxCount = newMax;
     }
 
-    // Create new record
-    CLR_RT_GenericCctorExecutionRecord *record =
-        &g_CLR_RT_TypeSystem.m_genericCctorRegistry[g_CLR_RT_TypeSystem.m_genericCctorRegistryCount++];
+    CLR_RT_GenericInstance *instance = (CLR_RT_GenericInstance *)platform_malloc(
+        offsetof(CLR_RT_GenericInstance, m_nodes) + sizeof(CLR_RT_GenericInstanceNode) * nodeCount);
 
-    record->m_hash = hash;
-    record->m_flags = 0;
-
-    if (created)
+    if (instance == nullptr)
     {
-        *created = true;
+        hr = CLR_E_OUT_OF_MEMORY;
+        return nullptr;
     }
 
-    return record;
+    instance->m_hash = hash;
+    instance->m_self.Clear();
+    instance->m_origin.data = origin.data;
+    instance->m_fields = nullptr;
+    instance->m_fieldDefs = nullptr;
+    instance->m_count = 0;
+    instance->m_flags = 0;
+    instance->m_nodeCount = (CLR_UINT8)nodeCount;
+    memcpy(instance->m_nodes, nodes, sizeof(CLR_RT_GenericInstanceNode) * nodeCount);
+
+    if (NANOCLR_INDEX_IS_VALID(knownRow))
+    {
+        instance->m_self.data = knownRow.data;
+    }
+    else if (!FindClosedTypeSpecRow(nodes, nodeCount, instance->m_self))
+    {
+        instance->m_self.Set(CLR_RT_TypeSpec_Index::c_RuntimeAssembly, ts.m_genericInstancesCount);
+    }
+
+    ts.m_genericInstances[ts.m_genericInstancesCount++] = instance;
+
+    if (!instance->m_self.IsRuntime())
+    {
+        CLR_RT_Assembly *selfAssembly = ts.m_assemblies[instance->m_self.Assembly() - 1];
+        selfAssembly->crossReferenceTypeSpec[instance->m_self.TypeSpec()].genericInstance = instance;
+    }
+
+    return instance;
+}
+
+CLR_RT_GenericInstance *CLR_RT_TypeSystem::FindOrCreateGenericInstance(
+    CLR_RT_TypeSpec_Instance &typeInstance,
+    const CLR_RT_TypeSpec_Index *contextTypeSpec,
+    const CLR_RT_MethodDef_Instance *contextMethod,
+    HRESULT *result,
+    const CLR_RT_TypeDef_Index *mvarFallback)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    CLR_RT_GenericInstanceNode nodes[CLR_RT_GenericInstance::c_MaxNodes];
+    CLR_RT_TypeSpec_CrossReference *row = nullptr;
+    CLR_RT_TypeSpec_Index knownRow;
+    CLR_RT_GenericInstance *instance = nullptr;
+    HRESULT hr;
+    int nodeCount;
+    bool closed;
+    bool substituted;
+
+    knownRow.Clear();
+
+    if (typeInstance.IsRuntime())
+    {
+        instance = GetGenericInstance(typeInstance);
+        hr = instance != nullptr ? S_OK : CLR_E_WRONG_TYPE;
+        goto Done;
+    }
+
+    if (NANOCLR_INDEX_IS_VALID(typeInstance) && typeInstance.assembly != nullptr)
+    {
+        row = &typeInstance.assembly->crossReferenceTypeSpec[typeInstance.TypeSpec()];
+
+        if (row->genericInstance != nullptr)
+        {
+            instance = row->genericInstance;
+            hr = S_OK;
+            goto Done;
+        }
+    }
+
+    hr = CollectGenericInstanceNodes(
+        typeInstance,
+        contextTypeSpec,
+        contextMethod,
+        mvarFallback,
+        nodes,
+        nodeCount,
+        closed,
+        substituted);
+
+    if (FAILED(hr))
+    {
+        goto Done;
+    }
+
+    // Still open after resolution: there's no instantiation yet, and nothing may use storage for it.
+    if (!closed)
+    {
+        hr = S_FALSE;
+        goto Done;
+    }
+
+    if (!substituted && row != nullptr && typeInstance.levels == 0)
+    {
+        knownRow.data = typeInstance.data;
+    }
+
+    instance = RegisterGenericInstance(nodes, nodeCount, knownRow, typeInstance, hr);
+
+    if (instance != nullptr && row != nullptr && !substituted)
+    {
+        row->genericInstance = instance;
+    }
+
+Done:
+    if (result != nullptr)
+    {
+        *result = hr;
+    }
+
+    return SUCCEEDED(hr) ? instance : nullptr;
+}
+
+CLR_RT_GenericInstance *CLR_RT_TypeSystem::FindOrCreateGenericInstanceByNodes(
+    const CLR_RT_GenericInstanceNode *nodes,
+    int nodeCount,
+    HRESULT *result)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    CLR_RT_TypeSpec_Index none;
+    HRESULT hr = S_OK;
+
+    none.Clear();
+
+    for (int i = 0; i < nodeCount; i++)
+    {
+        if (nodes[i].DataType == DATATYPE_VAR || nodes[i].DataType == DATATYPE_MVAR)
+        {
+            hr = CLR_E_WRONG_TYPE;
+        }
+    }
+
+    CLR_RT_GenericInstance *instance =
+        SUCCEEDED(hr) ? RegisterGenericInstance(nodes, nodeCount, none, none, hr) : nullptr;
+
+    if (result != nullptr)
+    {
+        *result = hr;
+    }
+
+    return instance;
+}
+
+// S_OK with a count of 0 when the signature isn't a generic instance or is an array of one, S_FALSE when it's open.
+HRESULT CLR_RT_TypeSystem::CollectGenericTarget(
+    const CLR_RT_SignatureParser &at,
+    const CLR_RT_TypeSpec_Index *contextTypeSpec,
+    const CLR_RT_MethodDef_Instance *contextMethod,
+    CLR_RT_GenericTarget &target)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    CLR_RT_SignatureParser peek = at;
+    CLR_RT_SignatureParser::Element elem;
+    bool closed;
+    bool substituted;
+    HRESULT hr;
+
+    target.m_count = 0;
+
+    if (SUCCEEDED(peek.Advance(elem)) && elem.DataType == DATATYPE_VAR && elem.Levels == 0 &&
+        contextTypeSpec != nullptr && NANOCLR_INDEX_IS_VALID(*contextTypeSpec))
+    {
+        CLR_RT_TypeSpec_Instance owner{};
+        CLR_RT_SignatureParser argument;
+
+        if (owner.InitializeFromIndex(*contextTypeSpec) &&
+            owner.PositionAtGenericParam(elem.GenericParamPosition, argument))
+        {
+            return CollectGenericTarget(argument, nullptr, nullptr, target);
+        }
+    }
+
+    peek = at;
+
+    if (FAILED(peek.Advance(elem)) || elem.DataType != DATATYPE_GENERICINST || elem.Levels > 0)
+    {
+        return S_OK;
+    }
+
+    hr = CollectGenericNodesAt(
+        at,
+        contextTypeSpec,
+        contextMethod,
+        nullptr,
+        target.m_nodes,
+        target.m_count,
+        closed,
+        substituted);
+
+    if (FAILED(hr))
+    {
+        target.m_count = 0;
+        return hr;
+    }
+
+    if (!closed)
+    {
+        target.m_count = 0;
+        return S_FALSE;
+    }
+
+    return S_OK;
+}
+
+CLR_RT_GenericMatch CLR_RT_TypeSystem::MatchGenericArguments(
+    const CLR_RT_HeapBlock &ref,
+    const CLR_RT_GenericTarget &target)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    const CLR_RT_HeapBlock *obj = &ref;
+    const CLR_RT_TypeDef_Index &targetClass = target.m_nodes[0].Class;
+    CLR_RT_GenericInstance *own = nullptr;
+    CLR_RT_TypeDef_Instance inst{};
+    CLR_RT_TypeDef_Instance targetDef{};
+    bool different = false;
+    bool openAtOwnLevel = false;
+    int level = 0;
+
+    while (obj->DataType() == DATATYPE_OBJECT || obj->DataType() == DATATYPE_BYREF)
+    {
+        obj = obj->Dereference();
+
+        if (obj == nullptr)
+        {
+            return GenericMatch_Unresolved;
+        }
+    }
+
+    if (target.m_count == 0)
+    {
+        return GenericMatch_Unresolved;
+    }
+
+    if (obj->DataType() == DATATYPE_SZARRAY)
+    {
+        const CLR_RT_ReflectionDef_Index &reflex = obj->ReflectionDataConst();
+
+        if (target.m_nodes[0].ArgCount != 1 || target.m_count < 2 || reflex.levels == 0)
+        {
+            return GenericMatch_Unresolved;
+        }
+
+        if (target.m_nodes[1].Levels + 1 != reflex.levels)
+        {
+            return GenericMatch_Different;
+        }
+
+        if (target.m_nodes[1].Class.data == reflex.data.type.data)
+        {
+            return GenericMatch_Same;
+        }
+
+        // Reference-type elements are covariant, one level only.
+        if (reflex.levels == 1 && target.m_nodes[1].ArgCount == 0 &&
+            (target.m_nodes[1].Class.data == g_CLR_RT_WellKnownTypes.Object.data ||
+             CLR_RT_ExecutionEngine::IsInstanceOf(reflex.data.type, target.m_nodes[1].Class)))
+        {
+            CLR_RT_TypeDef_Instance element{};
+            const CLR_UINT32 valueTypeFlags =
+                CLR_RT_DataTypeLookup::c_OptimizedValueType | CLR_RT_DataTypeLookup::c_ValueType;
+
+            if (element.InitializeFromIndex(reflex.data.type) &&
+                (c_CLR_RT_DataTypeLookup[element.target->dataType].m_flags & valueTypeFlags) == 0 &&
+                (element.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) !=
+                    CLR_RECORD_TYPEDEF::TD_Semantics_Enum)
+            {
+                return GenericMatch_Same;
+            }
+        }
+
+        return GenericMatch_Different;
+    }
+
+    if ((obj->DataType() != DATATYPE_CLASS && obj->DataType() != DATATYPE_VALUETYPE) ||
+        !inst.InitializeFromIndex(obj->ObjectCls()))
+    {
+        return GenericMatch_Unresolved;
+    }
+
+    // A stored TypeSpec of another class is the context of whoever created the object, not its own.
+    if (obj->IsAGenericInstance())
+    {
+        CLR_RT_TypeSpec_Instance stored{};
+
+        if (stored.InitializeFromIndex(obj->ObjectGenericType()))
+        {
+            own = FindOrCreateGenericInstance(stored);
+
+            if (own != nullptr && own->m_nodes[0].Class.data != inst.data)
+            {
+                own = nullptr;
+            }
+        }
+    }
+
+    if (inst.data == targetClass.data)
+    {
+        if (own == nullptr)
+        {
+            return GenericMatch_NoTypeSpec;
+        }
+
+        return (own->m_nodeCount == target.m_count &&
+                SameGenericInstanceNodes(own->m_nodes, target.m_nodes, target.m_count))
+                   ? GenericMatch_Same
+                   : GenericMatch_Different;
+    }
+
+    // Through an interface: the arguments are in the interface entry, resolved against the implementing class.
+    if (!targetDef.InitializeFromIndex(targetClass) ||
+        (targetDef.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) != CLR_RECORD_TYPEDEF::TD_Semantics_Interface)
+    {
+        return GenericMatch_Unresolved;
+    }
+
+    do
+    {
+        CLR_RT_SignatureParser parser{};
+
+        parser.Initialize_Interfaces(inst.assembly, inst.target);
+
+        while (parser.Available() > 0)
+        {
+            CLR_RT_SignatureParser peek = parser;
+            CLR_RT_SignatureParser::Element elem;
+            CLR_UINT32 tk = CLR_TkFromStream(peek.Signature);
+
+            if (FAILED(parser.Advance(elem)))
+            {
+                break;
+            }
+
+            if (elem.Class.data != targetClass.data || CLR_TypeFromTk(tk) != TBL_TypeSpec)
+            {
+                continue;
+            }
+
+            CLR_RT_TypeSpec_Index entryIndex;
+            CLR_RT_TypeSpec_Instance entry{};
+            CLR_RT_SignatureParser at{};
+            CLR_RT_GenericTarget entryTarget;
+
+            entryIndex.Set(inst.assembly->assemblyIndex, CLR_DataFromTk(tk));
+
+            if (!entry.InitializeFromIndex(entryIndex))
+            {
+                continue;
+            }
+
+            at.Initialize_TypeSpec(entry);
+
+            // Only the implementing class itself has a context. A generic parent's arguments aren't known here.
+            HRESULT hr =
+                CollectGenericTarget(at, (level == 0 && own != nullptr) ? &own->m_self : nullptr, nullptr, entryTarget);
+
+            if (hr != S_OK || entryTarget.m_count == 0)
+            {
+                openAtOwnLevel = openAtOwnLevel || level == 0;
+                continue;
+            }
+
+            if (entryTarget.m_count == target.m_count &&
+                SameGenericInstanceNodes(entryTarget.m_nodes, target.m_nodes, target.m_count))
+            {
+                return GenericMatch_Same;
+            }
+
+            different = true;
+        }
+
+        level++;
+    } while (inst.SwitchToParent());
+
+    if (different)
+    {
+        return GenericMatch_Different;
+    }
+
+    return openAtOwnLevel ? GenericMatch_NoTypeSpec : GenericMatch_Unresolved;
+}
+
+HRESULT CLR_RT_TypeSystem::AllocateGenericInstanceStatics(CLR_RT_GenericInstance &instance)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    CLR_RT_TypeDef_Instance owner{};
+    CLR_RT_TypeSpec_Instance self{};
+    CLR_RT_FieldDef_Index *fieldDefs;
+    CLR_RT_HeapBlock *fields;
+    CLR_UINT32 count;
+
+    if (instance.m_fields != nullptr)
+    {
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
+
+    if (!owner.InitializeFromIndex(instance.m_nodes[0].Class))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
+
+    count = owner.target->staticFieldsCount;
+
+    if (count == 0)
+    {
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
+
+    if (!self.InitializeFromIndex(instance.m_self))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
+
+    // platform_malloc first: nothing to unwind if it fails, unlike the GC heap blob.
+    fieldDefs = (CLR_RT_FieldDef_Index *)platform_malloc(sizeof(CLR_RT_FieldDef_Index) * count);
+
+    if (fieldDefs == nullptr)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
+
+    fields = CLR_AllocateGenericStaticFieldStorage(count);
+
+    if (fields == nullptr)
+    {
+        platform_free(fieldDefs);
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
+
+    for (CLR_UINT32 i = 0; i < count; i++)
+    {
+        fieldDefs[i].Set(owner.assembly->assemblyIndex, owner.target->firstStaticField + i);
+    }
+
+    // Published before stamping, so the GC marks the blob if stamping allocates.
+    instance.m_fields = fields;
+    instance.m_fieldDefs = fieldDefs;
+    instance.m_count = (CLR_UINT16)count;
+
+    for (CLR_UINT32 i = 0; i < count; i++)
+    {
+        const CLR_RECORD_FIELDDEF *pFd = owner.assembly->GetFieldDef(owner.target->firstStaticField + i);
+
+        hr = g_CLR_RT_ExecutionEngine.InitializeReference(fields[i], pFd, owner.assembly, &self);
+
+        if (FAILED(hr))
+        {
+            // An event block is never collected, so the blob is released here.
+            instance.m_fields = nullptr;
+            instance.m_fieldDefs = nullptr;
+            instance.m_count = 0;
+            CLR_ReleaseGenericStaticFieldStorage(fields);
+            platform_free(fieldDefs);
+            NANOCLR_LEAVE();
+        }
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
+void CLR_RT_TypeSystem::TruncateGenericInstances(CLR_UINT32 count)
+{
+    if (m_genericInstancesCount <= count)
+    {
+        return;
+    }
+
+    NANOCLR_FOREACH_ASSEMBLY(*this)
+    {
+        for (int i = 0; i < pASSM->tablesSize[TBL_TypeSpec]; i++)
+        {
+            CLR_RT_GenericInstance *&linked = pASSM->crossReferenceTypeSpec[i].genericInstance;
+
+            for (CLR_UINT32 j = count; linked != nullptr && j < m_genericInstancesCount; j++)
+            {
+                if (linked == m_genericInstances[j])
+                {
+                    linked = nullptr;
+                }
+            }
+        }
+    }
+    NANOCLR_FOREACH_ASSEMBLY_END();
+
+    while (m_genericInstancesCount > count)
+    {
+        CLR_RT_GenericInstance *instance = m_genericInstances[--m_genericInstancesCount];
+
+        if (instance->m_fields != nullptr)
+        {
+            CLR_ReleaseGenericStaticFieldStorage(instance->m_fields);
+        }
+
+        if (instance->m_fieldDefs != nullptr)
+        {
+            platform_free(instance->m_fieldDefs);
+        }
+
+        platform_free(instance);
+    }
 }
 
 //--//

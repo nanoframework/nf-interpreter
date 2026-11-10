@@ -6,8 +6,10 @@
 #include "stdafx.h"
 
 #include "nanoCLR_native.h"
+#include <Target_Network.h>
 #include <nanoCLR_Application.h>
 #include <target_common.h>
+#include <WireProtocol_Transport.h>
 #include <iostream>
 #include <format>
 
@@ -53,6 +55,7 @@ ProfilerDataCallback g_ProfilerDataCallback = nullptr;
 
 WireTransmitCallback WireProtocolTransmitCallback = nullptr;
 WireReceiveCallback WireProtocolReceiveCallback = nullptr;
+WireDropClientCallback WireProtocolDropClientCallback = nullptr;
 
 // flag requesting stopping of WP processing
 bool _wireProtocolStopProcess;
@@ -103,6 +106,12 @@ void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
 
     // initialize nanoHAL
     nanoHAL_Initialize();
+    if (!Network_Initialize())
+    {
+        CLR_Debug::Printf("Failed to initialize Windows networking.\r\n");
+        nanoHAL_Uninitialize(false);
+        return;
+    }
 
     // take care of block storage here as we are RAM based
     BlockStorageList_Initialize();
@@ -119,6 +128,7 @@ void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
     clrSettings.PerformHeapCompaction = nanoClrSettings.PerformHeapCompaction;
 
     ClrStartup(clrSettings);
+    Network_Uninitialize();
 
 #if !defined(BUILD_RTM)
     CLR_Debug::Printf("Exiting.\r\n");
@@ -138,6 +148,21 @@ void nanoCLR_SetWireProtocolReceiveCallback(WireReceiveCallback receiveCallback)
 void nanoCLR_SetWireProtocolTransmitCallback(WireTransmitCallback transmitCallback)
 {
     WireProtocolTransmitCallback = transmitCallback;
+}
+
+void nanoCLR_SetWireProtocolDropClientCallback(WireDropClientCallback dropClientCallback)
+{
+    WireProtocolDropClientCallback = dropClientCallback;
+}
+
+void nanoCLR_SetWireProtocolChannelInfo(bool isNetwork, const char *token)
+{
+    if (token != nullptr)
+    {
+        WP_Auth_SetToken((const uint8_t *)token, (uint32_t)strlen(token));
+    }
+
+    WP_Auth_SessionChanged(isNetwork);
 }
 
 void nanoCLR_WireProtocolProcess()

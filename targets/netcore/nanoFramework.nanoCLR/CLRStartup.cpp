@@ -5,6 +5,7 @@
 //
 #include "stdafx.h"
 #include "nanoCLR_native.h"
+#include <Target_Network.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -311,6 +312,7 @@ struct Settings
 
     void Cleanup()
     {
+        SOCKETS_CloseConnections();
         CLR_RT_ExecutionEngine::DeleteInstance();
 
         memset(&g_CLR_RT_ExecutionEngine, 0, sizeof(g_CLR_RT_ExecutionEngine));
@@ -616,11 +618,14 @@ void ClrStartup(CLR_SETTINGS params)
         // DO NOT USE 'ELSE IF' here because the state can change in Debugger_WaitForCommands() call
         if (CLR_EE_DBG_IS(RebootPending))
         {
-            if (CLR_EE_REBOOT_IS(ClrOnly))
+            if (CLR_EE_REBOOT_IS(ClrOnly) || params.EnterDebuggerLoopAfterExit)
             {
                 softReboot = true;
 
-                params.WaitForDebugger = CLR_EE_REBOOT_IS(WaitForDebugger);
+                if (CLR_EE_REBOOT_IS(ClrOnly))
+                {
+                    params.WaitForDebugger = CLR_EE_REBOOT_IS(WaitForDebugger);
+                }
 
                 s_ClrSettings.Cleanup();
 

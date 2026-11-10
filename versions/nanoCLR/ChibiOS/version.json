@@ -158,6 +158,7 @@
     ":!/targets/ChibiOS/ST_STM32F769I_DISCOVERY/MCUboot/mcuconf_nf.h",
     ":!/targets/ChibiOS/ST_STM32F769I_DISCOVERY/MCUboot/target_platform.h",
     ":!/targets/ChibiOS/ST_STM32F769I_DISCOVERY/nanoBooter",
+    ":!/targets/ChibiOS/ST_STM32H735_DISCOVERY/nanoBooter",
     ":!/targets/ChibiOS/_mcuboot/fatfs_diskio_boot.c",
     ":!/targets/ChibiOS/_mcuboot/hal_community_stub.c",
     ":!/targets/ChibiOS/_mcuboot/mcuboot_board_iface.h",

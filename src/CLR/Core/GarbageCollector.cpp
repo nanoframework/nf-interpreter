@@ -739,9 +739,9 @@ void CLR_RT_GarbageCollector::Assembly_Mark()
 
     // Generic static fields are rooted in the global registry, not per assembly: marking has to walk
     // the same array relocation does. See CLAUDE.md "Static fields on generic types".
-    for (CLR_UINT32 i = 0; i < g_CLR_RT_TypeSystem.m_genericStaticFieldsCount; i++)
+    for (CLR_UINT32 i = 0; i < g_CLR_RT_TypeSystem.m_genericInstancesCount; i++)
     {
-        CLR_RT_GenericStaticFieldRecord &record = g_CLR_RT_TypeSystem.m_genericStaticFields[i];
+        CLR_RT_GenericInstance &record = *g_CLR_RT_TypeSystem.m_genericInstances[i];
 
         if (record.m_fields != nullptr && record.m_count > 0)
         {

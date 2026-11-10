@@ -46,6 +46,13 @@
       <PackagePath>tools\$(PackageTfmSubFolder)any\NanoCLR</PackagePath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Condition="$([MSBuild]::IsOSPlatform('Windows'))"
+          Include="..\..\..\build\bin\$(Configuration)\share\nanoFramework\LICENSE-mbedTLS.txt"
+          Link="NanoCLR\share\nanoFramework\LICENSE-mbedTLS.txt">
+      <Pack>True</Pack>
+      <PackagePath>tools\$(PackageTfmSubFolder)any\NanoCLR\share\nanoFramework</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <!-- macOS arm64 -->
     <None Condition="Exists('$(NativeBinRoot)runtimes\osx-arm64\native\nanoFramework.nanoCLR.dylib')"
           Include="$(NativeBinRoot)runtimes\osx-arm64\native\nanoFramework.nanoCLR.dylib"

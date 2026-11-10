@@ -1,4 +1,4 @@
-#
+﻿#
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
@@ -189,6 +189,8 @@ set(NF_RUNTIME_NATIVE_SRCS
 
 # ─── HAL / PAL stubs ──────────────────────────────────────────────────────────
 set(NF_HAL_PAL_STUB_SRCS
+    ${REPO_ROOT}/src/HAL/nanoHAL_ConfigurationManager.c
+    ${REPO_ROOT}/src/HAL/nanoHAL_ConfigurationManager_Virtual.cpp
     ${REPO_ROOT}/src/HAL/nanoHAL_Time.cpp
     ${REPO_ROOT}/src/HAL/nanoHAL_Watchdog.c
     ${REPO_ROOT}/src/HAL/nanoHAL_SystemEvents.c
@@ -229,6 +231,44 @@ add_library(nanoFramework.nanoCLR SHARED ${NANOCLR_POSIX_SOURCES})
 
 target_compile_features(nanoFramework.nanoCLR PRIVATE cxx_std_20)
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR APPLE)
+    find_package(Threads REQUIRED)
+    include(FetchContent)
+    include(${REPO_ROOT}/CMake/binutils.common.cmake)
+    set(ENABLE_TESTING OFF)
+    set(ENABLE_PROGRAMS OFF)
+    set(USE_STATIC_MBEDTLS_LIBRARY ON)
+    set(USE_SHARED_MBEDTLS_LIBRARY OFF)
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+    set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
+    nf_add_mbedtls_library()
+    FetchContent_GetProperties(mbedtls)
+    target_link_libraries(nanoFramework.nanoCLR PRIVATE Threads::Threads mbedtls mbedx509 mbedcrypto)
+    if(APPLE)
+        find_library(SYSTEM_CONFIGURATION_FRAMEWORK SystemConfiguration REQUIRED)
+        find_library(CORE_FOUNDATION_FRAMEWORK CoreFoundation REQUIRED)
+        target_link_libraries(nanoFramework.nanoCLR PRIVATE
+            ${SYSTEM_CONFIGURATION_FRAMEWORK} ${CORE_FOUNDATION_FRAMEWORK})
+    endif()
+    configure_file(
+        ${mbedtls_SOURCE_DIR}/LICENSE
+        ${CMAKE_BINARY_DIR}/share/nanoFramework/LICENSE-mbedTLS.txt COPYONLY)
+    target_sources(nanoFramework.nanoCLR PRIVATE
+        Network_Interfaces.cpp
+        ${REPO_ROOT}/src/PAL/Network/Network_Sockets.cpp
+        ${REPO_ROOT}/src/PAL/Network/Network_native.cpp
+        ${REPO_ROOT}/src/PAL/Network/Network_Tls.cpp
+        ${REPO_ROOT}/src/PAL/Network/Network_Tls_native.cpp
+        ${REPO_ROOT}/src/DeviceInterfaces/System.Net/sys_net_native.cpp
+        ${REPO_ROOT}/src/DeviceInterfaces/System.Net/sys_net_native_System_Net_IPAddress.cpp
+        ${REPO_ROOT}/src/DeviceInterfaces/System.Net/sys_net_native_System_Net_Sockets_NativeSocket.cpp
+        ${REPO_ROOT}/src/DeviceInterfaces/System.Net/sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate.cpp
+        ${REPO_ROOT}/src/DeviceInterfaces/System.Net/sys_net_native_System_Net_NetworkInformation_IPGlobalProperties_stubs.cpp
+        ${REPO_ROOT}/src/DeviceInterfaces/System.Net/sys_net_native_System_Net_NetworkInformation_Wireless80211Configuration_stubs.cpp
+        ${REPO_ROOT}/src/DeviceInterfaces/System.Net/sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration_stubs.cpp
+    )
+endif()
+
 target_include_directories(
     nanoFramework.nanoCLR
     PRIVATE
@@ -251,6 +291,7 @@ target_include_directories(
     ${REPO_ROOT}/src/CLR/Helpers/Base64
     ${REPO_ROOT}/src/HAL/Include
     ${REPO_ROOT}/src/PAL/Include
+    ${REPO_ROOT}/src/PAL/Network
     ${REPO_ROOT}/src/nanoFramework.Runtime.Native
     ${REPO_ROOT}/src/nanoFramework.Runtime.Events
     ${REPO_ROOT}/src/nanoFramework.System.Collections
@@ -263,6 +304,7 @@ target_include_directories(
     ${REPO_ROOT}/src/System.Device.I2c
     ${REPO_ROOT}/src/System.Device.Spi
     ${REPO_ROOT}/src/System.IO.Ports
+    ${REPO_ROOT}/src/DeviceInterfaces/System.Net
 )
 
 # Determine platform-specific flags.
@@ -282,6 +324,7 @@ set(NANOCLR_POSIX_COMMON_DEFINITIONS
     NANOCLR_HOST_POSIX=1
     NANOCLR_HOST_APPLE=${NANOCLR_HOST_APPLE}
     NANOCLR_HOST_LINUX=${NANOCLR_HOST_LINUX}
+    NANOCLR_USE_HOST_OS_SOCKETS=1
     NANOCLR_HOST_WINDOWS=0
     NANOCLR_POSIX_VERSION_STRING="${PROJECT_VERSION}"
     NANOCLR_PLATFORM_NAME="${NANOCLR_PLATFORM_NAME}"

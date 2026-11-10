@@ -27,8 +27,7 @@ HRESULT Library_corlib_native_System_Reflection_ConstructorInfo::Invoke___OBJECT
     CLR_RT_HeapBlock *args = nullptr;
     int ArgumentsCount = 0;
 
-    if (md.InitializeFromIndex(thisRef->ReflectionDataConst().data.method) == false)
-        NANOCLR_SET_AND_LEAVE(CLR_E_NULL_REFERENCE);
+    NANOCLR_CHECK_HRESULT(Library_corlib_native_System_Reflection_MethodBase::GetMethodDescriptor(stack, *thisRef, md));
 
     if (stack.m_customState == 0)
     {
@@ -39,6 +38,9 @@ HRESULT Library_corlib_native_System_Reflection_ConstructorInfo::Invoke___OBJECT
             args = (CLR_RT_HeapBlock *)pArray->GetFirstElement();
             ArgumentsCount = pArray->m_numOfElements;
         }
+
+        NANOCLR_CHECK_HRESULT(
+            Library_corlib_native_System_Reflection_MethodBase::CheckInvokeArguments(md, args, ArgumentsCount));
 
         NANOCLR_CHECK_HRESULT(stack.MakeCall(md, nullptr, args, ArgumentsCount));
     }

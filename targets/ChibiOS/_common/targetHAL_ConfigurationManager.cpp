@@ -20,92 +20,118 @@ static uint32_t GetConfigBlockAlignment()
 #elif defined(STM32L475xx)
     // 8 bytes - STM32L4 flash can only be programmed in double-word units
     return 8U;
+#elif defined(STM32H7XX)
+    // 32 bytes - STM32H7 flash can only be programmed in flash word (256 bits) units
+    return 32U;
 #else
     // default to byte alignment
     return 1U;
 #endif
 }
 
-// updates the end address of the used config data with the end address of the block, if that's higher
-static void UpdateConfigDataEnd(uint32_t *dataEnd, const void *block, uint32_t blockSize)
+static uint32_t GetStoredConfigBlockSize(const uint8_t *block, uint32_t remainingSize)
 {
-    uint32_t blockAddress = (uint32_t)block;
-    uint32_t configEnd = (uint32_t)&__nanoConfig_end__;
-
-    // a block can't go beyond the end of the config sector
-    uint32_t blockEnd = (blockSize > configEnd - blockAddress) ? configEnd : blockAddress + blockSize;
-
-    if (blockEnd > *dataEnd)
+    if (memcmp(block, c_MARKER_CONFIGURATION_NETWORK_V1, 4) == 0)
     {
-        *dataEnd = blockEnd;
+        uint32_t blockSize = sizeof(HAL_Configuration_NetworkInterface);
+        return blockSize > remainingSize ? remainingSize : blockSize;
     }
+
+    if (memcmp(block, c_MARKER_CONFIGURATION_WIRELESS80211_V1, 4) == 0)
+    {
+        uint32_t blockSize = sizeof(HAL_Configuration_Wireless80211);
+        return blockSize > remainingSize ? remainingSize : blockSize;
+    }
+
+    if (memcmp(block, c_MARKER_CONFIGURATION_WIRELESS_AP_V1, 4) == 0)
+    {
+        uint32_t blockSize = sizeof(HAL_Configuration_WirelessAP);
+        return blockSize > remainingSize ? remainingSize : blockSize;
+    }
+
+    if (memcmp(block, c_MARKER_CONFIGURATION_X509CAROOTBUNDLE_V1, 4) == 0)
+    {
+        uint32_t headerSize = offsetof(HAL_Configuration_X509CaRootBundle, Certificate);
+        if (remainingSize < headerSize)
+        {
+            return remainingSize;
+        }
+
+        uint32_t certificateSize = ((const HAL_Configuration_X509CaRootBundle *)block)->CertificateSize;
+        return certificateSize > remainingSize - headerSize ? remainingSize : headerSize + certificateSize;
+    }
+
+    if (memcmp(block, c_MARKER_CONFIGURATION_X509DEVICECERTIFICATE_V1, 4) == 0)
+    {
+        uint32_t headerSize = offsetof(HAL_Configuration_X509DeviceCertificate, Certificate);
+        if (remainingSize < headerSize)
+        {
+            return remainingSize;
+        }
+
+        uint32_t certificateSize = ((const HAL_Configuration_X509DeviceCertificate *)block)->CertificateSize;
+        return certificateSize > remainingSize - headerSize ? remainingSize : headerSize + certificateSize;
+    }
+
+    if (memcmp(block, c_MARKER_CONFIGURATION_WPAUTHTOKEN_V1, 4) == 0)
+    {
+        uint32_t blockSize = sizeof(HAL_Configuration_WPAuthToken);
+        return blockSize > remainingSize ? remainingSize : blockSize;
+    }
+
+    return 0;
 }
 
 uint32_t GetExistingConfigSize()
 {
     uint32_t alignment = GetConfigBlockAlignment();
-    uint32_t dataEnd = (uint32_t)&__nanoConfig_start__;
+    uint32_t configStart = (uint32_t)&__nanoConfig_start__;
+    uint32_t configEnd = (uint32_t)&__nanoConfig_end__;
+    uint32_t configSize = configEnd - configStart;
+    uint32_t dataEnd = configStart;
 
-    // the size of the existing config is given by the highest end address of all the enumerated blocks
-    if (g_TargetConfiguration.NetworkInterfaceConfigs != NULL)
+    // Scan stored blocks directly so blocks omitted from target enumeration are preserved.
+    for (uint32_t offset = 0; configSize >= 4 && offset <= configSize - 4;)
     {
-        for (uint32_t i = 0; i < g_TargetConfiguration.NetworkInterfaceConfigs->Count; i++)
-        {
-            UpdateConfigDataEnd(
-                &dataEnd,
-                g_TargetConfiguration.NetworkInterfaceConfigs->Configs[i],
-                sizeof(HAL_Configuration_NetworkInterface));
-        }
-    }
+        uint32_t address = configStart + offset;
+        uint32_t blockSize = GetStoredConfigBlockSize((const uint8_t *)address, configSize - offset);
 
-    if (g_TargetConfiguration.Wireless80211Configs != NULL)
-    {
-        for (uint32_t i = 0; i < g_TargetConfiguration.Wireless80211Configs->Count; i++)
+        if (blockSize == 0)
         {
-            UpdateConfigDataEnd(
-                &dataEnd,
-                g_TargetConfiguration.Wireless80211Configs->Configs[i],
-                sizeof(HAL_Configuration_Wireless80211));
+            offset++;
+            continue;
         }
-    }
 
-    if (g_TargetConfiguration.WirelessAPConfigs != NULL)
-    {
-        for (uint32_t i = 0; i < g_TargetConfiguration.WirelessAPConfigs->Count; i++)
-        {
-            UpdateConfigDataEnd(
-                &dataEnd,
-                g_TargetConfiguration.WirelessAPConfigs->Configs[i],
-                sizeof(HAL_Configuration_WirelessAP));
-        }
-    }
-
-    if (g_TargetConfiguration.CertificateStore != NULL)
-    {
-        for (uint32_t i = 0; i < g_TargetConfiguration.CertificateStore->Count; i++)
-        {
-            UpdateConfigDataEnd(
-                &dataEnd,
-                g_TargetConfiguration.CertificateStore->Certificates[i],
-                offsetof(HAL_Configuration_X509CaRootBundle, Certificate) +
-                    g_TargetConfiguration.CertificateStore->Certificates[i]->CertificateSize);
-        }
-    }
-
-    if (g_TargetConfiguration.DeviceCertificates != NULL)
-    {
-        for (uint32_t i = 0; i < g_TargetConfiguration.DeviceCertificates->Count; i++)
-        {
-            UpdateConfigDataEnd(
-                &dataEnd,
-                g_TargetConfiguration.DeviceCertificates->Certificates[i],
-                offsetof(HAL_Configuration_X509DeviceCertificate, Certificate) +
-                    g_TargetConfiguration.DeviceCertificates->Certificates[i]->CertificateSize);
-        }
+        dataEnd = address + blockSize;
+        offset += blockSize;
     }
 
     // round up to the target alignment
-    return ((dataEnd - (uint32_t)&__nanoConfig_start__ + alignment - 1) / alignment) * alignment;
+    return ((dataEnd - configStart + alignment - 1) / alignment) * alignment;
+}
+
+// gets the size of the configuration block to be stored, 0 for configuration options that can't be updated
+static uint32_t GetConfigurationBlockSize(void *configurationBlock, DeviceConfigurationOption configuration)
+{
+    switch (configuration)
+    {
+        case DeviceConfigurationOption_Network:
+            return sizeof(HAL_Configuration_NetworkInterface);
+
+        case DeviceConfigurationOption_Wireless80211Network:
+            return sizeof(HAL_Configuration_Wireless80211);
+
+        case DeviceConfigurationOption_X509CaRootBundle:
+            return offsetof(HAL_Configuration_X509CaRootBundle, Certificate) +
+                   ((HAL_Configuration_X509CaRootBundle *)configurationBlock)->CertificateSize;
+
+        case DeviceConfigurationOption_X509DeviceCertificates:
+            return offsetof(HAL_Configuration_X509DeviceCertificate, Certificate) +
+                   ((HAL_Configuration_X509DeviceCertificate *)configurationBlock)->CertificateSize;
+
+        default:
+            return 0;
+    }
 }
 
 // initialization of configuration manager
@@ -167,33 +193,7 @@ __nfweak void ConfigurationManager_EnumerateConfigurationBlocks()
                 (uint32_t)&__nanoConfig_start__,
                 (uint32_t)&__nanoConfig_end__);
 
-        // check wireless configs count — create a default if none exist
-        if (networkWirelessConfigs->Count == 0)
-        {
-            HAL_Configuration_Wireless80211 *wirelessConfig =
-                (HAL_Configuration_Wireless80211 *)platform_malloc(sizeof(HAL_Configuration_Wireless80211));
-
-            if (wirelessConfig != NULL)
-            {
-                InitialiseWirelessDefaultConfig(wirelessConfig, 0);
-
-                ConfigurationManager_StoreConfigurationBlock(
-                    wirelessConfig,
-                    DeviceConfigurationOption_Wireless80211Network,
-                    0,
-                    sizeof(HAL_Configuration_Wireless80211),
-                    0,
-                    false);
-
-                // re-enumerate to pick it up
-                networkWirelessConfigs = (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)
-                    ConfigurationManager_FindNetworkWireless80211ConfigurationBlocks(
-                        (uint32_t)&__nanoConfig_start__,
-                        (uint32_t)&__nanoConfig_end__);
-
-                platform_free(wirelessConfig);
-            }
-        }
+        // wireless station profiles are not created by default: a device can have none
 
         // find X509 CA certificate blocks
         HAL_CONFIGURATION_X509_CERTIFICATE *certificateStore =
@@ -204,6 +204,12 @@ __nfweak void ConfigurationManager_EnumerateConfigurationBlocks()
         // find X509 device certificate blocks
         HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *deviceCertificates = (HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *)
             ConfigurationManager_FindX509DeviceCertificatesConfigurationBlocks(
+                (uint32_t)&__nanoConfig_start__,
+                (uint32_t)&__nanoConfig_end__);
+
+        // find Wire Protocol authentication token configuration blocks
+        HAL_CONFIGURATION_WPAUTHTOKEN *wpAuthTokenConfigs =
+            (HAL_CONFIGURATION_WPAUTHTOKEN *)ConfigurationManager_FindWPAuthTokenConfigurationBlocks(
                 (uint32_t)&__nanoConfig_start__,
                 (uint32_t)&__nanoConfig_end__);
 
@@ -219,6 +225,9 @@ __nfweak void ConfigurationManager_EnumerateConfigurationBlocks()
                                               certificateStore->Count * sizeof(certificateStore->Certificates[0]);
         uint32_t sizeOfX509DeviceCertificate = offsetof(HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE, Certificates) +
                                                deviceCertificates->Count * sizeof(deviceCertificates->Certificates[0]);
+        uint32_t countOfWPAuthTokenConfigs = wpAuthTokenConfigs != NULL ? wpAuthTokenConfigs->Count : 0;
+        uint32_t sizeOfWPAuthTokenConfigs = offsetof(HAL_CONFIGURATION_WPAUTHTOKEN, Configs) +
+                                            countOfWPAuthTokenConfigs * sizeof(wpAuthTokenConfigs->Configs[0]);
 
         g_TargetConfiguration.NetworkInterfaceConfigs =
             (HAL_CONFIGURATION_NETWORK *)platform_malloc(sizeOfNetworkInterfaceConfigs);
@@ -228,6 +237,8 @@ __nfweak void ConfigurationManager_EnumerateConfigurationBlocks()
             (HAL_CONFIGURATION_X509_CERTIFICATE *)platform_malloc(sizeOfX509CertificateStore);
         g_TargetConfiguration.DeviceCertificates =
             (HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *)platform_malloc(sizeOfX509DeviceCertificate);
+        g_TargetConfiguration.WPAuthTokenConfigs =
+            (HAL_CONFIGURATION_WPAUTHTOKEN *)platform_malloc(sizeOfWPAuthTokenConfigs);
 
         // copy structs to g_TargetConfiguration
         memcpy(
@@ -246,12 +257,28 @@ __nfweak void ConfigurationManager_EnumerateConfigurationBlocks()
             (HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *)g_TargetConfiguration.DeviceCertificates,
             deviceCertificates,
             sizeOfX509DeviceCertificate);
+        if (g_TargetConfiguration.WPAuthTokenConfigs != NULL)
+        {
+            if (wpAuthTokenConfigs != NULL)
+            {
+                memcpy(
+                    (HAL_CONFIGURATION_WPAUTHTOKEN *)g_TargetConfiguration.WPAuthTokenConfigs,
+                    wpAuthTokenConfigs,
+                    sizeOfWPAuthTokenConfigs);
+            }
+            else
+            {
+                // couldn't enumerate, there is no token block
+                memset(g_TargetConfiguration.WPAuthTokenConfigs, 0, sizeOfWPAuthTokenConfigs);
+            }
+        }
 
         // now free the memory of the original structs
         platform_free(networkConfigs);
         platform_free(networkWirelessConfigs);
         platform_free(certificateStore);
         platform_free(deviceCertificates);
+        platform_free(wpAuthTokenConfigs);
     }
     else
     {
@@ -334,6 +361,27 @@ __nfweak bool ConfigurationManager_GetConfigurationBlock(
         sizeOfBlock = offsetof(HAL_Configuration_X509DeviceCertificate, Certificate);
         sizeOfBlock += ((HAL_Configuration_X509DeviceCertificate *)blockAddress)->CertificateSize;
     }
+    else if (configuration == DeviceConfigurationOption_WPAuthToken)
+    {
+        if (g_TargetConfiguration.WPAuthTokenConfigs == nullptr ||
+            g_TargetConfiguration.WPAuthTokenConfigs->Count == 0 ||
+            (configurationIndex + 1) > g_TargetConfiguration.WPAuthTokenConfigs->Count)
+        {
+            return FALSE;
+        }
+
+        // set block size
+        sizeOfBlock = sizeof(HAL_Configuration_WPAuthToken);
+
+        // get block address
+        blockAddress = (uint8_t *)g_TargetConfiguration.WPAuthTokenConfigs->Configs[configurationIndex];
+
+        // a block that goes beyond the end of the configuration region is not complete
+        if ((uint32_t)blockAddress + sizeOfBlock > (uint32_t)&__nanoConfig_end__)
+        {
+            return FALSE;
+        }
+    }
     else
     {
         // unknown or unsupported configuration option
@@ -410,25 +458,16 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
             (g_TargetConfiguration.Wireless80211Configs->Count == 0 && configurationIndex == 0))
         {
             // no wireless config block exists yet, storing the first one
-            // scan flash to find the end of existing config data (network configs come first)
-            HAL_CONFIGURATION_NETWORK *existingNet =
-                (HAL_CONFIGURATION_NETWORK *)ConfigurationManager_FindNetworkConfigurationBlocks(
-                    (uint32_t)&__nanoConfig_start__,
-                    (uint32_t)&__nanoConfig_end__);
-            uint32_t existingSize = existingNet->Count * sizeof(HAL_Configuration_NetworkInterface);
-            platform_free(existingNet);
+            storageAddress = (uint32_t)&__nanoConfig_start__ + GetExistingConfigSize();
 
-#if defined(RP2040) || defined(RP2350)
-            // round up to 256 bytes - RP2040/RP2350 flash program granularity
-            existingSize = (existingSize + 255U) & ~255U;
-#elif defined(STM32L475xx)
-            // round up to 8 bytes - STM32L4 flash can only be programmed in double-word units
-            existingSize = (existingSize + 7U) & ~7U;
-#else
-            // default to byte alignment
-#endif
+            // check if there is room for it
+            if (storageAddress >= (uint32_t)&__nanoConfig_end__ ||
+                ((uint32_t)&__nanoConfig_end__ - storageAddress) < sizeof(HAL_Configuration_Wireless80211))
+            {
+                // not enough room
+                return FALSE;
+            }
 
-            storageAddress = (uint32_t)&__nanoConfig_start__ + existingSize;
             isInitialAllocation = TRUE;
         }
         else if (
@@ -557,14 +596,16 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
     {
         // particular situation where we are receiving the full configuration block
 
-        // set storage address as the start of the flash configuration sector, plus the requested offset
-        storageAddress = (ByteAddress)&__nanoConfig_start__ + offset;
+        uint32_t configSize = (uint32_t)&__nanoConfig_end__ - (uint32_t)&__nanoConfig_start__;
 
-        // for save all the block size has to be provided, check that
-        if (blockSize == 0)
+        // for SAVE ALL the block size has to be provided
+        // sanity checks on offset and size (coming from host)
+        if (blockSize == 0 || offset > configSize || blockSize > configSize - offset)
         {
             return FALSE;
         }
+
+        storageAddress = (ByteAddress)&__nanoConfig_start__ + offset;
     }
 
     if (isInitialAllocation &&
@@ -591,6 +632,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
         platform_free(g_TargetConfiguration.Wireless80211Configs);
         platform_free(g_TargetConfiguration.CertificateStore);
         platform_free(g_TargetConfiguration.DeviceCertificates);
+        platform_free(g_TargetConfiguration.WPAuthTokenConfigs);
 
         // perform enumeration of configuration blocks
         ConfigurationManager_EnumerateConfigurationBlocks();
@@ -632,13 +674,25 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
         (unsigned)(uintptr_t)g_TargetConfiguration.Wireless80211Configs,
         g_TargetConfiguration.Wireless80211Configs ? g_TargetConfiguration.Wireless80211Configs->Count : -1);
 
+    // the copy only has to hold the config data in use plus room for the block being stored, as it can grow
+    // there is no need to copy the whole config sector, which can be larger than the available heap
+    uint32_t alignment = GetConfigBlockAlignment();
+    uint32_t copySize =
+        GetExistingConfigSize() +
+        ((GetConfigurationBlockSize(configurationBlock, configuration) + alignment - 1) / alignment) * alignment;
+
+    if (copySize > (uint32_t)sizeOfConfigSector)
+    {
+        copySize = (uint32_t)sizeOfConfigSector;
+    }
+
     // allocate memory from CRT heap
-    uint8_t *configSectorCopy = (uint8_t *)platform_malloc(sizeOfConfigSector);
+    uint8_t *configSectorCopy = (uint8_t *)platform_malloc(copySize);
 
     if (configSectorCopy != nullptr)
     {
-        // copy config sector from flash to RAM
-        memcpy(configSectorCopy, &__nanoConfig_start__, sizeOfConfigSector);
+        // copy config data in use from flash to RAM
+        memcpy(configSectorCopy, &__nanoConfig_start__, copySize);
 
         // find out the address for the config block to update in the configSectorCopy
         // because we are copying back the config block to flash and just replacing the config block content
@@ -821,9 +875,8 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
         // subtract the start address of config sector to get the offset
         blockOffset = storageAddress - (uint32_t)&__nanoConfig_start__;
 
-        // sanity check of the new and current block sizes against the config sector
-        if (blockSize > (uint32_t)sizeOfConfigSector - blockOffset ||
-            oldBlockSize > (uint32_t)sizeOfConfigSector - blockOffset)
+        // sanity check of the block offset and of the new and current block sizes against the config data copy
+        if (blockOffset > copySize || blockSize > copySize - blockOffset || oldBlockSize > copySize - blockOffset)
         {
             platform_free(configSectorCopy);
 
@@ -839,7 +892,6 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
             // certificate blocks have variable length, so the data following the block has to be moved
             // to close or open the gap, the shift is a multiple of the target alignment so the blocks that follow
             // keep their alignment
-            uint32_t alignment = GetConfigBlockAlignment();
             uint32_t usedSize = GetExistingConfigSize();
             uint32_t shift;
 
@@ -848,17 +900,18 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
                 usedSize = oldTailOffset;
             }
 
-            if (usedSize > (uint32_t)sizeOfConfigSector)
+            if (usedSize > copySize)
             {
-                usedSize = (uint32_t)sizeOfConfigSector;
+                usedSize = copySize;
             }
 
             if (blockSize > oldBlockSize)
             {
                 shift = ((blockSize - oldBlockSize + alignment - 1) / alignment) * alignment;
 
-                // check if the used data plus the size increase still fits in the config sector
-                if (shift > (uint32_t)sizeOfConfigSector - usedSize)
+                // check if the used data plus the size increase still fits in the config data copy
+                // (which is capped to the config sector size)
+                if (shift > copySize - usedSize)
                 {
                     CFGDBG("CFGUPD: no room for block size change\r\n");
                     platform_free(configSectorCopy);
@@ -913,11 +966,12 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
                     (int)blockSize,
                     sizeOfConfigSector);
 
-                // copy the config block copy back to the config block storage
+                // copy the config data back to the config block storage
+                // the rest of the config sector has just been erased
                 if (BlockStorageDevice_Write(
                         device,
                         (uint32_t)&__nanoConfig_start__,
-                        sizeOfConfigSector,
+                        copySize,
                         (unsigned char *)configSectorCopy,
                         true))
                 {
@@ -946,6 +1000,7 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
             platform_free(g_TargetConfiguration.Wireless80211Configs);
             platform_free(g_TargetConfiguration.CertificateStore);
             platform_free(g_TargetConfiguration.DeviceCertificates);
+            platform_free(g_TargetConfiguration.WPAuthTokenConfigs);
 
             // perform enumeration of configuration blocks
             ConfigurationManager_EnumerateConfigurationBlocks();
@@ -953,7 +1008,7 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
     }
     else
     {
-        CFGDBG("CFGUPD: malloc(%d) FAILED\r\n", sizeOfConfigSector);
+        CFGDBG("CFGUPD: malloc(%d) FAILED\r\n", (int)copySize);
     }
 
     CFGDBG("CFGUPD: result=%d\r\n", (int)success);
@@ -998,4 +1053,109 @@ __nfweak void ConfigurationManager_GetSystemSerialNumber(char *serialNumber, siz
     // default serial number on other platforms may be in the same range.
     // Set the first byte to a number that is unique (within the nanoFramework CLR) for STM32.
     serialNumber[0] = 2;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// configuration storage operations
+
+// maximum count of wireless station profiles
+#define CONFIG_MAX_WIRELESS_PROFILES 1
+
+// maximum size of a certificate block, it's received in RAM and the configuration image is built in RAM too
+#ifndef NF_CONFIG_MAX_CERTIFICATE_BLOCK_SIZE
+#define NF_CONFIG_MAX_CERTIFICATE_BLOCK_SIZE (8 * 1024)
+#endif
+
+// writes the configuration image (or part of it) to the configuration flash region
+static bool WriteConfigurationImage(uint32_t offset, const uint8_t *data, uint32_t length, bool eraseFirst)
+{
+    BlockStorageDevice *device = BlockStorageList_GetFirstDevice();
+
+    if (device == nullptr)
+    {
+        return false;
+    }
+
+    if (eraseFirst)
+    {
+        DeviceBlockInfo *blockInfo = BlockStorageDevice_GetDeviceInfo(device);
+        BlockRegionInfo *region = &blockInfo->Regions[0];
+        uint32_t firstBlockIndex = BlockRegionInfo_BlockIndexFromAddress(region, (uint32_t)&__nanoConfig_start__);
+
+        // erase all the blocks of the configuration region
+        for (uint32_t eraseAddress = BlockRegionInfo_BlockAddress(region, firstBlockIndex);
+             eraseAddress < (uint32_t)&__nanoConfig_end__;
+             eraseAddress += region->BytesPerBlock)
+        {
+            if (!BlockStorageDevice_EraseBlock(device, eraseAddress))
+            {
+                return false;
+            }
+        }
+    }
+
+    return length == 0 || BlockStorageDevice_Write(
+                              device,
+                              (uint32_t)&__nanoConfig_start__ + offset,
+                              length,
+                              (unsigned char *)data,
+                              true);
+}
+
+void ConfigurationManager_GetBlockInfo(DeviceConfigurationOption configuration, HAL_ConfigurationBlockInfo *info)
+{
+    ConfigurationManager_GetFlashBlockInfo(
+        configuration,
+        info,
+        (const uint8_t *)&__nanoConfig_start__,
+        (uint32_t)&__nanoConfig_end__ - (uint32_t)&__nanoConfig_start__,
+        GetConfigBlockAlignment(),
+        CONFIG_MAX_WIRELESS_PROFILES,
+        NF_CONFIG_MAX_CERTIFICATE_BLOCK_SIZE);
+}
+
+void ConfigurationManager_GetStorageInfo(uint32_t *totalSize, uint32_t *freeSize, uint32_t *flags)
+{
+    ConfigurationManager_GetFlashStorageInfo(
+        (const uint8_t *)&__nanoConfig_start__,
+        (uint32_t)&__nanoConfig_end__ - (uint32_t)&__nanoConfig_start__,
+        GetConfigBlockAlignment(),
+        totalSize,
+        freeSize,
+        flags);
+}
+
+ConfigurationOperationError ConfigurationManager_ApplyConfigurationOperation(
+    ConfigurationOperation operation,
+    DeviceConfigurationOption configuration,
+    uint32_t configurationIndex,
+    void *block,
+    uint32_t blockSize)
+{
+    ConfigurationOperationError result = ConfigurationManager_ApplyConfigurationOperationToImage(
+        operation,
+        configuration,
+        configurationIndex,
+        block,
+        blockSize,
+        (const uint8_t *)&__nanoConfig_start__,
+        (uint32_t)&__nanoConfig_end__ - (uint32_t)&__nanoConfig_start__,
+        GetConfigBlockAlignment(),
+        WriteConfigurationImage);
+
+    if (result == ConfigurationOperationError_Success)
+    {
+        // blocks may have moved, so the configuration blocks have to be enumerated again
+        // free the current allocation(s)
+        platform_free(g_TargetConfiguration.NetworkInterfaceConfigs);
+        platform_free(g_TargetConfiguration.Wireless80211Configs);
+        platform_free(g_TargetConfiguration.CertificateStore);
+        platform_free(g_TargetConfiguration.DeviceCertificates);
+        platform_free(g_TargetConfiguration.WPAuthTokenConfigs);
+
+        // perform enumeration of configuration blocks
+        ConfigurationManager_EnumerateConfigurationBlocks();
+    }
+
+    return result;
 }

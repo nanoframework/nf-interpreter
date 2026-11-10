@@ -63,4 +63,9 @@ int NF_ESP32_Wait_NetNumber(int num);
 HAL_Configuration_NetworkInterface *NF_ESP32_GetNetworkConfigBlock(int index);
 esp_err_t NF_ESP32_ConfigureNetworkByConfigIndex(int index);
 esp_netif_t *NF_ESP32_GetEspNetif(struct netif *netif);
+
+// Gets the station profile with this Id. If no station profile is stored, gets a default one (that isn't stored), so
+// the station still starts on a device without profiles. The memory has to be freed by the caller.
+HAL_Configuration_Wireless80211 *NF_ESP32_GetWirelessConfigurationFromIdOrDefault(uint32_t configurationId);
+
 #endif // NF_ESP32_NETWORK_H

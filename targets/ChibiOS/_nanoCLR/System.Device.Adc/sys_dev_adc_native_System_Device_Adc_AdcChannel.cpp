@@ -7,7 +7,12 @@
 #include <sys_dev_adc_native_target.h>
 
 // this has to be an array because ChibiOS ADC API expects that
+#if defined(STM32H7XX)
+// DMA buffer, has to be in non cacheable memory
+static adcsample_t sampleBuffer[CACHE_SIZE_ALIGN(adcsample_t, 1 * 1)] __attribute__((section(".nocache")));
+#else
 static adcsample_t sampleBuffer[1 * 1];
+#endif
 
 #ifdef __GNUC__
 #pragma GCC diagnostic push
@@ -81,6 +86,13 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcChannel::NativeReadValue
             break;
 #endif
 
+#if defined(STM32_ADC_USE_ADC12) && STM32_ADC_USE_ADC12
+        // STM32H7 ADC1 is accessed through the ADC12 driver (single mode)
+        case 1:
+            adcDriver = &ADCD1;
+            break;
+#endif
+
 #if defined(STM32_ADC_USE_ADC2) && STM32_ADC_USE_ADC2
         case 2:
             adcDriver = &ADCD2;
@@ -121,6 +133,27 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcChannel::NativeReadValue
     {
         adcRPDisableTS(adcDriver);
     }
+#elif defined(STM32H7XX)
+
+    (void)enableVref;
+
+    // need to setup the conversion group parameters
+    // internal channels (sensor, VREF, VBAT) aren't supported
+    adcgrpcfg1 = {};
+    adcgrpcfg1.circular = FALSE;
+    adcgrpcfg1.num_channels = 1;
+    adcgrpcfg1.end_cb = NULL;
+    adcgrpcfg1.error_cb = NULL; // replace with adcerrorcallback if required for debug
+    adcgrpcfg1.cfgr = ADC_CFGR_RES_12BITS;
+    adcgrpcfg1.pcsel = 1U << adcDefinition.adcChannel;
+    adcgrpcfg1.smpr[0] = adcDefinition.adcChannel < 10 ? (ADC_SMPR_SMP_64P5 << (adcDefinition.adcChannel * 3U)) : 0;
+    adcgrpcfg1.smpr[1] =
+        adcDefinition.adcChannel >= 10 ? (ADC_SMPR_SMP_64P5 << ((adcDefinition.adcChannel - 10) * 3U)) : 0;
+    adcgrpcfg1.sqr[0] = ADC_SQR1_SQ1_N(adcDefinition.adcChannel);
+
+    // perform the conversion
+    adcConvert(adcDriver, &adcgrpcfg1, sampleBuffer, 1);
+
 #else
     enableVref = (adcDefinition.adcChannel == ADC_CHANNEL_SENSOR) | (adcDefinition.adcChannel == ADC_CHANNEL_VREFINT) |
                  (adcDefinition.adcChannel == ADC_CHANNEL_VBAT);

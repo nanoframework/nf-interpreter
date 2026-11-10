@@ -54,7 +54,9 @@ void app_main()
     vTaskPrioritySet(NULL, taskPriority);
 
     // start receiver task pinned to core 0
-    xTaskCreatePinnedToCore(&receiver_task, "ReceiverThread", 3072, NULL, taskPriority, NULL, 0);
+    // the wire protocol commands run in this task, including the configuration writes to littlefs, which
+    // need a deep stack (about 3.3 KB measured on ESP32-S3)
+    xTaskCreatePinnedToCore(&receiver_task, "ReceiverThread", 4608, NULL, taskPriority, NULL, 0);
 
     // start the CLR main task pinned to core 1
     xTaskCreatePinnedToCore(&main_task, "main_task", 15000, NULL, taskPriority, NULL, 1);

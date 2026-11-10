@@ -27,6 +27,7 @@ static uint8_t _rxState;
 static uint8_t *_pos;
 static uint32_t _size;
 static WP_Message _inboundMessage;
+static volatile bool _resetRequested = false;
 
 #if defined(TRACE_MASK) && (TRACE_MASK & TRACE_VERBOSE) != 0
 // used WP_Message_Process() and methods it calls to avoid flooding TRACE
@@ -73,17 +74,29 @@ bool IsMarkerMatched(void *header, const void *marker, size_t len)
 bool SyncToMessageStart()
 {
     uint32_t len;
+    uint32_t headerSize = sizeof(_inboundMessage.m_header);
 
     while (true)
     {
-        len = sizeof(_inboundMessage.m_header) - _size;
-
-        if (len <= 0)
+        if (_size > headerSize)
         {
-            break;
+            TRACE(
+                TRACE_ERRORS,
+                "RxError: Invalid receive size while syncing to packet start (%u > %u)\n",
+                _size,
+                headerSize);
+            return false;
         }
 
-        size_t lenCmp = min(len, sizeof(((WP_Packet *)0)->m_signature));
+        len = headerSize - _size;
+
+        if (len == 0)
+        {
+            TRACE(TRACE_ERRORS, "RxError: Packet marker not found while resyncing to message start\n");
+            return false;
+        }
+
+        size_t lenCmp = min((size_t)len, sizeof(((WP_Packet *)0)->m_signature));
 
         if (IsMarkerMatched(&_inboundMessage.m_header, MARKER_DEBUGGER_V1, lenCmp) ||
             IsMarkerMatched(&_inboundMessage.m_header, MARKER_PACKET_V1, lenCmp))
@@ -97,7 +110,8 @@ bool SyncToMessageStart()
         size_t moveLength = len - 1;
 
         // Ensure that the memory regions do not exceed allocated bounds
-        if ((src + moveLength >= (uint8_t *)&_inboundMessage + sizeof(_inboundMessage)) ||
+        if (moveLength > sizeof(_inboundMessage.m_header) - 1 ||
+            (src + moveLength >= (uint8_t *)&_inboundMessage + sizeof(_inboundMessage)) ||
             (dst + moveLength >= (uint8_t *)&_inboundMessage + sizeof(_inboundMessage)))
         {
             return false;
@@ -107,11 +121,14 @@ bool SyncToMessageStart()
         memmove(dst, src, moveLength);
 
         // Update pointer and expected size
-        _pos--;
+        if (_pos != NULL)
+        {
+            _pos--;
+        }
         _size++;
 
         // Sanity checks
-        if (_size > sizeof(_inboundMessage.m_header) || _pos < (uint8_t *)&_inboundMessage.m_header)
+        if (_size > headerSize || (_pos != NULL && _pos < (uint8_t *)&_inboundMessage.m_header))
         {
             return false;
         }
@@ -184,6 +201,11 @@ void WP_Message_PrepareReception()
 
     // platform initializations
     WP_Message_PrepareReception_Platform();
+}
+
+void WP_Message_ResetReception()
+{
+    _resetRequested = true;
 }
 
 void WP_Message_PrepareRequest(
@@ -324,6 +346,11 @@ void WP_Message_Process()
 
     while (true)
     {
+        if (_resetRequested)
+        {
+            _resetRequested = false;
+            _rxState = ReceiveState_Initialize;
+        }
 
 #if !defined(VIRTUAL_DEVICE)
         ASSERT(_rxState >= ReceiveState_Idle && _rxState <= ReceiveState_CompletePayload);

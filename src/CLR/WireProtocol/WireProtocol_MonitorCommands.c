@@ -3,6 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
+#include <string.h>
 #include <nanoWeak.h>
 #include "WireProtocol_MonitorCommands.h"
 #include <nanoPAL_BlockStorage.h>
@@ -91,9 +92,15 @@ int Monitor_ReadMemory(WP_Message *message)
         len = sizeof(buf);
     uint32_t errorCode;
 
-    AccessMemory(cmd->address, len, buf, AccessMemory_Read, &errorCode);
+    bool readOk = AccessMemory(cmd->address, len, buf, AccessMemory_Read, &errorCode);
 
-    WP_ReplyToCommand(message, true, false, buf, len);
+    if (!readOk)
+    {
+        // never send uninitialized or partial data when the read is refused or fails
+        memset(buf, 0, sizeof(buf));
+    }
+
+    WP_ReplyToCommand(message, readOk, false, buf, len);
 
     return true;
 }
@@ -173,7 +180,15 @@ int Monitor_QueryConfiguration(WP_Message *message)
                 size = sizeof(HAL_Configuration_Wireless80211);
                 success = true;
 
+                // passwords can't be read back
+                memset(
+                    configWireless80211NetworkInterface.Password,
+                    0,
+                    sizeof(configWireless80211NetworkInterface.Password));
+
                 WP_ReplyToCommand(message, success, false, (uint8_t *)&configWireless80211NetworkInterface, size);
+
+                memset(&configWireless80211NetworkInterface, 0, sizeof(configWireless80211NetworkInterface));
             }
             break;
 
@@ -189,55 +204,6 @@ int Monitor_QueryConfiguration(WP_Message *message)
     {
         WP_ReplyToCommand(message, success, false, NULL, size);
     }
-
-#else
-
-    (void)message;
-
-#endif // CONFIG_NF_FEATURE_HAS_CONFIG_BLOCK
-
-    return success;
-}
-
-int Monitor_UpdateConfiguration(WP_Message *message)
-{
-    bool success = false;
-
-    // include handling of configuration block only if feature is available
-#if CONFIG_NF_FEATURE_HAS_CONFIG_BLOCK
-
-    Monitor_UpdateConfiguration_Command *cmd = (Monitor_UpdateConfiguration_Command *)message->m_payload;
-    Monitor_UpdateConfiguration_Reply cmdReply;
-
-    switch ((DeviceConfigurationOption)cmd->Configuration)
-    {
-        case DeviceConfigurationOption_Network:
-        case DeviceConfigurationOption_Wireless80211Network:
-        case DeviceConfigurationOption_X509CaRootBundle:
-        case DeviceConfigurationOption_X509DeviceCertificates:
-        case DeviceConfigurationOption_All:
-            if (ConfigurationManager_StoreConfigurationBlock(
-                    cmd->Data,
-                    (DeviceConfigurationOption)cmd->Configuration,
-                    cmd->BlockIndex,
-                    cmd->Length,
-                    cmd->Offset,
-                    cmd->Done) == true)
-            {
-                cmdReply.ErrorCode = 0;
-                success = true;
-            }
-            else
-            {
-                cmdReply.ErrorCode = 100;
-            }
-            break;
-
-        default:
-            cmdReply.ErrorCode = 10;
-    }
-
-    WP_ReplyToCommand(message, success, false, &cmdReply, sizeof(cmdReply));
 
 #else
 

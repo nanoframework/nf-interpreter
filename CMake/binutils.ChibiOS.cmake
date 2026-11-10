@@ -90,7 +90,7 @@ macro(nf_add_platform_packages)
     if(TARGET_VENDOR STREQUAL "ST")
         # littlefs
         if(NF_FEATURE_USE_LITTLEFS_OPTION)
-            find_package(STM32F7_CubePackage REQUIRED QUIET)
+            find_package(${TARGET_STM32_CUBE_PACKAGE}_CubePackage REQUIRED QUIET)
             find_package(LITTLEFS REQUIRED QUIET)
         endif()
 

@@ -15,6 +15,9 @@
 // HAL/PAL headers needed for nanoHAL_Initialize / HAL_CONTINUATION.
 #include <nanoHAL.h>
 #include <nanoPAL_Events.h>
+#if NANOCLR_USE_HOST_OS_SOCKETS
+#include <nanoPAL.h>
+#endif
 
 // Forward declaration — defined in CLRStartup.cpp.
 extern "C" void ClrExit();
@@ -148,11 +151,17 @@ void nanoHAL_Initialize()
     HAL_CONTINUATION::InitializeList();
     HAL_COMPLETION::InitializeList();
     Events_Initialize();
+
+    // configuration blocks, kept in RAM
+    ConfigurationManager_Initialize();
 }
 
 void nanoHAL_Uninitialize(bool isPoweringDown)
 {
     (void)isPoweringDown;
+#if NANOCLR_USE_HOST_OS_SOCKETS
+    SOCKETS_CloseConnections();
+#endif
     Events_Uninitialize();
     HAL_CONTINUATION::Uninitialize();
     HAL_COMPLETION::Uninitialize();

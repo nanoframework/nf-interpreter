@@ -356,6 +356,7 @@ struct CLR_RT_TypeDescriptor;
 
 struct CLR_RT_Assembly_Instance;
 struct CLR_RT_TypeSpec_Instance;
+struct CLR_RT_GenericInstance;
 struct CLR_RT_TypeDef_Instance;
 struct CLR_RT_MethodDef_Instance;
 struct CLR_RT_FieldDef_Instance;
@@ -669,6 +670,14 @@ struct CLR_RT_TypeSpec_Index
     {
         return (CLR_INDEX)(data);
     }
+
+    // A closed instantiation with no TypeSpec row, see CLAUDE.md "Runtime-closed instantiations".
+    static const CLR_UINT32 c_RuntimeAssembly = 0xFF;
+
+    bool IsRuntime() const
+    {
+        return (data >> 24) == c_RuntimeAssembly;
+    }
 };
 
 struct CLR_RT_TypeDef_Index
@@ -849,7 +858,13 @@ struct CLR_RT_ReflectionDef_Index
 {
     // CLR_ReflectionType
     CLR_UINT16 kind;
-    CLR_UINT16 levels;
+
+    union {
+        // array levels of a type
+        CLR_UINT16 levels;
+        // method, constructor and field: registry slot + 1 of the owner's closed generic type, 0 if none
+        CLR_UINT16 genericOwner;
+    };
 
     union {
         CLR_RT_Assembly_Index assembly;
@@ -867,6 +882,8 @@ struct CLR_RT_ReflectionDef_Index
     CLR_UINT32 GetTypeHash() const;
 
     void InitializeFromHash(CLR_UINT32 hash);
+
+    bool GetGenericOwner(CLR_RT_TypeSpec_Index &typeSpec) const;
 
     CLR_UINT64 GetRawData() const;
     void SetRawData(CLR_UINT64 data);
@@ -915,6 +932,8 @@ struct CLR_RT_TypeDef_CrossReference
     static const CLR_UINT32 TD_CR_StaticConstructorCalled = 0x0001;
     static const CLR_UINT32 TD_CR_HasFinalizer = 0x0002;
     static const CLR_UINT32 TD_CR_IsMarshalByRefObject = 0x0004;
+    static const CLR_UINT32 TD_CR_StaticConstructorRunning = 0x0008;
+    static const CLR_UINT32 TD_CR_StaticConstructorFailed = 0x0010;
 
     CLR_UINT16 flags;
     CLR_INDEX totalFields;
@@ -977,17 +996,9 @@ struct CLR_RT_TypeSpec_CrossReference
     CLR_RT_TypeSpec_Index genericType;
     CLR_RT_TypeDef_Index ownerType;
 
-    /// @brief Array of static fields (one entry per bound static field)
+    /// @brief Instantiation of a closed row, set on first use. Never set for an open row.
     ///
-    CLR_RT_HeapBlock *genericStaticFields;
-
-    /// @brief Array of indices (one entry per bound static field, parallel with genericStaticFields)
-    ///
-    CLR_RT_FieldDef_Index *genericStaticFieldDefs;
-
-    /// @brief Number of static fields
-    ///
-    CLR_UINT32 genericStaticFieldsCount;
+    CLR_RT_GenericInstance *genericInstance;
 };
 
 struct CLR_RT_MethodDef_Patch
@@ -1190,6 +1201,7 @@ struct CLR_RT_SignatureParser
     static const int c_GenericParamType = 6;
     static const int c_MethodSpec = 7;
     static const int c_LocalVar = 8;
+    static const int c_RuntimeTypeSpec = 9;
 
     struct Element
     {
@@ -1236,6 +1248,9 @@ struct CLR_RT_SignatureParser
     /// Always reset to false by every Initialize_* function.
     bool m_pendingGenericInst;
 
+    /// @brief Nodes left to read in c_RuntimeTypeSpec mode.
+    CLR_UINT8 m_runtimeNodesLeft;
+
     //--//
 
     void Initialize_TypeSpec(CLR_RT_Assembly *assm, CLR_PMETADATA ts);
@@ -1265,6 +1280,9 @@ struct CLR_RT_SignatureParser
     }
 
     HRESULT Advance(Element &res);
+
+    /// @brief Advances over one whole parameter, returning a generic instantiation as a single element.
+    HRESULT AdvanceParameter(Element &res);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1454,17 +1472,9 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     HRESULT ResolveComputeHashes();
     HRESULT ResolveAllocateStaticFields(CLR_RT_HeapBlock *pStaticFields);
     HRESULT ResolveAllocateGenericTypeStaticFields();
-    CLR_RT_HeapBlock *GetGenericStaticField(
-        const CLR_RT_TypeSpec_Index &typeSpecIndex,
-        const CLR_RT_FieldDef_Index &fdIndex);
     CLR_RT_HeapBlock *GetStaticFieldByFieldDef(
         const CLR_RT_FieldDef_Index &fdIndex,
         const CLR_RT_TypeSpec_Index *genericType,
-        const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr,
-        const CLR_RT_MethodDef_Instance *contextMethod = nullptr);
-    HRESULT AllocateGenericStaticFieldsOnDemand(
-        const CLR_RT_TypeSpec_Index &typeSpecIndex,
-        const CLR_RT_TypeDef_Instance &genericTypeDef,
         const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr,
         const CLR_RT_MethodDef_Instance *contextMethod = nullptr);
     HRESULT PrepareForExecution();
@@ -2006,33 +2016,55 @@ extern const CLR_RT_LogicalOpcodeLookup c_CLR_RT_LogicalOpcodeLookup[];
 
 //--//
 
-struct CLR_RT_GenericStaticFieldRecord
+// One canonical element of a closed instantiation, see CLAUDE.md "Runtime-closed instantiations".
+struct CLR_RT_GenericInstanceNode
 {
-    // Unique identifier for this closed generic type
-    CLR_UINT32 m_hash;
-
-    // Storage for static fields
-    CLR_RT_HeapBlock *m_fields;
-
-    // Field definition mapping
-    CLR_RT_FieldDef_Index *m_fieldDefs;
-
-    // Number of static fields
-    CLR_UINT32 m_count;
+    CLR_RT_TypeDef_Index Class;
+    CLR_UINT8 DataType;
+    CLR_UINT8 Levels;
+    CLR_UINT8 ArgCount;
+    CLR_UINT8 Position;
 };
 
-//--//
+CT_ASSERT(sizeof(CLR_RT_GenericInstanceNode) == 8)
 
-struct CLR_RT_GenericCctorExecutionRecord
+struct CLR_RT_GenericInstance
 {
-    // Unique hash identifier for the closed generic type
-    CLR_UINT32 m_hash;
-
-    // Execution state flags
     static const CLR_UINT8 c_Scheduled = 0x01;
     static const CLR_UINT8 c_Executed = 0x02;
 
+    static const int c_MaxNodes = 16;
+
+    CLR_UINT32 m_hash;
+
+    // closed row or runtime index
+    CLR_RT_TypeSpec_Index m_self;
+
+    // row it was first reached through
+    CLR_RT_TypeSpec_Index m_origin;
+
+    CLR_RT_HeapBlock *m_fields;
+    CLR_RT_FieldDef_Index *m_fieldDefs;
+    CLR_UINT16 m_count;
+
     CLR_UINT8 m_flags;
+    CLR_UINT8 m_nodeCount;
+
+    CLR_RT_GenericInstanceNode m_nodes[1];
+};
+
+struct CLR_RT_GenericTarget
+{
+    CLR_RT_GenericInstanceNode m_nodes[CLR_RT_GenericInstance::c_MaxNodes];
+    int m_count;
+};
+
+enum CLR_RT_GenericMatch
+{
+    GenericMatch_Same,
+    GenericMatch_Different,
+    GenericMatch_NoTypeSpec,
+    GenericMatch_Unresolved,
 };
 
 //--//
@@ -2063,15 +2095,10 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
 
     CLR_RT_MethodDef_Index m_entryPoint;
 
-    // Global registry for generic static fields
-    CLR_RT_GenericStaticFieldRecord *m_genericStaticFields;
-    CLR_UINT32 m_genericStaticFieldsCount;
-    CLR_UINT32 m_genericStaticFieldsMaxCount;
-
-    // Global registry for generic .cctor execution tracking
-    CLR_RT_GenericCctorExecutionRecord *m_genericCctorRegistry;
-    CLR_UINT32 m_genericCctorRegistryCount;
-    CLR_UINT32 m_genericCctorRegistryMaxCount;
+    // Closed generic instantiations: identity, static storage and .cctor state
+    CLR_RT_GenericInstance **m_genericInstances;
+    CLR_UINT32 m_genericInstancesCount;
+    CLR_UINT32 m_genericInstancesMaxCount;
 
     //--//
 
@@ -2180,19 +2207,34 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
     void Dump(const wchar_t *szFileName, bool fNoByteCode);
 #endif
 
-    CLR_RT_GenericStaticFieldRecord *FindOrCreateGenericStaticFields(
-        CLR_UINT32 hash,
-        CLR_RT_Assembly *ownerAssembly,
-        CLR_UINT32 staticFieldCount);
-
-    // Helper to compute hash for a closed generic type
-    static CLR_UINT32 ComputeHashForClosedGenericType(
+    static CLR_RT_GenericInstance *FindOrCreateGenericInstance(
         CLR_RT_TypeSpec_Instance &typeInstance,
         const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr,
-        const CLR_RT_MethodDef_Instance *contextMethod = nullptr);
+        const CLR_RT_MethodDef_Instance *contextMethod = nullptr,
+        HRESULT *result = nullptr,
+        const CLR_RT_TypeDef_Index *mvarFallback = nullptr);
 
-    // Helper to find or create a generic .cctor execution record by hash
-    static CLR_RT_GenericCctorExecutionRecord *FindOrCreateGenericCctorRecord(CLR_UINT32 hash, bool *created);
+    static CLR_RT_GenericInstance *FindOrCreateGenericInstanceByNodes(
+        const CLR_RT_GenericInstanceNode *nodes,
+        int nodeCount,
+        HRESULT *result = nullptr);
+
+    static CLR_RT_GenericInstance *GetGenericInstance(const CLR_RT_TypeSpec_Index &index);
+
+    static CLR_UINT16 GetGenericOwnerSlot(const CLR_RT_TypeSpec_Index &typeSpec);
+    static bool IsSameGenericInstance(const CLR_RT_TypeSpec_Index &left, const CLR_RT_TypeSpec_Index &right);
+
+    static HRESULT CollectGenericTarget(
+        const CLR_RT_SignatureParser &at,
+        const CLR_RT_TypeSpec_Index *contextTypeSpec,
+        const CLR_RT_MethodDef_Instance *contextMethod,
+        CLR_RT_GenericTarget &target);
+
+    static CLR_RT_GenericMatch MatchGenericArguments(const CLR_RT_HeapBlock &ref, const CLR_RT_GenericTarget &target);
+
+    static HRESULT AllocateGenericInstanceStatics(CLR_RT_GenericInstance &instance);
+
+    void TruncateGenericInstances(CLR_UINT32 count);
 
     //--//
 
@@ -2232,6 +2274,7 @@ struct CLR_RT_TypeSpec_Instance : public CLR_RT_TypeSpec_Index
     bool IsClosedGenericType();
 
     bool GetGenericParam(CLR_INT32 parameterPosition, CLR_RT_SignatureParser::Element &element);
+    bool PositionAtGenericParam(CLR_INT32 parameterPosition, CLR_RT_SignatureParser &parser);
 };
 
 //--//
@@ -2419,6 +2462,7 @@ struct CLR_RT_MethodSpec_Instance : public CLR_RT_MethodSpec_Index
     CLR_EncodedMethodDefOrRef InstanceOfMethod;
 
     bool GetGenericArgument(CLR_INT32 argumentPosition, CLR_RT_SignatureParser::Element &element);
+    bool PositionAtGenericArgument(CLR_INT32 argumentPosition, CLR_RT_SignatureParser &parser);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2608,7 +2652,10 @@ struct CLR_RT_TypeDescriptor
     HRESULT InitializeFromType(const CLR_RT_TypeDef_Index &cls);
     HRESULT InitializeFromTypeDef(const CLR_RT_TypeDef_Index &cls);
     HRESULT InitializeFromGenericType(const CLR_RT_TypeSpec_Index &genericType);
-    HRESULT InitializeFromFieldDefinition(const CLR_RT_FieldDef_Instance &fd);
+    HRESULT InitializeFromFieldDefinition(
+        const CLR_RT_FieldDef_Instance &fd,
+        const CLR_RT_TypeSpec_Index *ownerTypeSpec = nullptr);
+    HRESULT InitializeFromClosedSignature(CLR_RT_SignatureParser &parser, const CLR_RT_TypeSpec_Index *ownerTypeSpec);
     HRESULT InitializeFromSignatureParser(
         CLR_RT_SignatureParser &parser,
         const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr);
@@ -3223,7 +3270,7 @@ struct CLR_RT_GarbageCollector
 
     //--//
 
-    static void RelocateGenericStaticField(CLR_RT_GenericStaticFieldRecord *field)
+    static void RelocateGenericStaticField(CLR_RT_GenericInstance *field)
     {
         if (field->m_fields)
         {
@@ -4304,13 +4351,17 @@ struct CLR_RT_ExecutionEngine
         CLR_RT_HeapBlock &ref,
         CLR_RT_SignatureParser &parser,
         const CLR_RT_TypeSpec_Instance *genericInstance = nullptr,
-        bool allowUnresolvedVarFallback = false);
+        bool allowUnresolvedVarFallback = false,
+        const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr,
+        const CLR_RT_MethodSpec_Index *contextMethodSpec = nullptr);
     HRESULT InitializeReference(
         CLR_RT_HeapBlock &ref,
         const CLR_RECORD_FIELDDEF *target,
         CLR_RT_Assembly *assm,
         const CLR_RT_TypeSpec_Instance *genericInstance = nullptr,
-        bool allowUnresolvedVarFallback = false);
+        bool allowUnresolvedVarFallback = false,
+        const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr,
+        const CLR_RT_MethodSpec_Index *contextMethodSpec = nullptr);
 
     HRESULT InitializeLocals(CLR_RT_HeapBlock *locals, const CLR_RT_MethodDef_Instance &methodDefInstance);
 
@@ -4348,14 +4399,13 @@ struct CLR_RT_ExecutionEngine
     HRESULT InitTimeout(CLR_INT64 &timeExpire, const CLR_INT64 &timeout);
     HRESULT InitTimeout(CLR_INT64 &timeExpire, CLR_INT32 timeout);
 
-    static bool IsInstanceOf(CLR_RT_TypeDescriptor &desc, CLR_RT_TypeDescriptor &descTarget, bool isInstInstruction);
+    static bool IsInstanceOf(CLR_RT_TypeDescriptor desc, CLR_RT_TypeDescriptor descTarget);
     static bool IsInstanceOf(const CLR_RT_TypeDef_Index &cls, const CLR_RT_TypeDef_Index &clsTarget);
     static bool IsInstanceOf(CLR_RT_HeapBlock &obj, const CLR_RT_TypeDef_Index &clsTarget);
     static bool IsInstanceOf(
         CLR_RT_HeapBlock &obj,
         CLR_RT_Assembly *assm,
         CLR_UINT32 token,
-        bool isInstInstruction,
         const CLR_RT_MethodDef_Instance *caller = nullptr);
     bool IsInstanceOfToken(CLR_UINT32 token, CLR_RT_HeapBlock &obj, const CLR_RT_MethodDef_Instance &caller);
 
@@ -4407,9 +4457,37 @@ struct CLR_RT_ExecutionEngine
 
     bool IsThereEnoughIdleTime(CLR_UINT32 expectedMsec);
 
+    enum StaticConstructorState : CLR_UINT8
+    {
+        StaticConstructorNotStarted,
+        StaticConstructorRunning,
+        StaticConstructorCompleted,
+        StaticConstructorFailed
+    };
+
     void SpawnTimer();
     void SpawnFinalizer();
     void SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread);
+    HRESULT EnsureStaticConstructorCompleted(CLR_RT_TypeDef_Instance &type, CLR_RT_Thread *thread);
+    HRESULT EnsureGenericStaticConstructorCompleted(const CLR_RT_TypeSpec_Index &typeSpec, CLR_RT_Thread *thread);
+    void CompleteStaticConstructor(CLR_RT_MethodDef_Instance method, CLR_RT_Thread *thread);
+    CLR_UINT8 GetStaticConstructorState(
+        const CLR_RT_TypeDef_Instance &type,
+        CLR_RT_Thread *thread
+#if defined(NANOCLR_APPDOMAINS)
+        ,
+        CLR_RT_AppDomain *appDomain = nullptr
+#endif
+    );
+    void SetStaticConstructorState(
+        const CLR_RT_TypeDef_Instance &type,
+        CLR_RT_Thread *thread,
+        CLR_UINT8 state
+#if defined(NANOCLR_APPDOMAINS)
+        ,
+        CLR_RT_AppDomain *appDomain = nullptr
+#endif
+    );
 #if defined(NANOCLR_APPDOMAINS)
     bool SpawnStaticConstructorHelper(
         CLR_RT_AppDomain *appDomain,

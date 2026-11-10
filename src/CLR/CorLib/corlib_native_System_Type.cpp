@@ -96,6 +96,7 @@ HRESULT Library_corlib_native_System_Type::IsInstanceOfType___BOOLEAN__OBJECT(CL
     CLR_RT_TypeDescriptor descTarget;
     CLR_RT_TypeDescriptor desc{};
     CLR_RT_HeapBlock *hbType = stack.This();
+    bool isInstance;
 
     if (hbType->DataType() != DATATYPE_REFLECTION)
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
@@ -103,7 +104,27 @@ HRESULT Library_corlib_native_System_Type::IsInstanceOfType___BOOLEAN__OBJECT(CL
     NANOCLR_CHECK_HRESULT(descTarget.InitializeFromReflection(hbType->ReflectionDataConst()));
     NANOCLR_CHECK_HRESULT(desc.InitializeFromObject(stack.Arg1()));
 
-    stack.SetResult_Boolean(CLR_RT_ExecutionEngine::IsInstanceOf(desc, descTarget, false));
+    isInstance = CLR_RT_ExecutionEngine::IsInstanceOf(desc, descTarget);
+
+    if (isInstance && hbType->ReflectionDataConst().kind == CLR_ReflectionType::REFLECTION_TYPESPEC)
+    {
+        CLR_RT_TypeSpec_Instance typeSpec{};
+        CLR_RT_SignatureParser parser{};
+        CLR_RT_GenericTarget target;
+
+        if (typeSpec.InitializeFromIndex(hbType->ObjectGenericType()))
+        {
+            parser.Initialize_TypeSpec(typeSpec);
+
+            if (CLR_RT_TypeSystem::CollectGenericTarget(parser, nullptr, nullptr, target) == S_OK &&
+                CLR_RT_TypeSystem::MatchGenericArguments(stack.Arg1(), target) == GenericMatch_Different)
+            {
+                isInstance = false;
+            }
+        }
+    }
+
+    stack.SetResult_Boolean(isInstance);
 
     NANOCLR_NOCLEANUP();
 }
@@ -155,14 +176,19 @@ HRESULT Library_corlib_native_System_Type::GetGenericArguments___SZARRAY_SystemT
         // fill the array with Type objects for each generic argument
         for (int i = 0; i < count; i++)
         {
-            NANOCLR_CHECK_HRESULT(parser.Advance(elem));
+            CLR_RT_SignatureParser argument = parser;
+            CLR_RT_TypeDescriptor argumentType{};
+
+            NANOCLR_CHECK_HRESULT(argumentType.InitializeFromClosedSignature(argument, nullptr));
+
+            parser = argument;
 
             CLR_RT_HeapBlock &slot = pElems[i];
             NANOCLR_CHECK_HRESULT(
                 g_CLR_RT_ExecutionEngine.NewObjectFromIndex(slot, g_CLR_RT_WellKnownTypes.TypeStatic));
 
             CLR_RT_HeapBlock *hbObj = slot.Dereference();
-            hbObj->SetReflection(elem.Class);
+            hbObj->SetReflection(argumentType.m_reflex);
         }
     }
 
@@ -607,6 +633,25 @@ HRESULT Library_corlib_native_System_Type::CheckFlags(CLR_RT_StackFrame &stack, 
     NANOCLR_NOCLEANUP();
 }
 
+static CLR_UINT16 GetOwnerSlot(const CLR_RT_HeapBlock &type)
+{
+    const CLR_RT_ReflectionDef_Index &reflex = type.ReflectionDataConst();
+
+    return reflex.kind == REFLECTION_TYPESPEC ? CLR_RT_TypeSystem::GetGenericOwnerSlot(reflex.data.typeSpec) : 0;
+}
+
+static void SetOwnerSlot(
+    CLR_RT_HeapBlock *member,
+    CLR_UINT16 slot,
+    const CLR_RT_TypeDef_Index &declaring,
+    const CLR_RT_TypeDef_Index &type)
+{
+    if (slot != 0 && declaring.data == type.data)
+    {
+        member->ReflectionData().genericOwner = slot;
+    }
+}
+
 HRESULT Library_corlib_native_System_Type::GetFields(
     CLR_RT_StackFrame &stack,
     const char *szText,
@@ -620,11 +665,14 @@ HRESULT Library_corlib_native_System_Type::GetFields(
     CLR_RT_TypeDef_Instance tdArg;
     int iField;
     CLR_RT_HeapBlock *hbType = stack.This();
+    CLR_UINT16 ownerSlot;
 
     if (bindingFlags == c_BindingFlags_Default)
         bindingFlags = c_BindingFlags_DefaultLookup;
 
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_RuntimeType::GetTypeDescriptor(*hbType, tdArg));
+
+    ownerSlot = GetOwnerSlot(*hbType);
 
     {
         CLR_RT_HeapBlock &top = stack.PushValueAndClear();
@@ -702,6 +750,7 @@ HRESULT Library_corlib_native_System_Type::GetFields(
                             g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.FieldInfo));
                         hbObj = top.Dereference();
                         hbObj->SetReflection(index);
+                        SetOwnerSlot(hbObj, ownerSlot, td, tdArg);
 
                         NANOCLR_SET_AND_LEAVE(S_OK);
                     }
@@ -713,6 +762,7 @@ HRESULT Library_corlib_native_System_Type::GetFields(
                             g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*elem, g_CLR_RT_WellKnownTypes.FieldInfo));
                         hbObj = elem->Dereference();
                         NANOCLR_CHECK_HRESULT(hbObj->SetReflection(index));
+                        SetOwnerSlot(hbObj, ownerSlot, td, tdArg);
                     }
 
                     iField++;
@@ -755,6 +805,7 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
     CLR_RT_HeapBlock *hbType = stack.This();
     bool staticInstanceOnly = false;
+    CLR_UINT16 ownerSlot;
 
     if (bindingFlags == c_BindingFlags_Default)
     {
@@ -768,6 +819,8 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
     }
 
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_RuntimeType::GetTypeDescriptor(*hbType, tdArg));
+
+    ownerSlot = GetOwnerSlot(*hbType);
 
     for (int pass = 0; pass < 2; pass++)
     {
@@ -887,6 +940,7 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                             g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*elem, g_CLR_RT_WellKnownTypes.MethodInfo));
                         hbObj = elem->Dereference();
                         NANOCLR_CHECK_HRESULT(hbObj->SetReflection(index));
+                        SetOwnerSlot(hbObj, ownerSlot, td, tdArg);
 
                         // store token for type
                         hbObj[MethodBase::FIELD___token].NumericByRef().u4 = index.data;
@@ -988,6 +1042,15 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                         g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.MethodInfo));
                     hbObj = top.Dereference();
                     hbObj->SetReflection(inst);
+
+                    {
+                        CLR_RT_TypeDef_Instance declaring{};
+
+                        if (declaring.InitializeFromMethod(inst))
+                        {
+                            SetOwnerSlot(hbObj, ownerSlot, declaring, tdArg);
+                        }
+                    }
 
                     // store token for type
                     hbObj[MethodBase::FIELD___token].NumericByRef().u4 = inst.data;

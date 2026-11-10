@@ -245,10 +245,6 @@ if(RTOS_THREADX_CHECK)
     #     ssl_write_internal.cpp
     # )
 
-    # if(NF_FEATURE_DEBUGGER)
-    #     list(APPEND NF_Network_SRCS Sockets_debugger.cpp)
-    # endif()
-
     # if(USE_SECURITY_MBEDTLS_OPTION)
 
     #     foreach(SRC_FILE ${NF_Network_Security_SRCS})
@@ -318,6 +314,7 @@ else()
 
     # set include directories for nanoFramework network
     list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets)
+    list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Include)
     list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl)
     list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/Lwip)
     list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL)
@@ -404,8 +401,9 @@ else()
         ssl_write_internal.cpp
     )
 
-    if(NF_FEATURE_DEBUGGER AND NOT TARGET_HAS_WIFI_ISM43362)
-        list(APPEND NF_Network_SRCS Sockets_debugger.cpp)
+    # Wire Protocol over network (lwIP)
+    if(NF_WP_CHANNEL_NETWORK)
+        list(APPEND NF_Network_SRCS WireProtocol_Network.cpp)
     endif()
 
     # add Enc28j60source files in two steps

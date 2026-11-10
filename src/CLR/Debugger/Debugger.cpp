@@ -9,6 +9,7 @@
 #include <WireProtocol.h>
 #include <WireProtocol_Message.h>
 #include <WireProtocol_MonitorCommands.h>
+#include <WireProtocol_Transport.h>
 #include "Debugger.h"
 #include <corlib_native.h>
 #include <target_common.h>
@@ -469,6 +470,57 @@ HRESULT CLR_DBG_Debugger::CreateListOfCalls(
 // all Monitor_nnnnnnn, Debugger_nnnnn and Profiller_nnnn handlers have to execute the respective reply
 // if the handler fails to execute, it will return false and then the caller will reply with a failed reply
 
+bool CLR_DBG_Debugger::Monitor_Authenticate(WP_Message *msg)
+{
+    NATIVE_PROFILE_CLR_DEBUGGER();
+
+    // only requests are handled
+    if ((msg->m_header.m_flags & WP_Flags_c_Reply) != 0)
+    {
+        return true;
+    }
+
+    uint32_t result = WP_AuthResult_Ok;
+
+    // a session that doesn't require authentication (serial, or no token set) is always authenticated
+    if (WP_Auth_IsRequired())
+    {
+        uint32_t length = 0;
+        const uint8_t *token = msg->m_payload;
+
+        if (token != nullptr && msg->m_header.m_size >= sizeof(length))
+        {
+            memcpy(&length, token, sizeof(length));
+            token += sizeof(length);
+
+            if (length > msg->m_header.m_size - sizeof(length))
+            {
+                // malformed request, count it as a failure
+                length = WP_AUTH_TOKEN_MAX_LENGTH + 1;
+                token = nullptr;
+            }
+        }
+        else
+        {
+            length = WP_AUTH_TOKEN_MAX_LENGTH + 1;
+            token = nullptr;
+        }
+
+        result = WP_Auth_Verify(token, length);
+    }
+
+    // always acknowledged, the outcome is the result in the payload
+    WP_ReplyToCommand(msg, true, false, &result, sizeof(result));
+
+    if (result == WP_AuthResult_Dropped)
+    {
+        // too many failures
+        WP_Transport_DropClient();
+    }
+
+    return true;
+}
+
 bool CLR_DBG_Debugger::Monitor_Ping(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
@@ -731,13 +783,15 @@ bool CLR_DBG_Debugger::CheckPermission(ByteAddress address, int mode)
     switch (mode)
     {
         case AccessMemory_Check:
-            hasPermission = true;
+            // a CRC of a small range reveals its content, so the configuration region can't be checked either
+            hasPermission = !BlockRange_IsConfig(range);
             break;
         case AccessMemory_Read:
+            // the configuration region can't be read: it holds certificates, private keys and passwords
+            // configuration blocks are managed with Monitor_ConfigurationOperation
             switch (range.RangeType)
             {
                 // fall through
-                case BlockRange_BLOCKTYPE_CONFIG:
                 case BlockRange_BLOCKTYPE_BOOTSTRAP:
                 case BlockRange_BLOCKTYPE_DIRTYBIT:
                 case BlockRange_BLOCKTYPE_FILESYSTEM:
@@ -752,9 +806,14 @@ bool CLR_DBG_Debugger::CheckPermission(ByteAddress address, int mode)
             }
             break;
         case AccessMemory_Write:
-            if (BlockRange_IsDeployment(range) || BlockRange_IsConfig(range))
+            if (BlockRange_IsDeployment(range))
             {
                 hasPermission = true;
+            }
+            else if (BlockRange_IsConfig(range))
+            {
+                // configuration blocks are managed with Monitor_ConfigurationOperation
+                hasPermission = false;
             }
             else
             {
@@ -771,7 +830,6 @@ bool CLR_DBG_Debugger::CheckPermission(ByteAddress address, int mode)
                 case BlockRange_BLOCKTYPE_SIMPLE_A:
                 case BlockRange_BLOCKTYPE_SIMPLE_B:
                 case BlockRange_BLOCKTYPE_UPDATE:
-                case BlockRange_BLOCKTYPE_CONFIG:
                     hasPermission = true;
                     break;
             }
@@ -1103,6 +1161,15 @@ bool CLR_DBG_Debugger::Monitor_ReadMemory(WP_Message *msg)
 
         g_CLR_DBG_Debugger->AccessMemory(cmd->address, len, (buffer + sizeof(uint32_t)), AccessMemory_Read, &errorCode);
 
+        // the reply starts with the error code, so a refused read isn't taken as data
+        memcpy(buffer, &errorCode, sizeof(uint32_t));
+
+        if (errorCode != AccessMemoryErrorCode_NoError)
+        {
+            // don't send back anything that may have been copied before the failure
+            memset(buffer + sizeof(uint32_t), 0, len);
+        }
+
         WP_ReplyToCommand(msg, true, false, buffer, allocationSize);
 
         // free allocated memory
@@ -1263,241 +1330,170 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration(WP_Message *message)
 #if CONFIG_NF_FEATURE_HAS_CONFIG_BLOCK
 
     Monitor_QueryConfiguration_Command *cmd = (Monitor_QueryConfiguration_Command *)message->m_payload;
-    int size = 0;
-    int sizeOfBlock = 0;
+    uint32_t sizeOfBlock;
+    uint8_t *configurationBlock;
+    bool found;
 
-    HAL_Configuration_NetworkInterface *configNetworkInterface;
-    HAL_Configuration_Wireless80211 *configWireless80211NetworkInterface;
-    HAL_Configuration_WirelessAP *configWirelessAPNetworkInterface;
-    HAL_Configuration_X509CaRootBundle *x509Certificate;
-    HAL_Configuration_X509DeviceCertificate *x509DeviceCertificate;
-
+    ///////////////////////////////////////////////////////////////////////////////////////
+    // certificates (and the private keys in the device certificates) can't be read back //
+    ///////////////////////////////////////////////////////////////////////////////////////
     switch ((DeviceConfigurationOption)cmd->Configuration)
     {
         case DeviceConfigurationOption_Network:
-
-            configNetworkInterface =
-                (HAL_Configuration_NetworkInterface *)platform_malloc(sizeof(HAL_Configuration_NetworkInterface));
-
-            // check allocation
-            if (configNetworkInterface != nullptr)
-            {
-
-                memset(configNetworkInterface, 0, sizeof(HAL_Configuration_NetworkInterface));
-
-                if (ConfigurationManager_GetConfigurationBlock(
-                        configNetworkInterface,
-                        (DeviceConfigurationOption)cmd->Configuration,
-                        cmd->BlockIndex) == true)
-                {
-                    size = sizeof(HAL_Configuration_NetworkInterface);
-
-                    WP_ReplyToCommand(message, true, false, (uint8_t *)configNetworkInterface, size);
-                }
-
-                platform_free(configNetworkInterface);
-
-                // done here
-                return true;
-            }
+            sizeOfBlock = sizeof(HAL_Configuration_NetworkInterface);
             break;
 
         case DeviceConfigurationOption_Wireless80211Network:
-
-            configWireless80211NetworkInterface =
-                (HAL_Configuration_Wireless80211 *)platform_malloc(sizeof(HAL_Configuration_Wireless80211));
-
-            // check allocation
-            if (configWireless80211NetworkInterface != nullptr)
-            {
-                memset(configWireless80211NetworkInterface, 0, sizeof(HAL_Configuration_Wireless80211));
-
-                if (ConfigurationManager_GetConfigurationBlock(
-                        configWireless80211NetworkInterface,
-                        (DeviceConfigurationOption)cmd->Configuration,
-                        cmd->BlockIndex) == true)
-                {
-                    size = sizeof(HAL_Configuration_Wireless80211);
-
-                    WP_ReplyToCommand(message, true, false, (uint8_t *)configWireless80211NetworkInterface, size);
-                }
-
-                platform_free(configWireless80211NetworkInterface);
-
-                // done here
-                return true;
-            }
-            break;
-
-        case DeviceConfigurationOption_X509CaRootBundle:
-
-            // check if cert store is empty OR request index doesn't exist
-            // (mind the zero based index)
-            if (g_TargetConfiguration.CertificateStore->Count == 0 ||
-                g_TargetConfiguration.CertificateStore->Count < cmd->BlockIndex + 1)
-            {
-                // we are done here, just send an empty reply
-                return true;
-            }
-            else
-            {
-                // because X509 certificate has a variable length need to compute the block size in two steps
-                sizeOfBlock = offsetof(HAL_Configuration_X509CaRootBundle, Certificate);
-                sizeOfBlock += g_TargetConfiguration.CertificateStore->Certificates[cmd->BlockIndex]->CertificateSize;
-
-                x509Certificate = (HAL_Configuration_X509CaRootBundle *)platform_malloc(sizeOfBlock);
-
-                // check allocation
-                if (x509Certificate != nullptr)
-                {
-                    memset(x509Certificate, 0, sizeof(sizeOfBlock));
-
-                    if (ConfigurationManager_GetConfigurationBlock(
-                            x509Certificate,
-                            (DeviceConfigurationOption)cmd->Configuration,
-                            cmd->BlockIndex) == true)
-                    {
-                        size = sizeOfBlock;
-
-                        WP_ReplyToCommand(message, true, false, (uint8_t *)x509Certificate, size);
-                    }
-
-                    platform_free(x509Certificate);
-
-                    // done here
-                    return true;
-                }
-            }
-
-            break;
-
-        case DeviceConfigurationOption_X509DeviceCertificates:
-
-            // check if device cert store is empty OR request index doesn't exist
-            // (mind the zero based index)
-            if (g_TargetConfiguration.DeviceCertificates->Count == 0 ||
-                g_TargetConfiguration.DeviceCertificates->Count < cmd->BlockIndex + 1)
-            {
-                // we are done here, just send an empty reply
-                return true;
-            }
-            else
-            {
-                // because X509 certificate has a variable length need to compute the block size in two steps
-                sizeOfBlock = offsetof(HAL_Configuration_X509DeviceCertificate, Certificate);
-                sizeOfBlock += g_TargetConfiguration.DeviceCertificates->Certificates[cmd->BlockIndex]->CertificateSize;
-
-                x509DeviceCertificate = (HAL_Configuration_X509DeviceCertificate *)platform_malloc(sizeOfBlock);
-                memset(x509DeviceCertificate, 0, sizeof(sizeOfBlock));
-
-                if (ConfigurationManager_GetConfigurationBlock(
-                        x509DeviceCertificate,
-                        (DeviceConfigurationOption)cmd->Configuration,
-                        cmd->BlockIndex) == true)
-                {
-                    size = sizeOfBlock;
-
-                    WP_ReplyToCommand(message, true, false, (uint8_t *)x509DeviceCertificate, size);
-                }
-
-                platform_free(x509DeviceCertificate);
-
-                // done here
-                return true;
-            }
-
+            sizeOfBlock = sizeof(HAL_Configuration_Wireless80211);
             break;
 
         case DeviceConfigurationOption_WirelessNetworkAP:
-
-            configWirelessAPNetworkInterface =
-                (HAL_Configuration_WirelessAP *)platform_malloc(sizeof(HAL_Configuration_WirelessAP));
-
-            // check allocation
-            if (configWirelessAPNetworkInterface != nullptr)
-            {
-                memset(configWirelessAPNetworkInterface, 0, sizeof(HAL_Configuration_WirelessAP));
-
-                if (ConfigurationManager_GetConfigurationBlock(
-                        configWirelessAPNetworkInterface,
-                        (DeviceConfigurationOption)cmd->Configuration,
-                        cmd->BlockIndex) == true)
-                {
-                    size = sizeof(HAL_Configuration_WirelessAP);
-
-                    WP_ReplyToCommand(message, true, false, (uint8_t *)configWirelessAPNetworkInterface, size);
-                }
-
-                platform_free(configWirelessAPNetworkInterface);
-
-                // done here
-                return true;
-            }
-
+            sizeOfBlock = sizeof(HAL_Configuration_WirelessAP);
             break;
 
         default:
-            break;
+            return false;
     }
+
+    configurationBlock = (uint8_t *)platform_malloc(sizeOfBlock);
+
+    if (configurationBlock == nullptr)
+    {
+        return false;
+    }
+
+    memset(configurationBlock, 0, sizeOfBlock);
+
+    found = ConfigurationManager_GetConfigurationBlock(
+        configurationBlock,
+        (DeviceConfigurationOption)cmd->Configuration,
+        cmd->BlockIndex);
+
+    if (found)
+    {
+        //////////////////////////////////
+        // passwords can't be read back //
+        //////////////////////////////////
+        if ((DeviceConfigurationOption)cmd->Configuration == DeviceConfigurationOption_Wireless80211Network)
+        {
+            memset(
+                ((HAL_Configuration_Wireless80211 *)configurationBlock)->Password,
+                0,
+                sizeof(((HAL_Configuration_Wireless80211 *)configurationBlock)->Password));
+        }
+        else if ((DeviceConfigurationOption)cmd->Configuration == DeviceConfigurationOption_WirelessNetworkAP)
+        {
+            memset(
+                ((HAL_Configuration_WirelessAP *)configurationBlock)->Password,
+                0,
+                sizeof(((HAL_Configuration_WirelessAP *)configurationBlock)->Password));
+        }
+
+        WP_ReplyToCommand(message, true, false, configurationBlock, sizeOfBlock);
+    }
+
+    // clear the block, it may hold a password
+    memset(configurationBlock, 0, sizeOfBlock);
+    platform_free(configurationBlock);
+
+    return found;
 
 #else
 
     (void)message;
-
-#endif // CONFIG_NF_FEATURE_HAS_CONFIG_BLOCK
 
     // got here, something wrong
     return false;
+
+#endif // CONFIG_NF_FEATURE_HAS_CONFIG_BLOCK
 }
 
-bool CLR_DBG_Debugger::Monitor_UpdateConfiguration(WP_Message *message)
+bool CLR_DBG_Debugger::Monitor_ConfigurationInfo(WP_Message *message)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    // include handling of configuration block only if feature is available
-#if CONFIG_NF_FEATURE_HAS_CONFIG_BLOCK
+    Monitor_ConfigurationInfo_Reply cmdReply;
+    HAL_ConfigurationBlockInfo blockInfo;
+    uint32_t totalSize;
+    uint32_t freeSize;
+    uint32_t flags;
 
-    Monitor_UpdateConfiguration_Command *cmd = (Monitor_UpdateConfiguration_Command *)message->m_payload;
-    Monitor_UpdateConfiguration_Reply cmdReply;
+    memset(&cmdReply, 0, sizeof(cmdReply));
 
-    switch ((DeviceConfigurationOption)cmd->Configuration)
+    cmdReply.Version = CONFIGURATION_STORAGE_API_VERSION;
+
+    ConfigurationManager_GetStorageInfo(&totalSize, &freeSize, &flags);
+
+    cmdReply.TotalSize = totalSize;
+    cmdReply.FreeSize = freeSize;
+    cmdReply.Flags = flags;
+
+    cmdReply.BlockInfoCount = MONITOR_CONFIGURATION_INFO_BLOCK_TYPES;
+
+    for (uint32_t i = 0; i < MONITOR_CONFIGURATION_INFO_BLOCK_TYPES; i++)
     {
-        case DeviceConfigurationOption_Network:
-        case DeviceConfigurationOption_Wireless80211Network:
-        case DeviceConfigurationOption_WirelessNetworkAP:
-        case DeviceConfigurationOption_X509CaRootBundle:
-        case DeviceConfigurationOption_X509DeviceCertificates:
-        case DeviceConfigurationOption_All:
-            if (ConfigurationManager_StoreConfigurationBlock(
-                    cmd->Data,
-                    (DeviceConfigurationOption)cmd->Configuration,
-                    cmd->BlockIndex,
-                    cmd->Length,
-                    cmd->Offset,
-                    cmd->Done) == true)
-            {
-                cmdReply.ErrorCode = 0;
-            }
-            else
-            {
-                cmdReply.ErrorCode = 100;
-            }
-            break;
+        DeviceConfigurationOption configuration = (DeviceConfigurationOption)(i + 1);
 
-        default:
-            cmdReply.ErrorCode = 10;
+        ConfigurationManager_GetBlockInfo(configuration, &blockInfo);
+
+        cmdReply.Blocks[i].Configuration = (uint8_t)configuration;
+        cmdReply.Blocks[i].Count = (uint8_t)ConfigurationManager_GetBlockCount(configuration);
+        cmdReply.Blocks[i].MaxCount = blockInfo.MaxCount;
+        cmdReply.Blocks[i].Flags = blockInfo.Flags;
+        cmdReply.Blocks[i].MaxBlockSize = blockInfo.MaxBlockSize;
     }
 
-    WP_ReplyToCommand(message, true, false, (uint8_t *)&cmdReply, sizeof(Monitor_UpdateConfiguration_Reply));
+    WP_ReplyToCommand(message, true, false, &cmdReply, sizeof(cmdReply));
 
     return true;
+}
 
-#else
+bool CLR_DBG_Debugger::Monitor_ConfigurationOperation(WP_Message *message)
+{
+    NATIVE_PROFILE_CLR_DEBUGGER();
 
-    (void)message;
-    return false;
+    Monitor_ConfigurationOperation_Command *cmd = (Monitor_ConfigurationOperation_Command *)message->m_payload;
+    Monitor_ConfigurationOperation_Reply cmdReply;
+    uint32_t blockIndex;
+    uint32_t id;
+    uint32_t count;
 
+    // sanity check
+    if (message->m_header.m_size < offsetof(Monitor_ConfigurationOperation_Command, Data) ||
+        cmd->Length > message->m_header.m_size - offsetof(Monitor_ConfigurationOperation_Command, Data))
+    {
+        return false;
+    }
+
+    cmdReply.ErrorCode = ConfigurationManager_ProcessConfigurationOperationChunk(
+        (ConfigurationOperation)cmd->Operation,
+        (DeviceConfigurationOption)cmd->Configuration,
+        cmd->BlockIndex,
+        cmd->Flags,
+        cmd->TotalLength,
+        cmd->Offset,
+        cmd->Data,
+        cmd->Length,
+        &blockIndex,
+        &id,
+        &count);
+
+    cmdReply.BlockIndex = blockIndex;
+    cmdReply.Id = id;
+    cmdReply.Count = count;
+
+#if CONFIG_NF_WP_CHANNEL_NETWORK
+    if (cmd->Configuration == DeviceConfigurationOption_WPAuthToken &&
+        cmdReply.ErrorCode == ConfigurationOperationError_Success)
+    {
+        // the authentication token changed, it applies from now on
+        WP_Network_ReloadAuthToken();
+    }
 #endif
+
+    WP_ReplyToCommand(message, true, false, &cmdReply, sizeof(cmdReply));
+
+    return true;
 }
 
 bool CLR_DBG_Debugger::Monitor_StorageOperation(WP_Message *message)
@@ -2039,6 +2035,13 @@ static bool FillValues(
             if (ptr->IsAGenericInstance())
             {
                 dst->m_ts = ptr->ObjectGenericType();
+
+                // The debugger only knows TypeSpec rows.
+                if (dst->m_ts.IsRuntime())
+                {
+                    CLR_RT_GenericInstance *instance = CLR_RT_TypeSystem::GetGenericInstance(dst->m_ts);
+                    dst->m_ts.data = instance != nullptr ? instance->m_origin.data : 0;
+                }
             }
             break;
 

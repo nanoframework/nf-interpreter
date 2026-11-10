@@ -754,7 +754,11 @@ HRESULT CLR_RT_ExecutionEngine::Execute(wchar_t *entryPointArgs, int maxContextS
 #endif
 
     // By skipping the whole CLRStartup routine, the Monitor_Program_Exit message never gets sent to clients.
-    CLR_EE_DBG_EVENT_BROADCAST(CLR_DBG_Commands::c_Monitor_ProgramExit, 0, nullptr, WP_Flags_c_NonCritical);
+    if (CLR_EE_DBG_IS_NOT(RebootPending))
+    {
+        CLR_EE_DBG_EVENT_BROADCAST(CLR_DBG_Commands::c_Monitor_ProgramExit, 0, nullptr, WP_Flags_c_NonCritical);
+    }
+
     WaitForDebugger();
 #endif
 
@@ -797,6 +801,225 @@ void CLR_RT_ExecutionEngine::SpawnTimer()
     NANOCLR_FOREACH_NODE_END();
 }
 
+CLR_UINT8 CLR_RT_ExecutionEngine::GetStaticConstructorState(
+    const CLR_RT_TypeDef_Instance &type,
+    CLR_RT_Thread *thread
+#if defined(NANOCLR_APPDOMAINS)
+    ,
+    CLR_RT_AppDomain *appDomain
+#endif
+)
+{
+#if defined(NANOCLR_APPDOMAINS)
+    if (appDomain == nullptr && thread != nullptr)
+    {
+        appDomain = thread->CurrentAppDomain();
+    }
+
+    if (appDomain == nullptr)
+    {
+        appDomain = GetCurrentAppDomain();
+    }
+
+    if (appDomain == nullptr)
+    {
+        return StaticConstructorFailed;
+    }
+
+    CLR_RT_AppDomainAssembly *appDomainAssembly = appDomain->FindAppDomainAssembly(type.assembly);
+    if (appDomainAssembly == nullptr)
+    {
+        return StaticConstructorFailed;
+    }
+
+    CLR_UINT8 *states =
+        (CLR_UINT8 *)(appDomainAssembly->m_pStaticFields + appDomainAssembly->m_assembly->m_iStaticFields);
+    return states[type.Type()];
+#else
+    (void)thread;
+
+    const CLR_UINT32 flags = type.CrossReference().flags;
+    if (flags & CLR_RT_TypeDef_CrossReference::TD_CR_StaticConstructorRunning)
+    {
+        return StaticConstructorRunning;
+    }
+    if (flags & CLR_RT_TypeDef_CrossReference::TD_CR_StaticConstructorFailed)
+    {
+        return StaticConstructorFailed;
+    }
+    if (flags & CLR_RT_TypeDef_CrossReference::TD_CR_StaticConstructorCalled)
+    {
+        return StaticConstructorCompleted;
+    }
+
+    return StaticConstructorNotStarted;
+#endif
+}
+
+void CLR_RT_ExecutionEngine::SetStaticConstructorState(
+    const CLR_RT_TypeDef_Instance &type,
+    CLR_RT_Thread *thread,
+    CLR_UINT8 state
+#if defined(NANOCLR_APPDOMAINS)
+    ,
+    CLR_RT_AppDomain *appDomain
+#endif
+)
+{
+#if defined(NANOCLR_APPDOMAINS)
+    if (appDomain == nullptr && thread != nullptr)
+    {
+        appDomain = thread->CurrentAppDomain();
+    }
+
+    if (appDomain == nullptr)
+    {
+        appDomain = GetCurrentAppDomain();
+    }
+
+    if (appDomain == nullptr)
+    {
+        return;
+    }
+
+    CLR_RT_AppDomainAssembly *appDomainAssembly = appDomain->FindAppDomainAssembly(type.assembly);
+    if (appDomainAssembly == nullptr)
+    {
+        return;
+    }
+
+    CLR_UINT8 *states =
+        (CLR_UINT8 *)(appDomainAssembly->m_pStaticFields + appDomainAssembly->m_assembly->m_iStaticFields);
+    states[type.Type()] = state;
+#else
+    (void)thread;
+
+    CLR_RT_TypeDef_CrossReference &crossReference = type.CrossReference();
+    crossReference.flags &=
+        ~(CLR_RT_TypeDef_CrossReference::TD_CR_StaticConstructorCalled |
+          CLR_RT_TypeDef_CrossReference::TD_CR_StaticConstructorRunning |
+          CLR_RT_TypeDef_CrossReference::TD_CR_StaticConstructorFailed);
+
+    switch (state)
+    {
+        case StaticConstructorRunning:
+            crossReference.flags |= CLR_RT_TypeDef_CrossReference::TD_CR_StaticConstructorRunning;
+            break;
+        case StaticConstructorCompleted:
+            crossReference.flags |= CLR_RT_TypeDef_CrossReference::TD_CR_StaticConstructorCalled;
+            break;
+        case StaticConstructorFailed:
+            crossReference.flags |= CLR_RT_TypeDef_CrossReference::TD_CR_StaticConstructorFailed;
+            break;
+        default:
+            break;
+    }
+#endif
+}
+
+HRESULT CLR_RT_ExecutionEngine::EnsureStaticConstructorCompleted(CLR_RT_TypeDef_Instance &type, CLR_RT_Thread *thread)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    if (type.target == nullptr || !type.assembly->HasStaticConstructor(type))
+    {
+        return S_OK;
+    }
+
+    CLR_UINT8 state = GetStaticConstructorState(type, thread);
+    if (state == StaticConstructorCompleted)
+    {
+        return S_OK;
+    }
+    if (state == StaticConstructorFailed)
+    {
+        return CLR_E_WRONG_TYPE;
+    }
+
+    if (state == StaticConstructorRunning)
+    {
+        CLR_RT_StackFrame *frame = thread->CurrentFrame();
+        while (frame != nullptr && frame->Caller() != nullptr)
+        {
+            if (frame->m_call.target != nullptr &&
+                (frame->m_call.target->flags & CLR_RECORD_METHODDEF::MD_StaticConstructor) != 0 &&
+                (frame->m_call.genericType == nullptr || !NANOCLR_INDEX_IS_VALID(*frame->m_call.genericType)))
+            {
+                CLR_RT_TypeDef_Instance frameType{};
+                if (frameType.InitializeFromMethod(frame->m_call) && frameType.data == type.data)
+                {
+                    return S_OK;
+                }
+            }
+
+            frame = frame->Caller();
+        }
+
+        return CLR_E_RESCHEDULE;
+    }
+
+    const CLR_RECORD_TYPEDEF *typeDef = type.target;
+    const CLR_RECORD_METHODDEF *method = type.assembly->GetMethodDef(typeDef->firstMethod);
+    int methodCount = typeDef->virtualMethodCount + typeDef->instanceMethodCount + typeDef->staticMethodCount;
+    CLR_RT_MethodDef_Index cctorIndex{};
+    bool foundCctor = false;
+
+    for (int i = 0; i < methodCount; i++, method++)
+    {
+        if (method->flags & CLR_RECORD_METHODDEF::MD_StaticConstructor)
+        {
+            cctorIndex.Set(type.assembly->assemblyIndex, typeDef->firstMethod + i);
+            foundCctor = true;
+            break;
+        }
+    }
+
+    if (!foundCctor)
+    {
+        return S_OK;
+    }
+
+    CLR_RT_MethodDef_Instance cctor{};
+    if (!cctor.InitializeFromIndex(cctorIndex))
+    {
+        return CLR_E_WRONG_TYPE;
+    }
+
+    SetStaticConstructorState(type, thread, StaticConstructorRunning);
+
+    HRESULT hr = CLR_RT_StackFrame::Push(thread, cctor, -1);
+    if (FAILED(hr))
+    {
+        SetStaticConstructorState(type, thread, StaticConstructorNotStarted);
+        return hr;
+    }
+
+    return CLR_E_PROCESS_EXCEPTION;
+}
+
+void CLR_RT_ExecutionEngine::CompleteStaticConstructor(CLR_RT_MethodDef_Instance method, CLR_RT_Thread *thread)
+{
+    if (method.target == nullptr || (method.target->flags & CLR_RECORD_METHODDEF::MD_StaticConstructor) == 0 ||
+        (method.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*method.genericType)))
+    {
+        return;
+    }
+
+    CLR_RT_TypeDef_Instance type{};
+    if (type.InitializeFromMethod(method))
+    {
+        SetStaticConstructorState(
+            type,
+            thread,
+            thread->m_currentException.Dereference() == nullptr ? StaticConstructorCompleted : StaticConstructorFailed
+#if defined(NANOCLR_APPDOMAINS)
+            ,
+            thread->CurrentAppDomain()
+#endif
+        );
+    }
+}
+
 void CLR_RT_ExecutionEngine::StaticConstructorTerminationCallback(void *arg)
 {
     (void)arg;
@@ -811,15 +1034,17 @@ void CLR_RT_ExecutionEngine::StaticConstructorTerminationCallback(void *arg)
         CLR_RT_TypeSpec_Instance genericTypeInstance{};
         if (genericTypeInstance.InitializeFromIndex(dlg->m_genericTypeSpec))
         {
-            CLR_UINT32 hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(genericTypeInstance);
-            CLR_RT_GenericCctorExecutionRecord *record =
-                g_CLR_RT_TypeSystem.FindOrCreateGenericCctorRecord(hash, nullptr);
+            CLR_RT_MethodDef_Instance contextMethod{};
+            contextMethod.ClearInstance();
+            contextMethod.methodSpec = dlg->m_genericMethodSpec;
+
+            CLR_RT_GenericInstance *record =
+                CLR_RT_TypeSystem::FindOrCreateGenericInstance(genericTypeInstance, nullptr, &contextMethod);
 
             if (record != nullptr)
             {
-                // Clear scheduled flag and set executed flag
-                record->m_flags &= ~CLR_RT_GenericCctorExecutionRecord::c_Scheduled;
-                record->m_flags |= CLR_RT_GenericCctorExecutionRecord::c_Executed;
+                record->m_flags &= ~CLR_RT_GenericInstance::c_Scheduled;
+                record->m_flags |= CLR_RT_GenericInstance::c_Executed;
             }
         }
     }
@@ -839,13 +1064,26 @@ bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper(
     _ASSERTE(m_cctorThread != nullptr);
     //_ASSERTE(m_cctorThread->CanThreadBeReused());
 
-    indexNext.m_data = index.m_data;
+    indexNext.data = index.data;
 
     _ASSERTE(appDomainAssembly != nullptr);
 
-    // find next method with static constructor
-    if (appDomainAssembly->m_assembly->FindNextStaticConstructor(indexNext))
+    while (appDomainAssembly->m_assembly->FindNextStaticConstructor(indexNext))
     {
+        CLR_RT_MethodDef_Instance cctor{};
+        CLR_RT_TypeDef_Instance type{};
+        if (!cctor.InitializeFromIndex(indexNext) || !type.InitializeFromMethod(cctor))
+        {
+            indexNext.data++;
+            continue;
+        }
+
+        if (GetStaticConstructorState(type, m_cctorThread, appDomain) != StaticConstructorNotStarted)
+        {
+            indexNext.data++;
+            continue;
+        }
+
         CLR_RT_HeapBlock_Delegate *dlg;
         CLR_RT_HeapBlock refDlg;
         refDlg.SetObjectReference(nullptr);
@@ -858,6 +1096,7 @@ bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper(
 
             if (SUCCEEDED(m_cctorThread->PushThreadProcDelegate(dlg)))
             {
+                SetStaticConstructorState(type, m_cctorThread, StaticConstructorRunning, appDomain);
                 m_cctorThread->m_terminationCallback = CLR_RT_ExecutionEngine::StaticConstructorTerminationCallback;
 
                 return true;
@@ -958,9 +1197,22 @@ bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper(
 
     _ASSERTE(assembly != nullptr);
 
-    // find next method with static constructor
-    if (assembly->FindNextStaticConstructor(indexNext))
+    while (assembly->FindNextStaticConstructor(indexNext))
     {
+        CLR_RT_MethodDef_Instance cctor{};
+        CLR_RT_TypeDef_Instance type{};
+        if (!cctor.InitializeFromIndex(indexNext) || !type.InitializeFromMethod(cctor))
+        {
+            indexNext.data++;
+            continue;
+        }
+
+        if (GetStaticConstructorState(type, m_cctorThread) != StaticConstructorNotStarted)
+        {
+            indexNext.data++;
+            continue;
+        }
+
         CLR_RT_HeapBlock_Delegate *dlg;
         CLR_RT_HeapBlock refDlg;
 
@@ -973,6 +1225,7 @@ bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper(
 
             if (SUCCEEDED(m_cctorThread->PushThreadProcDelegate(dlg)))
             {
+                SetStaticConstructorState(type, m_cctorThread, StaticConstructorRunning);
                 m_cctorThread->m_terminationCallback = CLR_RT_ExecutionEngine::StaticConstructorTerminationCallback;
 
                 return true;
@@ -1054,30 +1307,21 @@ bool CLR_RT_ExecutionEngine::SpawnGenericTypeStaticConstructorsHelper(
             continue;
         }
 
-        // Compute hash for the closed generic type to check if .cctor already scheduled/executed
-        CLR_UINT32 hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(genericTypeInstance);
-
-        // Find or create the .cctor execution record for this closed type
-        bool recordCreated = false;
-        CLR_RT_GenericCctorExecutionRecord *record =
-            g_CLR_RT_TypeSystem.FindOrCreateGenericCctorRecord(hash, &recordCreated);
+        // Over the limits or out of memory: skip this .cctor
+        CLR_RT_GenericInstance *record = CLR_RT_TypeSystem::FindOrCreateGenericInstance(genericTypeInstance);
 
         if (record == nullptr)
         {
-            // Out of memory - skip this .cctor
             continue;
         }
 
-        // Check if .cctor already scheduled or executed
-        if (record->m_flags &
-            (CLR_RT_GenericCctorExecutionRecord::c_Scheduled | CLR_RT_GenericCctorExecutionRecord::c_Executed))
+        if (record->m_flags & (CLR_RT_GenericInstance::c_Scheduled | CLR_RT_GenericInstance::c_Executed))
         {
-            // Already handled - skip to next TypeSpec
             continue;
         }
 
         // Mark as scheduled to prevent duplicate scheduling
-        record->m_flags |= CLR_RT_GenericCctorExecutionRecord::c_Scheduled;
+        record->m_flags |= CLR_RT_GenericInstance::c_Scheduled;
 
         // Create delegate for the generic type .cctor
         CLR_RT_HeapBlock_Delegate *dlg;
@@ -1101,7 +1345,7 @@ bool CLR_RT_ExecutionEngine::SpawnGenericTypeStaticConstructorsHelper(
         }
 
         // If we failed to schedule, clear the scheduled flag
-        record->m_flags &= ~CLR_RT_GenericCctorExecutionRecord::c_Scheduled;
+        record->m_flags &= ~CLR_RT_GenericInstance::c_Scheduled;
     }
 
     // no more generic type .cctors for this assembly - set flag
@@ -1131,16 +1375,20 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread
         // Check if this is a generic type .cctor (has m_genericTypeSpec.data != 0 in the delegate)
         if (dlg->m_genericTypeSpec.data != 0)
         {
-            // Extract the TypeSpec index from the delegate and increment to next TypeSpec
-            CLR_RT_TypeSpec_Index tsIndex = dlg->m_genericTypeSpec;
-            CLR_RT_Assembly *assembly = g_CLR_RT_TypeSystem.m_assemblies[tsIndex.Assembly() - 1];
-
-            // Increment to next TypeSpec (same pattern as regular .cctor)
-            tsIndex.data++;
-
-            if (SpawnGenericTypeStaticConstructorsHelper(assembly, tsIndex))
+            // One reached at runtime has no row to resume the crawl after.
+            if (!dlg->m_genericTypeSpec.IsRuntime())
             {
-                return;
+                // Extract the TypeSpec index from the delegate and increment to next TypeSpec
+                CLR_RT_TypeSpec_Index tsIndex = dlg->m_genericTypeSpec;
+                CLR_RT_Assembly *assembly = g_CLR_RT_TypeSystem.m_assemblies[tsIndex.Assembly() - 1];
+
+                // Increment to next TypeSpec (same pattern as regular .cctor)
+                tsIndex.data++;
+
+                if (SpawnGenericTypeStaticConstructorsHelper(assembly, tsIndex))
+                {
+                    return;
+                }
             }
         }
         else
@@ -1707,7 +1955,17 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocksForArray(
     NanoCLRDataType dt = (NanoCLRDataType)inst.target->dataType;
     const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[dt];
 
-    CLR_UINT32 totLength = (CLR_UINT32)(sizeof(CLR_RT_HeapBlock_Array) + length * dtl.m_sizeInBytes + extraBytes);
+    const CLR_UINT32 maxArraySize = CLR_RT_HeapBlock::HB_MaxSize * (CLR_UINT32)sizeof(CLR_RT_HeapBlock);
+    const CLR_UINT32 arrayHeaderSize = (CLR_UINT32)sizeof(CLR_RT_HeapBlock_Array);
+    const CLR_UINT32 elementSize = dtl.m_sizeInBytes;
+
+    if (elementSize == 0 || arrayHeaderSize > maxArraySize || extraBytes > maxArraySize - arrayHeaderSize ||
+        length > (maxArraySize - arrayHeaderSize - extraBytes) / elementSize)
+    {
+        return nullptr;
+    }
+
+    CLR_UINT32 totLength = arrayHeaderSize + length * elementSize + extraBytes;
     CLR_UINT32 lengthHB = CONVERTFROMSIZETOHEAPBLOCKS(totLength);
 
     if (lengthHB > CLR_RT_HeapBlock::HB_MaxSize)
@@ -2007,42 +2265,125 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::AccessStaticField(const CLR_RT_FieldDe
     return nullptr;
 }
 
-// Helper function to resolve generic type parameters (VAR/MVAR) to their concrete types
-// Used by both InitializeReference and InitializeLocals to reduce code duplication
+// Resolves a VAR to its whole argument in the closed TypeSpec. See CLAUDE.md "Bare T fields and locals".
 static HRESULT ResolveGenericTypeParameter(
     const CLR_RT_TypeSpec_Index &genericTypeIndex,
-    CLR_UINT8 paramPosition,
-    CLR_RT_TypeDef_Index &outClass,
-    NanoCLRDataType &outDataType)
+    CLR_INT32 paramPosition,
+    const CLR_RT_TypeSpec_Index *contextTypeSpec,
+    const CLR_RT_MethodSpec_Index *contextMethodSpec,
+    CLR_RT_SignatureParser::Element &arg,
+    CLR_RT_TypeSpec_Index &argTypeSpec)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    if (!NANOCLR_INDEX_IS_VALID(genericTypeIndex))
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-    }
-
     CLR_RT_TypeSpec_Instance typeSpec;
-    if (!typeSpec.InitializeFromIndex(genericTypeIndex))
+    CLR_RT_MethodSpec_Instance methodSpec;
+    CLR_RT_SignatureParser argParser;
+    CLR_RT_Assembly *argAssembly;
+    CLR_PMETADATA argSignature;
+    CLR_PMETADATA argStart;
+    bool argIsGenericInst;
+    bool argIsRuntime;
+    int argNodesLeft;
+    bool varResolved = false;
+    bool mvarResolved = false;
+    int outerLevels = 0;
+
+    argTypeSpec.Clear();
+
+    if (!NANOCLR_INDEX_IS_VALID(genericTypeIndex) || !typeSpec.InitializeFromIndex(genericTypeIndex) ||
+        !typeSpec.PositionAtGenericParam(paramPosition, argParser))
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
 
-    CLR_RT_SignatureParser::Element paramElement;
-    if (!typeSpec.GetGenericParam(paramPosition, paramElement))
+    argAssembly = typeSpec.assembly;
+
+    // An open owner's argument can be a VAR or MVAR of the caller: each is resolved at most once.
+    while (true)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+        argSignature = argParser.Signature;
+        argStart = argSignature;
+        argIsRuntime = argParser.Type == CLR_RT_SignatureParser::c_RuntimeTypeSpec;
+        argNodesLeft = argIsRuntime ? argParser.m_runtimeNodesLeft : 0;
+
+        argIsGenericInst = argIsRuntime
+                               ? (argNodesLeft > 0 && ((const CLR_RT_GenericInstanceNode *)argSignature)->ArgCount > 0)
+                               : CLR_UncompressElementType(argStart) == DATATYPE_GENERICINST;
+
+        NANOCLR_CHECK_HRESULT(argParser.AdvanceParameter(arg));
+
+        arg.Levels += outerLevels;
+        outerLevels = arg.Levels;
+
+        if (arg.DataType == DATATYPE_VAR && !varResolved && contextTypeSpec != nullptr &&
+            NANOCLR_INDEX_IS_VALID(*contextTypeSpec))
+        {
+            varResolved = true;
+
+            if (!typeSpec.InitializeFromIndex(*contextTypeSpec) ||
+                !typeSpec.PositionAtGenericParam(arg.GenericParamPosition, argParser))
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            }
+
+            argAssembly = typeSpec.assembly;
+            continue;
+        }
+
+        if (arg.DataType == DATATYPE_MVAR && !mvarResolved && contextMethodSpec != nullptr &&
+            NANOCLR_INDEX_IS_VALID(*contextMethodSpec))
+        {
+            mvarResolved = true;
+
+            if (!methodSpec.InitializeFromIndex(*contextMethodSpec) ||
+                !methodSpec.PositionAtGenericArgument(arg.GenericParamPosition, argParser))
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            }
+
+            argAssembly = methodSpec.assembly;
+            continue;
+        }
+
+        break;
     }
 
     // Fail here so the caller's allowUnresolvedVarFallback path handles it.
-    if (paramElement.DataType == DATATYPE_VAR || paramElement.DataType == DATATYPE_MVAR)
+    if (arg.DataType == DATATYPE_VAR || arg.DataType == DATATYPE_MVAR)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
 
-    outClass = paramElement.Class;
-    outDataType = paramElement.DataType;
+    if (argIsGenericInst && arg.Levels == 0 && arg.DataType == DATATYPE_VALUETYPE)
+    {
+        if (argIsRuntime)
+        {
+            const CLR_RT_GenericInstanceNode *argNodes = (const CLR_RT_GenericInstanceNode *)argSignature;
+            int pending = 1;
+            int count = 0;
+
+            while (pending > 0 && count < argNodesLeft)
+            {
+                pending += argNodes[count++].ArgCount - 1;
+            }
+
+            CLR_RT_GenericInstance *argInstance =
+                pending == 0 ? CLR_RT_TypeSystem::FindOrCreateGenericInstanceByNodes(argNodes, count) : nullptr;
+
+            if (argInstance == nullptr)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            }
+
+            argTypeSpec = argInstance->m_self;
+        }
+        else if (!argAssembly->FindTypeSpec(argSignature, argTypeSpec))
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        }
+    }
 
     NANOCLR_NOCLEANUP();
 }
@@ -2051,7 +2392,9 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
     CLR_RT_HeapBlock &ref,
     CLR_RT_SignatureParser &parser,
     const CLR_RT_TypeSpec_Instance *genericInstance,
-    bool allowUnresolvedVarFallback)
+    bool allowUnresolvedVarFallback,
+    const CLR_RT_TypeSpec_Index *contextTypeSpec,
+    const CLR_RT_MethodSpec_Index *contextMethodSpec)
 {
     NATIVE_PROFILE_CLR_CORE();
     //
@@ -2098,11 +2441,16 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
             }
             else
             {
+                CLR_RT_SignatureParser::Element arg;
+                CLR_RT_TypeSpec_Index argTypeSpec;
                 HRESULT hrParam = ResolveGenericTypeParameter(
                     *genericInstance,
-                    static_cast<CLR_UINT8>(res.GenericParamPosition),
-                    realTypeDef,
-                    dt);
+                    res.GenericParamPosition,
+                    contextTypeSpec,
+                    contextMethodSpec,
+                    arg,
+                    argTypeSpec);
+
                 if (FAILED(hrParam))
                 {
                     if (allowUnresolvedVarFallback)
@@ -2114,8 +2462,20 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
                         NANOCLR_CHECK_HRESULT(hrParam);
                     }
                 }
+                else if (arg.Levels > 0)
+                {
+                    dt = DATATYPE_OBJECT;
+                }
                 else
                 {
+                    dt = arg.DataType;
+                    realTypeDef = arg.Class;
+
+                    if (NANOCLR_INDEX_IS_VALID(argTypeSpec))
+                    {
+                        internalGenericInstance.InitializeFromIndex(argTypeSpec);
+                    }
+
                     goto process_datatype;
                 }
             }
@@ -2197,7 +2557,9 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
     const CLR_RECORD_FIELDDEF *target,
     CLR_RT_Assembly *assm,
     const CLR_RT_TypeSpec_Instance *genericInstance,
-    bool allowUnresolvedVarFallback)
+    bool allowUnresolvedVarFallback,
+    const CLR_RT_TypeSpec_Index *contextTypeSpec,
+    const CLR_RT_MethodSpec_Index *contextMethodSpec)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -2205,7 +2567,13 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
     CLR_RT_SignatureParser parser{};
     parser.Initialize_FieldDef(assm, target);
 
-    NANOCLR_SET_AND_LEAVE(InitializeReference(ref, parser, genericInstance, allowUnresolvedVarFallback));
+    NANOCLR_SET_AND_LEAVE(InitializeReference(
+        ref,
+        parser,
+        genericInstance,
+        allowUnresolvedVarFallback,
+        contextTypeSpec,
+        contextMethodSpec));
 
     NANOCLR_NOCLEANUP();
 }
@@ -2400,8 +2768,25 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                         methodDefInstance.genericType && NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType) &&
                         methodDefInstance.genericType->data != CLR_EmptyToken)
                     {
-                        NANOCLR_CHECK_HRESULT(
-                            ResolveGenericTypeParameter(*methodDefInstance.genericType, genericParamPosition, cls, dt));
+                        CLR_RT_SignatureParser::Element arg;
+                        CLR_RT_TypeSpec_Index argTypeSpec;
+
+                        NANOCLR_CHECK_HRESULT(ResolveGenericTypeParameter(
+                            *methodDefInstance.genericType,
+                            genericParamPosition,
+                            nullptr,
+                            &methodDefInstance.methodSpec,
+                            arg,
+                            argTypeSpec));
+
+                        cls = arg.Class;
+                        dt = arg.DataType;
+                        levels += arg.Levels;
+
+                        if (NANOCLR_INDEX_IS_VALID(argTypeSpec))
+                        {
+                            genericInstance.InitializeFromIndex(argTypeSpec);
+                        }
                     }
                     else
                     {
@@ -2431,21 +2816,34 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     {
                         CLR_RT_MethodSpec_Instance methodSpec;
                         CLR_RT_SignatureParser::Element element;
+                        CLR_RT_SignatureParser argParser;
 
-                        if (!methodSpec.InitializeFromIndex(methodDefInstance.methodSpec))
+                        if (!methodSpec.InitializeFromIndex(methodDefInstance.methodSpec) ||
+                            !methodSpec.PositionAtGenericArgument(genericParamPosition, argParser))
                         {
                             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
                         }
 
-                        // Use GetGenericArgument to get the concrete type from MethodSpec's signature
-                        if (methodSpec.GetGenericArgument(genericParamPosition, element))
+                        CLR_PMETADATA argSignature = argParser.Signature;
+                        CLR_PMETADATA argStart = argSignature;
+                        bool argIsGenericInst = CLR_UncompressElementType(argStart) == DATATYPE_GENERICINST;
+
+                        NANOCLR_CHECK_HRESULT(argParser.AdvanceParameter(element));
+
+                        cls = element.Class;
+                        dt = element.DataType;
+                        levels += element.Levels;
+
+                        if (argIsGenericInst && dt == DATATYPE_VALUETYPE)
                         {
-                            cls = element.Class;
-                            dt = element.DataType;
-                        }
-                        else
-                        {
-                            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                            CLR_RT_TypeSpec_Index argTypeSpec;
+
+                            if (!methodSpec.assembly->FindTypeSpec(argSignature, argTypeSpec))
+                            {
+                                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                            }
+
+                            genericInstance.InitializeFromIndex(argTypeSpec);
                         }
                     }
                     else
@@ -3442,10 +3840,7 @@ void CLR_RT_ExecutionEngine::SignalEvents(CLR_UINT32 events)
 
 //--//
 
-bool CLR_RT_ExecutionEngine::IsInstanceOf(
-    CLR_RT_TypeDescriptor &desc,
-    CLR_RT_TypeDescriptor &descTarget,
-    bool isInstInstruction)
+static bool IsAssignableByHierarchy(CLR_RT_TypeDescriptor desc, CLR_RT_TypeDescriptor descTarget)
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_TypeDef_Instance &inst = desc.m_handlerCls;
@@ -3456,8 +3851,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
     if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Info)
     {
         CLR_Debug::Printf(
-            "[DIAG] IsInstanceOf desc DT=%d hCls=%08X hGT=%08X lvl=%d  target DT=%d hCls=%08X hGT=%08X lvl=%d "
-            "isInst=%d\r\n",
+            "[DIAG] IsInstanceOf desc DT=%d hCls=%08X hGT=%08X lvl=%d  target DT=%d hCls=%08X hGT=%08X lvl=%d\r\n",
             (int)desc.GetDataType(),
             (unsigned)desc.m_handlerCls.data,
             (unsigned)desc.m_handlerGenericType.data,
@@ -3465,8 +3859,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
             (int)descTarget.GetDataType(),
             (unsigned)descTarget.m_handlerCls.data,
             (unsigned)descTarget.m_handlerGenericType.data,
-            (int)descTarget.m_reflex.levels,
-            (int)isInstInstruction);
+            (int)descTarget.m_reflex.levels);
     }
 #endif
 
@@ -3477,6 +3870,18 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
         return CLR_RT_HeapBlock::TypeDescriptorsMatch(descTarget, desc);
     }
 
+    // Reflection objects and array element references carry array levels in m_reflex without being arrays themselves.
+    // Compare them using their runtime class.
+    if (desc.m_reflex.levels > 0 && (desc.m_flags & CLR_RT_DataTypeLookup::c_Array) == 0)
+    {
+        CLR_RT_TypeDef_Index runtimeType = desc.m_handlerCls;
+
+        if (FAILED(desc.InitializeFromType(runtimeType)))
+        {
+            return false;
+        }
+    }
+
     while (desc.m_reflex.levels > 0 && descTarget.m_reflex.levels > 0)
     {
         desc.GetElementType(desc);
@@ -3485,40 +3890,33 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
         fArray = true;
     }
 
-    // only check reflection levels if this is not an array
-    if (!fArray && desc.m_reflex.levels < descTarget.m_reflex.levels)
+    if (desc.m_reflex.levels < descTarget.m_reflex.levels)
     {
         return false;
     }
 
-    if (desc.m_reflex.levels > descTarget.m_reflex.levels)
-    {
-        if (descTarget.m_reflex.levels == 0 && !isInstInstruction)
-        {
-            //
-            // Casting from <type>[] to System.Array or System.Object is always allowed.
-            //
-            if (inst.data == g_CLR_RT_WellKnownTypes.Array.data || inst.data == g_CLR_RT_WellKnownTypes.Object.data ||
-                inst.data == g_CLR_RT_WellKnownTypes.IList.data || inst.data == g_CLR_RT_WellKnownTypes.ICloneable.data)
-            {
-                return true;
-            }
-        }
+    // If the source still has array levels here, inst is System.Array and the walk below checks its base types and
+    // interfaces.
 
-        if (inst.target->dataType != instTarget.target->dataType)
-        {
-            return false;
-        }
-    }
-
-    CLR_UINT32 semantic = (inst.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask);
     CLR_UINT32 semanticTarget = (instTarget.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask);
 
     if (fArray)
     {
-        if (semantic != semanticTarget)
+        const CLR_UINT32 valueTypeFlags =
+            CLR_RT_DataTypeLookup::c_OptimizedValueType | CLR_RT_DataTypeLookup::c_ValueType;
+
+        // Value-type elements are invariant, except types sharing storage (enum and its underlying type).
+        if ((c_CLR_RT_DataTypeLookup[inst.target->dataType].m_flags & valueTypeFlags) != 0 ||
+            (c_CLR_RT_DataTypeLookup[instTarget.target->dataType].m_flags & valueTypeFlags) != 0)
         {
-            return false;
+            return inst.data == instTarget.data || (inst.target->dataType == instTarget.target->dataType &&
+                                                    inst.target->dataType != DATATYPE_VALUETYPE);
+        }
+
+        // Interface elements have no parent chain to reach System.Object.
+        if (instTarget.data == g_CLR_RT_WellKnownTypes.Object.data)
+        {
+            return true;
         }
     }
 
@@ -3530,7 +3928,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
         }
 
         //
-        // Scan the list of interfaces.
+        // Scan the list of interfaces. The compiler emits the transitive closure, so there's no need to recurse.
         //
         if (semanticTarget == CLR_RECORD_TYPEDEF::TD_Semantics_Interface && inst.target->interfaces != CLR_EmptyIndex)
         {
@@ -3554,6 +3952,61 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
     return false;
 }
 
+bool CLR_RT_ExecutionEngine::IsInstanceOf(CLR_RT_TypeDescriptor desc, CLR_RT_TypeDescriptor descTarget)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    static const struct
+    {
+        const char *assembly;
+        const char *name;
+    } c_ArrayGenericInterfaces[] = {
+        {"mscorlib", "IEnumerable`1"},
+        {"mscorlib", "ICollection`1"},
+        {"nanoFramework.System.Collections", "IList`1"},
+        {"nanoFramework.System.Collections", "IReadOnlyCollection`1"},
+        {"nanoFramework.System.Collections", "IReadOnlyList`1"}};
+
+    if (IsAssignableByHierarchy(desc, descTarget))
+    {
+        return true;
+    }
+
+    // See CLAUDE.md "Reflection invocation and casts".
+    if ((desc.m_flags & CLR_RT_DataTypeLookup::c_Array) == 0 || descTarget.GetDataType() == DATATYPE_GENERICINST)
+    {
+        return false;
+    }
+
+    while (desc.m_reflex.levels > 0 && descTarget.m_reflex.levels > 0)
+    {
+        desc.GetElementType(desc);
+        descTarget.GetElementType(descTarget);
+    }
+
+    const CLR_RT_TypeDef_Instance &instTarget = descTarget.m_handlerCls;
+
+    if (desc.m_reflex.levels == 0 || descTarget.m_reflex.levels > 0 ||
+        (instTarget.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) !=
+            CLR_RECORD_TYPEDEF::TD_Semantics_Interface ||
+        strcmp(instTarget.assembly->GetString(instTarget.target->nameSpace), "System.Collections.Generic") != 0)
+    {
+        return false;
+    }
+
+    const char *name = instTarget.assembly->GetString(instTarget.target->name);
+
+    for (const auto &candidate : c_ArrayGenericInterfaces)
+    {
+        if (strcmp(name, candidate.name) == 0 && strcmp(instTarget.assembly->name, candidate.assembly) == 0)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool CLR_RT_ExecutionEngine::IsInstanceOf(const CLR_RT_TypeDef_Index &cls, const CLR_RT_TypeDef_Index &clsTarget)
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -3565,7 +4018,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(const CLR_RT_TypeDef_Index &cls, const
     if (FAILED(descTarget.InitializeFromType(clsTarget)))
         return false;
 
-    return IsInstanceOf(desc, descTarget, false);
+    return IsInstanceOf(desc, descTarget);
 }
 
 bool CLR_RT_ExecutionEngine::IsInstanceOf(CLR_RT_HeapBlock &ref, const CLR_RT_TypeDef_Index &clsTarget)
@@ -3579,14 +4032,13 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(CLR_RT_HeapBlock &ref, const CLR_RT_Ty
     if (FAILED(descTarget.InitializeFromType(clsTarget)))
         return false;
 
-    return IsInstanceOf(desc, descTarget, false);
+    return IsInstanceOf(desc, descTarget);
 }
 
 bool CLR_RT_ExecutionEngine::IsInstanceOf(
     CLR_RT_HeapBlock &obj,
     CLR_RT_Assembly *assm,
     CLR_UINT32 token,
-    bool isInstInstruction,
     const CLR_RT_MethodDef_Instance *caller)
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -3601,7 +4053,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
     if (FAILED(descTarget.InitializeFromSignatureToken(assm, token, caller)))
         return false;
 
-    return IsInstanceOf(desc, descTarget, isInstInstruction);
+    return IsInstanceOf(desc, descTarget);
 }
 
 /// <summary>
@@ -3650,9 +4102,31 @@ HRESULT CLR_RT_ExecutionEngine::CastToType(
     {
         ;
     }
-    else if (g_CLR_RT_ExecutionEngine.IsInstanceOf(ref, assm, tk, isInstInstruction, caller) == true)
+    else if (g_CLR_RT_ExecutionEngine.IsInstanceOf(ref, assm, tk, caller) == true)
     {
-        ;
+        if (CLR_TypeFromTk(tk) == TBL_TypeSpec)
+        {
+            CLR_RT_SignatureParser parser{};
+            CLR_RT_GenericTarget target;
+            bool hasContext = caller != nullptr && caller->genericType != nullptr;
+
+            parser.Initialize_TypeSpec(assm, assm->GetTypeSpec(CLR_DataFromTk(tk)));
+
+            if (CLR_RT_TypeSystem::CollectGenericTarget(
+                    parser,
+                    hasContext ? caller->genericType : nullptr,
+                    caller,
+                    target) == S_OK &&
+                CLR_RT_TypeSystem::MatchGenericArguments(ref, target) == GenericMatch_Different)
+            {
+                if (isInstInstruction == false)
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+                }
+
+                ref.SetObjectReference(nullptr);
+            }
+        }
     }
     else
     {

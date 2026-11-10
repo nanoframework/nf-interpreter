@@ -777,6 +777,24 @@ need step-by-step visibility into opcode dispatch.
 
 When you see one of these symptoms, this is where to look first.
 
+**`Assembly.Load(byte[])` throws `CLR_E_FAIL`, possibly followed by a reset.**
+- Its constructor wait is a polling interval, not a deadline for loading the
+  assembly. Renew the interval immediately before each `WaitEvents` call:
+  metadata resolution and static-field allocation can take longer than two
+  thread quanta, particularly when allocations trigger GC.
+- Expiring a deadline established before resolution used to enter failure
+  cleanup after `SpawnStaticConstructor` had scheduled a delegate into the
+  new assembly. `DestroyInstance` then removed that assembly while the
+  constructor thread still referenced it, leading to an access violation.
+- Reproduced on netcore with a valid PE read from `I:`, 300 static struct
+  fields, and `NANOCLR_FORCE_GC_BEFORE_EVERY_ALLOCATION`. This demonstrates
+  the loader failure independently of ESP32 storage timing.
+- The image must exactly fill the byte array (`TotalSize()` equals the array
+  length) and its table offsets must be ordered, aligned and within the image.
+  The array is checked before any header field is trusted. Otherwise data past
+  the end of the array is read, and trailing bytes outside the assembly CRC,
+  such as an appended second assembly, are accepted.
+
 **`CLR_E_WRONG_TYPE` on `callvirt`.**
 - Walk the `FindVirtualMethodDef` 3-pass chain (§3). Most commonly the
   signature matcher silently fails on an explicit interface impl and the
@@ -813,6 +831,24 @@ value) only when the GC compacts.**
 - A crash (host exit code 3) on the *next* generic-static test rather
   than a bad value is the same bug reaching a slot that holds an object
   reference instead of an `int`.
+
+**Debug session ends right after a CLR-only reboot on the virtual device.**
+- The cleanup of `Execute` also runs when leaving for a reboot. A
+  `Monitor_ProgramExit` sent from there makes the debugger terminate the
+  session, and on the way out it asks for a normal reboot, which shuts the
+  virtual device down. So it is only sent when no reboot is pending, the same
+  check `ClrStartup` has for its own broadcast.
+
+**Virtual device gone after the debugger stops.**
+- Stopping a debug session sends a normal reboot. In the netcore
+  `ClrStartup` loop a normal reboot ends the run, unless the device was started
+  with `--loopafterexit` (`EnterDebuggerLoopAfterExit`): then it restarts the
+  execution engine like a `ClrOnly` reboot, keeping the `WaitForDebugger` it
+  started with, and the device stays listening and announcing.
+- The virtual device VS starts over serial passes `--loopafterexit`, so it
+  also keeps running after Stop Debugging instead of exiting.
+- The host's native Wire Protocol processing thread is a background thread.
+  As a foreground thread it kept the process alive, busy, after the run ended.
 
 **Generic `.cctor` not firing or firing twice.**
 - `FindOrCreateGenericStaticFields` hash mismatch — two TypeSpec rows

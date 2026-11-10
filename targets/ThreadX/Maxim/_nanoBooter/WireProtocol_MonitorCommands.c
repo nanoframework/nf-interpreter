@@ -11,6 +11,10 @@
 #include <Target_BlockStorage_MXCFlashDriver.h>
 #include <target_board.h>
 
+// limits of the configuration region, from the linker script
+extern uint32_t __nanoConfig_start__;
+extern uint32_t __nanoConfig_end__;
+
 #include <mxc_device.h>
 
 int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t *buffer, int32_t mode, uint32_t *errorCode)
@@ -31,12 +35,34 @@ int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t *buffer, int
             return MXCFlashDriver_EraseBlock(NULL, location);
 
         case AccessMemory_Check:
+            // the configuration region can't be checked: a CRC of a small range reveals its content
+            if (AccessMemory_OverlapsRegion(
+                    location,
+                    lengthInBytes,
+                    (uint32_t)&__nanoConfig_start__,
+                    (uint32_t)&__nanoConfig_end__))
+            {
+                *errorCode = AccessMemoryErrorCode_PermissionDenied;
+                return false;
+            }
+
             // compute CRC32 of the memory segment
             *(unsigned int *)buffer = SUPPORT_ComputeCRC((uint32_t *)location, lengthInBytes, 0);
             // done here
             return true;
 
         case AccessMemory_Read:
+            // the configuration region can't be read: it holds certificates, private keys and passwords
+            if (AccessMemory_OverlapsRegion(
+                    location,
+                    lengthInBytes,
+                    (uint32_t)&__nanoConfig_start__,
+                    (uint32_t)&__nanoConfig_end__))
+            {
+                *errorCode = AccessMemoryErrorCode_PermissionDenied;
+                return false;
+            }
+
             // use FLASH driver to perform read operation
             // this requires that HAL_USE_MXC_FLASH is set to TRUE on halconf_nf.h
             MXCFlashDriver_Read(NULL, location, lengthInBytes, buffer);

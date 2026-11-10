@@ -41,6 +41,11 @@ static std::atomic<bool> g_wireProtocolStopProcess{false};
 
 void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
 {
+    (void)nanoCLR_RunWithStatus(nanoClrSettings);
+}
+
+int nanoCLR_RunWithStatus(NANO_CLR_SETTINGS nanoClrSettings)
+{
 #if !defined(BUILD_RTM)
     CLR_Debug::Printf(
         "\r\nLoading nanoCLR v%d.%d.%d.%d\r\n...\r\n",
@@ -51,6 +56,15 @@ void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
 #endif
 
     nanoHAL_Initialize();
+
+#if NANOCLR_USE_HOST_OS_SOCKETS
+    if (!Network_Initialize())
+    {
+        CLR_Debug::Printf("Failed to initialize POSIX networking.\r\n");
+        nanoHAL_Uninitialize(false);
+        return EXIT_FAILURE;
+    }
+#endif
 
     BlockStorageList_Initialize();
     BlockStorage_AddDevices();
@@ -68,6 +82,12 @@ void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
     // managed host but are intentionally not forwarded here.
 
     ClrStartup(clrSettings);
+
+#if NANOCLR_USE_HOST_OS_SOCKETS
+    Network_Uninitialize();
+#endif
+    nanoHAL_Uninitialize(false);
+    return EXIT_SUCCESS;
 }
 
 // ── Assembly-loading API ─────────────────────────────────────────────────────
