@@ -139,6 +139,18 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::Invoke___OBJECT__OBJ
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
             }
+
+            if (md.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*md.genericType))
+            {
+                CLR_RT_HeapBlock *target = nullptr;
+
+                if (SUCCEEDED(obj.EnsureObjectReference(target)) && target->IsAGenericInstance() &&
+                    target->ObjectCls().data == declaringType.data &&
+                    !CLR_RT_TypeSystem::IsSameGenericInstance(target->ObjectGenericType(), *md.genericType))
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+                }
+            }
         }
 
         NANOCLR_CHECK_HRESULT(CheckInvokeArguments(md, args, argumentsCount));
@@ -178,7 +190,17 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::GetMethodDescriptor(
     (void)stack;
 
     NATIVE_PROFILE_CLR_CORE();
-    return CLR_RT_ReflectionDef_Index::Convert(arg, inst) ? S_OK : CLR_E_NULL_REFERENCE;
+    if (!CLR_RT_ReflectionDef_Index::Convert(arg, inst))
+    {
+        return CLR_E_NULL_REFERENCE;
+    }
+
+    if (arg.ReflectionDataConst().GetGenericOwner(inst.m_typeSpecStorage))
+    {
+        inst.genericType = &inst.m_typeSpecStorage;
+    }
+
+    return S_OK;
 }
 
 HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckInvokeArguments(
@@ -193,6 +215,9 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckInvokeArguments
     CLR_RT_SignatureParser::Element element{};
     parser.Initialize_MethodSignature(md.assembly, md.target);
 
+    const CLR_RT_TypeSpec_Index *owner =
+        md.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*md.genericType) ? md.genericType : nullptr;
+
     // Skip the return type; the remaining signature elements are the explicit parameters.
     NANOCLR_CHECK_HRESULT(parser.AdvanceParameter(element));
 
@@ -200,8 +225,32 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckInvokeArguments
     {
         CLR_RT_SignatureParser parameter = parser;
         CLR_RT_GenericTarget target;
+        const CLR_RT_TypeSpec_Index *targetOwner = owner;
 
         NANOCLR_CHECK_HRESULT(parser.AdvanceParameter(element));
+
+        if (owner != nullptr && element.DataType == DATATYPE_VAR)
+        {
+            CLR_RT_TypeSpec_Instance ownerInstance{};
+            CLR_RT_SignatureParser argument;
+            CLR_RT_SignatureParser::Element resolved;
+            int levels = element.Levels;
+
+            if (!ownerInstance.InitializeFromIndex(*owner) ||
+                !ownerInstance.PositionAtGenericParam(element.GenericParamPosition, argument))
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+            }
+
+            parameter = argument;
+            targetOwner = nullptr;
+
+            NANOCLR_CHECK_HRESULT(argument.AdvanceParameter(resolved));
+
+            element.Class = resolved.Class;
+            element.DataType = resolved.DataType;
+            element.Levels = levels + resolved.Levels;
+        }
 
         // MakeCall passes the value, not a reference, so the callee's writes would be lost.
         if (element.IsByRef)
@@ -217,7 +266,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckInvokeArguments
             NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
         }
 
-        if (CLR_RT_TypeSystem::CollectGenericTarget(parameter, nullptr, nullptr, target) == S_FALSE)
+        if (CLR_RT_TypeSystem::CollectGenericTarget(parameter, targetOwner, nullptr, target) == S_FALSE)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
         }
@@ -319,6 +368,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::GetParametersNative_
     CLR_RT_SignatureParser::Element paramElement;
     CLR_RT_HeapBlock *hbObj;
     CLR_RT_HeapBlock *paramInfoElement;
+    CLR_RT_TypeSpec_Index owner;
 
     uint32_t paramCount = 0;
 
@@ -328,6 +378,9 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::GetParametersNative_
 
     idx.data = hbMethodInfo[FIELD___token].NumericByRef().u4;
     inst.InitializeFromIndex(idx);
+
+    owner.Clear();
+    hbMethodInfo->ReflectionDataConst().GetGenericOwner(owner);
 
     // 1st pass: get the number of parameters
     sigParser.Initialize_MethodSignature(inst.assembly, inst.target);
@@ -358,14 +411,29 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::GetParametersNative_
 
     while (sigParser.Available() > 0)
     {
+        CLR_RT_SignatureParser parameter = sigParser;
+
         NANOCLR_CHECK_HRESULT(sigParser.AdvanceParameter(paramElement));
 
         // create a new instance of <ParameterInfo>
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*paramInfoElement, paramInfoTypeDef));
         hbObj = paramInfoElement->Dereference();
 
+        if (NANOCLR_INDEX_IS_VALID(owner))
+        {
+            CLR_RT_TypeDescriptor desc{};
+
+            if (SUCCEEDED(desc.InitializeFromClosedSignature(parameter, &owner)))
+            {
+                CLR_RT_HeapBlock &paraTypeHB = hbObj[ParameterInfo::FIELD___parameterType];
+
+                NANOCLR_CHECK_HRESULT(
+                    g_CLR_RT_ExecutionEngine.NewObjectFromIndex(paraTypeHB, g_CLR_RT_WellKnownTypes.TypeStatic));
+                paraTypeHB.Dereference()->SetReflection(desc.m_reflex);
+            }
+        }
         // VAR, MVAR and arrays of them have no generic context to resolve, parameter type stays null
-        if (NANOCLR_INDEX_IS_VALID(paramElement.Class))
+        else if (NANOCLR_INDEX_IS_VALID(paramElement.Class))
         {
             // get reference to the <ParameterInfo> instance
             CLR_RT_HeapBlock &paraTypeHB = hbObj[ParameterInfo::FIELD___parameterType];

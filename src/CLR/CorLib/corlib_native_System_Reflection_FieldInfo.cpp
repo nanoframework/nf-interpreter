@@ -19,6 +19,7 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::SetValue___VOID__OBJE
     bool fValueType;
     CLR_RT_HeapBlock &srcVal = stack.Arg2();
     CLR_RT_HeapBlock val;
+    CLR_RT_TypeSpec_Index ownerTypeSpec;
 
     val.Assign(srcVal);
     CLR_RT_ProtectFromGC gc(val);
@@ -33,7 +34,26 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::SetValue___VOID__OBJE
         NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
     }
 
-    NANOCLR_CHECK_HRESULT(instTDescObj.InitializeFromFieldDefinition(instFD));
+    ownerTypeSpec.Clear();
+
+    if (!stack.This()->ReflectionDataConst().GetGenericOwner(ownerTypeSpec) &&
+        (fd->flags & CLR_RECORD_FIELDDEF::FD_Static) == 0)
+    {
+        CLR_RT_HeapBlock *owner = nullptr;
+
+        if (SUCCEEDED(stack.Arg1().EnsureObjectReference(owner)) && owner->IsAGenericInstance())
+        {
+            CLR_RT_TypeSpec_Instance ownerInstance{};
+
+            if (ownerInstance.InitializeFromIndex(owner->ObjectGenericType()) &&
+                ownerInstance.genericTypeDef.data == instTD.data)
+            {
+                ownerTypeSpec = owner->ObjectGenericType();
+            }
+        }
+    }
+
+    NANOCLR_CHECK_HRESULT(instTDescObj.InitializeFromFieldDefinition(instFD, &ownerTypeSpec));
 
     // make sure the right side object is of the same type as the left side
     if (nullptr != val.Dereference())
@@ -48,23 +68,8 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::SetValue___VOID__OBJE
 
         CLR_RT_SignatureParser fieldParser{};
         CLR_RT_GenericTarget target;
-        CLR_RT_HeapBlock *owner = nullptr;
-        CLR_RT_TypeSpec_Index ownerTypeSpec;
 
-        ownerTypeSpec.Clear();
         fieldParser.Initialize_FieldDef(instFD.assembly, instFD.target);
-
-        if ((fd->flags & CLR_RECORD_FIELDDEF::FD_Static) == 0 && SUCCEEDED(stack.Arg1().EnsureObjectReference(owner)) &&
-            owner->IsAGenericInstance())
-        {
-            CLR_RT_TypeSpec_Instance ownerInstance{};
-
-            if (ownerInstance.InitializeFromIndex(owner->ObjectGenericType()) &&
-                ownerInstance.genericTypeDef.data == instTD.data)
-            {
-                ownerTypeSpec = owner->ObjectGenericType();
-            }
-        }
 
         if (CLR_RT_TypeSystem::CollectGenericTarget(
                 fieldParser,
@@ -151,15 +156,34 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::Initialize(
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
     CLR_RT_HeapBlock *hbField = stack.This();
+    CLR_RT_TypeSpec_Index owner;
+
+    owner.Clear();
 
     if (CLR_RT_ReflectionDef_Index::Convert(*hbField, instFD) == false || instTD.InitializeFromField(instFD) == false)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
+    hbField->ReflectionDataConst().GetGenericOwner(owner);
+
     if (instFD.target->flags & CLR_RECORD_FIELDDEF::FD_Static)
     {
-        obj = CLR_RT_ExecutionEngine::AccessStaticField(instFD);
+        if (NANOCLR_INDEX_IS_VALID(owner))
+        {
+            NANOCLR_CHECK_HRESULT(
+                g_CLR_RT_ExecutionEngine.EnsureGenericStaticConstructorCompleted(owner, stack.m_owningThread));
+
+            obj = instFD.assembly->GetStaticFieldByFieldDef(instFD, &owner, nullptr, nullptr);
+        }
+        else if (instTD.target->genericParamCount > 0)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+        }
+        else
+        {
+            obj = CLR_RT_ExecutionEngine::AccessStaticField(instFD);
+        }
 
         if (obj == nullptr)
         {
@@ -171,6 +195,12 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::Initialize(
         NANOCLR_CHECK_HRESULT(stack.Arg1().EnsureObjectReference(obj));
 
         if (CLR_RT_ExecutionEngine::IsInstanceOf(*obj, instTD) == false)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        }
+
+        if (NANOCLR_INDEX_IS_VALID(owner) && obj->IsAGenericInstance() && obj->ObjectCls().data == instTD.data &&
+            !CLR_RT_TypeSystem::IsSameGenericInstance(obj->ObjectGenericType(), owner))
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }

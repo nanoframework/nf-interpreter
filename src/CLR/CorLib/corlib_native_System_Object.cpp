@@ -52,6 +52,21 @@ HRESULT Library_corlib_native_System_Object::GetType___SystemType(CLR_RT_StackFr
     else
     {
         index = desc.m_reflex;
+
+        if (arg0.DataType() == DATATYPE_OBJECT && pObj &&
+            (pObj->DataType() == DATATYPE_CLASS || pObj->DataType() == DATATYPE_VALUETYPE) &&
+            pObj->IsAGenericInstance())
+        {
+            CLR_RT_TypeSpec_Instance owner{};
+
+            if (owner.InitializeFromIndex(pObj->ObjectGenericType()) && owner.levels == 0 &&
+                owner.genericTypeDef.data == desc.m_handlerCls.data)
+            {
+                index.kind = REFLECTION_TYPESPEC;
+                index.levels = 0;
+                index.data.typeSpec = pObj->ObjectGenericType();
+            }
+        }
     }
 
     {
