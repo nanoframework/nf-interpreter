@@ -620,6 +620,14 @@ HRESULT CLR_RT_HeapBlock::StoreToReference(CLR_RT_HeapBlock &ref, int size)
                 {
                     NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 }
+
+                const CLR_RT_TypeSpec_Index *elementSpec = array->ElementTypeSpec();
+
+                if (elementSpec != nullptr && descDst.m_reflex.levels == 1 &&
+                    !CLR_RT_TypeSystem::ElementMatchesArraySpec(*this, *elementSpec))
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                }
             }
 
             obj = (CLR_RT_HeapBlock *)dst;
@@ -1515,7 +1523,7 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
                     objLeft->m_typeOfElement == objRight->m_typeOfElement)
                 {
                     // check that array is not stored in stack
-                    ASSERT(objLeft->m_StoragePointer == 0);
+                    ASSERT(!objLeft->IsStoragePointer());
 
                     if (!objLeft->m_fReference)
                     {

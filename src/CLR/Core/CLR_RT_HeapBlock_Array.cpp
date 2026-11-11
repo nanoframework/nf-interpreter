@@ -11,7 +11,8 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
     CLR_RT_HeapBlock &reference,
     CLR_UINT32 length,
     const CLR_RT_ReflectionDef_Index &reflex,
-    CLR_UINT32 extraBytes)
+    CLR_UINT32 extraBytes,
+    const CLR_RT_TypeSpec_Index *elementTypeSpec)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -56,6 +57,11 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
         pArray = (CLR_RT_HeapBlock_Array *)
                      g_CLR_RT_ExecutionEngine.ExtractHeapBlocksForArray(inst, length, reflex, extraBytes);
         CHECK_ALLOCATION(pArray);
+
+        if (elementTypeSpec != nullptr && reflex.kind == REFLECTION_TYPE)
+        {
+            pArray->m_elementTypeSpec = *elementTypeSpec;
+        }
 
         reference.SetObjectReference(pArray);
 
@@ -137,6 +143,9 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
     CLR_RT_HeapBlock ref;
     CLR_RT_TypeDef_Instance cls{};
     CLR_RT_TypeSpec_Instance tsInst{};
+    CLR_RT_TypeSpec_Index elementSpec;
+
+    elementSpec.Clear();
 
     memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
 
@@ -170,9 +179,34 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
+    if (CLR_TypeFromTk(tk) == TBL_TypeSpec)
+    {
+        CLR_RT_TypeSpec_Index row;
+        CLR_RT_TypeSpec_Instance rowInst{};
+        const CLR_RT_TypeSpec_Index *context =
+            (caller != nullptr && caller->genericType != nullptr && NANOCLR_INDEX_IS_VALID(*caller->genericType))
+                ? caller->genericType
+                : contextTypeSpec;
+
+        row.Set(assm->assemblyIndex, CLR_DataFromTk(tk));
+
+        // the TypeDef path above drops the levels of an array of a generic instance
+        if (ref.ReflectionData().levels == 0 && rowInst.InitializeFromIndex(row) && rowInst.levels > 0)
+        {
+            ref.ReflectionData().levels = (CLR_UINT16)rowInst.levels;
+        }
+
+        NANOCLR_CHECK_HRESULT(CLR_RT_TypeSystem::GetElementGenericInstance(assm, tk, caller, context, elementSpec));
+    }
+
     ref.ReflectionData().levels++;
 
-    NANOCLR_SET_AND_LEAVE(CreateInstance(reference, length, ref.ReflectionData()));
+    NANOCLR_SET_AND_LEAVE(CreateInstance(
+        reference,
+        length,
+        ref.ReflectionData(),
+        0,
+        NANOCLR_INDEX_IS_VALID(elementSpec) ? &elementSpec : nullptr));
 
     NANOCLR_NOCLEANUP();
 }
@@ -227,6 +261,19 @@ HRESULT CLR_RT_HeapBlock_Array::ClearElements(int index, int length)
     }
 
     NANOCLR_NOCLEANUP();
+}
+
+bool CLR_RT_HeapBlock_Array::SameElementTypeSpec(const CLR_RT_HeapBlock_Array &other) const
+{
+    const CLR_RT_TypeSpec_Index *left = ElementTypeSpec();
+    const CLR_RT_TypeSpec_Index *right = other.ElementTypeSpec();
+
+    if (left == nullptr || right == nullptr)
+    {
+        return left == right;
+    }
+
+    return CLR_RT_TypeSystem::IsSameGenericInstance(*left, *right);
 }
 
 void CLR_RT_HeapBlock_Array::Relocate()
@@ -376,6 +423,8 @@ HRESULT CLR_RT_HeapBlock_Array::Copy(
 
     if (length)
     {
+        const CLR_RT_TypeSpec_Index *dstSpec =
+            arrayDst->ReflectionDataConst().levels == 1 ? arrayDst->ElementTypeSpec() : nullptr;
         int numElemSrc = arraySrc->m_numOfElements;
         int numElemDst = arrayDst->m_numOfElements;
 
@@ -391,7 +440,7 @@ HRESULT CLR_RT_HeapBlock_Array::Copy(
         if (arraySrc == arrayDst && indexSrc == indexDst)
             NANOCLR_SET_AND_LEAVE(S_OK);
 
-        if (arraySrc->SameHeader(*arrayDst))
+        if (arraySrc->SameHeader(*arrayDst) && arraySrc->SameElementTypeSpec(*arrayDst))
         {
             CLR_UINT8 *dataSrc = arraySrc->GetFirstElement();
             CLR_UINT8 *dataDst = arrayDst->GetFirstElement();
@@ -417,7 +466,7 @@ HRESULT CLR_RT_HeapBlock_Array::Copy(
             if (!arraySrc->m_fReference)
             {
                 // check that array is not stored in stack
-                ASSERT(arraySrc->m_StoragePointer == 0);
+                ASSERT(!arraySrc->IsStoragePointer());
 
                 memmove(dataDst, dataSrc, length * sizeElem);
             }
@@ -464,7 +513,8 @@ HRESULT CLR_RT_HeapBlock_Array::Copy(
                 {
                     NANOCLR_CHECK_HRESULT(descSrc.InitializeFromObject(*ptrSrc));
 
-                    if (CLR_RT_ExecutionEngine::IsInstanceOf(descSrc, descDst) == false)
+                    if (CLR_RT_ExecutionEngine::IsInstanceOf(descSrc, descDst) == false ||
+                        (dstSpec != nullptr && !CLR_RT_TypeSystem::ElementMatchesArraySpec(*ptrSrc, *dstSpec)))
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
                     }
@@ -499,7 +549,8 @@ HRESULT CLR_RT_HeapBlock_Array::Copy(
                 {
                     NANOCLR_CHECK_HRESULT(descSrc.InitializeFromObject(elem));
 
-                    if (CLR_RT_ExecutionEngine::IsInstanceOf(descSrc, descDst) == false)
+                    if (CLR_RT_ExecutionEngine::IsInstanceOf(descSrc, descDst) == false ||
+                        (dstSpec != nullptr && !CLR_RT_TypeSystem::ElementMatchesArraySpec(elem, *dstSpec)))
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
                     }

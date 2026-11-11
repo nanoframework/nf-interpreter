@@ -194,6 +194,18 @@ HRESULT Library_corlib_native_System_RuntimeType::GetElementType___SystemType(CL
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
     CLR_RT_HeapBlock *hbType = stack.This();
 
+    if (hbType->ReflectionDataConst().kind == REFLECTION_TYPESPEC && hbType->ReflectionDataConst().levels > 0)
+    {
+        CLR_RT_ReflectionDef_Index element = hbType->ReflectionDataConst();
+
+        element.levels--;
+
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
+        top.Dereference()->SetReflection(element);
+
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
+
     NANOCLR_CHECK_HRESULT(desc.InitializeFromReflection(hbType->ReflectionDataConst()));
 
     if (desc.GetElementType(descSub))

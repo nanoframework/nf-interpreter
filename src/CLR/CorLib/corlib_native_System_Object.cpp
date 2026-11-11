@@ -53,6 +53,18 @@ HRESULT Library_corlib_native_System_Object::GetType___SystemType(CLR_RT_StackFr
     {
         index = desc.m_reflex;
 
+        if (arg0.DataType() == DATATYPE_OBJECT && pObj && pObj->DataType() == DATATYPE_SZARRAY &&
+            index.kind == REFLECTION_TYPE && index.levels > 0)
+        {
+            const CLR_RT_TypeSpec_Index *element = ((const CLR_RT_HeapBlock_Array *)pObj)->ElementTypeSpec();
+
+            if (element != nullptr)
+            {
+                index.kind = REFLECTION_TYPESPEC;
+                index.data.typeSpec = *element;
+            }
+        }
+
         if (arg0.DataType() == DATATYPE_OBJECT && pObj &&
             (pObj->DataType() == DATATYPE_CLASS || pObj->DataType() == DATATYPE_VALUETYPE) &&
             pObj->IsAGenericInstance())

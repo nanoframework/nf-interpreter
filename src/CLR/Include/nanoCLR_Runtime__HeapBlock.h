@@ -1893,7 +1893,12 @@ struct CLR_RT_HeapBlock_Array : public CLR_RT_HeapBlock
     CLR_UINT8 m_sizeOfElement;
     CLR_UINT8 m_fReference;
     CLR_UINT8 m_pad;
-    uintptr_t m_StoragePointer;
+
+    union {
+        uintptr_t m_StoragePointer;
+        // closed generic instance of the element, 0 if none. See CLAUDE.md "Array element TypeSpec"
+        CLR_RT_TypeSpec_Index m_elementTypeSpec;
+    };
 
     //--//
 
@@ -1901,7 +1906,8 @@ struct CLR_RT_HeapBlock_Array : public CLR_RT_HeapBlock
         CLR_RT_HeapBlock &reference,
         CLR_UINT32 length,
         const CLR_RT_ReflectionDef_Index &reflex,
-        CLR_UINT32 extraBytes = 0);
+        CLR_UINT32 extraBytes = 0,
+        const CLR_RT_TypeSpec_Index *elementTypeSpec = nullptr);
     static HRESULT CreateInstance(CLR_RT_HeapBlock &reference, CLR_UINT32 length, const CLR_RT_TypeDef_Index &cls);
     static HRESULT CreateInstance(
         CLR_RT_HeapBlock &reference,
@@ -1955,6 +1961,18 @@ struct CLR_RT_HeapBlock_Array : public CLR_RT_HeapBlock
     {
         return (ReflectionData().kind == REFLECTION_STORAGE_PTR);
     }
+
+    const CLR_RT_TypeSpec_Index *ElementTypeSpec() const
+    {
+        if (ReflectionDataConst().kind == REFLECTION_STORAGE_PTR || m_elementTypeSpec.data == 0)
+        {
+            return nullptr;
+        }
+
+        return &m_elementTypeSpec;
+    }
+
+    bool SameElementTypeSpec(const CLR_RT_HeapBlock_Array &other) const;
 
     // Valid only when IsStoragePointer() is true. See CLAUDE.md §16.
     CLR_RT_HeapBlock *StorageOwner()
