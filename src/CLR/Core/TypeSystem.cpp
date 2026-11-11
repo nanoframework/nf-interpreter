@@ -9883,8 +9883,6 @@ CLR_RT_GenericMatch CLR_RT_TypeSystem::MatchGenericArguments(
         return GenericMatch_Unresolved;
     }
 
-    // A generic base class: the arguments are in the extends entry of each class up the chain, closed against the
-    // class below it.
     if ((targetDef.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) != CLR_RECORD_TYPEDEF::TD_Semantics_Interface)
     {
         CLR_RT_TypeDef_Instance walk = inst;
@@ -9924,6 +9922,8 @@ CLR_RT_GenericMatch CLR_RT_TypeSystem::MatchGenericArguments(
         return GenericMatch_Unresolved;
     }
 
+    CLR_RT_GenericInstance *levelContext = own;
+
     do
     {
         CLR_RT_SignatureParser parser{};
@@ -9960,9 +9960,11 @@ CLR_RT_GenericMatch CLR_RT_TypeSystem::MatchGenericArguments(
 
             at.Initialize_TypeSpec(entry);
 
-            // Only the implementing class itself has a context. A generic parent's arguments aren't known here.
-            HRESULT hr =
-                CollectGenericTarget(at, (level == 0 && own != nullptr) ? &own->m_self : nullptr, nullptr, entryTarget);
+            HRESULT hr = CollectGenericTarget(
+                at,
+                levelContext != nullptr ? &levelContext->m_self : nullptr,
+                nullptr,
+                entryTarget);
 
             if (hr != S_OK || entryTarget.m_count == 0)
             {
@@ -9979,8 +9981,18 @@ CLR_RT_GenericMatch CLR_RT_TypeSystem::MatchGenericArguments(
             different = true;
         }
 
+        CLR_RT_GenericInstance *closedBase =
+            FindOrCreateGenericBase(inst, levelContext != nullptr ? &levelContext->m_self : nullptr);
+
         level++;
-    } while (inst.SwitchToParent());
+
+        if (!inst.SwitchToParent())
+        {
+            break;
+        }
+
+        levelContext = closedBase;
+    } while (level < c_MaxInheritanceDepth);
 
     if (different)
     {

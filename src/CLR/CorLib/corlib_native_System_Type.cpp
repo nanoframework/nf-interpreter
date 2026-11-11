@@ -665,6 +665,85 @@ static CLR_UINT16 GetBaseOwnerSlot(const CLR_RT_TypeDef_Instance &child, CLR_UIN
     return record != nullptr ? CLR_RT_TypeSystem::GetGenericOwnerSlot(record->m_self) : 0;
 }
 
+static const CLR_RT_TypeSpec_Index *SlotOwner(CLR_UINT16 slot, CLR_RT_TypeSpec_Index &storage)
+{
+    if (slot == 0 || slot > g_CLR_RT_TypeSystem.m_genericInstancesCount)
+    {
+        return nullptr;
+    }
+
+    storage = g_CLR_RT_TypeSystem.m_genericInstances[slot - 1]->m_self;
+
+    return &storage;
+}
+
+// A type parameter of the owner is compared as its argument, so inherited members of a closed generic match the closed
+// types of the owner. A parameter that is a generic instance is compared by its generic definition only.
+static void CloseTypeParameter(CLR_RT_SignatureParser::Element &element, const CLR_RT_TypeSpec_Index *owner)
+{
+    CLR_RT_TypeSpec_Instance ownerInstance{};
+    CLR_RT_SignatureParser argument;
+    CLR_RT_SignatureParser::Element resolved;
+
+    if (owner == nullptr || element.DataType != DATATYPE_VAR || !ownerInstance.InitializeFromIndex(*owner) ||
+        !ownerInstance.PositionAtGenericParam(element.GenericParamPosition, argument) ||
+        FAILED(argument.AdvanceParameter(resolved)) || !NANOCLR_INDEX_IS_VALID(resolved.Class))
+    {
+        return;
+    }
+
+    const int levels = element.Levels + resolved.Levels;
+    const bool isByRef = element.IsByRef;
+
+    element = resolved;
+    element.Levels = levels;
+    element.IsByRef = isByRef;
+
+    if (element.DataType == DATATYPE_GENERICINST)
+    {
+        element.DataType = DATATYPE_CLASS;
+    }
+}
+
+static bool MatchSignatureClosed(
+    CLR_RT_SignatureParser &parserLeft,
+    CLR_RT_SignatureParser &parserRight,
+    bool fIsInstanceOfOK,
+    const CLR_RT_TypeSpec_Index *ownerLeft,
+    const CLR_RT_TypeSpec_Index *ownerRight)
+{
+    while (true)
+    {
+        int iAvailLeft = parserLeft.Available();
+
+        if (iAvailLeft != parserRight.Available())
+        {
+            return false;
+        }
+
+        if (iAvailLeft == 0)
+        {
+            return true;
+        }
+
+        CLR_RT_SignatureParser::Element resLeft;
+        CLR_RT_SignatureParser::Element resRight;
+
+        if (FAILED(parserLeft.Advance(resLeft)) || FAILED(parserRight.Advance(resRight)))
+        {
+            return false;
+        }
+
+        CloseTypeParameter(resLeft, ownerLeft);
+        CloseTypeParameter(resRight, ownerRight);
+
+        if (!CLR_RT_TypeSystem::MatchSignatureElement(resLeft, resRight, parserLeft, parserRight, fIsInstanceOfOK))
+        {
+            return false;
+        }
+    }
+}
+
 static bool AdvanceToParent(CLR_RT_TypeDef_Instance &td, CLR_UINT16 &slot)
 {
     CLR_RT_TypeDef_Instance child = td;
@@ -951,7 +1030,14 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                     //
                     NANOCLR_CHECK_HRESULT(parserLeft.Advance(res));
 
-                    if (CLR_RT_TypeSystem::MatchSignatureDirect(parserLeft, parserRight, true) == false)
+                    CLR_RT_TypeSpec_Index levelOwner;
+
+                    if (MatchSignatureClosed(
+                            parserLeft,
+                            parserRight,
+                            true,
+                            SlotOwner(levelSlot, levelOwner),
+                            nullptr) == false)
                     {
                         continue;
                     }
@@ -1002,7 +1088,15 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
 
                         if (!pParams)
                         {
-                            if (CLR_RT_TypeSystem::MatchSignatureDirect(parserLeft, parserRight, false) == false)
+                            CLR_RT_TypeSpec_Index foundOwner;
+                            CLR_RT_TypeSpec_Index candidateOwner;
+
+                            if (MatchSignatureClosed(
+                                    parserLeft,
+                                    parserRight,
+                                    false,
+                                    SlotOwner(foundSlot, foundOwner),
+                                    SlotOwner(levelSlot, candidateOwner)) == false)
                             {
                                 // Two methods with different signatures, we cannot distinguish between the two.
                                 NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
@@ -1015,11 +1109,18 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                         {
                             bool fLeftBetterMatch = false;
                             bool fRightBetterMatch = false;
+                            CLR_RT_TypeSpec_Index foundOwner;
+                            CLR_RT_TypeSpec_Index candidateOwner;
+                            const CLR_RT_TypeSpec_Index *ownerLeft = SlotOwner(foundSlot, foundOwner);
+                            const CLR_RT_TypeSpec_Index *ownerRight = SlotOwner(levelSlot, candidateOwner);
 
                             while (parserLeft.Available() > 0)
                             {
                                 NANOCLR_CHECK_HRESULT(parserLeft.Advance(resLeft));
                                 NANOCLR_CHECK_HRESULT(parserRight.Advance(resRight));
+
+                                CloseTypeParameter(resLeft, ownerLeft);
+                                CloseTypeParameter(resRight, ownerRight);
 
                                 bool fRightBetterMatchT = CLR_RT_TypeSystem::MatchSignatureElement(
                                     resLeft,
