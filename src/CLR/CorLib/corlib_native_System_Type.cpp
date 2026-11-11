@@ -640,16 +640,43 @@ static CLR_UINT16 GetOwnerSlot(const CLR_RT_HeapBlock &type)
     return reflex.kind == REFLECTION_TYPESPEC ? CLR_RT_TypeSystem::GetGenericOwnerSlot(reflex.data.typeSpec) : 0;
 }
 
-static void SetOwnerSlot(
-    CLR_RT_HeapBlock *member,
-    CLR_UINT16 slot,
-    const CLR_RT_TypeDef_Index &declaring,
-    const CLR_RT_TypeDef_Index &type)
+static void SetOwnerSlot(CLR_RT_HeapBlock *member, CLR_UINT16 slot)
 {
-    if (slot != 0 && declaring.data == type.data)
+    if (slot != 0)
     {
         member->ReflectionData().genericOwner = slot;
     }
+}
+
+static CLR_UINT16 GetBaseOwnerSlot(const CLR_RT_TypeDef_Instance &child, CLR_UINT16 childSlot)
+{
+    CLR_RT_TypeSpec_Index context;
+    CLR_RT_GenericInstance *record;
+
+    context.Clear();
+
+    if (childSlot != 0 && childSlot <= g_CLR_RT_TypeSystem.m_genericInstancesCount)
+    {
+        context = g_CLR_RT_TypeSystem.m_genericInstances[childSlot - 1]->m_self;
+    }
+
+    record = CLR_RT_TypeSystem::FindOrCreateGenericBase(child, &context);
+
+    return record != nullptr ? CLR_RT_TypeSystem::GetGenericOwnerSlot(record->m_self) : 0;
+}
+
+static bool AdvanceToParent(CLR_RT_TypeDef_Instance &td, CLR_UINT16 &slot)
+{
+    CLR_RT_TypeDef_Instance child = td;
+
+    if (!td.SwitchToParent())
+    {
+        return false;
+    }
+
+    slot = GetBaseOwnerSlot(child, slot);
+
+    return true;
 }
 
 HRESULT Library_corlib_native_System_Type::GetFields(
@@ -679,6 +706,8 @@ HRESULT Library_corlib_native_System_Type::GetFields(
 
         for (int pass = 0; pass < 2; pass++)
         {
+            CLR_UINT16 levelSlot = ownerSlot;
+
             td = tdArg;
             iField = 0;
 
@@ -750,7 +779,7 @@ HRESULT Library_corlib_native_System_Type::GetFields(
                             g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.FieldInfo));
                         hbObj = top.Dereference();
                         hbObj->SetReflection(index);
-                        SetOwnerSlot(hbObj, ownerSlot, td, tdArg);
+                        SetOwnerSlot(hbObj, levelSlot);
 
                         NANOCLR_SET_AND_LEAVE(S_OK);
                     }
@@ -762,7 +791,7 @@ HRESULT Library_corlib_native_System_Type::GetFields(
                             g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*elem, g_CLR_RT_WellKnownTypes.FieldInfo));
                         hbObj = elem->Dereference();
                         NANOCLR_CHECK_HRESULT(hbObj->SetReflection(index));
-                        SetOwnerSlot(hbObj, ownerSlot, td, tdArg);
+                        SetOwnerSlot(hbObj, levelSlot);
                     }
 
                     iField++;
@@ -770,7 +799,7 @@ HRESULT Library_corlib_native_System_Type::GetFields(
 
                 if (bindingFlags & c_BindingFlags_DeclaredOnly)
                     break;
-            } while (td.SwitchToParent());
+            } while (AdvanceToParent(td, levelSlot));
 
             if (pass == 0)
             {
@@ -806,6 +835,7 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
     CLR_RT_HeapBlock *hbType = stack.This();
     bool staticInstanceOnly = false;
     CLR_UINT16 ownerSlot;
+    CLR_UINT16 foundSlot = 0;
 
     if (bindingFlags == c_BindingFlags_Default)
     {
@@ -824,6 +854,8 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
 
     for (int pass = 0; pass < 2; pass++)
     {
+        CLR_UINT16 levelSlot = ownerSlot;
+
         td = tdArg;
         iMethod = 0;
         bool isInstance = true;
@@ -940,7 +972,7 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                             g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*elem, g_CLR_RT_WellKnownTypes.MethodInfo));
                         hbObj = elem->Dereference();
                         NANOCLR_CHECK_HRESULT(hbObj->SetReflection(index));
-                        SetOwnerSlot(hbObj, ownerSlot, td, tdArg);
+                        SetOwnerSlot(hbObj, levelSlot);
 
                         // store token for type
                         hbObj[MethodBase::FIELD___token].NumericByRef().u4 = index.data;
@@ -1037,20 +1069,13 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                     }
 
                     inst.InitializeFromIndex(index);
+                    foundSlot = levelSlot;
 
                     NANOCLR_CHECK_HRESULT(
                         g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.MethodInfo));
                     hbObj = top.Dereference();
                     hbObj->SetReflection(inst);
-
-                    {
-                        CLR_RT_TypeDef_Instance declaring{};
-
-                        if (declaring.InitializeFromMethod(inst))
-                        {
-                            SetOwnerSlot(hbObj, ownerSlot, declaring, tdArg);
-                        }
-                    }
+                    SetOwnerSlot(hbObj, foundSlot);
 
                     // store token for type
                     hbObj[MethodBase::FIELD___token].NumericByRef().u4 = inst.data;
@@ -1062,7 +1087,7 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                 break;
             }
 
-        } while (td.SwitchToParent());
+        } while (AdvanceToParent(td, levelSlot));
 
         if (pass == 0)
         {

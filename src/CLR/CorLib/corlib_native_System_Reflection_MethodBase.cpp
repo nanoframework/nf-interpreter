@@ -258,10 +258,8 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckInvokeArguments
             NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
         }
 
-        bool isUnresolved = !NANOCLR_INDEX_IS_VALID(element.Class);
-
-        // Without a generic context FixCall can't convert a VAR or MVAR argument, not even a null one.
-        if (isUnresolved && element.Levels == 0)
+        // Without a generic context the argument can't be checked or converted, not even a null one.
+        if (!NANOCLR_INDEX_IS_VALID(element.Class))
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
         }
@@ -281,19 +279,6 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckInvokeArguments
         CLR_RT_ReflectionDef_Index expectedType{};
         CLR_RT_TypeDescriptor targetType{};
         CLR_RT_TypeDescriptor sourceType{};
-
-        if (isUnresolved)
-        {
-            // Only the array shape of T[] can be checked.
-            if (FAILED(sourceType.InitializeFromObject(arg)) ||
-                (sourceType.m_flags & CLR_RT_DataTypeLookup::c_Array) == 0 ||
-                sourceType.m_reflex.levels < element.Levels)
-            {
-                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
-            }
-
-            continue;
-        }
 
         expectedType.kind = REFLECTION_TYPE;
         expectedType.levels = (CLR_UINT16)element.Levels;

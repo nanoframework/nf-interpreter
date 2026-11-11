@@ -1832,6 +1832,23 @@ bool CLR_RT_TypeDef_Instance::SwitchToParent()
                     cls = &assembly->crossReferenceTypeRef[target->ExtendsIndex()].target;
                     break;
 
+                case TBL_TypeSpec:
+                {
+                    CLR_RT_TypeSpec_Index typeSpec;
+                    CLR_RT_TypeSpec_Instance typeSpecInstance{};
+
+                    typeSpec.Set(Assembly(), target->ExtendsIndex());
+
+                    if (!typeSpecInstance.InitializeFromIndex(typeSpec))
+                    {
+                        return false;
+                    }
+
+                    tmp = typeSpecInstance.genericTypeDef;
+                    cls = &tmp;
+                }
+                break;
+
                 // all others are not supported
                 default:
                     return false;
@@ -1844,6 +1861,20 @@ bool CLR_RT_TypeDef_Instance::SwitchToParent()
     ClearInstance();
 
     return false;
+}
+
+bool CLR_RT_TypeDef_Instance::GetExtendsTypeSpec(CLR_RT_TypeSpec_Index &typeSpec) const
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    if (!NANOCLR_INDEX_IS_VALID(*this) || !target->HasValidExtendsType() || !target->ExtendsIsTypeSpec())
+    {
+        return false;
+    }
+
+    typeSpec.Set(Assembly(), target->ExtendsIndex());
+
+    return true;
 }
 
 bool CLR_RT_TypeDef_Instance::HasFinalizer() const
@@ -9435,6 +9466,27 @@ CLR_UINT16 CLR_RT_TypeSystem::GetGenericOwnerSlot(const CLR_RT_TypeSpec_Index &t
     return 0;
 }
 
+static const int c_MaxInheritanceDepth = 32;
+
+CLR_RT_GenericInstance *CLR_RT_TypeSystem::FindOrCreateGenericBase(
+    const CLR_RT_TypeDef_Instance &child,
+    const CLR_RT_TypeSpec_Index *childContext)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    CLR_RT_TypeSpec_Index baseSpec;
+    CLR_RT_TypeSpec_Instance baseInstance{};
+
+    if (!child.GetExtendsTypeSpec(baseSpec) || !baseInstance.InitializeFromIndex(baseSpec))
+    {
+        return nullptr;
+    }
+
+    return FindOrCreateGenericInstance(
+        baseInstance,
+        (childContext != nullptr && NANOCLR_INDEX_IS_VALID(*childContext)) ? childContext : nullptr);
+}
+
 bool CLR_RT_TypeSystem::IsSameGenericInstance(const CLR_RT_TypeSpec_Index &left, const CLR_RT_TypeSpec_Index &right)
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -9829,10 +9881,49 @@ CLR_RT_GenericMatch CLR_RT_TypeSystem::MatchGenericArguments(
                    : GenericMatch_Different;
     }
 
-    // Through an interface: the arguments are in the interface entry, resolved against the implementing class.
-    if (!targetDef.InitializeFromIndex(targetClass) ||
-        (targetDef.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) != CLR_RECORD_TYPEDEF::TD_Semantics_Interface)
+    if (!targetDef.InitializeFromIndex(targetClass))
     {
+        return GenericMatch_Unresolved;
+    }
+
+    // A generic base class: the arguments are in the extends entry of each class up the chain, closed against the
+    // class below it.
+    if ((targetDef.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) != CLR_RECORD_TYPEDEF::TD_Semantics_Interface)
+    {
+        CLR_RT_TypeDef_Instance walk = inst;
+        CLR_RT_GenericInstance *current = own;
+
+        for (int depth = 0; depth < c_MaxInheritanceDepth; depth++)
+        {
+            CLR_RT_TypeDef_Instance parent = walk;
+            bool hasTypeSpecBase = walk.target->HasValidExtendsType() && walk.target->ExtendsIsTypeSpec();
+            CLR_RT_GenericInstance *closedBase =
+                hasTypeSpecBase ? FindOrCreateGenericBase(walk, current != nullptr ? &current->m_self : nullptr)
+                                : nullptr;
+
+            if (!parent.SwitchToParent())
+            {
+                break;
+            }
+
+            current = closedBase;
+
+            if (parent.data == targetClass.data)
+            {
+                if (current == nullptr)
+                {
+                    return hasTypeSpecBase ? GenericMatch_NoTypeSpec : GenericMatch_Unresolved;
+                }
+
+                return (current->m_nodeCount == target.m_count &&
+                        SameGenericInstanceNodes(current->m_nodes, target.m_nodes, target.m_count))
+                           ? GenericMatch_Same
+                           : GenericMatch_Different;
+            }
+
+            walk = parent;
+        }
+
         return GenericMatch_Unresolved;
     }
 

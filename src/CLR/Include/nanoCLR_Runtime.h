@@ -2222,6 +2222,9 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
     static CLR_RT_GenericInstance *GetGenericInstance(const CLR_RT_TypeSpec_Index &index);
 
     static CLR_UINT16 GetGenericOwnerSlot(const CLR_RT_TypeSpec_Index &typeSpec);
+    static CLR_RT_GenericInstance *FindOrCreateGenericBase(
+        const CLR_RT_TypeDef_Instance &child,
+        const CLR_RT_TypeSpec_Index *childContext);
     static bool IsSameGenericInstance(const CLR_RT_TypeSpec_Index &left, const CLR_RT_TypeSpec_Index &right);
 
     static HRESULT CollectGenericTarget(
@@ -2313,6 +2316,7 @@ struct CLR_RT_TypeDef_Instance : public CLR_RT_TypeDef_Index
     }
 
     bool SwitchToParent();
+    bool GetExtendsTypeSpec(CLR_RT_TypeSpec_Index &typeSpec) const;
     bool HasFinalizer() const;
 
     bool IsATypeHandler();

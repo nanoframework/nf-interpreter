@@ -73,6 +73,33 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::SetValue___VOID__OBJE
 
     fValueType = obj->IsAValueType();
 
+    if (!fValueType &&
+        (c_CLR_RT_DataTypeLookup[obj->DataType()].m_flags & CLR_RT_DataTypeLookup::c_OptimizedValueType) == 0 &&
+        instTDescObj.m_reflex.levels == 0 && NANOCLR_INDEX_IS_VALID(instTDescObj.m_handlerCls))
+    {
+        const CLR_UINT32 closedFlags = c_CLR_RT_DataTypeLookup[instTDescObj.m_handlerCls.target->dataType].m_flags;
+
+        if (closedFlags & CLR_RT_DataTypeLookup::c_ValueType)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+        }
+
+        if (closedFlags & CLR_RT_DataTypeLookup::c_OptimizedValueType)
+        {
+            if (val.Dereference() == nullptr || !val.Dereference()->IsBoxed())
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            }
+
+            instTDField.InitializeFromIndex(*c_CLR_RT_DataTypeLookup[instTDescObj.m_handlerCls.target->dataType].m_cls);
+
+            NANOCLR_CHECK_HRESULT(val.PerformUnboxing(instTDField));
+            obj->Assign(val);
+
+            NANOCLR_SET_AND_LEAVE(S_OK);
+        }
+    }
+
     if (fValueType || (c_CLR_RT_DataTypeLookup[obj->DataType()].m_flags & CLR_RT_DataTypeLookup::c_OptimizedValueType))
     {
         if (val.Dereference() == nullptr || !val.Dereference()->IsBoxed())
