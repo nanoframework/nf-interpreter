@@ -3,7 +3,8 @@
 
 steps:
   - bash: |
-      sudo apt-get install -y srecord
+      set -euo pipefail
+      sudo apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install -y srecord
       mkdir -p "$(Agent.TempDirectory)/srecord/srecord"
       for f in /usr/bin/srec_*; do ln -sf "$f" "$(Agent.TempDirectory)/srecord/srecord/"; done
       echo "##vso[task.setvariable variable=SRECORD_PATH]$(Agent.TempDirectory)/srecord"
