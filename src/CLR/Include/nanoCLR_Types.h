@@ -1344,16 +1344,24 @@ struct CLR_RECORD_TYPEDEF
     ///
     CLR_INDEX ExtendsIndex() const
     {
-        return (encodedExtends & 0x7FFF);
+        return (encodedExtends & (ExtendsIsTypeSpec() ? 0x3FFF : 0x7FFF));
     }
 
-    /// @brief Extends table
+    /// @brief Extends table: TypeDef (bit 15 clear), TypeRef (bit 15 set) or TypeSpec (bits 15 and 14 set)
     ///
     NanoCLRTable Extends() const
     {
-        static const NanoCLRTable c_lookup[2] = {TBL_TypeDef, TBL_TypeRef};
+        if (ExtendsIsTypeSpec())
+        {
+            return TBL_TypeSpec;
+        }
 
-        return c_lookup[(encodedExtends >> 15)];
+        return (encodedExtends & 0x8000) ? TBL_TypeRef : TBL_TypeDef;
+    }
+
+    bool ExtendsIsTypeSpec() const
+    {
+        return (encodedExtends & 0xC000) == 0xC000 && encodedExtends != CLR_EmptyIndex;
     }
 
     /// @brief Index into EnclosingType table
