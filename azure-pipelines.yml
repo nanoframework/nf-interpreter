@@ -1051,7 +1051,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "windows-2025-vs2026"
 
     variables:
       - group: sign-client-credentials
