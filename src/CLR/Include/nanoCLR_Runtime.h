@@ -2248,6 +2248,11 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
     // False only when the object is known to be of another instantiation than the element of the array.
     static bool ElementMatchesArraySpec(const CLR_RT_HeapBlock &object, const CLR_RT_TypeSpec_Index &element);
 
+    // The element instance of an array is the requested one, or derives from it through generic base classes.
+    static bool IsElementInstanceAssignable(
+        const CLR_RT_TypeSpec_Index &actual,
+        const CLR_RT_TypeSpec_Index &requested);
+
     static HRESULT AllocateGenericInstanceStatics(CLR_RT_GenericInstance &instance);
 
     void TruncateGenericInstances(CLR_UINT32 count);

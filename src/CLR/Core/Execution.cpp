@@ -4121,7 +4121,7 @@ static bool ArrayElementDiffers(
         return false;
     }
 
-    return !CLR_RT_TypeSystem::IsSameGenericInstance(*actual, element);
+    return !CLR_RT_TypeSystem::IsElementInstanceAssignable(*actual, element);
 }
 
 HRESULT CLR_RT_ExecutionEngine::CastToType(

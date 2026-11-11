@@ -9873,8 +9873,20 @@ HRESULT CLR_RT_TypeSystem::GetElementGenericInstance(
         else
         {
             CLR_RT_GenericTarget target;
+            CLR_RT_MethodSpec_Instance methodSpec{};
+            CLR_RT_SignatureParser argument;
 
-            hr = CollectGenericTarget(parser, contextTypeSpec, contextMethod, target);
+            if (first.DataType == DATATYPE_MVAR && first.Levels == 0 && contextMethod != nullptr &&
+                NANOCLR_INDEX_IS_VALID(contextMethod->methodSpec) &&
+                methodSpec.InitializeFromIndex(contextMethod->methodSpec) &&
+                methodSpec.PositionAtGenericArgument(first.GenericParamPosition, argument))
+            {
+                hr = CollectGenericTarget(argument, contextTypeSpec, nullptr, target);
+            }
+            else
+            {
+                hr = CollectGenericTarget(parser, contextTypeSpec, contextMethod, target);
+            }
 
             if (hr == S_OK && target.m_count > 0)
             {
@@ -9897,16 +9909,86 @@ HRESULT CLR_RT_TypeSystem::GetElementGenericInstance(
     return hr;
 }
 
+bool CLR_RT_TypeSystem::IsElementInstanceAssignable(
+    const CLR_RT_TypeSpec_Index &actual,
+    const CLR_RT_TypeSpec_Index &requested)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    CLR_RT_GenericInstance *current = RecordOfTypeSpec(actual);
+    CLR_RT_GenericInstance *wanted = RecordOfTypeSpec(requested);
+
+    if (IsSameGenericInstance(actual, requested) || current == nullptr || wanted == nullptr)
+    {
+        return true;
+    }
+
+    // another instantiation of the same generic type
+    if (current->m_nodes[0].Class.data == wanted->m_nodes[0].Class.data)
+    {
+        return false;
+    }
+
+    // a generic base class of the element, closed level by level; interfaces and bases that aren't generic instances
+    // aren't compared, the TypeDefs were already checked
+    for (int depth = 0; depth < c_MaxInheritanceDepth; depth++)
+    {
+        CLR_RT_TypeDef_Instance definition{};
+        CLR_RT_GenericInstance *parent;
+
+        if (!definition.InitializeFromIndex(current->m_nodes[0].Class))
+        {
+            break;
+        }
+
+        parent = FindOrCreateGenericBase(definition, &current->m_self);
+
+        if (parent == nullptr)
+        {
+            break;
+        }
+
+        if (parent->m_nodeCount == wanted->m_nodeCount &&
+            SameGenericInstanceNodes(parent->m_nodes, wanted->m_nodes, wanted->m_nodeCount))
+        {
+            return true;
+        }
+
+        if (parent->m_nodes[0].Class.data == wanted->m_nodes[0].Class.data)
+        {
+            return false;
+        }
+
+        current = parent;
+    }
+
+    return true;
+}
+
 bool CLR_RT_TypeSystem::ElementMatchesArraySpec(const CLR_RT_HeapBlock &object, const CLR_RT_TypeSpec_Index &element)
 {
     NATIVE_PROFILE_CLR_CORE();
 
     CLR_RT_GenericInstance *record = RecordOfTypeSpec(element);
     CLR_RT_GenericTarget target;
+    const CLR_RT_HeapBlock *obj = &object;
 
     if (record == nullptr)
     {
         return true;
+    }
+
+    while (obj != nullptr && (obj->DataType() == DATATYPE_OBJECT || obj->DataType() == DATATYPE_BYREF))
+    {
+        obj = obj->Dereference();
+    }
+
+    // an element that is an array itself: its own element instance is what counts
+    if (obj != nullptr && obj->DataType() == DATATYPE_SZARRAY)
+    {
+        const CLR_RT_TypeSpec_Index *actual = ((const CLR_RT_HeapBlock_Array *)obj)->ElementTypeSpec();
+
+        return actual == nullptr || IsElementInstanceAssignable(*actual, element);
     }
 
     target.m_count = record->m_nodeCount;

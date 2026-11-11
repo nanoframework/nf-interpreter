@@ -121,7 +121,7 @@ HRESULT Library_corlib_native_System_Type::IsInstanceOfType___BOOLEAN__OBJECT(CL
             const CLR_RT_TypeSpec_Index *element = ((const CLR_RT_HeapBlock_Array *)obj)->ElementTypeSpec();
 
             if (element != nullptr &&
-                !CLR_RT_TypeSystem::IsSameGenericInstance(*element, hbType->ReflectionDataConst().data.typeSpec))
+                !CLR_RT_TypeSystem::IsElementInstanceAssignable(*element, hbType->ReflectionDataConst().data.typeSpec))
             {
                 isInstance = false;
             }

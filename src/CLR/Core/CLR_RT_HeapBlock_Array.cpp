@@ -423,8 +423,7 @@ HRESULT CLR_RT_HeapBlock_Array::Copy(
 
     if (length)
     {
-        const CLR_RT_TypeSpec_Index *dstSpec =
-            arrayDst->ReflectionDataConst().levels == 1 ? arrayDst->ElementTypeSpec() : nullptr;
+        const CLR_RT_TypeSpec_Index *dstSpec = arrayDst->ElementTypeSpec();
         int numElemSrc = arraySrc->m_numOfElements;
         int numElemDst = arrayDst->m_numOfElements;
 

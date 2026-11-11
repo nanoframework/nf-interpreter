@@ -623,8 +623,7 @@ HRESULT CLR_RT_HeapBlock::StoreToReference(CLR_RT_HeapBlock &ref, int size)
 
                 const CLR_RT_TypeSpec_Index *elementSpec = array->ElementTypeSpec();
 
-                if (elementSpec != nullptr && descDst.m_reflex.levels == 1 &&
-                    !CLR_RT_TypeSystem::ElementMatchesArraySpec(*this, *elementSpec))
+                if (elementSpec != nullptr && !CLR_RT_TypeSystem::ElementMatchesArraySpec(*this, *elementSpec))
                 {
                     NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 }
