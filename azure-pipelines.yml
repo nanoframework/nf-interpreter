@@ -1693,7 +1693,7 @@ jobs:
       - Build_Pre_Checks
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "windows-2025-vs2026"
 
     variables:
       DOTNET_NOLOGO: true
