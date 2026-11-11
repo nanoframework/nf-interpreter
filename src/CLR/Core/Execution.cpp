@@ -4110,13 +4110,12 @@ static bool ArrayElementDiffers(
     row.Set(assm->assemblyIndex, CLR_DataFromTk(tk));
 
     if (actual == nullptr || !requested.InitializeFromIndex(row) || requested.levels == 0 ||
-        FAILED(
-            CLR_RT_TypeSystem::GetElementGenericInstance(
-                assm,
-                tk,
-                caller,
-                caller != nullptr ? caller->genericType : nullptr,
-                element)) ||
+        FAILED(CLR_RT_TypeSystem::GetElementGenericInstance(
+            assm,
+            tk,
+            caller,
+            caller != nullptr ? caller->genericType : nullptr,
+            element)) ||
         !NANOCLR_INDEX_IS_VALID(element))
     {
         return false;

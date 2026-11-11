@@ -78,13 +78,12 @@ HRESULT Library_corlib_native_System_Array::CreateInstance___STATIC__SystemArray
         reflex.levels = 1;
         reflex.data.type = td;
 
-        NANOCLR_SET_AND_LEAVE(
-            CLR_RT_HeapBlock_Array::CreateInstance(
-                stack.PushValue(),
-                stack.Arg1().NumericByRefConst().s4,
-                reflex,
-                0,
-                &hbType->ReflectionDataConst().data.typeSpec));
+        NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_Array::CreateInstance(
+            stack.PushValue(),
+            stack.Arg1().NumericByRefConst().s4,
+            reflex,
+            0,
+            &hbType->ReflectionDataConst().data.typeSpec));
     }
 
     NANOCLR_CHECK_HRESULT(
