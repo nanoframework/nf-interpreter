@@ -109,6 +109,12 @@ pwm.Start();
 
 > **Note:** Two GPIOs sharing the same slice share the same frequency but can have different duty cycles.
 
+PWM frequency selection and live frequency changes use the same driver as
+[Pico RP2040](../PICO_RP2040/README.md#pwm). The supported frequency range scales
+with the system clock: at 150 MHz, integer frequencies from 9 Hz to 75 MHz are
+supported. Changing frequency preserves both channels' duty cycles but restarts
+the shared slice counter.
+
 ### ADC
 
 | Channel | GPIO | Pico Pin | Description |
