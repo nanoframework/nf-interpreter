@@ -44,18 +44,22 @@ pin.Write(PinValue.High);
 
 ### SPI Bus Configuration
 
-| Bus | Function | GPIO | Pico Pin |
-|-----|----------|------|----------|
-| SPI0 | SCK | GP18 | 24 |
-| SPI0 | MOSI | GP19 | 25 |
-| SPI0 | MISO | GP16 | 21 |
-| SPI1 | SCK | GP10 | 14 |
-| SPI1 | MOSI | GP11 | 15 |
-| SPI1 | MISO | GP12 | 16 |
+SPI bus IDs are 1-based in nanoFramework: SPI1 (bus ID 1) maps to hardware bus 0, and SPI2 (bus ID 2) maps to hardware bus 1.
+Use these IDs with both `SpiDevice.Create` and `SpiDevice.GetBusInfo`.
+In the table below, **Bus** is the hardware peripheral number and **SPI** is the nanoFramework name to use.
+
+| Bus | SPI | Function | GPIO | Pico Pin |
+|-----|-----|----------|------|----------|
+| 0 | SPI1 | SCK | GP18 | 24 |
+| 0 | SPI1 | MOSI | GP19 | 25 |
+| 0 | SPI1 | MISO | GP16 | 21 |
+| 1 | SPI2 | SCK | GP10 | 14 |
+| 1 | SPI2 | MOSI | GP11 | 15 |
+| 1 | SPI2 | MISO | GP12 | 16 |
 
 ```csharp
 // SPI0 example
-var settings = new SpiConnectionSettings(0, chipSelectPin);  // bus 0 = SPI0
+var settings = new SpiConnectionSettings(1, chipSelectPin);  // nanoFramework SPI1 = hardware SPI0
 settings.ClockFrequency = 1_000_000;
 var spi = SpiDevice.Create(settings);
 ```
