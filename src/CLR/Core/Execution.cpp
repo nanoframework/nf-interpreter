@@ -2265,6 +2265,30 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::AccessStaticField(const CLR_RT_FieldDe
     return nullptr;
 }
 
+static HRESULT FindRuntimeArgumentTypeSpec(const CLR_RT_SignatureParser &argParser, CLR_RT_TypeSpec_Index &argTypeSpec)
+{
+    const CLR_RT_GenericInstanceNode *argNodes = (const CLR_RT_GenericInstanceNode *)argParser.Signature;
+    int pending = 1;
+    int count = 0;
+
+    while (pending > 0 && count < argParser.m_runtimeNodesLeft)
+    {
+        pending += argNodes[count++].ArgCount - 1;
+    }
+
+    CLR_RT_GenericInstance *argInstance =
+        pending == 0 ? CLR_RT_TypeSystem::FindOrCreateGenericInstanceByNodes(argNodes, count) : nullptr;
+
+    if (argInstance == nullptr)
+    {
+        return CLR_E_WRONG_TYPE;
+    }
+
+    argTypeSpec = argInstance->m_self;
+
+    return S_OK;
+}
+
 // Resolves a VAR to its whole argument in the closed TypeSpec. See CLAUDE.md "Bare T fields and locals".
 static HRESULT ResolveGenericTypeParameter(
     const CLR_RT_TypeSpec_Index &genericTypeIndex,
@@ -2826,7 +2850,12 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
 
                         CLR_PMETADATA argSignature = argParser.Signature;
                         CLR_PMETADATA argStart = argSignature;
-                        bool argIsGenericInst = CLR_UncompressElementType(argStart) == DATATYPE_GENERICINST;
+                        bool argIsRuntime = argParser.Type == CLR_RT_SignatureParser::c_RuntimeTypeSpec;
+                        CLR_RT_SignatureParser argBefore = argParser;
+                        bool argIsGenericInst = argIsRuntime
+                                                    ? (argParser.m_runtimeNodesLeft > 0 &&
+                                                       ((const CLR_RT_GenericInstanceNode *)argSignature)->ArgCount > 0)
+                                                    : CLR_UncompressElementType(argStart) == DATATYPE_GENERICINST;
 
                         NANOCLR_CHECK_HRESULT(argParser.AdvanceParameter(element));
 
@@ -2838,7 +2867,11 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                         {
                             CLR_RT_TypeSpec_Index argTypeSpec;
 
-                            if (!methodSpec.assembly->FindTypeSpec(argSignature, argTypeSpec))
+                            if (argIsRuntime)
+                            {
+                                NANOCLR_CHECK_HRESULT(FindRuntimeArgumentTypeSpec(argBefore, argTypeSpec));
+                            }
+                            else if (!methodSpec.assembly->FindTypeSpec(argSignature, argTypeSpec))
                             {
                                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                             }

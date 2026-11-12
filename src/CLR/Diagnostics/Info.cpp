@@ -689,8 +689,9 @@ void CLR_RT_Assembly::DumpToken(
                             }
                             else if (element.DataType == DATATYPE_MVAR)
                             {
-                                // nested MVAR not implemented
-                                ASSERT(false);
+                                CLR_Debug::Printf("!!%d", genericPosition);
+
+                                break;
                             }
 
                             char bufArg[256]{};
