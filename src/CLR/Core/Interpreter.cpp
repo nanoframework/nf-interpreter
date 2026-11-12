@@ -1044,6 +1044,13 @@ static bool TryGetReceiverTypeSpec(
     const CLR_RT_TypeDef_Index *requiredDef,
     CLR_RT_TypeSpec_Index &receiverTypeSpec)
 {
+    for (int hop = 0;
+         obj != nullptr && hop < 2 && (obj->DataType() == DATATYPE_OBJECT || obj->DataType() == DATATYPE_BYREF);
+         hop++)
+    {
+        obj = obj->Dereference();
+    }
+
     if (obj == nullptr || (obj->DataType() != DATATYPE_CLASS && obj->DataType() != DATATYPE_VALUETYPE) ||
         !obj->IsAGenericInstance())
     {
@@ -2646,6 +2653,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                                         }
 
+                                        CLR_RT_MethodSpec_Index savedMethodSpec = calleeInst.methodSpec;
+
                                         // If this is an SZArrayHelper dispatch, populate arrayElementType from runtime
                                         // array
                                         CLR_RT_TypeDef_Index savedArrayElementType{};
@@ -2750,6 +2759,11 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                                     NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                                                 }
                                             }
+                                        }
+
+                                        if (NANOCLR_INDEX_IS_VALID(savedMethodSpec))
+                                        {
+                                            calleeInst.methodSpec = savedMethodSpec;
                                         }
 
                                         // Restore the array element type after reinitializing calleeInst
