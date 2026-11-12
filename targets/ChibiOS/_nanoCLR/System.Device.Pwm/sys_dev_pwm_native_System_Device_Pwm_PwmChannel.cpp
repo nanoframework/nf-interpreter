@@ -861,8 +861,7 @@ int GetChannelPwm(int pin, int timerId)
             break;
     }
 #endif
-#if defined(STM32H735xx) || defined(STM32H733xx) || defined(STM32H730xx) || defined(STM32H725xx) ||                    \
-    defined(STM32H723xx)
+#if defined(STM32H735xx) || defined(STM32H733xx) || defined(STM32H730xx) || defined(STM32H725xx) || defined(STM32H723xx)
     switch (timerId)
     {
         case 1:
