@@ -66,20 +66,21 @@ var spi = SpiDevice.Create(settings);
 
 ### I2C Bus Configuration
 
-| Bus | Function | GPIO | Pico Pin |
-|-----|----------|------|----------|
-| I2C0 | SDA | GP4 | 6 |
-| I2C0 | SCL | GP5 | 7 |
-| I2C1 | SDA | GP6 | 9 |
-| I2C1 | SCL | GP7 | 10 |
+I2C bus IDs are 1-based in nanoFramework: I2C1 (bus ID 1) maps to hardware bus 0, and I2C2 (bus ID 2) maps to hardware bus 1.
+In the table below, **Bus** is the hardware peripheral number and **I2C** is the nanoFramework name to use.
+
+| Bus | I2C | Function | GPIO | Pico Pin |
+|-----|-----|----------|------|----------|
+| 0 | I2C1 | SDA | GP4 | 6 |
+| 0 | I2C1 | SCL | GP5 | 7 |
+| 1 | I2C2 | SDA | GP6 | 9 |
+| 1 | I2C2 | SCL | GP7 | 10 |
 
 ```csharp
-// I2C0 example (bus index 0)
-var settings = new I2cConnectionSettings(0, 0x48);  // bus 0 = I2C0
+// I2C1 example (hardware I2C0)
+var settings = new I2cConnectionSettings(1, 0x48);  // bus 1 = I2C1 = hardware I2C0
 var device = I2cDevice.Create(settings);
 ```
-
-> **Note:** I2C buses are 0-indexed on RP2040. Bus 0 = I2C0, Bus 1 = I2C1.
 
 ### PWM
 
