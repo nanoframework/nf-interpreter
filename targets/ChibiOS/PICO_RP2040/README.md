@@ -81,7 +81,7 @@ var device = I2cDevice.Create(settings);
 
 RP2040 has 8 PWM slices with 2 channels each (A and B). The pin-to-PWM mapping follows a simple formula:
 
-- **Slice** = GPIO number / 2
+- **Slice** = (GPIO number % 16) / 2
 - **Channel** = GPIO number % 2 (0 = A, 1 = B)
 
 | GPIO | Slice | Channel | GPIO | Slice | Channel |
@@ -111,6 +111,17 @@ pwm.Start();
 ```
 
 > **Note:** Two GPIOs sharing the same slice share the same frequency but can have different duty cycles.
+
+The driver selects the smallest 8.4 fixed-point clock divider that allows the period
+to fit in 65,535 counter ticks, then rounds the period to the nearest tick.
+The output frequency is approximately `system clock / (divider * period)`, not
+restricted to a few preset frequencies. At 125 MHz, integer frequencies from 8 Hz
+to 62.5 MHz are supported; requests outside this range are rejected.
+
+Changing `Frequency` on a running channel keeps both channels on the slice active
+with their existing duty cycles (rounded to the new period). It changes the shared
+slice frequency, so GP26 and GP27 cannot play independent pitches simultaneously.
+The slice counter restarts during the change; phase continuity is not guaranteed.
 
 ### ADC
 

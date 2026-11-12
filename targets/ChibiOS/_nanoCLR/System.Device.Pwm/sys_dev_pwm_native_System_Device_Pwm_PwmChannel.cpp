@@ -12,6 +12,9 @@
 
 typedef Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel PwmChannel;
 
+// ChibiOS retains the configuration pointer after pwmStart returns.
+static PWMConfig s_pwmConfig[8];
+
 // Get PWM driver for a given RP2040 slice (timer) ID.
 static PWMDriver *GetDriverPwm(int timerId)
 {
@@ -81,7 +84,14 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetDesire
     uint32_t timerId;
     int32_t desiredFrequency;
     uint32_t period;
-    PWMConfig pwmConfig;
+    uint32_t divider;
+    uint32_t systemClock;
+    uint64_t scaledClock;
+    uint64_t frequencyPeriod;
+    uint32_t oldPeriod;
+    uint32_t compare;
+    pwmchnmsk_t enabled;
+    pwmcnt_t widths[2] = {};
     PWMDriver *pwmDriver;
 
     NANOCLR_HEADER();
@@ -92,26 +102,51 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetDesire
     timerId = pThis[PwmChannel::FIELD___pwmTimer].NumericByRef().s4;
     desiredFrequency = stack.Arg1().NumericByRef().s4;
 
-    if (desiredFrequency < 0)
+    if (desiredFrequency <= 0)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
     pwmDriver = GetDriverPwm(timerId);
 
-    period = 1000;
-    if (desiredFrequency >= 1000)
+    if (pwmDriver == NULL)
     {
-        period = 100;
-    }
-    else if (desiredFrequency >= 1000000)
-    {
-        period = 10;
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    // RP2040 PWM has two channels per slice.
-    pwmConfig = {
-        (desiredFrequency * period),
+    systemClock = halClockGetPointX(RP_CLK_SYS);
+    scaledClock = (uint64_t)systemClock * 16;
+    frequencyPeriod = (uint64_t)desiredFrequency * UINT16_MAX;
+
+    // Choose the smallest 8.4 divider that fits the period in ChibiOS's 16-bit counter.
+    divider = (uint32_t)((scaledClock + frequencyPeriod - 1) / frequencyPeriod);
+    if (divider < 16)
+    {
+        divider = 16;
+    }
+
+    if (divider > 4095 || (uint32_t)desiredFrequency > systemClock / 2)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    frequencyPeriod = (uint64_t)divider * desiredFrequency;
+    period = (uint32_t)((scaledClock + frequencyPeriod / 2) / frequencyPeriod);
+
+    enabled = pwmDriver->enabled;
+    oldPeriod = pwmDriver->period;
+    compare = pwmDriver->pwm->CH[timerId].CC;
+    for (uint32_t channel = 0; channel < 2; channel++)
+    {
+        if ((enabled & (1U << channel)) != 0)
+        {
+            uint32_t width = (compare >> (channel * 16)) & UINT16_MAX;
+            widths[channel] = (pwmcnt_t)(((uint64_t)width * period + oldPeriod / 2) / oldPeriod);
+        }
+    }
+
+    s_pwmConfig[timerId] = {
+        (uint32_t)(scaledClock / divider),
         (pwmcnt_t)period,
         NULL,
         {
@@ -120,13 +155,17 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetDesire
         },
     };
 
-    pwmStop(pwmDriver);
-    osDelay(5);
-    pwmStart(pwmDriver, &pwmConfig);
+    pwmStart(pwmDriver, &s_pwmConfig[timerId]);
+
+    for (uint32_t channel = 0; channel < 2; channel++)
+    {
+        if ((enabled & (1U << channel)) != 0)
+        {
+            pwmEnableChannel(pwmDriver, channel, widths[channel]);
+        }
+    }
 
     pThis[PwmChannel::FIELD___frequency].NumericByRef().s4 = desiredFrequency;
-
-    stack.SetResult_R8((double)desiredFrequency);
 
     NANOCLR_NOCLEANUP();
 }
@@ -210,11 +249,20 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeStop___VO
 
 HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::DisposeNative___VOID(CLR_RT_StackFrame &stack)
 {
-    (void)stack;
+    PWMDriver *pwmDriver;
 
     NANOCLR_HEADER();
 
-    NANOCLR_NOCLEANUP_NOLABEL();
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    pwmDriver = GetDriverPwm(pThis[PwmChannel::FIELD___pwmTimer].NumericByRef().s4);
+    if (pwmDriver != NULL && pwmDriver->state == PWM_READY)
+    {
+        pwmDisableChannel(pwmDriver, pThis[PwmChannel::FIELD___channelNumber].NumericByRef().s4);
+    }
+
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::GetChannel___STATIC__I4__I4__I4(
