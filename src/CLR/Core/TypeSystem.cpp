@@ -9953,6 +9953,8 @@ HRESULT CLR_RT_TypeSystem::ResolveArrayRow(
         return S_OK;
     }
 
+    bool fromMethodSpec = false;
+
     levels = first.Levels;
 
     for (int hop = 0;; hop++)
@@ -9963,7 +9965,8 @@ HRESULT CLR_RT_TypeSystem::ResolveArrayRow(
 
         if (position.DataType == DATATYPE_MVAR)
         {
-            if (hop > 0 || contextMethod == nullptr || NANOCLR_INDEX_IS_INVALID(contextMethod->methodSpec) ||
+            if ((hop > 0 && first.DataType == DATATYPE_MVAR) || contextMethod == nullptr ||
+                NANOCLR_INDEX_IS_INVALID(contextMethod->methodSpec) ||
                 !methodSpec.InitializeFromIndex(contextMethod->methodSpec) ||
                 !methodSpec.PositionAtGenericArgument(position.GenericParamPosition, argument))
             {
@@ -9979,6 +9982,8 @@ HRESULT CLR_RT_TypeSystem::ResolveArrayRow(
             levels = 0;
             return S_OK;
         }
+
+        fromMethodSpec = position.DataType == DATATYPE_MVAR;
 
         CLR_RT_SignatureParser peek = argument;
 
@@ -10009,7 +10014,7 @@ HRESULT CLR_RT_TypeSystem::ResolveArrayRow(
         CLR_RT_GenericTarget target;
         CLR_RT_GenericInstance *instance = nullptr;
 
-        hr = CollectGenericTarget(argument, nullptr, nullptr, target, true);
+        hr = CollectGenericTarget(argument, fromMethodSpec ? contextTypeSpec : nullptr, nullptr, target, true);
 
         if (hr == S_OK && target.m_count > 0)
         {
