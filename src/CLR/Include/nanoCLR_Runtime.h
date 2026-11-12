@@ -736,6 +736,11 @@ struct CLR_RT_MethodSpec_Index
     {
         return (CLR_INDEX)data;
     }
+
+    bool IsRuntime() const
+    {
+        return (data >> 24) == 0xFF;
+    }
 };
 
 struct CLR_RT_FieldDef_Index
@@ -2220,6 +2225,8 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
         HRESULT *result = nullptr);
 
     static CLR_RT_GenericInstance *GetGenericInstance(const CLR_RT_TypeSpec_Index &index);
+
+    static bool CloseMethodSpec(const CLR_RT_MethodDef_Instance &caller, CLR_RT_MethodSpec_Index &methodSpec);
 
     static CLR_UINT16 GetGenericOwnerSlot(const CLR_RT_TypeSpec_Index &typeSpec);
     static CLR_RT_GenericInstance *FindOrCreateGenericBase(

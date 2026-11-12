@@ -376,6 +376,25 @@ void CLR_RT_SignatureParser::Initialize_MethodSignature(CLR_RT_MethodSpec_Instan
 {
     NATIVE_PROFILE_CLR_CORE();
 
+    if (ms->IsRuntime())
+    {
+        CLR_RT_TypeSpec_Index recordIndex;
+        recordIndex.data = ms->data;
+        CLR_RT_GenericInstance *instance = CLR_RT_TypeSystem::GetGenericInstance(recordIndex);
+
+        Method = 0;
+        Assembly = nullptr;
+        Flags = PIMAGE_CEE_CS_CALLCONV_GENERICINST;
+        Type = CLR_RT_SignatureParser::c_RuntimeTypeSpec;
+        Signature = instance != nullptr ? (CLR_PMETADATA)(instance->m_nodes + 1) : nullptr;
+        m_runtimeNodesLeft = instance != nullptr ? instance->m_nodeCount - 1 : 0;
+        ParamCount = instance != nullptr ? instance->m_nodes[0].ArgCount : 0;
+        GenParamCount = ParamCount;
+        m_pendingGenericInst = false;
+
+        return;
+    }
+
     Method = ms->Method();
 
     Signature = ms->assembly->GetSignature(ms->target->instantiation);
@@ -1619,8 +1638,6 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                                     }
                                     else if (element.DataType == DATATYPE_MVAR)
                                     {
-                                        // nested MVAR not implemented
-                                        ASSERT(false);
                                         return false;
                                     }
 
@@ -2799,6 +2816,25 @@ bool CLR_RT_GenericParam_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *
 bool CLR_RT_MethodSpec_Instance::InitializeFromIndex(const CLR_RT_MethodSpec_Index &index)
 {
     NATIVE_PROFILE_CLR_CORE();
+
+    if (index.IsRuntime())
+    {
+        CLR_RT_TypeSpec_Index recordIndex;
+        recordIndex.data = index.data;
+
+        if (CLR_RT_TypeSystem::GetGenericInstance(recordIndex) != nullptr)
+        {
+            data = index.data;
+            assembly = nullptr;
+            target = nullptr;
+
+            return true;
+        }
+
+        ClearInstance();
+
+        return false;
+    }
 
     if (NANOCLR_INDEX_IS_VALID(index))
     {
@@ -9623,7 +9659,7 @@ static CLR_RT_GenericInstance *RegisterGenericInstance(
     {
         instance->m_self.data = knownRow.data;
     }
-    else if (!FindClosedTypeSpecRow(nodes, nodeCount, instance->m_self))
+    else if (nodes[0].Class.data == 0 || !FindClosedTypeSpecRow(nodes, nodeCount, instance->m_self))
     {
         instance->m_self.Set(CLR_RT_TypeSpec_Index::c_RuntimeAssembly, ts.m_genericInstancesCount);
     }
@@ -9750,6 +9786,64 @@ CLR_RT_GenericInstance *CLR_RT_TypeSystem::FindOrCreateGenericInstanceByNodes(
     }
 
     return instance;
+}
+
+bool CLR_RT_TypeSystem::CloseMethodSpec(const CLR_RT_MethodDef_Instance &caller, CLR_RT_MethodSpec_Index &methodSpec)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    CLR_RT_MethodSpec_Instance spec{};
+    CLR_RT_SignatureParser parser;
+    CLR_RT_GenericInstanceNode nodes[CLR_RT_GenericInstance::c_MaxNodes];
+    int nodeCount = 1;
+    bool closed;
+    bool substituted;
+
+    if (!NANOCLR_INDEX_IS_VALID(methodSpec) || methodSpec.IsRuntime() || !spec.InitializeFromIndex(methodSpec))
+    {
+        return false;
+    }
+
+    parser.Initialize_MethodSignature(&spec);
+
+    int argCount = parser.ParamCount;
+
+    if (argCount <= 0 || argCount > 0xFF)
+    {
+        return false;
+    }
+
+    nodes[0].Class.Clear();
+    nodes[0].DataType = DATATYPE_VOID;
+    nodes[0].Levels = 0;
+    nodes[0].ArgCount = (CLR_UINT8)argCount;
+    nodes[0].Position = 0;
+
+    if (FAILED(CollectGenericArguments(
+            parser,
+            caller.genericType,
+            &caller,
+            argCount,
+            nullptr,
+            nodes,
+            nodeCount,
+            closed,
+            substituted)) ||
+        !closed || !substituted)
+    {
+        return false;
+    }
+
+    CLR_RT_GenericInstance *instance = FindOrCreateGenericInstanceByNodes(nodes, nodeCount);
+
+    if (instance == nullptr)
+    {
+        return false;
+    }
+
+    methodSpec.data = instance->m_self.data;
+
+    return true;
 }
 
 // S_OK with a count of 0 when the signature isn't a generic instance or is an array of one, S_FALSE when it's open.

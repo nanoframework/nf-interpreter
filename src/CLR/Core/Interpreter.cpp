@@ -1039,6 +1039,38 @@ static bool IsOtherInstantiation(const CLR_RT_TypeSpec_Index *calleeTs, const CL
            calleeInst.genericTypeDef.data == callerInst.genericTypeDef.data;
 }
 
+static bool TryGetReceiverTypeSpec(
+    const CLR_RT_HeapBlock *obj,
+    const CLR_RT_TypeDef_Index *requiredDef,
+    CLR_RT_TypeSpec_Index &receiverTypeSpec)
+{
+    for (int hop = 0;
+         obj != nullptr && hop < 2 && (obj->DataType() == DATATYPE_OBJECT || obj->DataType() == DATATYPE_BYREF);
+         hop++)
+    {
+        obj = obj->Dereference();
+    }
+
+    if (obj == nullptr || (obj->DataType() != DATATYPE_CLASS && obj->DataType() != DATATYPE_VALUETYPE) ||
+        !obj->IsAGenericInstance())
+    {
+        return false;
+    }
+
+    const CLR_RT_TypeSpec_Index &objTypeSpec = obj->ObjectGenericType();
+    const CLR_RT_TypeDef_Index &def = requiredDef != nullptr ? *requiredDef : obj->ObjectCls();
+    CLR_RT_TypeSpec_Instance objTs{};
+
+    if (!NANOCLR_INDEX_IS_VALID(objTypeSpec) || !NANOCLR_INDEX_IS_VALID(def) ||
+        !objTs.InitializeFromIndex(objTypeSpec) || objTs.genericTypeDef.data != def.data)
+    {
+        return false;
+    }
+
+    receiverTypeSpec = objTypeSpec;
+    return true;
+}
+
 // See CLAUDE.md "Generic .cctor lifecycle" for the call contract.
 static HRESULT EnsureGenericCctorCompleted(
     CLR_RT_TypeSpec_Instance &tsInst,
@@ -2431,20 +2463,9 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                 {
                                     CLR_RT_HeapBlock *obj = pThisTemp->Dereference();
 
-                                    // 7. Object is a class instance (generic or not)
-                                    if (obj && obj->DataType() == DATATYPE_CLASS)
+                                    if (TryGetReceiverTypeSpec(obj, nullptr, objTypeSpec))
                                     {
-                                        CLR_RT_TypeDef_Index objCls = obj->ObjectCls();
-
-                                        CLR_RT_TypeSpec_Instance objTs{};
-
-                                        if (NANOCLR_INDEX_IS_VALID(objCls) && obj->IsAGenericInstance() &&
-                                            objTs.InitializeFromIndex(obj->ObjectGenericType()) &&
-                                            objTs.genericTypeDef.data == objCls.data)
-                                        {
-                                            objTypeSpec = obj->ObjectGenericType();
-                                            effectiveCallerGeneric = &objTypeSpec;
-                                        }
+                                        effectiveCallerGeneric = &objTypeSpec;
                                     }
                                 }
                             }
@@ -2468,6 +2489,12 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             stack->m_call.arrayElementType.data);
 #endif
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
+
+                    if (NANOCLR_INDEX_IS_VALID(calleeInst.methodSpec) &&
+                        (NANOCLR_INDEX_IS_VALID(stack->m_call.methodSpec) || stack->m_call.genericType != nullptr))
+                    {
+                        CLR_RT_TypeSystem::CloseMethodSpec(stack->m_call, calleeInst.methodSpec);
                     }
 
                     CLR_RT_TypeDef_Index cls;
@@ -2626,6 +2653,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                                         }
 
+                                        CLR_RT_MethodSpec_Index savedMethodSpec = calleeInst.methodSpec;
+
                                         // If this is an SZArrayHelper dispatch, populate arrayElementType from runtime
                                         // array
                                         CLR_RT_TypeDef_Index savedArrayElementType{};
@@ -2690,28 +2719,16 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                                     // Interface TypeSpec doesn't match the callee's declaring type.
                                                     // Attempt to recover the correct closed TypeSpec from 'this'.
                                                     bool recovered = false;
-                                                    CLR_RT_HeapBlock *thisHeap = pThis[0].Dereference();
-                                                    if (thisHeap != nullptr && thisHeap->IsAGenericInstance())
+                                                    CLR_RT_TypeSpec_Index receiverTs{};
+                                                    if (TryGetReceiverTypeSpec(
+                                                            pThis[0].Dereference(),
+                                                            &declCheck,
+                                                            receiverTs))
                                                     {
-                                                        const CLR_RT_TypeSpec_Index &objTS =
-                                                            thisHeap->ObjectGenericType();
-                                                        if (NANOCLR_INDEX_IS_VALID(objTS))
-                                                        {
-                                                            CLR_RT_TypeSpec_Instance tsObj{};
-                                                            if (tsObj.InitializeFromIndex(objTS) &&
-                                                                tsObj.genericTypeDef.data == declCheck.data)
-                                                            {
-                                                                // The object's TypeSpec matches the callee's declaring
-                                                                // type — reinitialize with the correct closed TypeSpec.
-                                                                if (calleeInst.InitializeFromIndex(
-                                                                        calleeReal,
-                                                                        objTS,
-                                                                        &stack->m_call))
-                                                                {
-                                                                    recovered = true;
-                                                                }
-                                                            }
-                                                        }
+                                                        recovered = calleeInst.InitializeFromIndex(
+                                                            calleeReal,
+                                                            receiverTs,
+                                                            &stack->m_call);
                                                     }
 
                                                     if (!recovered)
@@ -2728,6 +2745,25 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                             {
                                                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                                             }
+
+                                            CLR_RT_TypeDef_Instance declReal{};
+                                            CLR_RT_TypeSpec_Index receiverTs{};
+                                            if (declReal.InitializeFromMethod(calleeInst) &&
+                                                declReal.target->genericParamCount > 0 &&
+                                                TryGetReceiverTypeSpec(pThis[0].Dereference(), &declReal, receiverTs))
+                                            {
+                                                if (!calleeInst
+                                                         .InitializeFromIndex(calleeReal, receiverTs, &stack->m_call) &&
+                                                    !calleeInst.InitializeFromIndex(calleeReal))
+                                                {
+                                                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                                                }
+                                            }
+                                        }
+
+                                        if (NANOCLR_INDEX_IS_VALID(savedMethodSpec))
+                                        {
+                                            calleeInst.methodSpec = savedMethodSpec;
                                         }
 
                                         // Restore the array element type after reinitializing calleeInst
