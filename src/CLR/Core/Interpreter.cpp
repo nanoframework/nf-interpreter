@@ -2640,10 +2640,18 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                                     const CLR_RT_ReflectionDef_Index &reflex =
                                                         pArray->ReflectionDataConst();
 
-                                                    // For a 1D array, levels == 1 and data.type is the element TypeDef
-                                                    if (reflex.levels == 1 && reflex.kind == REFLECTION_TYPE)
+                                                    // For a 1D array, levels == 1 and data.type is the element TypeDef,
+                                                    // an element that is an array itself binds as System.Array
+                                                    if (reflex.kind == REFLECTION_TYPE)
                                                     {
-                                                        savedArrayElementType = reflex.data.type;
+                                                        if (reflex.levels == 1)
+                                                        {
+                                                            savedArrayElementType = reflex.data.type;
+                                                        }
+                                                        else if (reflex.levels > 1)
+                                                        {
+                                                            savedArrayElementType = g_CLR_RT_WellKnownTypes.Array;
+                                                        }
                                                     }
                                                 }
                                             }
@@ -4549,6 +4557,21 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                 else
                                 {
                                     NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                                }
+
+                                CLR_RT_TypeSpec_Index elementSpec;
+
+                                NANOCLR_CHECK_HRESULT(CLR_RT_TypeSystem::GetElementGenericInstance(
+                                    assm,
+                                    arg,
+                                    &stack->m_call,
+                                    stack->m_call.genericType,
+                                    elementSpec));
+
+                                if (NANOCLR_INDEX_IS_VALID(elementSpec))
+                                {
+                                    reflex.kind = REFLECTION_TYPESPEC;
+                                    reflex.data.typeSpec = elementSpec;
                                 }
 
                                 evalPos[0].SetReflection(reflex);

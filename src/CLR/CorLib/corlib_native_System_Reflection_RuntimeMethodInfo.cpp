@@ -14,6 +14,7 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeMethodInfo::get_ReturnTyp
     CLR_RT_SignatureParser parser{};
     CLR_RT_TypeDescriptor desc{};
     CLR_RT_TypeSpec_Index owner;
+    CLR_RT_TypeSpec_Index elementSpec;
     CLR_RT_HeapBlock *hbMeth = stack.This();
 
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_Reflection_MethodBase::GetMethodDescriptor(stack, *hbMeth, md));
@@ -23,7 +24,7 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeMethodInfo::get_ReturnTyp
     owner.Clear();
     hbMeth->ReflectionDataConst().GetGenericOwner(owner);
 
-    NANOCLR_CHECK_HRESULT(desc.InitializeFromClosedSignature(parser, &owner));
+    NANOCLR_CHECK_HRESULT(desc.InitializeFromClosedSignature(parser, &owner, &elementSpec));
 
     {
         CLR_RT_HeapBlock &top = stack.PushValue();
@@ -31,7 +32,7 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeMethodInfo::get_ReturnTyp
 
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
         hbObj = top.Dereference();
-        hbObj->SetReflection(desc.m_reflex);
+        hbObj->SetReflection(desc.GetTypeReflection(elementSpec));
     }
 
     NANOCLR_NOCLEANUP();

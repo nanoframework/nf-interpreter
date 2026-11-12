@@ -4088,6 +4088,42 @@ bool CLR_RT_ExecutionEngine::IsInstanceOfToken(
     return CLR_RT_HeapBlock::TypeDescriptorsMatch(expectedDesc, actualDesc);
 }
 
+// An array with a known element instantiation cast to an array of another instantiation.
+static bool ArrayElementDiffers(
+    const CLR_RT_HeapBlock &ref,
+    CLR_UINT32 tk,
+    CLR_RT_Assembly *assm,
+    const CLR_RT_MethodDef_Instance *caller)
+{
+    const CLR_RT_HeapBlock *obj = ref.Dereference();
+
+    if (obj == nullptr || obj->DataType() != DATATYPE_SZARRAY)
+    {
+        return false;
+    }
+
+    const CLR_RT_TypeSpec_Index *actual = ((const CLR_RT_HeapBlock_Array *)obj)->ElementTypeSpec();
+    CLR_RT_TypeSpec_Instance requested{};
+    CLR_RT_TypeSpec_Index row;
+    CLR_RT_TypeSpec_Index element;
+
+    row.Set(assm->assemblyIndex, CLR_DataFromTk(tk));
+
+    if (actual == nullptr || !requested.InitializeFromIndex(row) || requested.levels == 0 ||
+        FAILED(CLR_RT_TypeSystem::GetElementGenericInstance(
+            assm,
+            tk,
+            caller,
+            caller != nullptr ? caller->genericType : nullptr,
+            element)) ||
+        !NANOCLR_INDEX_IS_VALID(element))
+    {
+        return false;
+    }
+
+    return !CLR_RT_TypeSystem::IsElementInstanceAssignable(*actual, element);
+}
+
 HRESULT CLR_RT_ExecutionEngine::CastToType(
     CLR_RT_HeapBlock &ref,
     CLR_UINT32 tk,
@@ -4112,12 +4148,20 @@ HRESULT CLR_RT_ExecutionEngine::CastToType(
 
             parser.Initialize_TypeSpec(assm, assm->GetTypeSpec(CLR_DataFromTk(tk)));
 
+            bool different = false;
+
             if (CLR_RT_TypeSystem::CollectGenericTarget(
                     parser,
                     hasContext ? caller->genericType : nullptr,
                     caller,
-                    target) == S_OK &&
-                CLR_RT_TypeSystem::MatchGenericArguments(ref, target) == GenericMatch_Different)
+                    target) == S_OK)
+            {
+                different = target.m_count > 0
+                                ? CLR_RT_TypeSystem::MatchGenericArguments(ref, target) == GenericMatch_Different
+                                : ArrayElementDiffers(ref, tk, assm, caller);
+            }
+
+            if (different)
             {
                 if (isInstInstruction == false)
                 {

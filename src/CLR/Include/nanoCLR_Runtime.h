@@ -2231,9 +2231,27 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
         const CLR_RT_SignatureParser &at,
         const CLR_RT_TypeSpec_Index *contextTypeSpec,
         const CLR_RT_MethodDef_Instance *contextMethod,
-        CLR_RT_GenericTarget &target);
+        CLR_RT_GenericTarget &target,
+        bool allowLevels = false);
 
     static CLR_RT_GenericMatch MatchGenericArguments(const CLR_RT_HeapBlock &ref, const CLR_RT_GenericTarget &target);
+
+    // The closed instance of the element of an array TypeSpec, cleared when the element isn't a closed generic
+    // instance.
+    static HRESULT GetElementGenericInstance(
+        CLR_RT_Assembly *assm,
+        CLR_UINT32 tk,
+        const CLR_RT_MethodDef_Instance *contextMethod,
+        const CLR_RT_TypeSpec_Index *contextTypeSpec,
+        CLR_RT_TypeSpec_Index &element);
+
+    // False only when the object is known to be of another instantiation than the element of the array.
+    static bool ElementMatchesArraySpec(const CLR_RT_HeapBlock &object, const CLR_RT_TypeSpec_Index &element);
+
+    // The element instance of an array is the requested one, or derives from it through generic base classes.
+    static bool IsElementInstanceAssignable(
+        const CLR_RT_TypeSpec_Index &actual,
+        const CLR_RT_TypeSpec_Index &requested);
 
     static HRESULT AllocateGenericInstanceStatics(CLR_RT_GenericInstance &instance);
 
@@ -2658,8 +2676,13 @@ struct CLR_RT_TypeDescriptor
     HRESULT InitializeFromGenericType(const CLR_RT_TypeSpec_Index &genericType);
     HRESULT InitializeFromFieldDefinition(
         const CLR_RT_FieldDef_Instance &fd,
-        const CLR_RT_TypeSpec_Index *ownerTypeSpec = nullptr);
-    HRESULT InitializeFromClosedSignature(CLR_RT_SignatureParser &parser, const CLR_RT_TypeSpec_Index *ownerTypeSpec);
+        const CLR_RT_TypeSpec_Index *ownerTypeSpec = nullptr,
+        CLR_RT_TypeSpec_Index *elementSpec = nullptr);
+    HRESULT InitializeFromClosedSignature(
+        CLR_RT_SignatureParser &parser,
+        const CLR_RT_TypeSpec_Index *ownerTypeSpec,
+        CLR_RT_TypeSpec_Index *elementSpec = nullptr);
+    CLR_RT_ReflectionDef_Index GetTypeReflection(const CLR_RT_TypeSpec_Index &elementSpec) const;
     HRESULT InitializeFromSignatureParser(
         CLR_RT_SignatureParser &parser,
         const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr);

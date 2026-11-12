@@ -49,6 +49,11 @@ HRESULT Library_corlib_native_System_Type::GetGenericTypeDefinition___SystemType
 
     if (hbType->ReflectionDataConst().kind == CLR_ReflectionType::REFLECTION_TYPESPEC)
     {
+        if (hbType->ReflectionDataConst().levels > 0)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+        }
+
         // instanciate the generic type
         genericInstance.InitializeFromIndex(hbType->ObjectGenericType());
 
@@ -106,7 +111,23 @@ HRESULT Library_corlib_native_System_Type::IsInstanceOfType___BOOLEAN__OBJECT(CL
 
     isInstance = CLR_RT_ExecutionEngine::IsInstanceOf(desc, descTarget);
 
-    if (isInstance && hbType->ReflectionDataConst().kind == CLR_ReflectionType::REFLECTION_TYPESPEC)
+    if (isInstance && hbType->ReflectionDataConst().kind == CLR_ReflectionType::REFLECTION_TYPESPEC &&
+        hbType->ReflectionDataConst().levels > 0)
+    {
+        const CLR_RT_HeapBlock *obj = stack.Arg1().Dereference();
+
+        if (obj != nullptr && obj->DataType() == DATATYPE_SZARRAY)
+        {
+            const CLR_RT_TypeSpec_Index *element = ((const CLR_RT_HeapBlock_Array *)obj)->ElementTypeSpec();
+
+            if (element != nullptr &&
+                !CLR_RT_TypeSystem::IsElementInstanceAssignable(*element, hbType->ReflectionDataConst().data.typeSpec))
+            {
+                isInstance = false;
+            }
+        }
+    }
+    else if (isInstance && hbType->ReflectionDataConst().kind == CLR_ReflectionType::REFLECTION_TYPESPEC)
     {
         CLR_RT_TypeSpec_Instance typeSpec{};
         CLR_RT_SignatureParser parser{};
@@ -148,7 +169,8 @@ HRESULT Library_corlib_native_System_Type::GetGenericArguments___SZARRAY_SystemT
     hbType = stack.This();
 
     // sanity check for type spec instance
-    if (hbType->ReflectionDataConst().kind != CLR_ReflectionType::REFLECTION_TYPESPEC)
+    if (hbType->ReflectionDataConst().kind != CLR_ReflectionType::REFLECTION_TYPESPEC ||
+        hbType->ReflectionDataConst().levels > 0)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
@@ -178,8 +200,9 @@ HRESULT Library_corlib_native_System_Type::GetGenericArguments___SZARRAY_SystemT
         {
             CLR_RT_SignatureParser argument = parser;
             CLR_RT_TypeDescriptor argumentType{};
+            CLR_RT_TypeSpec_Index elementSpec;
 
-            NANOCLR_CHECK_HRESULT(argumentType.InitializeFromClosedSignature(argument, nullptr));
+            NANOCLR_CHECK_HRESULT(argumentType.InitializeFromClosedSignature(argument, nullptr, &elementSpec));
 
             parser = argument;
 
@@ -188,7 +211,7 @@ HRESULT Library_corlib_native_System_Type::GetGenericArguments___SZARRAY_SystemT
                 g_CLR_RT_ExecutionEngine.NewObjectFromIndex(slot, g_CLR_RT_WellKnownTypes.TypeStatic));
 
             CLR_RT_HeapBlock *hbObj = slot.Dereference();
-            hbObj->SetReflection(argumentType.m_reflex);
+            hbObj->SetReflection(argumentType.GetTypeReflection(elementSpec));
         }
     }
 
@@ -384,7 +407,12 @@ HRESULT Library_corlib_native_System_Type::get_IsArray___BOOLEAN(CLR_RT_StackFra
 
     CLR_RT_HeapBlock *hbType = stack.This();
 
-    if (hbType->ReflectionDataConst().kind == CLR_ReflectionType::REFLECTION_TYPESPEC)
+    if (hbType->ReflectionDataConst().kind == CLR_ReflectionType::REFLECTION_TYPESPEC &&
+        hbType->ReflectionDataConst().levels > 0)
+    {
+        stack.SetResult_Boolean(true);
+    }
+    else if (hbType->ReflectionDataConst().kind == CLR_ReflectionType::REFLECTION_TYPESPEC)
     {
         // instanciate the generic type
         genericInstance.InitializeFromIndex(hbType->ObjectGenericType());
@@ -441,7 +469,12 @@ HRESULT Library_corlib_native_System_Type::get_IsGenericTypeDefinition___BOOLEAN
 
     CLR_RT_HeapBlock *hbType = stack.This();
 
-    if (hbType->ReflectionDataConst().kind == CLR_ReflectionType::REFLECTION_TYPESPEC)
+    if (hbType->ReflectionDataConst().kind == CLR_ReflectionType::REFLECTION_TYPESPEC &&
+        hbType->ReflectionDataConst().levels > 0)
+    {
+        isTypeDefinition = false;
+    }
+    else if (hbType->ReflectionDataConst().kind == CLR_ReflectionType::REFLECTION_TYPESPEC)
     {
         // instanciate the generic type
         genericInstance.InitializeFromIndex(hbType->ObjectGenericType());
@@ -637,7 +670,9 @@ static CLR_UINT16 GetOwnerSlot(const CLR_RT_HeapBlock &type)
 {
     const CLR_RT_ReflectionDef_Index &reflex = type.ReflectionDataConst();
 
-    return reflex.kind == REFLECTION_TYPESPEC ? CLR_RT_TypeSystem::GetGenericOwnerSlot(reflex.data.typeSpec) : 0;
+    return reflex.kind == REFLECTION_TYPESPEC && reflex.levels == 0
+               ? CLR_RT_TypeSystem::GetGenericOwnerSlot(reflex.data.typeSpec)
+               : 0;
 }
 
 static void SetOwnerSlot(CLR_RT_HeapBlock *member, CLR_UINT16 slot)

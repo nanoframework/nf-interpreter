@@ -57,6 +57,7 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeFieldInfo::get_FieldType_
     CLR_RT_TypeDescriptor desc{};
     CLR_RT_FieldDef_Instance fd;
     CLR_RT_TypeSpec_Index owner;
+    CLR_RT_TypeSpec_Index elementSpec;
     CLR_RT_HeapBlock *hbField = stack.This();
 
     if (GetFieldDescriptor(stack, *hbField, fd) == false)
@@ -65,7 +66,9 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeFieldInfo::get_FieldType_
     owner.Clear();
     hbField->ReflectionDataConst().GetGenericOwner(owner);
 
-    NANOCLR_CHECK_HRESULT(desc.InitializeFromFieldDefinition(fd, &owner));
+    elementSpec.Clear();
+
+    NANOCLR_CHECK_HRESULT(desc.InitializeFromFieldDefinition(fd, &owner, &elementSpec));
 
     {
         CLR_RT_HeapBlock &top = stack.PushValue();
@@ -73,7 +76,7 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeFieldInfo::get_FieldType_
 
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
         hbObj = top.Dereference();
-        hbObj->SetReflection(desc.m_reflex);
+        hbObj->SetReflection(desc.GetTypeReflection(elementSpec));
     }
 
     NANOCLR_NOCLEANUP();

@@ -1214,7 +1214,11 @@ bool CLR_RT_TypeDef_Instance::InitializeFromReflection(const CLR_RT_ReflectionDe
 
             if (levels)
             {
-                *levels = element.Levels;
+                *levels = element.Levels + reflex.levels;
+            }
+            else if (reflex.levels > 0)
+            {
+                return InitializeFromIndex(g_CLR_RT_WellKnownTypes.Array);
             }
 
             // if this is a generic type, need to advance to get type
@@ -3025,6 +3029,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromGenericType(const CLR_RT_TypeSpec_I
         m_flags = CLR_RT_DataTypeLookup::c_ManagedType;
 
         m_reflex.kind = REFLECTION_TYPESPEC;
+        m_reflex.levels = 0;
         m_reflex.data.typeSpec = m_handlerGenericType;
     }
 
@@ -3035,7 +3040,8 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromGenericType(const CLR_RT_TypeSpec_I
 
 HRESULT CLR_RT_TypeDescriptor::InitializeFromFieldDefinition(
     const CLR_RT_FieldDef_Instance &fd,
-    const CLR_RT_TypeSpec_Index *ownerTypeSpec)
+    const CLR_RT_TypeSpec_Index *ownerTypeSpec,
+    CLR_RT_TypeSpec_Index *elementSpec)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -3048,14 +3054,15 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromFieldDefinition(
         NANOCLR_SET_AND_LEAVE(InitializeFromSignatureParser(parser));
     }
 
-    NANOCLR_SET_AND_LEAVE(InitializeFromClosedSignature(parser, ownerTypeSpec));
+    NANOCLR_SET_AND_LEAVE(InitializeFromClosedSignature(parser, ownerTypeSpec, elementSpec));
 
     NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_TypeDescriptor::InitializeFromClosedSignature(
     CLR_RT_SignatureParser &parser,
-    const CLR_RT_TypeSpec_Index *ownerTypeSpec)
+    const CLR_RT_TypeSpec_Index *ownerTypeSpec,
+    CLR_RT_TypeSpec_Index *elementSpec)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -3066,6 +3073,11 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromClosedSignature(
     CLR_RT_TypeSpec_Instance owner{};
     int levels;
     HRESULT collected;
+
+    if (elementSpec != nullptr)
+    {
+        elementSpec->Clear();
+    }
 
     NANOCLR_CHECK_HRESULT(parser.AdvanceParameter(res));
 
@@ -3122,9 +3134,35 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromClosedSignature(
         m_reflex.levels = (CLR_UINT16)levels;
 
         ConvertToArray();
+
+        if (elementSpec != nullptr &&
+            CLR_RT_TypeSystem::CollectGenericTarget(at, ownerTypeSpec, nullptr, target, true) == S_OK &&
+            target.m_count > 0)
+        {
+            CLR_RT_GenericInstance *record =
+                CLR_RT_TypeSystem::FindOrCreateGenericInstanceByNodes(target.m_nodes, target.m_count);
+
+            if (record != nullptr)
+            {
+                *elementSpec = record->m_self;
+            }
+        }
     }
 
     NANOCLR_NOCLEANUP();
+}
+
+CLR_RT_ReflectionDef_Index CLR_RT_TypeDescriptor::GetTypeReflection(const CLR_RT_TypeSpec_Index &elementSpec) const
+{
+    CLR_RT_ReflectionDef_Index reflex = m_reflex;
+
+    if (NANOCLR_INDEX_IS_VALID(elementSpec) && reflex.kind == REFLECTION_TYPE && reflex.levels > 0)
+    {
+        reflex.kind = REFLECTION_TYPESPEC;
+        reflex.data.typeSpec = elementSpec;
+    }
+
+    return reflex;
 }
 
 HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureParser(
@@ -9719,7 +9757,8 @@ HRESULT CLR_RT_TypeSystem::CollectGenericTarget(
     const CLR_RT_SignatureParser &at,
     const CLR_RT_TypeSpec_Index *contextTypeSpec,
     const CLR_RT_MethodDef_Instance *contextMethod,
-    CLR_RT_GenericTarget &target)
+    CLR_RT_GenericTarget &target,
+    bool allowLevels)
 {
     NATIVE_PROFILE_CLR_CORE();
 
@@ -9746,7 +9785,7 @@ HRESULT CLR_RT_TypeSystem::CollectGenericTarget(
 
     peek = at;
 
-    if (FAILED(peek.Advance(elem)) || elem.DataType != DATATYPE_GENERICINST || elem.Levels > 0)
+    if (FAILED(peek.Advance(elem)) || elem.DataType != DATATYPE_GENERICINST || (elem.Levels > 0 && !allowLevels))
     {
         return S_OK;
     }
@@ -9774,6 +9813,191 @@ HRESULT CLR_RT_TypeSystem::CollectGenericTarget(
     }
 
     return S_OK;
+}
+
+static CLR_RT_GenericInstance *RecordOfTypeSpec(const CLR_RT_TypeSpec_Index &index)
+{
+    CLR_RT_GenericInstance *record = CLR_RT_TypeSystem::GetGenericInstance(index);
+
+    if (record == nullptr)
+    {
+        CLR_RT_TypeSpec_Instance inst{};
+
+        if (inst.InitializeFromIndex(index))
+        {
+            record = CLR_RT_TypeSystem::FindOrCreateGenericInstance(inst);
+        }
+    }
+
+    return record;
+}
+
+HRESULT CLR_RT_TypeSystem::GetElementGenericInstance(
+    CLR_RT_Assembly *assm,
+    CLR_UINT32 tk,
+    const CLR_RT_MethodDef_Instance *contextMethod,
+    const CLR_RT_TypeSpec_Index *contextTypeSpec,
+    CLR_RT_TypeSpec_Index &element)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    CLR_RT_GenericInstance *instance = nullptr;
+    CLR_RT_TypeSpec_Index row;
+    CLR_RT_TypeSpec_Instance inst{};
+    CLR_RT_SignatureParser parser;
+    CLR_RT_SignatureParser peek;
+    CLR_RT_SignatureParser::Element first;
+    HRESULT hr = S_OK;
+
+    element.Clear();
+
+    if (assm == nullptr || CLR_TypeFromTk(tk) != TBL_TypeSpec)
+    {
+        return S_OK;
+    }
+
+    // the row itself, not what the token resolves to in a generic context
+    row.Set(assm->assemblyIndex, CLR_DataFromTk(tk));
+
+    if (!inst.InitializeFromIndex(row))
+    {
+        return S_OK;
+    }
+
+    parser.Initialize_TypeSpec(inst);
+    peek = parser;
+
+    if (SUCCEEDED(peek.Advance(first)))
+    {
+        if (first.DataType == DATATYPE_GENERICINST)
+        {
+            instance = FindOrCreateGenericInstance(inst, contextTypeSpec, contextMethod, &hr);
+        }
+        else
+        {
+            CLR_RT_GenericTarget target;
+            CLR_RT_MethodSpec_Instance methodSpec{};
+            CLR_RT_SignatureParser argument;
+
+            if (first.DataType == DATATYPE_MVAR && first.Levels == 0 && contextMethod != nullptr &&
+                NANOCLR_INDEX_IS_VALID(contextMethod->methodSpec) &&
+                methodSpec.InitializeFromIndex(contextMethod->methodSpec) &&
+                methodSpec.PositionAtGenericArgument(first.GenericParamPosition, argument))
+            {
+                hr = CollectGenericTarget(argument, contextTypeSpec, nullptr, target);
+            }
+            else
+            {
+                hr = CollectGenericTarget(parser, contextTypeSpec, contextMethod, target);
+            }
+
+            if (hr == S_OK && target.m_count > 0)
+            {
+                instance = FindOrCreateGenericInstanceByNodes(target.m_nodes, target.m_count, &hr);
+            }
+        }
+    }
+
+    if (instance != nullptr)
+    {
+        element = instance->m_self;
+    }
+
+    // an element that has no closed instance (open context, not a generic) is an array without it
+    if (hr != CLR_E_OUT_OF_MEMORY && hr != CLR_E_NOT_SUPPORTED)
+    {
+        hr = S_OK;
+    }
+
+    return hr;
+}
+
+bool CLR_RT_TypeSystem::IsElementInstanceAssignable(
+    const CLR_RT_TypeSpec_Index &actual,
+    const CLR_RT_TypeSpec_Index &requested)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    CLR_RT_GenericInstance *current = RecordOfTypeSpec(actual);
+    CLR_RT_GenericInstance *wanted = RecordOfTypeSpec(requested);
+
+    if (IsSameGenericInstance(actual, requested) || current == nullptr || wanted == nullptr)
+    {
+        return true;
+    }
+
+    // another instantiation of the same generic type
+    if (current->m_nodes[0].Class.data == wanted->m_nodes[0].Class.data)
+    {
+        return false;
+    }
+
+    // a generic base class of the element, closed level by level; interfaces and bases that aren't generic instances
+    // aren't compared, the TypeDefs were already checked
+    for (int depth = 0; depth < c_MaxInheritanceDepth; depth++)
+    {
+        CLR_RT_TypeDef_Instance definition{};
+        CLR_RT_GenericInstance *parent;
+
+        if (!definition.InitializeFromIndex(current->m_nodes[0].Class))
+        {
+            break;
+        }
+
+        parent = FindOrCreateGenericBase(definition, &current->m_self);
+
+        if (parent == nullptr)
+        {
+            break;
+        }
+
+        if (parent->m_nodeCount == wanted->m_nodeCount &&
+            SameGenericInstanceNodes(parent->m_nodes, wanted->m_nodes, wanted->m_nodeCount))
+        {
+            return true;
+        }
+
+        if (parent->m_nodes[0].Class.data == wanted->m_nodes[0].Class.data)
+        {
+            return false;
+        }
+
+        current = parent;
+    }
+
+    return true;
+}
+
+bool CLR_RT_TypeSystem::ElementMatchesArraySpec(const CLR_RT_HeapBlock &object, const CLR_RT_TypeSpec_Index &element)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    CLR_RT_GenericInstance *record = RecordOfTypeSpec(element);
+    CLR_RT_GenericTarget target;
+    const CLR_RT_HeapBlock *obj = &object;
+
+    if (record == nullptr)
+    {
+        return true;
+    }
+
+    while (obj != nullptr && (obj->DataType() == DATATYPE_OBJECT || obj->DataType() == DATATYPE_BYREF))
+    {
+        obj = obj->Dereference();
+    }
+
+    // an element that is an array itself: its own element instance is what counts
+    if (obj != nullptr && obj->DataType() == DATATYPE_SZARRAY)
+    {
+        const CLR_RT_TypeSpec_Index *actual = ((const CLR_RT_HeapBlock_Array *)obj)->ElementTypeSpec();
+
+        return actual == nullptr || IsElementInstanceAssignable(*actual, element);
+    }
+
+    target.m_count = record->m_nodeCount;
+    memcpy(target.m_nodes, record->m_nodes, sizeof(CLR_RT_GenericInstanceNode) * record->m_nodeCount);
+
+    return MatchGenericArguments(object, target) != GenericMatch_Different;
 }
 
 CLR_RT_GenericMatch CLR_RT_TypeSystem::MatchGenericArguments(
@@ -9822,6 +10046,38 @@ CLR_RT_GenericMatch CLR_RT_TypeSystem::MatchGenericArguments(
 
         if (target.m_nodes[1].Class.data == reflex.data.type.data)
         {
+            if (target.m_nodes[1].ArgCount == 0)
+            {
+                return GenericMatch_Same;
+            }
+
+            const CLR_RT_HeapBlock_Array *elementArray = (const CLR_RT_HeapBlock_Array *)obj;
+            const CLR_RT_TypeSpec_Index *elementSpec = elementArray->ElementTypeSpec();
+            CLR_RT_GenericInstance *element = elementSpec != nullptr ? RecordOfTypeSpec(*elementSpec) : nullptr;
+
+            if (element == nullptr)
+            {
+                return GenericMatch_NoTypeSpec;
+            }
+
+            // the arguments of an element are nodes 1.. of the target in the same order, the element's own record
+            // has its levels in the array
+            int needed = 1;
+            int count = 0;
+
+            while (needed > 0 && 1 + count < target.m_count)
+            {
+                needed += target.m_nodes[1 + count].ArgCount - 1;
+                count++;
+            }
+
+            if (needed != 0 || count != element->m_nodeCount ||
+                element->m_nodes[0].ArgCount != target.m_nodes[1].ArgCount ||
+                (count > 1 && !SameGenericInstanceNodes(&element->m_nodes[1], &target.m_nodes[2], count - 1)))
+            {
+                return GenericMatch_Different;
+            }
+
             return GenericMatch_Same;
         }
 

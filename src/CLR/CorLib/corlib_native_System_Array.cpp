@@ -70,6 +70,22 @@ HRESULT Library_corlib_native_System_Array::CreateInstance___STATIC__SystemArray
 
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_RuntimeType::GetTypeDescriptor(*hbType, td));
 
+    if (hbType->ReflectionDataConst().kind == REFLECTION_TYPESPEC && hbType->ReflectionDataConst().levels == 0)
+    {
+        CLR_RT_ReflectionDef_Index reflex;
+
+        reflex.kind = REFLECTION_TYPE;
+        reflex.levels = 1;
+        reflex.data.type = td;
+
+        NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_Array::CreateInstance(
+            stack.PushValue(),
+            stack.Arg1().NumericByRefConst().s4,
+            reflex,
+            0,
+            &hbType->ReflectionDataConst().data.typeSpec));
+    }
+
     NANOCLR_CHECK_HRESULT(
         CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValue(), stack.Arg1().NumericByRefConst().s4, td));
 
