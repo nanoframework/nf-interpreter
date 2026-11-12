@@ -4540,16 +4540,15 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             CLR_RT_TypeSpec_Index rowElement;
                             int rowLevels;
 
-                            NANOCLR_CHECK_HRESULT(
-                                CLR_RT_TypeSystem::ResolveArrayRow(
-                                    assm,
-                                    arg,
-                                    &stack->m_call,
-                                    stack->m_call.genericType,
-                                    arrayRow,
-                                    rowInnermost,
-                                    rowLevels,
-                                    rowElement));
+                            NANOCLR_CHECK_HRESULT(CLR_RT_TypeSystem::ResolveArrayRow(
+                                assm,
+                                arg,
+                                &stack->m_call,
+                                stack->m_call.genericType,
+                                arrayRow,
+                                rowInnermost,
+                                rowLevels,
+                                rowElement));
 
                             if (arrayRow)
                             {
@@ -4600,13 +4599,12 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                                     CLR_RT_TypeSpec_Index elementSpec;
 
-                                    NANOCLR_CHECK_HRESULT(
-                                        CLR_RT_TypeSystem::GetElementGenericInstance(
-                                            assm,
-                                            arg,
-                                            &stack->m_call,
-                                            stack->m_call.genericType,
-                                            elementSpec));
+                                    NANOCLR_CHECK_HRESULT(CLR_RT_TypeSystem::GetElementGenericInstance(
+                                        assm,
+                                        arg,
+                                        &stack->m_call,
+                                        stack->m_call.genericType,
+                                        elementSpec));
 
                                     if (NANOCLR_INDEX_IS_VALID(elementSpec))
                                     {
