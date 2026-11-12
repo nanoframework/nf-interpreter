@@ -9912,6 +9912,97 @@ HRESULT CLR_RT_TypeSystem::GetElementGenericInstance(
     return hr;
 }
 
+// The interfaces of an object's class and of its parents, closed level by level, against a closed interface target.
+static CLR_RT_GenericMatch MatchInterfaceArguments(
+    CLR_RT_TypeDef_Instance inst,
+    CLR_RT_GenericInstance *own,
+    const CLR_RT_GenericTarget &target)
+{
+    const CLR_RT_TypeDef_Index &targetClass = target.m_nodes[0].Class;
+    bool different = false;
+    bool openAtOwnLevel = false;
+    int level = 0;
+
+    CLR_RT_GenericInstance *levelContext = own;
+
+    do
+    {
+        CLR_RT_SignatureParser parser{};
+
+        parser.Initialize_Interfaces(inst.assembly, inst.target);
+
+        while (parser.Available() > 0)
+        {
+            CLR_RT_SignatureParser peek = parser;
+            CLR_RT_SignatureParser::Element elem;
+            CLR_UINT32 tk = CLR_TkFromStream(peek.Signature);
+
+            if (FAILED(parser.Advance(elem)))
+            {
+                break;
+            }
+
+            if (elem.Class.data != targetClass.data || CLR_TypeFromTk(tk) != TBL_TypeSpec)
+            {
+                continue;
+            }
+
+            CLR_RT_TypeSpec_Index entryIndex;
+            CLR_RT_TypeSpec_Instance entry{};
+            CLR_RT_SignatureParser at{};
+            CLR_RT_GenericTarget entryTarget;
+
+            entryIndex.Set(inst.assembly->assemblyIndex, CLR_DataFromTk(tk));
+
+            if (!entry.InitializeFromIndex(entryIndex))
+            {
+                continue;
+            }
+
+            at.Initialize_TypeSpec(entry);
+
+            HRESULT hr = CLR_RT_TypeSystem::CollectGenericTarget(
+                at,
+                levelContext != nullptr ? &levelContext->m_self : nullptr,
+                nullptr,
+                entryTarget);
+
+            if (hr != S_OK || entryTarget.m_count == 0)
+            {
+                openAtOwnLevel = openAtOwnLevel || level == 0;
+                continue;
+            }
+
+            if (entryTarget.m_count == target.m_count &&
+                SameGenericInstanceNodes(entryTarget.m_nodes, target.m_nodes, target.m_count))
+            {
+                return GenericMatch_Same;
+            }
+
+            different = true;
+        }
+
+        CLR_RT_GenericInstance *closedBase =
+            CLR_RT_TypeSystem::FindOrCreateGenericBase(inst, levelContext != nullptr ? &levelContext->m_self : nullptr);
+
+        level++;
+
+        if (!inst.SwitchToParent())
+        {
+            break;
+        }
+
+        levelContext = closedBase;
+    } while (level < c_MaxInheritanceDepth);
+
+    if (different)
+    {
+        return GenericMatch_Different;
+    }
+
+    return openAtOwnLevel ? GenericMatch_NoTypeSpec : GenericMatch_Unresolved;
+}
+
 bool CLR_RT_TypeSystem::IsElementInstanceAssignable(
     const CLR_RT_TypeSpec_Index &actual,
     const CLR_RT_TypeSpec_Index &requested)
@@ -9930,6 +10021,24 @@ bool CLR_RT_TypeSystem::IsElementInstanceAssignable(
     if (current->m_nodes[0].Class.data == wanted->m_nodes[0].Class.data)
     {
         return false;
+    }
+
+    {
+        CLR_RT_TypeDef_Instance wantedDef{};
+        CLR_RT_TypeDef_Instance currentDef{};
+
+        if (wantedDef.InitializeFromIndex(wanted->m_nodes[0].Class) &&
+            (wantedDef.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
+                CLR_RECORD_TYPEDEF::TD_Semantics_Interface &&
+            currentDef.InitializeFromIndex(current->m_nodes[0].Class))
+        {
+            CLR_RT_GenericTarget target;
+
+            target.m_count = wanted->m_nodeCount;
+            memcpy(target.m_nodes, wanted->m_nodes, sizeof(CLR_RT_GenericInstanceNode) * wanted->m_nodeCount);
+
+            return MatchInterfaceArguments(currentDef, current, target) != GenericMatch_Different;
+        }
     }
 
     // a generic base class of the element, closed level by level; interfaces and bases that aren't generic instances
@@ -10011,9 +10120,6 @@ CLR_RT_GenericMatch CLR_RT_TypeSystem::MatchGenericArguments(
     CLR_RT_GenericInstance *own = nullptr;
     CLR_RT_TypeDef_Instance inst{};
     CLR_RT_TypeDef_Instance targetDef{};
-    bool different = false;
-    bool openAtOwnLevel = false;
-    int level = 0;
 
     while (obj->DataType() == DATATYPE_OBJECT || obj->DataType() == DATATYPE_BYREF)
     {
@@ -10181,84 +10287,7 @@ CLR_RT_GenericMatch CLR_RT_TypeSystem::MatchGenericArguments(
         return GenericMatch_Unresolved;
     }
 
-    CLR_RT_GenericInstance *levelContext = own;
-
-    do
-    {
-        CLR_RT_SignatureParser parser{};
-
-        parser.Initialize_Interfaces(inst.assembly, inst.target);
-
-        while (parser.Available() > 0)
-        {
-            CLR_RT_SignatureParser peek = parser;
-            CLR_RT_SignatureParser::Element elem;
-            CLR_UINT32 tk = CLR_TkFromStream(peek.Signature);
-
-            if (FAILED(parser.Advance(elem)))
-            {
-                break;
-            }
-
-            if (elem.Class.data != targetClass.data || CLR_TypeFromTk(tk) != TBL_TypeSpec)
-            {
-                continue;
-            }
-
-            CLR_RT_TypeSpec_Index entryIndex;
-            CLR_RT_TypeSpec_Instance entry{};
-            CLR_RT_SignatureParser at{};
-            CLR_RT_GenericTarget entryTarget;
-
-            entryIndex.Set(inst.assembly->assemblyIndex, CLR_DataFromTk(tk));
-
-            if (!entry.InitializeFromIndex(entryIndex))
-            {
-                continue;
-            }
-
-            at.Initialize_TypeSpec(entry);
-
-            HRESULT hr = CollectGenericTarget(
-                at,
-                levelContext != nullptr ? &levelContext->m_self : nullptr,
-                nullptr,
-                entryTarget);
-
-            if (hr != S_OK || entryTarget.m_count == 0)
-            {
-                openAtOwnLevel = openAtOwnLevel || level == 0;
-                continue;
-            }
-
-            if (entryTarget.m_count == target.m_count &&
-                SameGenericInstanceNodes(entryTarget.m_nodes, target.m_nodes, target.m_count))
-            {
-                return GenericMatch_Same;
-            }
-
-            different = true;
-        }
-
-        CLR_RT_GenericInstance *closedBase =
-            FindOrCreateGenericBase(inst, levelContext != nullptr ? &levelContext->m_self : nullptr);
-
-        level++;
-
-        if (!inst.SwitchToParent())
-        {
-            break;
-        }
-
-        levelContext = closedBase;
-    } while (level < c_MaxInheritanceDepth);
-
-    if (different)
-    {
-        return GenericMatch_Different;
-    }
-
-    return openAtOwnLevel ? GenericMatch_NoTypeSpec : GenericMatch_Unresolved;
+    return MatchInterfaceArguments(inst, own, target);
 }
 
 HRESULT CLR_RT_TypeSystem::AllocateGenericInstanceStatics(CLR_RT_GenericInstance &instance)
