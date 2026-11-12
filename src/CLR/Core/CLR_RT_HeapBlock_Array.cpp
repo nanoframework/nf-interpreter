@@ -149,6 +149,36 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
 
     memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
 
+    if (CLR_TypeFromTk(tk) == TBL_TypeSpec)
+    {
+        bool handled;
+        CLR_RT_TypeDef_Index innermost;
+        int levels;
+        const CLR_RT_TypeSpec_Index *context =
+            (caller != nullptr && caller->genericType != nullptr && NANOCLR_INDEX_IS_VALID(*caller->genericType))
+                ? caller->genericType
+                : contextTypeSpec;
+
+        NANOCLR_CHECK_HRESULT(
+            CLR_RT_TypeSystem::ResolveArrayRow(assm, tk, caller, context, handled, innermost, levels, elementSpec));
+
+        if (handled)
+        {
+            CLR_RT_ReflectionDef_Index reflex{};
+
+            reflex.kind = REFLECTION_TYPE;
+            reflex.levels = (CLR_UINT16)(levels + 1);
+            reflex.data.type = innermost;
+
+            NANOCLR_SET_AND_LEAVE(CreateInstance(
+                reference,
+                length,
+                reflex,
+                0,
+                NANOCLR_INDEX_IS_VALID(elementSpec) ? &elementSpec : nullptr));
+        }
+    }
+
     if (cls.ResolveToken(tk, assm, caller, contextTypeSpec))
     {
         NANOCLR_CHECK_HRESULT(ref.SetReflection(cls));
@@ -232,6 +262,14 @@ HRESULT CLR_RT_HeapBlock_Array::ClearElements(int index, int length)
         NanoCLRDataType dt = (NanoCLRDataType)m_typeOfElement;
         bool fAllocate = (reflex.levels == 1 && dt == DATATYPE_VALUETYPE);
         CLR_RT_HeapBlock *ptr = (CLR_RT_HeapBlock *)data;
+        CLR_RT_TypeSpec_Instance elementInstance{};
+        const CLR_RT_TypeSpec_Index *elementSpec = fAllocate ? ElementTypeSpec() : nullptr;
+
+        // a struct element of a generic instance has its own TypeSpec, see CLAUDE.md §21
+        if (elementSpec != nullptr && !elementInstance.InitializeFromIndex(*elementSpec))
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        }
 
         switch (dt)
         {
@@ -252,7 +290,10 @@ HRESULT CLR_RT_HeapBlock_Array::ClearElements(int index, int length)
 
             if (fAllocate)
             {
-                NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*ptr, reflex.data.type));
+                NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(
+                    *ptr,
+                    reflex.data.type,
+                    elementSpec != nullptr ? &elementInstance : nullptr));
             }
 
             ptr++;

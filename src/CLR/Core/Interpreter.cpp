@@ -4535,72 +4535,107 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         {
                             // this has to provide the closed instance of the type in the context of the caller'sc
                             CLR_RT_TypeSpec_Instance tsInst{};
-                            if (tsInst.ResolveToken(arg, assm, &stack->m_call) == false)
-                            {
-                                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-                            }
+                            bool arrayRow;
+                            CLR_RT_TypeDef_Index rowInnermost;
+                            CLR_RT_TypeSpec_Index rowElement;
+                            int rowLevels;
 
-                            // Check if this is an array type
-                            if (tsInst.levels > 0)
-                            {
-                                // This is an array
-
-                                // Create a fake reflection index to pass the element type and levels.
-                                CLR_RT_ReflectionDef_Index reflex;
-                                reflex.kind = REFLECTION_TYPE;
-                                reflex.levels = tsInst.levels;
-
-                                // prefer generic type
-                                if (NANOCLR_INDEX_IS_VALID(tsInst.genericTypeDef) &&
-                                    NANOCLR_INDEX_IS_INVALID(tsInst.cachedElementType))
-                                {
-                                    reflex.data.type = tsInst.genericTypeDef;
-                                }
-                                else if (NANOCLR_INDEX_IS_VALID(tsInst.cachedElementType))
-                                {
-                                    reflex.data.type = tsInst.cachedElementType;
-                                }
-                                else
-                                {
-                                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-                                }
-
-                                CLR_RT_TypeSpec_Index elementSpec;
-
-                                NANOCLR_CHECK_HRESULT(CLR_RT_TypeSystem::GetElementGenericInstance(
+                            NANOCLR_CHECK_HRESULT(
+                                CLR_RT_TypeSystem::ResolveArrayRow(
                                     assm,
                                     arg,
                                     &stack->m_call,
                                     stack->m_call.genericType,
-                                    elementSpec));
+                                    arrayRow,
+                                    rowInnermost,
+                                    rowLevels,
+                                    rowElement));
 
-                                if (NANOCLR_INDEX_IS_VALID(elementSpec))
+                            if (arrayRow)
+                            {
+                                CLR_RT_ReflectionDef_Index reflex;
+                                reflex.kind = REFLECTION_TYPE;
+                                reflex.levels = (CLR_UINT16)rowLevels;
+                                reflex.data.type = rowInnermost;
+
+                                if (NANOCLR_INDEX_IS_VALID(rowElement))
                                 {
                                     reflex.kind = REFLECTION_TYPESPEC;
-                                    reflex.data.typeSpec = elementSpec;
+                                    reflex.data.typeSpec = rowElement;
                                 }
 
                                 evalPos[0].SetReflection(reflex);
                             }
                             else
                             {
-                                // prefer generic type
-                                if (NANOCLR_INDEX_IS_VALID(tsInst.genericTypeDef) &&
-                                    NANOCLR_INDEX_IS_INVALID(tsInst.cachedElementType))
+                                if (tsInst.ResolveToken(arg, assm, &stack->m_call) == false)
                                 {
-                                    evalPos[0].SetReflection((const CLR_RT_TypeSpec_Index &)tsInst.data);
+                                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                                 }
-                                else if (NANOCLR_INDEX_IS_VALID(tsInst.cachedElementType))
-                                {
-                                    // set reflection with TypeDef instance
-                                    CLR_RT_TypeDef_Instance cls{};
-                                    cls.InitializeFromIndex(tsInst.cachedElementType);
 
-                                    evalPos[0].SetReflection(cls);
+                                // Check if this is an array type
+                                if (tsInst.levels > 0)
+                                {
+                                    // This is an array
+
+                                    // Create a fake reflection index to pass the element type and levels.
+                                    CLR_RT_ReflectionDef_Index reflex;
+                                    reflex.kind = REFLECTION_TYPE;
+                                    reflex.levels = tsInst.levels;
+
+                                    // prefer generic type
+                                    if (NANOCLR_INDEX_IS_VALID(tsInst.genericTypeDef) &&
+                                        NANOCLR_INDEX_IS_INVALID(tsInst.cachedElementType))
+                                    {
+                                        reflex.data.type = tsInst.genericTypeDef;
+                                    }
+                                    else if (NANOCLR_INDEX_IS_VALID(tsInst.cachedElementType))
+                                    {
+                                        reflex.data.type = tsInst.cachedElementType;
+                                    }
+                                    else
+                                    {
+                                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                                    }
+
+                                    CLR_RT_TypeSpec_Index elementSpec;
+
+                                    NANOCLR_CHECK_HRESULT(
+                                        CLR_RT_TypeSystem::GetElementGenericInstance(
+                                            assm,
+                                            arg,
+                                            &stack->m_call,
+                                            stack->m_call.genericType,
+                                            elementSpec));
+
+                                    if (NANOCLR_INDEX_IS_VALID(elementSpec))
+                                    {
+                                        reflex.kind = REFLECTION_TYPESPEC;
+                                        reflex.data.typeSpec = elementSpec;
+                                    }
+
+                                    evalPos[0].SetReflection(reflex);
                                 }
                                 else
                                 {
-                                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                                    // prefer generic type
+                                    if (NANOCLR_INDEX_IS_VALID(tsInst.genericTypeDef) &&
+                                        NANOCLR_INDEX_IS_INVALID(tsInst.cachedElementType))
+                                    {
+                                        evalPos[0].SetReflection((const CLR_RT_TypeSpec_Index &)tsInst.data);
+                                    }
+                                    else if (NANOCLR_INDEX_IS_VALID(tsInst.cachedElementType))
+                                    {
+                                        // set reflection with TypeDef instance
+                                        CLR_RT_TypeDef_Instance cls{};
+                                        cls.InitializeFromIndex(tsInst.cachedElementType);
+
+                                        evalPos[0].SetReflection(cls);
+                                    }
+                                    else
+                                    {
+                                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                                    }
                                 }
                             }
                         }
