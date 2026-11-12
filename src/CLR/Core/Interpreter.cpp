@@ -2404,19 +2404,25 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     const CLR_RT_TypeSpec_Index *effectiveCallerGeneric = stack->m_call.genericType;
                     CLR_RT_TypeSpec_Index objTypeSpec{};
 
-                    if (op == CEE_CALLVIRT && stack->m_call.genericType == nullptr &&
-                        CLR_TypeFromTk(arg) == TBL_MethodRef)
+                    if (op == CEE_CALLVIRT && stack->m_call.genericType == nullptr)
                     {
-                        const CLR_RECORD_METHODREF *mr = assm->GetMethodRef(CLR_DataFromTk(arg));
+                        bool fromTypeRef = false;
 
-                        // 4. The method owner is a TypeRef (interface method)
-                        // 5. Not a static method (interfaces don't have static methods, but safety check)
-                        if (mr && mr->Owner() == TBL_TypeRef)
+                        if (CLR_TypeFromTk(arg) == TBL_MethodRef)
+                        {
+                            const CLR_RECORD_METHODREF *mr = assm->GetMethodRef(CLR_DataFromTk(arg));
+
+                            fromTypeRef = mr && mr->Owner() == TBL_TypeRef;
+                        }
+
+                        if (fromTypeRef || CLR_TypeFromTk(arg) == TBL_MethodDef)
                         {
                             // Temporarily resolve to get argument count and check if instance method
                             CLR_RT_MethodDef_Instance tempInst{};
                             if (tempInst.ResolveToken(arg, assm, nullptr) &&
-                                (tempInst.target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
+                                (tempInst.target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0 &&
+                                (fromTypeRef || (tempInst.target->flags & (CLR_RECORD_METHODDEF::MD_Abstract |
+                                                                           CLR_RECORD_METHODDEF::MD_Virtual)) != 0))
                             {
                                 CLR_RT_HeapBlock *pThisTemp = &evalPos[1 - tempInst.target->argumentsCount];
 
