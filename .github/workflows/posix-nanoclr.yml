@@ -36,13 +36,13 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: macos-14
+          - os: macos-15
             label: macOS-arm64
             posix_rid: osx-arm64
-          - os: macos-latest
+          - os: macos-15-intel
             label: macOS-x64
             posix_rid: osx-x64
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             label: Linux-x64
             posix_rid: linux-x64
           - os: ubuntu-24.04-arm
