@@ -2245,6 +2245,19 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
         const CLR_RT_TypeSpec_Index *contextTypeSpec,
         CLR_RT_TypeSpec_Index &element);
 
+    // A row that is a type parameter of an array of arguments (`T[]`, or `T` with an array argument): the innermost
+    // TypeDef, the total levels and the closed element instance. Not handled leaves the TypeDef resolution to the
+    // caller.
+    static HRESULT ResolveArrayRow(
+        CLR_RT_Assembly *assm,
+        CLR_UINT32 tk,
+        const CLR_RT_MethodDef_Instance *contextMethod,
+        const CLR_RT_TypeSpec_Index *contextTypeSpec,
+        bool &handled,
+        CLR_RT_TypeDef_Index &innermost,
+        int &levels,
+        CLR_RT_TypeSpec_Index &element);
+
     // False only when the object is known to be of another instantiation than the element of the array.
     static bool ElementMatchesArraySpec(const CLR_RT_HeapBlock &object, const CLR_RT_TypeSpec_Index &element);
 

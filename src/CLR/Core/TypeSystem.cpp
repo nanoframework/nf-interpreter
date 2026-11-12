@@ -9912,6 +9912,143 @@ HRESULT CLR_RT_TypeSystem::GetElementGenericInstance(
     return hr;
 }
 
+HRESULT CLR_RT_TypeSystem::ResolveArrayRow(
+    CLR_RT_Assembly *assm,
+    CLR_UINT32 tk,
+    const CLR_RT_MethodDef_Instance *contextMethod,
+    const CLR_RT_TypeSpec_Index *contextTypeSpec,
+    bool &handled,
+    CLR_RT_TypeDef_Index &innermost,
+    int &levels,
+    CLR_RT_TypeSpec_Index &element)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    CLR_RT_TypeSpec_Index row;
+    CLR_RT_TypeSpec_Instance inst{};
+    CLR_RT_SignatureParser parser;
+    CLR_RT_SignatureParser argument;
+    CLR_RT_SignatureParser::Element first;
+    CLR_RT_SignatureParser::Element resolved;
+    HRESULT hr = S_OK;
+
+    handled = false;
+    levels = 0;
+    innermost.Clear();
+    element.Clear();
+
+    if (assm == nullptr || CLR_TypeFromTk(tk) != TBL_TypeSpec)
+    {
+        return S_OK;
+    }
+
+    row.Set(assm->assemblyIndex, CLR_DataFromTk(tk));
+
+    if (!inst.InitializeFromIndex(row))
+    {
+        return S_OK;
+    }
+
+    parser.Initialize_TypeSpec(inst);
+
+    if (FAILED(parser.Advance(first)) || (first.DataType != DATATYPE_VAR && first.DataType != DATATYPE_MVAR))
+    {
+        return S_OK;
+    }
+
+    bool fromMethodSpec = false;
+
+    levels = first.Levels;
+
+    for (int hop = 0;; hop++)
+    {
+        CLR_RT_MethodSpec_Instance methodSpec{};
+        CLR_RT_TypeSpec_Instance owner{};
+        CLR_RT_SignatureParser::Element &position = hop == 0 ? first : resolved;
+
+        if (position.DataType == DATATYPE_MVAR)
+        {
+            if ((hop > 0 && first.DataType == DATATYPE_MVAR) || contextMethod == nullptr ||
+                NANOCLR_INDEX_IS_INVALID(contextMethod->methodSpec) ||
+                !methodSpec.InitializeFromIndex(contextMethod->methodSpec) ||
+                !methodSpec.PositionAtGenericArgument(position.GenericParamPosition, argument))
+            {
+                levels = 0;
+                return S_OK;
+            }
+        }
+        else if (
+            contextTypeSpec == nullptr || NANOCLR_INDEX_IS_INVALID(*contextTypeSpec) ||
+            !owner.InitializeFromIndex(*contextTypeSpec) ||
+            !owner.PositionAtGenericParam(position.GenericParamPosition, argument))
+        {
+            levels = 0;
+            return S_OK;
+        }
+
+        fromMethodSpec = position.DataType == DATATYPE_MVAR;
+
+        CLR_RT_SignatureParser peek = argument;
+
+        if (FAILED(peek.Advance(resolved)))
+        {
+            levels = 0;
+            return S_OK;
+        }
+
+        levels += resolved.Levels;
+
+        if (resolved.DataType == DATATYPE_VAR && hop == 0)
+        {
+            continue;
+        }
+
+        break;
+    }
+
+    if (levels == 0 || resolved.DataType == DATATYPE_VAR || resolved.DataType == DATATYPE_MVAR || levels > 0xFF)
+    {
+        levels = 0;
+        return S_OK;
+    }
+
+    if (resolved.DataType == DATATYPE_GENERICINST)
+    {
+        CLR_RT_GenericTarget target;
+        CLR_RT_GenericInstance *instance = nullptr;
+
+        hr = CollectGenericTarget(argument, fromMethodSpec ? contextTypeSpec : nullptr, nullptr, target, true);
+
+        if (hr == S_OK && target.m_count > 0)
+        {
+            instance = FindOrCreateGenericInstanceByNodes(target.m_nodes, target.m_count, &hr);
+        }
+
+        if (instance == nullptr)
+        {
+            levels = 0;
+
+            return (hr == CLR_E_OUT_OF_MEMORY || hr == CLR_E_NOT_SUPPORTED) ? hr : S_OK;
+        }
+
+        innermost = target.m_nodes[0].Class;
+        element = instance->m_self;
+    }
+    else if (NANOCLR_INDEX_IS_VALID(resolved.Class))
+    {
+        innermost = resolved.Class;
+    }
+    else
+    {
+        levels = 0;
+        return S_OK;
+    }
+
+    handled = true;
+
+    return S_OK;
+}
+
 // The interfaces of an object's class and of its parents, closed level by level, against a closed interface target.
 static CLR_RT_GenericMatch MatchInterfaceArguments(
     CLR_RT_TypeDef_Instance inst,
