@@ -308,6 +308,7 @@ bool CLR_RT_StackFrame::PushInline(
         (md->flags & ~CLR_RECORD_METHODDEF::MD_HasExceptionHandlers) >=
             CLR_RECORD_METHODDEF::MD_Constructor || // Do not try to inline constructors, etc because they require
                                                     // special processing
+        (0 != (md->flags & CLR_RECORD_METHODDEF::MD_HasExceptionHandlers)) || // Exception handlers require a frame
         (0 != (md->flags & CLR_RECORD_METHODDEF::MD_Static)) || // Static methods also requires special processing
         (0 != (md->flags & CLR_RECORD_METHODDEF::MD_Native)) || // Make sure the callee is not an internal method
         (md->rva == CLR_EmptyIndex) ||                          // Make sure we have a valid IP address for the method
