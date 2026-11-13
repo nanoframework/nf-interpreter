@@ -9824,8 +9824,8 @@ bool CLR_RT_TypeSystem::CloseMethodSpec(
     CLR_RT_SignatureParser parser;
     CLR_RT_GenericInstanceNode nodes[CLR_RT_GenericInstance::c_MaxNodes];
     int nodeCount = 1;
-    bool closed;
-    bool substituted;
+    bool closed = true;
+    bool substituted = false;
 
     if (!NANOCLR_INDEX_IS_VALID(methodSpec) || methodSpec.IsRuntime() || !spec.InitializeFromIndex(methodSpec))
     {
@@ -9857,7 +9857,18 @@ bool CLR_RT_TypeSystem::CloseMethodSpec(
             nodeCount,
             closed,
             substituted)) ||
-        !closed || (!substituted && !registerAlways))
+        !closed)
+    {
+        // a MethodSpec that is kept for later must not be left open
+        if (registerAlways)
+        {
+            methodSpec.Clear();
+        }
+
+        return false;
+    }
+
+    if (!substituted && !registerAlways)
     {
         return false;
     }
