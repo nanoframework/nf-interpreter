@@ -159,7 +159,8 @@ HRESULT CLR_RT_HeapBlock_Delegate_List::Change(
                 if (ptr)
                 {
                     if (ptr->DelegateFtn().data == dlg->DelegateFtn().data &&
-                        ptr->m_object.Dereference() == dlg->m_object.Dereference())
+                        ptr->m_object.Dereference() == dlg->m_object.Dereference() &&
+                        ptr->CompareGenericContext(*dlg) == 0)
                     {
                         break;
                     }

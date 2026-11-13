@@ -3311,6 +3311,35 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
             CLR_RT_SignatureParser::Element elem;
             parser.Advance(elem);
 
+            if ((elem.DataType == DATATYPE_VAR || elem.DataType == DATATYPE_MVAR) && elem.Levels > 0 &&
+                caller != nullptr)
+            {
+                bool handled;
+                CLR_RT_TypeDef_Index rowInnermost;
+                CLR_RT_TypeSpec_Index rowElement;
+                int rowLevels;
+
+                NANOCLR_CHECK_HRESULT(
+                    CLR_RT_TypeSystem::ResolveArrayRow(
+                        assm,
+                        token,
+                        caller,
+                        caller->genericType,
+                        handled,
+                        rowInnermost,
+                        rowLevels,
+                        rowElement));
+
+                if (handled)
+                {
+                    NANOCLR_CHECK_HRESULT(InitializeFromType(rowInnermost));
+
+                    m_reflex.levels = rowLevels;
+                    ConvertToArray();
+                    break;
+                }
+            }
+
             if (elem.DataType == DATATYPE_VAR)
             {
                 // !T: ask the CLR to map that slot into the *actual* argument
@@ -9788,7 +9817,10 @@ CLR_RT_GenericInstance *CLR_RT_TypeSystem::FindOrCreateGenericInstanceByNodes(
     return instance;
 }
 
-bool CLR_RT_TypeSystem::CloseMethodSpec(const CLR_RT_MethodDef_Instance &caller, CLR_RT_MethodSpec_Index &methodSpec)
+bool CLR_RT_TypeSystem::CloseMethodSpec(
+    const CLR_RT_MethodDef_Instance &caller,
+    CLR_RT_MethodSpec_Index &methodSpec,
+    bool registerAlways)
 {
     NATIVE_PROFILE_CLR_CORE();
 
@@ -9829,7 +9861,7 @@ bool CLR_RT_TypeSystem::CloseMethodSpec(const CLR_RT_MethodDef_Instance &caller,
             nodeCount,
             closed,
             substituted)) ||
-        !closed || !substituted)
+        !closed || (!substituted && !registerAlways))
     {
         return false;
     }
@@ -10014,17 +10046,15 @@ HRESULT CLR_RT_TypeSystem::ResolveArrayRow(
     bool &handled,
     CLR_RT_TypeDef_Index &innermost,
     int &levels,
-    CLR_RT_TypeSpec_Index &element)
+    CLR_RT_TypeSpec_Index &element,
+    bool claimWithoutLevels)
 {
     NATIVE_PROFILE_CLR_CORE();
 
     CLR_RT_TypeSpec_Index row;
     CLR_RT_TypeSpec_Instance inst{};
     CLR_RT_SignatureParser parser;
-    CLR_RT_SignatureParser argument;
     CLR_RT_SignatureParser::Element first;
-    CLR_RT_SignatureParser::Element resolved;
-    HRESULT hr = S_OK;
 
     handled = false;
     levels = 0;
@@ -10049,6 +10079,39 @@ HRESULT CLR_RT_TypeSystem::ResolveArrayRow(
     {
         return S_OK;
     }
+
+    return ResolveParameterArgument(
+        first,
+        contextMethod,
+        contextTypeSpec,
+        handled,
+        innermost,
+        levels,
+        element,
+        claimWithoutLevels);
+}
+
+HRESULT CLR_RT_TypeSystem::ResolveParameterArgument(
+    const CLR_RT_SignatureParser::Element &start,
+    const CLR_RT_MethodDef_Instance *contextMethod,
+    const CLR_RT_TypeSpec_Index *contextTypeSpec,
+    bool &handled,
+    CLR_RT_TypeDef_Index &innermost,
+    int &levels,
+    CLR_RT_TypeSpec_Index &element,
+    bool claimWithoutLevels)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    CLR_RT_SignatureParser argument;
+    CLR_RT_SignatureParser::Element first = start;
+    CLR_RT_SignatureParser::Element resolved;
+    HRESULT hr = S_OK;
+
+    handled = false;
+    levels = 0;
+    innermost.Clear();
+    element.Clear();
 
     bool fromMethodSpec = false;
 
@@ -10100,7 +10163,11 @@ HRESULT CLR_RT_TypeSystem::ResolveArrayRow(
         break;
     }
 
-    if (levels == 0 || resolved.DataType == DATATYPE_VAR || resolved.DataType == DATATYPE_MVAR || levels > 0xFF)
+    // a plain class parameter with a plain argument stays on the TypeDef path
+    bool claimed = claimWithoutLevels && (first.DataType == DATATYPE_MVAR || resolved.DataType == DATATYPE_GENERICINST);
+
+    if ((levels == 0 && !claimed) || resolved.DataType == DATATYPE_VAR || resolved.DataType == DATATYPE_MVAR ||
+        levels > 0xFF)
     {
         levels = 0;
         return S_OK;

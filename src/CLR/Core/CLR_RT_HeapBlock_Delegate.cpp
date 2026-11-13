@@ -82,6 +82,23 @@ HRESULT CLR_RT_HeapBlock_Delegate::CreateInstance(
     NANOCLR_NOCLEANUP();
 }
 
+int CLR_RT_HeapBlock_Delegate::CompareGenericContext(const CLR_RT_HeapBlock_Delegate &other) const
+{
+    if (m_genericMethodSpec.data != other.m_genericMethodSpec.data)
+    {
+        return m_genericMethodSpec.data > other.m_genericMethodSpec.data ? 1 : -1;
+    }
+
+    if (m_genericTypeSpec.data != other.m_genericTypeSpec.data &&
+        !(m_genericTypeSpec.data != 0 && other.m_genericTypeSpec.data != 0 &&
+          CLR_RT_TypeSystem::IsSameGenericInstance(m_genericTypeSpec, other.m_genericTypeSpec)))
+    {
+        return m_genericTypeSpec.data > other.m_genericTypeSpec.data ? 1 : -1;
+    }
+
+    return 0;
+}
+
 void CLR_RT_HeapBlock_Delegate::Relocate()
 {
     NATIVE_PROFILE_CLR_CORE();
