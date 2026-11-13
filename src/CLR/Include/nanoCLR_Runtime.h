@@ -2226,7 +2226,10 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
 
     static CLR_RT_GenericInstance *GetGenericInstance(const CLR_RT_TypeSpec_Index &index);
 
-    static bool CloseMethodSpec(const CLR_RT_MethodDef_Instance &caller, CLR_RT_MethodSpec_Index &methodSpec);
+    static bool CloseMethodSpec(
+        const CLR_RT_MethodDef_Instance &caller,
+        CLR_RT_MethodSpec_Index &methodSpec,
+        bool registerAlways = false);
 
     static CLR_UINT16 GetGenericOwnerSlot(const CLR_RT_TypeSpec_Index &typeSpec);
     static CLR_RT_GenericInstance *FindOrCreateGenericBase(
@@ -2263,7 +2266,19 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
         bool &handled,
         CLR_RT_TypeDef_Index &innermost,
         int &levels,
-        CLR_RT_TypeSpec_Index &element);
+        CLR_RT_TypeSpec_Index &element,
+        bool claimWithoutLevels = false);
+
+    // The same for a bare parameter: `start` carries its kind (VAR or MVAR), position and levels.
+    static HRESULT ResolveParameterArgument(
+        const CLR_RT_SignatureParser::Element &start,
+        const CLR_RT_MethodDef_Instance *contextMethod,
+        const CLR_RT_TypeSpec_Index *contextTypeSpec,
+        bool &handled,
+        CLR_RT_TypeDef_Index &innermost,
+        int &levels,
+        CLR_RT_TypeSpec_Index &element,
+        bool claimWithoutLevels);
 
     // False only when the object is known to be of another instantiation than the element of the array.
     static bool ElementMatchesArraySpec(const CLR_RT_HeapBlock &object, const CLR_RT_TypeSpec_Index &element);

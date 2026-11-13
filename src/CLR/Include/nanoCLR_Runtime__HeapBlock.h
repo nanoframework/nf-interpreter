@@ -2049,6 +2049,9 @@ struct CLR_RT_HeapBlock_Delegate : public CLR_RT_HeapBlock_Node // OBJECT HEAP -
         const CLR_RT_MethodDef_Index &ftn,
         CLR_RT_StackFrame *call);
 
+    // 0 when both delegates run their method with the same generic context
+    int CompareGenericContext(const CLR_RT_HeapBlock_Delegate &other) const;
+
     void Relocate();
 };
 

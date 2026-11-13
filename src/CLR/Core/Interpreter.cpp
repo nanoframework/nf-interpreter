@@ -1014,6 +1014,21 @@ HRESULT CLR_RT_Thread::Execute_DelegateInvoke(CLR_RT_StackFrame &stackArg)
         inst.InitializeFromIndex(dlg->DelegateFtn());
         bool fStaticMethod = (inst.target->flags & CLR_RECORD_METHODDEF::MD_Static) != 0;
 
+        CLR_RT_TypeSpec_Index delegateTypeSpec;
+
+        delegateTypeSpec.Clear();
+
+        if (dlg->m_genericTypeSpec.data != 0)
+        {
+            delegateTypeSpec = dlg->m_genericTypeSpec;
+            inst.genericType = &delegateTypeSpec;
+        }
+
+        if (dlg->m_genericMethodSpec.data != 0)
+        {
+            inst.methodSpec = dlg->m_genericMethodSpec;
+        }
+
         NANOCLR_CHECK_HRESULT(stack->MakeCall(
             inst,
             fStaticMethod ? nullptr : &dlg->m_object,
@@ -1069,6 +1084,39 @@ static bool TryGetReceiverTypeSpec(
 
     receiverTypeSpec = objTypeSpec;
     return true;
+}
+
+static void StoreDelegateGenericContext(
+    CLR_RT_HeapBlock &reference,
+    const CLR_RT_MethodDef_Instance &method,
+    const CLR_RT_MethodDef_Instance &caller,
+    bool withOwner)
+{
+    CLR_RT_HeapBlock_Delegate *dlg = reference.DereferenceDelegate();
+
+    if (dlg == nullptr)
+    {
+        return;
+    }
+
+    if (NANOCLR_INDEX_IS_VALID(method.methodSpec))
+    {
+        CLR_RT_MethodSpec_Index closedSpec = method.methodSpec;
+
+        CLR_RT_TypeSystem::CloseMethodSpec(caller, closedSpec, true);
+
+        dlg->m_genericMethodSpec = closedSpec;
+    }
+
+    if (withOwner && method.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*method.genericType))
+    {
+        CLR_RT_TypeSpec_Instance owner{};
+
+        if (owner.InitializeFromIndex(*method.genericType) && owner.IsClosedGenericType())
+        {
+            dlg->m_genericTypeSpec = *method.genericType;
+        }
+    }
 }
 
 // See CLAUDE.md "Generic .cctor lifecycle" for the call contract.
@@ -2428,6 +2476,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     }
 
                     CLR_RT_MethodDef_Instance calleeInst{};
+                    CLR_RT_TypeSpec_Index delegateTypeSpec;
+
+                    delegateTypeSpec.Clear();
+
                     // Set arrayElementType before ResolveToken so generic type resolution can use it
                     calleeInst.arrayElementType = propagatedArrayElementType;
 
@@ -2519,6 +2571,17 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             if (NANOCLR_INDEX_IS_VALID(propagatedArrayElementType))
                             {
                                 calleeInst.arrayElementType = propagatedArrayElementType;
+                            }
+
+                            if (dlg->m_genericTypeSpec.data != 0)
+                            {
+                                delegateTypeSpec = dlg->m_genericTypeSpec;
+                                calleeInst.genericType = &delegateTypeSpec;
+                            }
+
+                            if (dlg->m_genericMethodSpec.data != 0)
+                            {
+                                calleeInst.methodSpec = dlg->m_genericMethodSpec;
                             }
 
                             if ((calleeInst.target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
@@ -3302,6 +3365,15 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         if ((dlgInst.target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
                         {
                             dlg->m_object.Assign(top[0]);
+
+                            CLR_RT_TypeDef_Instance declaring{};
+                            CLR_RT_TypeSpec_Index receiverTypeSpec;
+
+                            if (declaring.InitializeFromMethod(dlgInst) &&
+                                TryGetReceiverTypeSpec(&top[0], &declaring, receiverTypeSpec))
+                            {
+                                dlg->m_genericTypeSpec = receiverTypeSpec;
+                            }
                         }
 
                         top->SetObjectReference(dlg);
@@ -4584,7 +4656,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                 arrayRow,
                                 rowInnermost,
                                 rowLevels,
-                                rowElement));
+                                rowElement,
+                                true));
 
                             if (arrayRow)
                             {
@@ -4656,7 +4729,24 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                     if (NANOCLR_INDEX_IS_VALID(tsInst.genericTypeDef) &&
                                         NANOCLR_INDEX_IS_INVALID(tsInst.cachedElementType))
                                     {
-                                        evalPos[0].SetReflection((const CLR_RT_TypeSpec_Index &)tsInst.data);
+                                        CLR_RT_TypeSpec_Index closedSpec;
+
+                                        closedSpec.Clear();
+
+                                        if (!tsInst.IsClosedGenericType())
+                                        {
+                                            NANOCLR_CHECK_HRESULT(CLR_RT_TypeSystem::GetElementGenericInstance(
+                                                assm,
+                                                arg,
+                                                &stack->m_call,
+                                                stack->m_call.genericType,
+                                                closedSpec));
+                                        }
+
+                                        evalPos[0].SetReflection(
+                                            NANOCLR_INDEX_IS_VALID(closedSpec)
+                                                ? closedSpec
+                                                : (const CLR_RT_TypeSpec_Index &)tsInst.data);
                                     }
                                     else if (NANOCLR_INDEX_IS_VALID(tsInst.cachedElementType))
                                     {
@@ -4720,6 +4810,54 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             if (genericParam.ResolveToken(arg, assm) == false)
                             {
                                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                            }
+
+                            {
+                                CLR_RT_SignatureParser::Element parameter{};
+                                bool parameterHandled;
+                                CLR_RT_TypeDef_Index parameterInnermost;
+                                CLR_RT_TypeSpec_Index parameterElement;
+                                int parameterLevels;
+                                bool isMethodParameter =
+                                    assm->crossReferenceGenericParam[CLR_DataFromTk(arg)].typeOrMethodDef ==
+                                    TBL_MethodDef;
+
+                                parameter.DataType = isMethodParameter ? DATATYPE_MVAR : DATATYPE_VAR;
+                                parameter.GenericParamPosition = genericParam.target->number;
+                                parameter.Levels = 0;
+
+                                NANOCLR_CHECK_HRESULT(CLR_RT_TypeSystem::ResolveParameterArgument(
+                                    parameter,
+                                    &stack->m_call,
+                                    stack->m_call.genericType,
+                                    parameterHandled,
+                                    parameterInnermost,
+                                    parameterLevels,
+                                    parameterElement,
+                                    true));
+
+                                if (parameterHandled)
+                                {
+                                    CLR_RT_ReflectionDef_Index reflex;
+
+                                    reflex.kind = REFLECTION_TYPE;
+                                    reflex.levels = (CLR_UINT16)parameterLevels;
+                                    reflex.data.type = parameterInnermost;
+
+                                    if (NANOCLR_INDEX_IS_VALID(parameterElement))
+                                    {
+                                        reflex.kind = REFLECTION_TYPESPEC;
+                                        reflex.data.typeSpec = parameterElement;
+                                    }
+
+                                    evalPos[0].SetReflection(reflex);
+                                    break;
+                                }
+
+                                if (isMethodParameter && NANOCLR_INDEX_IS_VALID(stack->m_call.methodSpec))
+                                {
+                                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                                }
                             }
 
                             // resolve the generic parameter in the context of the caller's generic type, if different
@@ -4936,7 +5074,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     CHECKSTACK(stack, evalPos);
 
                     CLR_RT_MethodDef_Instance method{};
-                    if (method.ResolveToken(arg, assm, stack->m_call.genericType) == false)
+                    if (method.ResolveToken(arg, assm, stack->m_call.genericType, &stack->m_call) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
@@ -4944,6 +5082,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     UPDATESTACK(stack, evalPos);
 
                     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Delegate::CreateInstance(evalPos[0], method, stack));
+
+                    StoreDelegateGenericContext(evalPos[0], method, stack->m_call, true);
                     break;
                 }
 
@@ -4954,7 +5094,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     FETCH_ARG_COMPRESSED_METHODTOKEN(arg, ip);
 
                     CLR_RT_MethodDef_Instance callee{};
-                    if (callee.ResolveToken(arg, assm, stack->m_call.genericType) == false)
+                    if (callee.ResolveToken(arg, assm, stack->m_call.genericType, &stack->m_call) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
@@ -4973,6 +5113,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     UPDATESTACK(stack, evalPos);
 
                     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Delegate::CreateInstance(evalPos[0], calleeReal, stack));
+
+                    StoreDelegateGenericContext(evalPos[0], callee, stack->m_call, false);
                     break;
                 }
 

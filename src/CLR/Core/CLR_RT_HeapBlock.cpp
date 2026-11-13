@@ -1916,7 +1916,9 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const C
                 if (leftData < rightData)
                     return -1;
 
-                return Compare_Values(leftDlg->m_object, rightDlg->m_object, fSigned);
+                int objectResult = Compare_Values(leftDlg->m_object, rightDlg->m_object, fSigned);
+
+                return objectResult != 0 ? objectResult : leftDlg->CompareGenericContext(*rightDlg);
             }
 
             case DATATYPE_CLASS:

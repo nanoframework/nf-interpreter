@@ -721,7 +721,10 @@ HRESULT CLR_RT_StackFrame::MakeCall(
             ownerContext = *md.genericType;
         }
 
+        CLR_RT_MethodSpec_Index calledMethodSpec = md.methodSpec;
+
         md.InitializeFromIndex(mdReal);
+        md.methodSpec = calledMethodSpec;
 
         if (NANOCLR_INDEX_IS_VALID(ownerContext) && declaring.InitializeFromMethod(md))
         {
