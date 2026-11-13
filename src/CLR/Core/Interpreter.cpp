@@ -4648,17 +4648,16 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             CLR_RT_TypeSpec_Index rowElement;
                             int rowLevels;
 
-                            NANOCLR_CHECK_HRESULT(
-                                CLR_RT_TypeSystem::ResolveArrayRow(
-                                    assm,
-                                    arg,
-                                    &stack->m_call,
-                                    stack->m_call.genericType,
-                                    arrayRow,
-                                    rowInnermost,
-                                    rowLevels,
-                                    rowElement,
-                                    true));
+                            NANOCLR_CHECK_HRESULT(CLR_RT_TypeSystem::ResolveArrayRow(
+                                assm,
+                                arg,
+                                &stack->m_call,
+                                stack->m_call.genericType,
+                                arrayRow,
+                                rowInnermost,
+                                rowLevels,
+                                rowElement,
+                                true));
 
                             if (arrayRow)
                             {
@@ -4736,13 +4735,12 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                                         if (!tsInst.IsClosedGenericType())
                                         {
-                                            NANOCLR_CHECK_HRESULT(
-                                                CLR_RT_TypeSystem::GetElementGenericInstance(
-                                                    assm,
-                                                    arg,
-                                                    &stack->m_call,
-                                                    stack->m_call.genericType,
-                                                    closedSpec));
+                                            NANOCLR_CHECK_HRESULT(CLR_RT_TypeSystem::GetElementGenericInstance(
+                                                assm,
+                                                arg,
+                                                &stack->m_call,
+                                                stack->m_call.genericType,
+                                                closedSpec));
                                         }
 
                                         evalPos[0].SetReflection(
@@ -4828,16 +4826,15 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                 parameter.GenericParamPosition = genericParam.target->number;
                                 parameter.Levels = 0;
 
-                                NANOCLR_CHECK_HRESULT(
-                                    CLR_RT_TypeSystem::ResolveParameterArgument(
-                                        parameter,
-                                        &stack->m_call,
-                                        stack->m_call.genericType,
-                                        parameterHandled,
-                                        parameterInnermost,
-                                        parameterLevels,
-                                        parameterElement,
-                                        true));
+                                NANOCLR_CHECK_HRESULT(CLR_RT_TypeSystem::ResolveParameterArgument(
+                                    parameter,
+                                    &stack->m_call,
+                                    stack->m_call.genericType,
+                                    parameterHandled,
+                                    parameterInnermost,
+                                    parameterLevels,
+                                    parameterElement,
+                                    true));
 
                                 if (parameterHandled)
                                 {

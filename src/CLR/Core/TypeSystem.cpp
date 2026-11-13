@@ -3319,16 +3319,15 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
                 CLR_RT_TypeSpec_Index rowElement;
                 int rowLevels;
 
-                NANOCLR_CHECK_HRESULT(
-                    CLR_RT_TypeSystem::ResolveArrayRow(
-                        assm,
-                        token,
-                        caller,
-                        caller->genericType,
-                        handled,
-                        rowInnermost,
-                        rowLevels,
-                        rowElement));
+                NANOCLR_CHECK_HRESULT(CLR_RT_TypeSystem::ResolveArrayRow(
+                    assm,
+                    token,
+                    caller,
+                    caller->genericType,
+                    handled,
+                    rowInnermost,
+                    rowLevels,
+                    rowElement));
 
                 if (handled)
                 {
@@ -6000,10 +5999,7 @@ struct MethodIndexLookup
 };
 
 static const MethodIndexLookup c_MethodIndexLookup[] = {
-#define MIL(nm, type, method)                                                                                          \
-    {                                                                                                                  \
-        nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method                                           \
-    }
+#define MIL(nm, type, method) {nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method}
 
     // clang-format off
 
