@@ -360,7 +360,6 @@ struct CLR_RT_GenericInstance;
 struct CLR_RT_TypeDef_Instance;
 struct CLR_RT_MethodDef_Instance;
 struct CLR_RT_FieldDef_Instance;
-struct CLR_RT_GenericParam_Instance;
 struct CLR_RT_MethodSpec_Instance;
 
 struct CLR_RT_StackFrame;
@@ -830,35 +829,6 @@ struct CLR_RT_MethodRef_Index
     }
 };
 
-struct CLR_RT_GenericParam_Index
-{
-    CLR_UINT32 data;
-
-    //--//
-
-    void Clear()
-    {
-        data = 0;
-    }
-
-    void Set(CLR_UINT32 indexAssm, CLR_UINT32 indexGenericParam)
-    {
-        data = indexAssm << 24 | indexGenericParam;
-    }
-
-    //--//
-
-    CLR_INDEX Assembly() const
-    {
-        return (CLR_INDEX)(data >> 24);
-    }
-
-    CLR_UINT8 GenericParam() const
-    {
-        return (CLR_UINT8)(data);
-    }
-};
-
 struct CLR_RT_ReflectionDef_Index
 {
     // CLR_ReflectionType
@@ -956,27 +926,6 @@ struct CLR_RT_MethodDef_CrossReference
     {
         return (CLR_INDEX)(data);
     }
-};
-
-struct CLR_RT_GenericParam_CrossReference
-{
-    /// @brief Generic Parameter Owner -> Index to TypeDef or MethodDef
-    ///
-    CLR_UINT16 data;
-
-    /// @brief Tag for owner (TypeDef or MethodDef)
-    ///
-    NanoCLRTable typeOrMethodDef;
-
-    /// @brief DataType for the generic parameter
-    ///
-    NanoCLRDataType dataType;
-
-    /// @brief Class of the generic parameter
-    ///
-    CLR_RT_TypeDef_Index classTypeDef;
-
-    CLR_RT_GenericParam_Index m_target;
 };
 
 struct CLR_RT_MethodSpec_CrossReference
@@ -1203,7 +1152,6 @@ struct CLR_RT_SignatureParser
     static const int c_Method = 3;
     static const int c_Locals = 4;
     static const int c_Object = 5;
-    static const int c_GenericParamType = 6;
     static const int c_MethodSpec = 7;
     static const int c_LocalVar = 8;
     static const int c_RuntimeTypeSpec = 9;
@@ -1265,7 +1213,6 @@ struct CLR_RT_SignatureParser
     void Initialize_Interfaces(CLR_RT_Assembly *assm, const CLR_RECORD_TYPEDEF *td);
     void Initialize_MethodLocals(CLR_RT_Assembly *assm, const CLR_RECORD_METHODDEF *md);
     void Initialize_LocalVar(CLR_RT_Assembly *assm, const CLR_PMETADATA sig);
-    bool Initialize_GenericParamTypeSignature(CLR_RT_Assembly *assm, const CLR_RECORD_GENERICPARAM *gp);
 
     void Initialize_FieldDef(CLR_RT_Assembly *assm, const CLR_RECORD_FIELDDEF *fd);
     void Initialize_FieldDef(CLR_RT_Assembly *assm, CLR_PMETADATA fd);
@@ -1357,7 +1304,6 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
         size_t typeDef;
         size_t fieldDef;
         size_t methodDef;
-        size_t genericParam;
         size_t methodSpec;
         size_t typeSpec;
 
@@ -1426,8 +1372,6 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
     CLR_RT_MethodDef_CrossReference *crossReferenceMethodDef;
     // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
-    CLR_RT_GenericParam_CrossReference *crossReferenceGenericParam;
-    // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
     CLR_RT_MethodSpec_CrossReference *crossReferenceMethodSpec;
     // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
     CLR_RT_TypeSpec_CrossReference *crossReferenceTypeSpec;
@@ -1492,11 +1436,6 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     bool FindTypeDef(CLR_UINT32 hash, CLR_RT_TypeDef_Index &index);
 
     bool FindTypeSpec(const CLR_PMETADATA sig, CLR_RT_TypeSpec_Index &index);
-    bool FindGenericParamAtMethodDef(
-        CLR_RT_MethodDef_Instance md,
-        CLR_INT32 genericParameterPosition,
-        CLR_RT_GenericParam_Index &index);
-    bool FindGenericParam(CLR_INDEX typeSpecIndex, CLR_RT_GenericParam_Index &index);
     bool FindMethodSpecFromTypeSpec(CLR_INDEX typeSpecIndex, CLR_RT_MethodSpec_Index &index);
 
     bool FindFieldDef(
@@ -2473,31 +2412,6 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
         return assembly->debuggingInfoMethodDef[Method()];
     }
 #endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-};
-
-struct CLR_RT_GenericParam_Instance : public CLR_RT_GenericParam_Index
-{
-    CLR_RT_Assembly *assembly;
-    const CLR_RECORD_GENERICPARAM *target;
-
-#if defined(NANOCLR_INSTANCE_NAMES)
-    const char *name;
-#endif
-
-    //--//
-
-    bool InitializeFromIndex(const CLR_RT_GenericParam_Index &index);
-
-    void ClearInstance();
-
-    bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm);
-
-    //--//
-
-    CLR_RT_GenericParam_CrossReference &CrossReference() const
-    {
-        return assembly->crossReferenceGenericParam[GenericParam()];
-    }
 };
 
 struct CLR_RT_MethodSpec_Instance : public CLR_RT_MethodSpec_Index

@@ -419,37 +419,6 @@ void CLR_RT_SignatureParser::Initialize_MethodSignature(CLR_RT_MethodSpec_Instan
 
 //--//
 
-bool CLR_RT_SignatureParser::Initialize_GenericParamTypeSignature(
-    CLR_RT_Assembly *assm,
-    const CLR_RECORD_GENERICPARAM *gp)
-{
-    NATIVE_PROFILE_CLR_CORE();
-
-    Type = CLR_RT_SignatureParser::c_GenericParamType;
-
-    Assembly = assm;
-
-    // need to check for valid signature
-    if (gp->signature != 0xFFFF)
-    {
-        Signature = assm->GetSignature(gp->signature);
-        ParamCount = 1;
-    }
-    else
-    {
-        // can't process...
-        return false;
-    }
-
-    Flags = 0;
-
-    GenParamCount = 0;
-    m_pendingGenericInst = false;
-
-    // done here
-    return true;
-}
-
 //--//
 
 void CLR_RT_SignatureParser::Initialize_MethodLocals(CLR_RT_Assembly *assm, const CLR_RECORD_METHODDEF *md)
@@ -1134,35 +1103,10 @@ bool CLR_RT_TypeSpec_Instance::IsClosedGenericType()
 {
     if (!NANOCLR_INDEX_IS_VALID(genericTypeDef))
     {
-        return false; // not a generic instantiation
-    }
-
-    CLR_RT_SignatureParser parser{};
-    parser.Initialize_TypeSpec(*this);
-
-    CLR_RT_SignatureParser::Element elem{};
-    if (FAILED(parser.Advance(elem)) || elem.DataType != DATATYPE_GENERICINST)
-    {
         return false;
     }
 
-    // Skip the generic type definition; elem.GenParamCount carries the arg count after this advance.
-    if (FAILED(parser.Advance(elem)))
-    {
-        return false;
-    }
-
-    while (parser.Available() > 0)
-    {
-        // treat malformed as open to avoid false "closed"
-        if (FAILED(parser.Advance(elem)) || elem.DataType == DATATYPE_VAR || elem.DataType == DATATYPE_MVAR)
-        {
-            return false;
-        }
-    }
-
-    // all arguments are concrete types, this is a closed generic type
-    return true;
+    return target == nullptr || (target->flags & CLR_RECORD_TYPESPEC::TS_Closed) != 0;
 }
 
 bool CLR_RT_TypeSpec_Instance::GetGenericParam(CLR_INT32 parameterPosition, CLR_RT_SignatureParser::Element &element)
@@ -1171,7 +1115,6 @@ bool CLR_RT_TypeSpec_Instance::GetGenericParam(CLR_INT32 parameterPosition, CLR_
 
     CLR_RT_SignatureParser parser;
 
-    // A generic argument is returned as its GENERICINST marker, which callers test for.
     return ::PositionAtGenericParam(*this, parameterPosition, parser) && SUCCEEDED(parser.Advance(element));
 }
 
@@ -1431,22 +1374,6 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
 #endif
 
                 return true;
-
-            case TBL_GenericParam:
-            {
-                CLR_RT_GenericParam_CrossReference gp = assm->crossReferenceGenericParam[index];
-
-                Set(gp.classTypeDef.Assembly(), gp.classTypeDef.Type());
-
-                assembly = g_CLR_RT_TypeSystem.m_assemblies[gp.classTypeDef.Assembly() - 1];
-                target = assembly->GetTypeDef(gp.classTypeDef.Type());
-
-#if defined(NANOCLR_INSTANCE_NAMES)
-                name = assembly->GetString(target->name);
-#endif
-
-                return true;
-            }
 
             case TBL_TypeSpec:
             {
@@ -1798,21 +1725,27 @@ bool CLR_RT_TypeDef_Instance::ResolveNullableType(
                 return true;
             }
 
-            // Use the *caller's* bound genericType (Stack<Int32>, etc.)
-            if (caller == nullptr || caller->genericType == nullptr)
+            if (caller != nullptr && NANOCLR_INDEX_IS_VALID(caller->methodSpec))
             {
-                return false;
+                CLR_RT_MethodSpec_Instance methodSpecInstance;
+                CLR_RT_SignatureParser::Element argument;
+                CLR_RT_SignatureParser argumentParser;
+
+                if (!methodSpecInstance.InitializeFromIndex(caller->methodSpec) ||
+                    !PositionAtGenericArgument(methodSpecInstance, elem.GenericParamPosition, argumentParser) ||
+                    FAILED(argumentParser.AdvanceParameter(argument)) || !NANOCLR_INDEX_IS_VALID(argument.Class))
+                {
+                    return false;
+                }
+
+                data = argument.Class.data;
+                assembly = g_CLR_RT_TypeSystem.m_assemblies[argument.Class.Assembly() - 1];
+                target = assembly->GetTypeDef(argument.Class.Type());
+
+                return true;
             }
 
-            CLR_RT_GenericParam_Index gpIdx;
-            caller->assembly->FindGenericParamAtMethodDef(*caller, elem.GenericParamPosition, gpIdx);
-            auto &gp = caller->assembly->crossReferenceGenericParam[gpIdx.GenericParam()];
-
-            data = gp.classTypeDef.data;
-            assembly = g_CLR_RT_TypeSystem.m_assemblies[gp.classTypeDef.Assembly() - 1];
-            target = assembly->GetTypeDef(gp.classTypeDef.Type());
-
-            return true;
+            return false;
         }
         else
         {
@@ -1943,28 +1876,7 @@ void CLR_RT_FieldDef_Instance::ClearInstance()
 
 static bool IsInstantiatedOverOwnParameters(const CLR_RT_TypeSpec_Instance &typeSpec)
 {
-    CLR_RT_SignatureParser parser{};
-    parser.Initialize_TypeSpec(typeSpec);
-
-    CLR_RT_SignatureParser::Element element{};
-
-    if (FAILED(parser.Advance(element)) || element.DataType != DATATYPE_GENERICINST || FAILED(parser.Advance(element)))
-    {
-        return false;
-    }
-
-    const int argCount = element.GenParamCount;
-
-    for (int i = 0; i < argCount; i++)
-    {
-        if (FAILED(parser.Advance(element)) || element.DataType != DATATYPE_VAR || element.Levels != 0 ||
-            element.GenericParamPosition != i)
-        {
-            return false;
-        }
-    }
-
-    return true;
+    return typeSpec.target != nullptr && (typeSpec.target->flags & CLR_RECORD_TYPESPEC::TS_OverOwnParameters) != 0;
 }
 
 // Closes an open owner in the caller's context, see CLAUDE.md "A closed owner outranks the caller".
@@ -2750,67 +2662,6 @@ bool CLR_RT_MethodDef_Instance::GetDeclaringType(CLR_RT_TypeDef_Instance &declTy
     return declType.InitializeFromMethod(*this);
 }
 
-//////////////////////////////
-
-bool CLR_RT_GenericParam_Instance::InitializeFromIndex(const CLR_RT_GenericParam_Index &index)
-{
-    NATIVE_PROFILE_CLR_CORE();
-
-    if (NANOCLR_INDEX_IS_VALID(index))
-    {
-        data = index.data;
-        assembly = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
-        target = assembly->GetGenericParam(GenericParam());
-
-#if defined(NANOCLR_INSTANCE_NAMES)
-        name = assembly->GetString(target->name);
-#endif
-
-        return true;
-    }
-
-    data = 0;
-    assembly = nullptr;
-    target = nullptr;
-
-    return false;
-}
-
-void CLR_RT_GenericParam_Instance::ClearInstance()
-{
-    NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_GenericParam_Index::Clear();
-
-    assembly = nullptr;
-    target = nullptr;
-}
-
-bool CLR_RT_GenericParam_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm)
-{
-    NATIVE_PROFILE_CLR_CORE();
-    if (assm)
-    {
-        CLR_UINT32 index = CLR_DataFromTk(tk);
-
-        CLR_RT_GenericParam_Index genericParamIndex;
-        genericParamIndex.Set(assm->assemblyIndex, index);
-
-        // get generic type
-        data = genericParamIndex.data;
-        assembly = assm;
-        target = assembly->GetGenericParam(index);
-
-#if defined(NANOCLR_INSTANCE_NAMES)
-        name = assembly->GetString(target->name);
-#endif
-        return true;
-    }
-
-    ClearInstance();
-
-    return false;
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool CLR_RT_MethodSpec_Instance::InitializeFromIndex(const CLR_RT_MethodSpec_Index &index)
@@ -3319,15 +3170,16 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
                 CLR_RT_TypeSpec_Index rowElement;
                 int rowLevels;
 
-                NANOCLR_CHECK_HRESULT(CLR_RT_TypeSystem::ResolveArrayRow(
-                    assm,
-                    token,
-                    caller,
-                    caller->genericType,
-                    handled,
-                    rowInnermost,
-                    rowLevels,
-                    rowElement));
+                NANOCLR_CHECK_HRESULT(
+                    CLR_RT_TypeSystem::ResolveArrayRow(
+                        assm,
+                        token,
+                        caller,
+                        caller->genericType,
+                        handled,
+                        rowInnermost,
+                        rowLevels,
+                        rowElement));
 
                 if (handled)
                 {
@@ -3433,21 +3285,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
                     }
                 }
 
-                // Fallback: use the GenericParam table on the caller's assembly (gives the declared
-                // constraint, e.g. object).  Use caller->assembly rather than assm so that cross-assembly
-                // calls look up the GenericParam table in the assembly that actually declares the method,
-                // avoiding picking up the wrong table from a different assembly.
-                if (caller != nullptr)
-                {
-                    CLR_RT_GenericParam_Index gp;
-                    caller->assembly->FindGenericParamAtMethodDef(*caller, elem.GenericParamPosition, gp);
-                    auto &info = caller->assembly->crossReferenceGenericParam[gp.GenericParam()];
-                    this->InitializeFromTypeDef(info.classTypeDef);
-                }
-                else
-                {
-                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-                }
+                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
             }
             else if (elem.DataType == DATATYPE_GENERICINST)
             {
@@ -4034,8 +3872,6 @@ void CLR_RT_Assembly::AssemblyInitialize(CLR_RT_Assembly::Offsets &offsets)
     buffer += offsets.fieldDef;
     crossReferenceMethodDef = (CLR_RT_MethodDef_CrossReference *)buffer;
     buffer += offsets.methodDef;
-    crossReferenceGenericParam = (CLR_RT_GenericParam_CrossReference *)buffer;
-    buffer += offsets.genericParam;
     crossReferenceMethodSpec = (CLR_RT_MethodSpec_CrossReference *)buffer;
     buffer += offsets.methodSpec;
     crossReferenceTypeSpec = (CLR_RT_TypeSpec_CrossReference *)buffer;
@@ -4074,15 +3910,6 @@ void CLR_RT_Assembly::AssemblyInitialize(CLR_RT_Assembly::Offsets &offsets)
         auto *src = (const CLR_RECORD_METHODDEF *)this->GetTable(TBL_MethodDef);
         CLR_RT_MethodDef_CrossReference *dst = this->crossReferenceMethodDef;
         for (i = 0; i < this->tablesSize[TBL_MethodDef]; i++, src++, dst++)
-        {
-            dst->data = CLR_EmptyIndex;
-        }
-    }
-
-    {
-        auto *src = (const CLR_RECORD_GENERICPARAM *)this->GetTable(TBL_GenericParam);
-        CLR_RT_GenericParam_CrossReference *dst = this->crossReferenceGenericParam;
-        for (i = 0; i < this->tablesSize[TBL_GenericParam]; i++, src++, dst++)
         {
             dst->data = CLR_EmptyIndex;
         }
@@ -4200,10 +4027,6 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
         offsets.methodDef =
             ROUNDTOMULTIPLE(skeleton->tablesSize[TBL_MethodDef] * sizeof(CLR_RT_MethodDef_CrossReference), CLR_UINT32);
 
-        offsets.genericParam = ROUNDTOMULTIPLE(
-            skeleton->tablesSize[TBL_GenericParam] * sizeof(CLR_RT_GenericParam_CrossReference),
-            CLR_UINT32);
-
         offsets.methodSpec = ROUNDTOMULTIPLE(
             skeleton->tablesSize[TBL_MethodSpec] * sizeof(CLR_RT_MethodSpec_CrossReference),
             CLR_UINT32);
@@ -4222,7 +4045,7 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
 
         size_t iTotalRamSize = offsets.base + offsets.assemblyRef + offsets.typeRef + offsets.fieldRef +
                                offsets.methodRef + offsets.typeDef + offsets.fieldDef + offsets.methodDef +
-                               offsets.genericParam + offsets.methodSpec + offsets.typeSpec;
+                               offsets.methodSpec + offsets.typeSpec;
 
 #if !defined(NANOCLR_APPDOMAINS)
         iTotalRamSize += offsets.staticFieldsCount;
@@ -4315,10 +4138,6 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
                 "   MethodDef       = %6d bytes (%5d elements)\r\n",
                 offsets.methodDef,
                 skeleton->tablesSize[TBL_MethodDef]);
-            CLR_Debug::Printf(
-                "   GenericParam    = %6d bytes (%5d elements)\r\n",
-                offsets.genericParam,
-                skeleton->tablesSize[TBL_GenericParam]);
             CLR_Debug::Printf(
                 "   MethodSpec      = %6d bytes (%5d elements)\r\n",
                 offsets.methodSpec,
@@ -5193,49 +5012,6 @@ void CLR_RT_Assembly::ResolveLink()
                 md->data = indexType;
             }
         }
-
-        //
-        // Link generic parameters, if any
-        //
-        {
-            if (src->genericParamCount)
-            {
-                CLR_RT_GenericParam_CrossReference *gp = &crossReferenceGenericParam[src->firstGenericParam];
-
-                // get generic parameter count for stop condition
-                int count = src->genericParamCount;
-                CLR_UINT16 indexGenericParam = src->firstGenericParam;
-
-                for (; count; count--, gp++, indexGenericParam++)
-                {
-                    gp->m_target.Set(assemblyIndex, indexGenericParam);
-
-                    gp->data = indexType;
-                    gp->typeOrMethodDef = TBL_TypeDef;
-
-                    CLR_RT_SignatureParser sub;
-                    if (sub.Initialize_GenericParamTypeSignature(this, GetGenericParam(indexGenericParam)))
-                    {
-                        CLR_RT_SignatureParser::Element res;
-
-                        // get generic param type
-                        sub.Advance(res);
-
-                        gp->dataType = res.DataType;
-                        gp->classTypeDef = res.Class;
-                    }
-                    else
-                    {
-                        gp->dataType = DATATYPE_VOID;
-
-                        CLR_RT_TypeDef_Index td;
-                        td.Clear();
-
-                        gp->classTypeDef = td;
-                    }
-                }
-            }
-        }
     }
 }
 
@@ -5459,10 +5235,11 @@ HRESULT CLR_RT_AppDomain::GetManagedObject(CLR_RT_HeapBlock &res)
 
         pRes = res.Dereference();
 
-        NANOCLR_CHECK_HRESULT(CLR_RT_ObjectToEvent_Source::CreateInstance(
-            this,
-            *pRes,
-            pRes[Library_corlib_native_System_AppDomain::FIELD___appDomain]));
+        NANOCLR_CHECK_HRESULT(
+            CLR_RT_ObjectToEvent_Source::CreateInstance(
+                this,
+                *pRes,
+                pRes[Library_corlib_native_System_AppDomain::FIELD___appDomain]));
 
         pRes[Library_corlib_native_System_AppDomain::FIELD___friendlyName].SetObjectReference(m_strName);
     }
@@ -5999,10 +5776,7 @@ struct MethodIndexLookup
 };
 
 static const MethodIndexLookup c_MethodIndexLookup[] = {
-#define MIL(nm, type, method)                                                                                          \
-    {                                                                                                                  \
-        nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method                                           \
-    }
+#define MIL(nm, type, method) {nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method}
 
     // clang-format off
 
@@ -6104,45 +5878,6 @@ void CLR_RT_Assembly::ResolveMethodDef()
         if (md->flags & CLR_RECORD_METHODDEF::MD_EntryPoint)
         {
             g_CLR_RT_TypeSystem.m_entryPoint = index;
-        }
-
-        // link generic parameters
-        if (md->genericParamCount)
-        {
-            CLR_RT_GenericParam_CrossReference *gp = &crossReferenceGenericParam[md->firstGenericParam];
-
-            // get generic parameter count for stop condition
-            int num = md->genericParamCount;
-            CLR_UINT16 indexGenericParam = md->firstGenericParam;
-
-            for (; num; num--, gp++, indexGenericParam++)
-            {
-                gp->m_target.Set(assemblyIndex, indexGenericParam);
-
-                gp->data = indexMethod;
-                gp->typeOrMethodDef = TBL_MethodDef;
-
-                CLR_RT_SignatureParser sub;
-                if (sub.Initialize_GenericParamTypeSignature(this, GetGenericParam(indexGenericParam)))
-                {
-                    CLR_RT_SignatureParser::Element res;
-
-                    // get generic param type
-                    sub.Advance(res);
-
-                    gp->dataType = res.DataType;
-                    gp->classTypeDef = res.Class;
-                }
-                else
-                {
-                    gp->dataType = DATATYPE_VOID;
-
-                    CLR_RT_TypeDef_Index td;
-                    td.Clear();
-
-                    gp->classTypeDef = td;
-                }
-            }
         }
 
 #ifdef NANOCLR_TRACE_TYPE_RESOLUTION
@@ -6604,58 +6339,6 @@ bool CLR_RT_Assembly::FindTypeDef(CLR_UINT32 hash, CLR_RT_TypeDef_Index &index)
     if (i != tblSize)
     {
         index.Set(assemblyIndex, i);
-
-        return true;
-    }
-    else
-    {
-        index.Clear();
-
-        return false;
-    }
-}
-
-bool CLR_RT_Assembly::FindGenericParam(CLR_INDEX typeSpecIndex, CLR_RT_GenericParam_Index &index)
-{
-    NATIVE_PROFILE_CLR_CORE();
-    const CLR_RECORD_GENERICPARAM *gp = this->GetGenericParam(0);
-    int tblSize = this->tablesSize[TBL_GenericParam];
-
-    for (int i = 0; i < tblSize; i++, gp++)
-    {
-        CLR_RT_SignatureParser parserLeft;
-        parserLeft.Initialize_GenericParamTypeSignature(this, gp);
-
-        CLR_RT_SignatureParser parserRight;
-        parserRight.Initialize_TypeSpec(this, this->GetTypeSpec(typeSpecIndex));
-
-        if (CLR_RT_TypeSystem::MatchSignature(parserLeft, parserRight))
-        {
-
-            return true;
-        }
-    }
-
-    index.Clear();
-
-    return false;
-}
-
-bool CLR_RT_Assembly::FindGenericParamAtMethodDef(
-    CLR_RT_MethodDef_Instance md,
-    CLR_INT32 genericParameterPosition,
-    CLR_RT_GenericParam_Index &index)
-{
-    NATIVE_PROFILE_CLR_CORE();
-
-    CLR_INDEX paramIndex = GetMethodDef(md.Method())->firstGenericParam;
-
-    // sanity check for valid parameter index
-    if (paramIndex != CLR_EmptyIndex)
-    {
-        paramIndex += genericParameterPosition;
-
-        index.Set(assemblyIndex, paramIndex);
 
         return true;
     }
@@ -7776,9 +7459,6 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
                 offsets.methodDef += ROUNDTOMULTIPLE(
                     pASSM->tablesSize[TBL_MethodDef] * sizeof(CLR_RT_MethodDef_CrossReference),
                     CLR_UINT32);
-                offsets.genericParam += ROUNDTOMULTIPLE(
-                    pASSM->tablesSize[TBL_GenericParam] * sizeof(CLR_RT_GenericParam_CrossReference),
-                    CLR_UINT32);
 
 #if !defined(NANOCLR_APPDOMAINS)
                 offsets.staticFieldsCount +=
@@ -7810,8 +7490,7 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
             NANOCLR_FOREACH_ASSEMBLY_END();
 
             iTotalRamSize = offsets.base + offsets.assemblyRef + offsets.typeRef + offsets.fieldRef +
-                            offsets.methodRef + offsets.typeDef + offsets.fieldDef + offsets.methodDef +
-                            offsets.genericParam;
+                            offsets.methodRef + offsets.typeDef + offsets.fieldDef + offsets.methodDef;
 
 #if !defined(NANOCLR_APPDOMAINS)
             iTotalRamSize += offsets.staticFieldsCount;
@@ -7851,10 +7530,6 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
                 "   MethodDef       = %6d bytes (%5d elements)\r\n",
                 offsets.methodDef,
                 pTablesSize[TBL_MethodDef]);
-            CLR_Debug::Printf(
-                "   GenericParam    = %6d bytes (%5d elements)\r\n",
-                offsets.genericParam,
-                pTablesSize[TBL_GenericParam]);
             CLR_Debug::Printf(
                 "   MethodSpec      = %6d bytes (%5d elements)\r\n",
                 offsets.methodSpec,
@@ -10930,10 +10605,11 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
             }
 
             // instantiate array to hold parameters values
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
-                m_lastValue.m_value,
-                paramCount,
-                g_CLR_RT_WellKnownTypes.Object));
+            NANOCLR_CHECK_HRESULT(
+                CLR_RT_HeapBlock_Array::CreateInstance(
+                    m_lastValue.m_value,
+                    paramCount,
+                    g_CLR_RT_WellKnownTypes.Object));
 
             // get a pointer to the first element
             auto *currentParam = (CLR_RT_HeapBlock *)m_lastValue.m_value.DereferenceArray()->GetFirstElement();

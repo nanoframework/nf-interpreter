@@ -3333,10 +3333,11 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         // check that...
                         //
                         changes = -calleeInst.target->argumentsCount;
-                        NANOCLR_CHECK_HRESULT(CLR_Checks::VerifyStackOK(
-                            *stack,
-                            stack->m_evalStackPos,
-                            changes)); // Check to see if we have enough parameters.
+                        NANOCLR_CHECK_HRESULT(
+                            CLR_Checks::VerifyStackOK(
+                                *stack,
+                                stack->m_evalStackPos,
+                                changes)); // Check to see if we have enough parameters.
                         stack->m_evalStackPos += changes;
 
                         top = stack->m_evalStackPos++; // Push back the result.
@@ -3381,10 +3382,11 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     else
                     {
                         changes = calleeInst.target->argumentsCount;
-                        NANOCLR_CHECK_HRESULT(CLR_Checks::VerifyStackOK(
-                            *stack,
-                            stack->m_evalStackPos,
-                            -changes)); // Check to see if we have enough parameters.
+                        NANOCLR_CHECK_HRESULT(
+                            CLR_Checks::VerifyStackOK(
+                                *stack,
+                                stack->m_evalStackPos,
+                                -changes)); // Check to see if we have enough parameters.
                         top = stack->m_evalStackPos;
 
                         //
@@ -4648,16 +4650,17 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             CLR_RT_TypeSpec_Index rowElement;
                             int rowLevels;
 
-                            NANOCLR_CHECK_HRESULT(CLR_RT_TypeSystem::ResolveArrayRow(
-                                assm,
-                                arg,
-                                &stack->m_call,
-                                stack->m_call.genericType,
-                                arrayRow,
-                                rowInnermost,
-                                rowLevels,
-                                rowElement,
-                                true));
+                            NANOCLR_CHECK_HRESULT(
+                                CLR_RT_TypeSystem::ResolveArrayRow(
+                                    assm,
+                                    arg,
+                                    &stack->m_call,
+                                    stack->m_call.genericType,
+                                    arrayRow,
+                                    rowInnermost,
+                                    rowLevels,
+                                    rowElement,
+                                    true));
 
                             if (arrayRow)
                             {
@@ -4708,12 +4711,13 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                                     CLR_RT_TypeSpec_Index elementSpec;
 
-                                    NANOCLR_CHECK_HRESULT(CLR_RT_TypeSystem::GetElementGenericInstance(
-                                        assm,
-                                        arg,
-                                        &stack->m_call,
-                                        stack->m_call.genericType,
-                                        elementSpec));
+                                    NANOCLR_CHECK_HRESULT(
+                                        CLR_RT_TypeSystem::GetElementGenericInstance(
+                                            assm,
+                                            arg,
+                                            &stack->m_call,
+                                            stack->m_call.genericType,
+                                            elementSpec));
 
                                     if (NANOCLR_INDEX_IS_VALID(elementSpec))
                                     {
@@ -4735,12 +4739,13 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                                         if (!tsInst.IsClosedGenericType())
                                         {
-                                            NANOCLR_CHECK_HRESULT(CLR_RT_TypeSystem::GetElementGenericInstance(
-                                                assm,
-                                                arg,
-                                                &stack->m_call,
-                                                stack->m_call.genericType,
-                                                closedSpec));
+                                            NANOCLR_CHECK_HRESULT(
+                                                CLR_RT_TypeSystem::GetElementGenericInstance(
+                                                    assm,
+                                                    arg,
+                                                    &stack->m_call,
+                                                    stack->m_call.genericType,
+                                                    closedSpec));
                                         }
 
                                         evalPos[0].SetReflection(
@@ -4801,117 +4806,6 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             }
 
                             evalPos[0].SetReflection(method);
-                        }
-                        break;
-
-                        case TBL_GenericParam:
-                        {
-                            CLR_RT_GenericParam_Instance genericParam;
-                            if (genericParam.ResolveToken(arg, assm) == false)
-                            {
-                                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-                            }
-
-                            {
-                                CLR_RT_SignatureParser::Element parameter{};
-                                bool parameterHandled;
-                                CLR_RT_TypeDef_Index parameterInnermost;
-                                CLR_RT_TypeSpec_Index parameterElement;
-                                int parameterLevels;
-                                bool isMethodParameter =
-                                    assm->crossReferenceGenericParam[CLR_DataFromTk(arg)].typeOrMethodDef ==
-                                    TBL_MethodDef;
-
-                                parameter.DataType = isMethodParameter ? DATATYPE_MVAR : DATATYPE_VAR;
-                                parameter.GenericParamPosition = genericParam.target->number;
-                                parameter.Levels = 0;
-
-                                NANOCLR_CHECK_HRESULT(CLR_RT_TypeSystem::ResolveParameterArgument(
-                                    parameter,
-                                    &stack->m_call,
-                                    stack->m_call.genericType,
-                                    parameterHandled,
-                                    parameterInnermost,
-                                    parameterLevels,
-                                    parameterElement,
-                                    true));
-
-                                if (parameterHandled)
-                                {
-                                    CLR_RT_ReflectionDef_Index reflex;
-
-                                    reflex.kind = REFLECTION_TYPE;
-                                    reflex.levels = (CLR_UINT16)parameterLevels;
-                                    reflex.data.type = parameterInnermost;
-
-                                    if (NANOCLR_INDEX_IS_VALID(parameterElement))
-                                    {
-                                        reflex.kind = REFLECTION_TYPESPEC;
-                                        reflex.data.typeSpec = parameterElement;
-                                    }
-
-                                    evalPos[0].SetReflection(reflex);
-                                    break;
-                                }
-
-                                if (isMethodParameter && NANOCLR_INDEX_IS_VALID(stack->m_call.methodSpec))
-                                {
-                                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-                                }
-                            }
-
-                            // resolve the generic parameter in the context of the caller's generic type, if different
-                            // from the caller's assembly.
-                            if (stack->m_call.genericType != nullptr)
-                            {
-                                CLR_UINT32 rawGenericParamRow = CLR_DataFromTk(arg);
-
-                                CLR_RT_GenericParam_CrossReference gpCR =
-                                    stack->m_call.assembly->crossReferenceGenericParam[rawGenericParamRow];
-
-                                if (gpCR.typeOrMethodDef == TBL_MethodDef)
-                                {
-                                    // Method generic parameter (!!T)
-                                    // already resolved
-                                    evalPos[0].SetReflection(gpCR.classTypeDef);
-                                }
-                                else
-                                {
-                                    // Type generic parameter (!T)
-                                    if (stack->m_call.genericType == nullptr)
-                                    {
-                                        // No closed-generic context available: fall back to returning the
-                                        // declaring TYPE itself as the reflection result (rarely correct, but at least
-                                        // safe).
-                                        CLR_RT_TypeDef_Index fallbackTypeDef = gpCR.classTypeDef;
-                                        NANOCLR_CHECK_HRESULT(evalPos[0].SetReflection(fallbackTypeDef));
-                                    }
-                                    else
-                                    {
-                                        // closed TypeSpec
-                                        const CLR_RT_TypeSpec_Index *callerTypeSpec = stack->m_call.genericType;
-
-                                        CLR_RT_TypeSpec_Instance typeSpec;
-                                        if (!typeSpec.InitializeFromIndex(*callerTypeSpec))
-                                        {
-                                            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-                                        }
-
-                                        CLR_RT_SignatureParser::Element paramElement;
-                                        if (!typeSpec.GetGenericParam(genericParam.target->number, paramElement))
-                                        {
-                                            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-                                        }
-
-                                        NANOCLR_CHECK_HRESULT(evalPos[0].SetReflection(paramElement.Class));
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                // No caller context??
-                                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-                            }
                         }
                         break;
 
