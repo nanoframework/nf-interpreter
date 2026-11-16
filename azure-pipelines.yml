@@ -1795,7 +1795,7 @@ jobs:
         displayName: Publish vstest dump files
         inputs:
           targetPath: "$(Build.ArtifactStagingDirectory)/vstest_dumps"
-          artifactName: VsTestCrashDumps
+          artifactName: VsTestCrashDumps-$(System.JobAttempt)
           artifactType: pipeline
 
   #################################
