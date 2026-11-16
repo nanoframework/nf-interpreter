@@ -192,8 +192,9 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOI
     // the same bus just using different addresses
     switch (busIndex)
     {
+// RP bus IDs are 1 based: bus 1 is hardware I2C0 and bus 2 is hardware I2C1
 #if defined(RP_I2C_USE_I2C0)
-        case 0:
+        case 1:
             if (I2C0_PAL.Driver == NULL)
             {
                 ConfigPins_I2C0();
@@ -206,7 +207,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOI
             break;
 #endif
 #if defined(RP_I2C_USE_I2C1)
-        case 1:
+        case 2:
             if (I2C1_PAL.Driver == NULL)
             {
                 ConfigPins_I2C1();
@@ -322,7 +323,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeDispose___
     switch (busIndex)
     {
 #if defined(RP_I2C_USE_I2C0)
-        case 0:
+        case 1:
             I2C0_DeviceCounter--;
 
             if (I2C0_DeviceCounter == 0)
@@ -333,7 +334,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeDispose___
             break;
 #endif
 #if defined(RP_I2C_USE_I2C1)
-        case 1:
+        case 2:
             I2C1_DeviceCounter--;
 
             if (I2C1_DeviceCounter == 0)
@@ -455,12 +456,12 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
     switch (busIndex)
     {
 #if defined(RP_I2C_USE_I2C0)
-        case 0:
+        case 1:
             palI2c = &I2C0_PAL;
             break;
 #endif
 #if defined(RP_I2C_USE_I2C1)
-        case 1:
+        case 2:
             palI2c = &I2C1_PAL;
             break;
 #endif
