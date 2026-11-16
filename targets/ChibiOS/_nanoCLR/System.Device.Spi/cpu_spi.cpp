@@ -655,7 +655,7 @@ void CPU_SPI_GetPins(uint32_t busIndex, GPIO_PIN &clk, GPIO_PIN &miso, GPIO_PIN 
 
 HRESULT CPU_SPI_MinClockFrequency(uint32_t spiBus, int32_t *frequency)
 {
-    if (spiBus >= NUM_SPI_BUSES)
+    if (spiBus == 0 || spiBus > NUM_SPI_BUSES || !(CPU_SPI_PortsMap() & (1U << (spiBus - 1))))
     {
         return CLR_E_INVALID_PARAMETER;
     }
@@ -667,7 +667,7 @@ HRESULT CPU_SPI_MinClockFrequency(uint32_t spiBus, int32_t *frequency)
 
 HRESULT CPU_SPI_MaxClockFrequency(uint32_t spiBus, int32_t *frequency)
 {
-    if (spiBus >= NUM_SPI_BUSES)
+    if (spiBus == 0 || spiBus > NUM_SPI_BUSES || !(CPU_SPI_PortsMap() & (1U << (spiBus - 1))))
     {
         return CLR_E_INVALID_PARAMETER;
     }

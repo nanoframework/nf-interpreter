@@ -44,38 +44,43 @@ pin.Write(PinValue.High);
 
 ### SPI Bus Configuration
 
-| Bus | Function | GPIO | Pico Pin |
-|-----|----------|------|----------|
-| SPI0 | SCK | GP18 | 24 |
-| SPI0 | MOSI | GP19 | 25 |
-| SPI0 | MISO | GP16 | 21 |
-| SPI1 | SCK | GP10 | 14 |
-| SPI1 | MOSI | GP11 | 15 |
-| SPI1 | MISO | GP12 | 16 |
+SPI bus IDs are 1-based in nanoFramework: SPI1 (bus ID 1) maps to hardware bus 0, and SPI2 (bus ID 2) maps to hardware bus 1.
+Use these IDs with both `SpiDevice.Create` and `SpiDevice.GetBusInfo`.
+In the table below, **Bus** is the hardware peripheral number and **SPI** is the nanoFramework name to use.
+
+| Bus | SPI | Function | GPIO | Pico Pin |
+|-----|-----|----------|------|----------|
+| 0 | SPI1 | SCK | GP18 | 24 |
+| 0 | SPI1 | MOSI | GP19 | 25 |
+| 0 | SPI1 | MISO | GP16 | 21 |
+| 1 | SPI2 | SCK | GP10 | 14 |
+| 1 | SPI2 | MOSI | GP11 | 15 |
+| 1 | SPI2 | MISO | GP12 | 16 |
 
 ```csharp
 // SPI0 example
-var settings = new SpiConnectionSettings(0, chipSelectPin);  // bus 0 = SPI0
+var settings = new SpiConnectionSettings(1, chipSelectPin);  // nanoFramework SPI1 = hardware SPI0
 settings.ClockFrequency = 1_000_000;
 var spi = SpiDevice.Create(settings);
 ```
 
 ### I2C Bus Configuration
 
-| Bus | Function | GPIO | Pico Pin |
-|-----|----------|------|----------|
-| I2C0 | SDA | GP4 | 6 |
-| I2C0 | SCL | GP5 | 7 |
-| I2C1 | SDA | GP6 | 9 |
-| I2C1 | SCL | GP7 | 10 |
+I2C bus IDs are 1-based in nanoFramework: I2C1 (bus ID 1) maps to hardware bus 0, and I2C2 (bus ID 2) maps to hardware bus 1.
+In the table below, **Bus** is the hardware peripheral number and **I2C** is the nanoFramework name to use.
+
+| Bus | I2C | Function | GPIO | Pico Pin |
+|-----|-----|----------|------|----------|
+| 0 | I2C1 | SDA | GP4 | 6 |
+| 0 | I2C1 | SCL | GP5 | 7 |
+| 1 | I2C2 | SDA | GP6 | 9 |
+| 1 | I2C2 | SCL | GP7 | 10 |
 
 ```csharp
-// I2C0 example (bus index 0)
-var settings = new I2cConnectionSettings(0, 0x48);  // bus 0 = I2C0
+// I2C1 example (hardware I2C0)
+var settings = new I2cConnectionSettings(1, 0x48);  // bus 1 = I2C1 = hardware I2C0
 var device = I2cDevice.Create(settings);
 ```
-
-> **Note:** I2C buses are 0-indexed on RP2350. Bus 0 = I2C0, Bus 1 = I2C1.
 
 ### PWM
 
