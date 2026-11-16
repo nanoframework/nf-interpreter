@@ -4,6 +4,7 @@
 // See LICENSE file in the project root for full license information.
 //
 #include "Core.h"
+#include <nanoPAL_NativeDouble.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -271,17 +272,9 @@ HRESULT CLR_RT_HeapBlock_Array::ClearElements(int index, int length)
             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }
 
-        switch (dt)
+        if (c_CLR_RT_DataTypeLookup[dt].m_flags & CLR_RT_DataTypeLookup::c_Reference)
         {
-            case DATATYPE_VALUETYPE:
-            case DATATYPE_CLASS:
-            case DATATYPE_WEAKCLASS:
-                dt = DATATYPE_OBJECT;
-                break;
-
-            default:
-                // the remaining data types aren't to be handled
-                break;
+            dt = DATATYPE_OBJECT;
         }
 
         while (length > 0)
@@ -354,11 +347,8 @@ bool CLR_RT_HeapBlock_Array::CheckRange(int index, int length, int numOfElements
     return true;
 }
 
-/*
-    This is not the same functionality as System.Array.IndexOf.  CLR_RT_HeapBlock_Array::IndexOf does the search
-   analogous to calling Object.ReferenceEquals, not Object.Equals, as System.Array.IndexOf demands.  This function is
-   used by TrySzIndexOf
-*/
+// Searches primitive elements only, with the result of Equals. Reference and struct elements are left to the managed
+// loop of Array.IndexOf (index -1). See CLAUDE.md "Arrays as generic collections".
 HRESULT CLR_RT_HeapBlock_Array::IndexOf(
     CLR_RT_HeapBlock_Array *array,
     CLR_RT_HeapBlock &match,
@@ -381,12 +371,21 @@ HRESULT CLR_RT_HeapBlock_Array::IndexOf(
     if (CheckRange(start, count, numElem) == false)
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
 
-    if (count > 0)
+    if (count > 0 && !array->m_fReference)
     {
         CLR_UINT8 *data = array->GetFirstElement();
         CLR_UINT8 sizeElem = array->m_sizeOfElement;
+        NanoCLRDataType dt = (NanoCLRDataType)array->m_typeOfElement;
+        CLR_RT_HeapBlock *matchPtr = match.FixBoxingReference();
         int pos;
         int incr;
+
+        // null or another type is never equal to a primitive element
+        if (matchPtr == nullptr || matchPtr->DataType() != dt)
+        {
+            index = -1;
+            NANOCLR_SET_AND_LEAVE(S_OK);
+        }
 
         if (fForward)
         {
@@ -401,49 +400,44 @@ HRESULT CLR_RT_HeapBlock_Array::IndexOf(
 
         data += pos * sizeElem;
 
-        if (!array->m_fReference)
+        while (true)
         {
-            CLR_RT_HeapBlock *matchPtr = match.FixBoxingReference();
-            FAULT_ON_NULL(matchPtr);
+            bool equal;
 
-            if (matchPtr->DataType() <= DATATYPE_LAST_PRIMITIVE)
+#if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
+            if (dt == DATATYPE_R4)
             {
-                int incrElem = incr * sizeElem;
+                float element;
+                float value = (float)matchPtr->NumericByRefConst().r4;
 
-                while (true)
-                {
-                    if (memcmp(data, &matchPtr->NumericByRef(), sizeElem) == 0)
-                    {
-                        index = pos;
-                        NANOCLR_SET_AND_LEAVE(S_OK);
-                    }
-
-                    if (--count == 0)
-                        break;
-
-                    pos += incr;
-                    data += incrElem;
-                }
+                memcpy(&element, data, sizeof(element));
+                equal = element == value || (__isnanf(element) && __isnanf(value));
             }
-        }
-        else
-        {
-            CLR_RT_HeapBlock *dataPtr = (CLR_RT_HeapBlock *)data;
-
-            while (true)
+            else if (dt == DATATYPE_R8)
             {
-                if (CLR_RT_HeapBlock::Compare_Unsigned_Values(*dataPtr, match) == 0)
-                {
-                    index = pos;
-                    NANOCLR_SET_AND_LEAVE(S_OK);
-                }
+                double element;
+                double value = (double)matchPtr->NumericByRefConst().r8;
 
-                if (--count == 0)
-                    break;
-
-                pos += incr;
-                dataPtr += incr;
+                memcpy(&element, data, sizeof(element));
+                equal = element == value || (__isnand(element) && __isnand(value));
             }
+            else
+#endif
+            {
+                equal = memcmp(data, &matchPtr->NumericByRef(), sizeElem) == 0;
+            }
+
+            if (equal)
+            {
+                index = pos;
+                NANOCLR_SET_AND_LEAVE(S_OK);
+            }
+
+            if (--count == 0)
+                break;
+
+            pos += incr;
+            data += incr * sizeElem;
         }
     }
 

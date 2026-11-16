@@ -217,23 +217,14 @@ HRESULT Library_corlib_native_System_Array::TrySzIndexOf(
 
     NANOCLR_CHECK_HRESULT(CLR_Checks::VerifyArrayReference(argSrc));
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::IndexOf(array, match, start, stop, fForward, index));
-
     _ASSERTE(retValue.DataType() == DATATYPE_BYREF);
 
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::IndexOf(array, match, start, stop, fForward, index));
+
+    // reference and struct elements: the managed loop decides with Equals, so the first match wins
+    fRet = !array->m_fReference && array->m_typeOfElement <= DATATYPE_LAST_PRIMITIVE;
+
     retValue.Dereference()->SetInteger(index);
-
-    fRet = (index >= 0);
-
-    if (array->m_typeOfElement <= DATATYPE_LAST_PRIMITIVE)
-    {
-        // Primitives do not override Equals, so this check is good enough.
-        // If match is not found, index == -1, so the managed Array.IndexOf will
-        // skip the more expensive Object.Equals call.
-
-        _ASSERTE(FIMPLIES(!fRet, index == -1));
-        fRet = true;
-    }
 
     stack.SetResult_Boolean(fRet);
 
