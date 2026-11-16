@@ -3333,10 +3333,11 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         // check that...
                         //
                         changes = -calleeInst.target->argumentsCount;
-                        NANOCLR_CHECK_HRESULT(CLR_Checks::VerifyStackOK(
-                            *stack,
-                            stack->m_evalStackPos,
-                            changes)); // Check to see if we have enough parameters.
+                        NANOCLR_CHECK_HRESULT(
+                            CLR_Checks::VerifyStackOK(
+                                *stack,
+                                stack->m_evalStackPos,
+                                changes)); // Check to see if we have enough parameters.
                         stack->m_evalStackPos += changes;
 
                         top = stack->m_evalStackPos++; // Push back the result.
@@ -3381,10 +3382,11 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     else
                     {
                         changes = calleeInst.target->argumentsCount;
-                        NANOCLR_CHECK_HRESULT(CLR_Checks::VerifyStackOK(
-                            *stack,
-                            stack->m_evalStackPos,
-                            -changes)); // Check to see if we have enough parameters.
+                        NANOCLR_CHECK_HRESULT(
+                            CLR_Checks::VerifyStackOK(
+                                *stack,
+                                stack->m_evalStackPos,
+                                -changes)); // Check to see if we have enough parameters.
                         top = stack->m_evalStackPos;
 
                         //
@@ -4648,16 +4650,17 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             CLR_RT_TypeSpec_Index rowElement;
                             int rowLevels;
 
-                            NANOCLR_CHECK_HRESULT(CLR_RT_TypeSystem::ResolveArrayRow(
-                                assm,
-                                arg,
-                                &stack->m_call,
-                                stack->m_call.genericType,
-                                arrayRow,
-                                rowInnermost,
-                                rowLevels,
-                                rowElement,
-                                true));
+                            NANOCLR_CHECK_HRESULT(
+                                CLR_RT_TypeSystem::ResolveArrayRow(
+                                    assm,
+                                    arg,
+                                    &stack->m_call,
+                                    stack->m_call.genericType,
+                                    arrayRow,
+                                    rowInnermost,
+                                    rowLevels,
+                                    rowElement,
+                                    true));
 
                             if (arrayRow)
                             {
@@ -4708,12 +4711,13 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                                     CLR_RT_TypeSpec_Index elementSpec;
 
-                                    NANOCLR_CHECK_HRESULT(CLR_RT_TypeSystem::GetElementGenericInstance(
-                                        assm,
-                                        arg,
-                                        &stack->m_call,
-                                        stack->m_call.genericType,
-                                        elementSpec));
+                                    NANOCLR_CHECK_HRESULT(
+                                        CLR_RT_TypeSystem::GetElementGenericInstance(
+                                            assm,
+                                            arg,
+                                            &stack->m_call,
+                                            stack->m_call.genericType,
+                                            elementSpec));
 
                                     if (NANOCLR_INDEX_IS_VALID(elementSpec))
                                     {
@@ -4735,12 +4739,13 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                                         if (!tsInst.IsClosedGenericType())
                                         {
-                                            NANOCLR_CHECK_HRESULT(CLR_RT_TypeSystem::GetElementGenericInstance(
-                                                assm,
-                                                arg,
-                                                &stack->m_call,
-                                                stack->m_call.genericType,
-                                                closedSpec));
+                                            NANOCLR_CHECK_HRESULT(
+                                                CLR_RT_TypeSystem::GetElementGenericInstance(
+                                                    assm,
+                                                    arg,
+                                                    &stack->m_call,
+                                                    stack->m_call.genericType,
+                                                    closedSpec));
                                         }
 
                                         evalPos[0].SetReflection(

@@ -3170,15 +3170,16 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
                 CLR_RT_TypeSpec_Index rowElement;
                 int rowLevels;
 
-                NANOCLR_CHECK_HRESULT(CLR_RT_TypeSystem::ResolveArrayRow(
-                    assm,
-                    token,
-                    caller,
-                    caller->genericType,
-                    handled,
-                    rowInnermost,
-                    rowLevels,
-                    rowElement));
+                NANOCLR_CHECK_HRESULT(
+                    CLR_RT_TypeSystem::ResolveArrayRow(
+                        assm,
+                        token,
+                        caller,
+                        caller->genericType,
+                        handled,
+                        rowInnermost,
+                        rowLevels,
+                        rowElement));
 
                 if (handled)
                 {
@@ -5234,10 +5235,11 @@ HRESULT CLR_RT_AppDomain::GetManagedObject(CLR_RT_HeapBlock &res)
 
         pRes = res.Dereference();
 
-        NANOCLR_CHECK_HRESULT(CLR_RT_ObjectToEvent_Source::CreateInstance(
-            this,
-            *pRes,
-            pRes[Library_corlib_native_System_AppDomain::FIELD___appDomain]));
+        NANOCLR_CHECK_HRESULT(
+            CLR_RT_ObjectToEvent_Source::CreateInstance(
+                this,
+                *pRes,
+                pRes[Library_corlib_native_System_AppDomain::FIELD___appDomain]));
 
         pRes[Library_corlib_native_System_AppDomain::FIELD___friendlyName].SetObjectReference(m_strName);
     }
@@ -5774,10 +5776,7 @@ struct MethodIndexLookup
 };
 
 static const MethodIndexLookup c_MethodIndexLookup[] = {
-#define MIL(nm, type, method)                                                                                          \
-    {                                                                                                                  \
-        nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method                                           \
-    }
+#define MIL(nm, type, method) {nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method}
 
     // clang-format off
 
@@ -10606,10 +10605,11 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
             }
 
             // instantiate array to hold parameters values
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
-                m_lastValue.m_value,
-                paramCount,
-                g_CLR_RT_WellKnownTypes.Object));
+            NANOCLR_CHECK_HRESULT(
+                CLR_RT_HeapBlock_Array::CreateInstance(
+                    m_lastValue.m_value,
+                    paramCount,
+                    g_CLR_RT_WellKnownTypes.Object));
 
             // get a pointer to the first element
             auto *currentParam = (CLR_RT_HeapBlock *)m_lastValue.m_value.DereferenceArray()->GetFirstElement();
