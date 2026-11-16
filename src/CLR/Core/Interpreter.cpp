@@ -2717,6 +2717,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                         }
 
                                         CLR_RT_MethodSpec_Index savedMethodSpec = calleeInst.methodSpec;
+                                        CLR_RT_MethodSpec_Index helperMethodSpec{};
+                                        helperMethodSpec.Clear();
 
                                         // If this is an SZArrayHelper dispatch, populate arrayElementType from runtime
                                         // array
@@ -2738,17 +2740,25 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                                     const CLR_RT_ReflectionDef_Index &reflex =
                                                         pArray->ReflectionDataConst();
 
-                                                    // For a 1D array, levels == 1 and data.type is the element TypeDef,
-                                                    // an element that is an array itself binds as System.Array
-                                                    if (reflex.kind == REFLECTION_TYPE)
+                                                    // T is the element: a TypeDef when that is all of it, otherwise a
+                                                    // runtime MethodSpec.
+                                                    if (reflex.kind == REFLECTION_TYPE && reflex.levels > 0)
                                                     {
-                                                        if (reflex.levels == 1)
+                                                        if (reflex.levels == 1 && pArray->ElementTypeSpec() == nullptr)
                                                         {
                                                             savedArrayElementType = reflex.data.type;
                                                         }
-                                                        else if (reflex.levels > 1)
+                                                        else if (CLR_RT_TypeSystem::GetArrayElementMethodSpec(
+                                                                     *pArray,
+                                                                     helperMethodSpec))
                                                         {
-                                                            savedArrayElementType = g_CLR_RT_WellKnownTypes.Array;
+                                                            savedMethodSpec = helperMethodSpec;
+                                                        }
+                                                        else
+                                                        {
+                                                            savedArrayElementType = reflex.levels == 1
+                                                                                        ? reflex.data.type
+                                                                                        : g_CLR_RT_WellKnownTypes.Array;
                                                         }
                                                     }
                                                 }
@@ -2830,7 +2840,12 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                         }
 
                                         // Restore the array element type after reinitializing calleeInst
-                                        if (NANOCLR_INDEX_IS_VALID(savedArrayElementType))
+                                        if (NANOCLR_INDEX_IS_VALID(helperMethodSpec))
+                                        {
+                                            calleeInst.arrayElementType.Clear();
+                                            propagatedArrayElementType.Clear();
+                                        }
+                                        else if (NANOCLR_INDEX_IS_VALID(savedArrayElementType))
                                         {
                                             calleeInst.arrayElementType = savedArrayElementType;
                                         }

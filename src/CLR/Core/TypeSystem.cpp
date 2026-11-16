@@ -1568,6 +1568,12 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                                         return false;
                                     }
 
+                                    // the TypeDef of an array argument is System.Array
+                                    if (element.Levels > 0)
+                                    {
+                                        element.Class = g_CLR_RT_WellKnownTypes.Array;
+                                    }
+
                                     if (!NANOCLR_INDEX_IS_VALID(element.Class))
                                     {
                                         return false;
@@ -9550,6 +9556,106 @@ bool CLR_RT_TypeSystem::CloseMethodSpec(
     {
         return false;
     }
+
+    CLR_RT_GenericInstance *instance = FindOrCreateGenericInstanceByNodes(nodes, nodeCount);
+
+    if (instance == nullptr)
+    {
+        return false;
+    }
+
+    methodSpec.data = instance->m_self.data;
+
+    return true;
+}
+
+static CLR_RT_GenericInstance *RecordOfTypeSpec(const CLR_RT_TypeSpec_Index &index);
+
+// The data type a signature element of this class has, so the node compares equal to one parsed from metadata.
+static NanoCLRDataType SignatureDataTypeOfClass(const CLR_RT_TypeDef_Index &cls)
+{
+    CLR_RT_TypeDef_Instance inst{};
+
+    if (!inst.InitializeFromIndex(cls))
+    {
+        return DATATYPE_VOID;
+    }
+
+    if (cls.data == g_CLR_RT_WellKnownTypes.Object.data)
+    {
+        return DATATYPE_OBJECT;
+    }
+
+    NanoCLRDataType dt = (NanoCLRDataType)inst.target->dataType;
+    const CLR_RT_TypeDef_Index *primitive = c_CLR_RT_DataTypeLookup[dt].m_cls;
+
+    if (((dt >= DATATYPE_BOOLEAN && dt <= DATATYPE_R8) || dt == DATATYPE_STRING) && primitive != nullptr &&
+        primitive->data == cls.data)
+    {
+        return dt;
+    }
+
+    CLR_UINT32 semantics = inst.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask;
+
+    return (semantics == CLR_RECORD_TYPEDEF::TD_Semantics_ValueType ||
+            semantics == CLR_RECORD_TYPEDEF::TD_Semantics_Enum)
+               ? DATATYPE_VALUETYPE
+               : DATATYPE_CLASS;
+}
+
+// A runtime MethodSpec with one argument, the element of the array (levels - 1 levels). See CLAUDE.md §25.
+bool CLR_RT_TypeSystem::GetArrayElementMethodSpec(
+    const CLR_RT_HeapBlock_Array &array,
+    CLR_RT_MethodSpec_Index &methodSpec)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    CLR_RT_GenericInstanceNode nodes[CLR_RT_GenericInstance::c_MaxNodes];
+    const CLR_RT_ReflectionDef_Index &reflex = array.ReflectionDataConst();
+    const CLR_RT_TypeSpec_Index *elementSpec = array.ElementTypeSpec();
+    int nodeCount = 2;
+
+    methodSpec.Clear();
+
+    if (reflex.kind != REFLECTION_TYPE || reflex.levels == 0 || reflex.levels > 0x100)
+    {
+        return false;
+    }
+
+    nodes[0].Class.Clear();
+    nodes[0].DataType = DATATYPE_VOID;
+    nodes[0].Levels = 0;
+    nodes[0].ArgCount = 1;
+    nodes[0].Position = 0;
+
+    if (elementSpec != nullptr)
+    {
+        CLR_RT_GenericInstance *element = RecordOfTypeSpec(*elementSpec);
+
+        if (element == nullptr || element->m_nodeCount + 1 > CLR_RT_GenericInstance::c_MaxNodes)
+        {
+            return false;
+        }
+
+        memcpy(&nodes[1], element->m_nodes, sizeof(CLR_RT_GenericInstanceNode) * element->m_nodeCount);
+        nodeCount = 1 + element->m_nodeCount;
+    }
+    else
+    {
+        NanoCLRDataType dt = SignatureDataTypeOfClass(reflex.data.type);
+
+        if (dt == DATATYPE_VOID)
+        {
+            return false;
+        }
+
+        nodes[1].Class = reflex.data.type;
+        nodes[1].DataType = (CLR_UINT8)dt;
+        nodes[1].ArgCount = 0;
+        nodes[1].Position = 0;
+    }
+
+    nodes[1].Levels = (CLR_UINT8)(reflex.levels - 1);
 
     CLR_RT_GenericInstance *instance = FindOrCreateGenericInstanceByNodes(nodes, nodeCount);
 

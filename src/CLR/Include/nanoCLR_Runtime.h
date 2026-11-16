@@ -2170,6 +2170,8 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
         CLR_RT_MethodSpec_Index &methodSpec,
         bool registerAlways = false);
 
+    static bool GetArrayElementMethodSpec(const CLR_RT_HeapBlock_Array &array, CLR_RT_MethodSpec_Index &methodSpec);
+
     static CLR_UINT16 GetGenericOwnerSlot(const CLR_RT_TypeSpec_Index &typeSpec);
     static CLR_RT_GenericInstance *FindOrCreateGenericBase(
         const CLR_RT_TypeDef_Instance &child,
