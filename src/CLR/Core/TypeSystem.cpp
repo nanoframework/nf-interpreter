@@ -1725,6 +1725,26 @@ bool CLR_RT_TypeDef_Instance::ResolveNullableType(
                 return true;
             }
 
+            if (caller != nullptr && NANOCLR_INDEX_IS_VALID(caller->methodSpec))
+            {
+                CLR_RT_MethodSpec_Instance methodSpecInstance;
+                CLR_RT_SignatureParser::Element argument;
+                CLR_RT_SignatureParser argumentParser;
+
+                if (!methodSpecInstance.InitializeFromIndex(caller->methodSpec) ||
+                    !PositionAtGenericArgument(methodSpecInstance, elem.GenericParamPosition, argumentParser) ||
+                    FAILED(argumentParser.AdvanceParameter(argument)) || !NANOCLR_INDEX_IS_VALID(argument.Class))
+                {
+                    return false;
+                }
+
+                data = argument.Class.data;
+                assembly = g_CLR_RT_TypeSystem.m_assemblies[argument.Class.Assembly() - 1];
+                target = assembly->GetTypeDef(argument.Class.Type());
+
+                return true;
+            }
+
             return false;
         }
         else
