@@ -2740,7 +2740,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                                     const CLR_RT_ReflectionDef_Index &reflex =
                                                         pArray->ReflectionDataConst();
 
-                                                    // T is the element: a TypeDef when that is all of it, otherwise a runtime MethodSpec.
+                                                    // T is the element: a TypeDef when that is all of it, otherwise a
+                                                    // runtime MethodSpec.
                                                     if (reflex.kind == REFLECTION_TYPE && reflex.levels > 0)
                                                     {
                                                         if (reflex.levels == 1 && pArray->ElementTypeSpec() == nullptr)
