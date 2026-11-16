@@ -2975,7 +2975,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
             }
             else if (res.DataType == DATATYPE_MVAR)
             {
-                // Generic parameter in a generic method definition: 
+                // Generic parameter in a generic method definition:
                 // the argument is not known here, show the value as it is on the stack
                 targetClass.Clear();
                 targetDataType = blk->DataType();
