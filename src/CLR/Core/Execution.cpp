@@ -2821,7 +2821,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                 }
                 case DATATYPE_MVAR:
                 {
-                    // MVAR resolution chain: arrayElementType → MethodSpec → GenericParam table.
+                    // MVAR resolution chain: arrayElementType → MethodSpec.
                     // See CLAUDE.md "VAR / MVAR resolution".
                     CLR_UINT8 genericParamPosition = *sig++;
 
@@ -2881,15 +2881,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     }
                     else
                     {
-                        // Fallback: try to resolve using GenericParam table (for open generic methods)
-                        CLR_RT_GenericParam_Index gpIndex;
-                        assembly->FindGenericParamAtMethodDef(methodDefInstance, genericParamPosition, gpIndex);
-
-                        CLR_RT_GenericParam_CrossReference gp =
-                            assembly->crossReferenceGenericParam[gpIndex.GenericParam()];
-
-                        cls = gp.classTypeDef;
-                        dt = gp.dataType;
+                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
                     goto done;

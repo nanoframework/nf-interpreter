@@ -1084,7 +1084,7 @@ struct CLR_RECORD_ASSEMBLY
 #define sizeOf_CLR_RECORD_TYPEDEF      27
 #define sizeOf_CLR_RECORD_FIELDDEF     10
 #define sizeOf_CLR_RECORD_METHODDEF    19
-#define sizeOf_CLR_RECORD_TYPESPEC     2
+#define sizeOf_CLR_RECORD_TYPESPEC     4
 #define sizeOf_CLR_RECORD_GENERICPARAM 10
 #define sizeOf_CLR_RECORD_METHODSPEC   6
 /////////////////////////////////////////////////////////////////////////
@@ -1616,9 +1616,45 @@ struct CLR_RECORD_ATTRIBUTE
 
 struct CLR_RECORD_TYPESPEC
 {
+    /// @brief No VAR or MVAR anywhere in the signature.
+    ///
+    static const CLR_UINT16 TS_Closed = 0x0001;
+
+    /// @brief Generic instance whose arguments are its own parameters, in order (G<!0, !1>).
+    ///
+    static const CLR_UINT16 TS_OverOwnParameters = 0x0002;
+
+    /// @brief The signature contains a VAR.
+    ///
+    static const CLR_UINT16 TS_HasVar = 0x0004;
+
+    /// @brief The signature contains an MVAR.
+    ///
+    static const CLR_UINT16 TS_HasMVar = 0x0008;
+
+    /// @brief Nesting depth of generic instances, 3 bits.
+    ///
+    static const CLR_UINT16 TS_DepthMask = 0x0070;
+
+    /// @brief The signature is a generic instance.
+    ///
+    static const CLR_UINT16 TS_GenericInstance = 0x0080;
+
+    /// @brief The signature is an array.
+    ///
+    static const CLR_UINT16 TS_Array = 0x0100;
+
+    /// @brief The signature is a by-ref or a pointer.
+    ///
+    static const CLR_UINT16 TS_ByRefOrPointer = 0x0200;
+
     /// @brief Index into TBL_Signatures
     ///
     CLR_SIG signature;
+
+    /// @brief TS_* flags, written by the Metadata Processor.
+    ///
+    CLR_UINT16 flags;
 };
 
 CT_ASSERT(sizeof(CLR_RECORD_TYPESPEC) == sizeOf_CLR_RECORD_TYPESPEC)
@@ -1637,7 +1673,8 @@ struct CLR_RECORD_GENERICPARAM
     ///
     CLR_TYPEORMETHODDEF owner;
 
-    /// @brief Index into TBL_Signatures for parameter type signature
+    /// @brief Index into TBL_Signatures for the type constraints (a count followed by the types), CLR_EmptyIndex when
+    /// there are none. Not read by the CLR.
     ///
     CLR_SIG signature;
 
