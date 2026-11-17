@@ -245,11 +245,15 @@ HRESULT Library_corlib_native_System_RuntimeType::GetElementType___SystemType(CL
 
 //--//
 
-HRESULT AppendGenericArguments(const CLR_RT_GenericInstance &record, char *&sz, size_t &size)
+HRESULT Library_corlib_native_System_RuntimeType::AppendGenericArguments(
+    const CLR_RT_GenericInstance &record,
+    char *&sz,
+    size_t &size)
 {
     NANOCLR_HEADER();
 
     CLR_UINT8 pending[CLR_RT_GenericInstance::c_MaxNodes];
+    CLR_UINT8 openLevels[CLR_RT_GenericInstance::c_MaxNodes];
     int depth = 0;
     bool comma = false;
 
@@ -277,6 +281,7 @@ HRESULT AppendGenericArguments(const CLR_RT_GenericInstance &record, char *&sz, 
             NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.QueueStringToBuffer(sz, size, "["));
 
             pending[++depth] = node.ArgCount;
+            openLevels[depth] = (CLR_UINT8)node.Levels;
             comma = false;
             continue;
         }
@@ -296,6 +301,11 @@ HRESULT AppendGenericArguments(const CLR_RT_GenericInstance &record, char *&sz, 
             if (depth == 0)
             {
                 break;
+            }
+
+            for (int level = 0; level < openLevels[depth]; level++)
+            {
+                NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.QueueStringToBuffer(sz, size, "[]"));
             }
 
             pending[--depth]--;

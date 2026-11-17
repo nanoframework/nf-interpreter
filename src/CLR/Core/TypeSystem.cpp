@@ -9590,8 +9590,16 @@ HRESULT CLR_RT_TypeSystem::GetClosedEnclosingType(
         return S_FALSE;
     }
 
+    CLR_RT_TypeDef_Instance enclosingInstance{};
+
+    if (!enclosingInstance.InitializeFromIndex(enclosing))
+    {
+        return CLR_E_WRONG_TYPE;
+    }
+
     nodes[0] = record->m_nodes[0];
     nodes[0].Class = enclosing;
+    nodes[0].DataType = enclosingInstance.target->dataType;
     nodes[0].ArgCount = (CLR_UINT8)enclosingArgCount;
 
     for (CLR_UINT32 arg = 0; arg < enclosingArgCount; arg++)
