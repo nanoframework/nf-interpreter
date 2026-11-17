@@ -258,6 +258,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Type::GetTypeFromHandle___STATIC__SystemType__SystemRuntimeTypeHandle,
     Library_corlib_native_System_Type::GetTypeInternal___STATIC__SystemType__STRING__STRING__BOOLEAN__SZARRAY_I4,
     Library_corlib_native_System_Type::InvokeMember___OBJECT__STRING__SystemReflectionBindingFlags__SystemReflectionBinder__OBJECT__SZARRAY_OBJECT,
+    Library_corlib_native_System_Type::IsAssignableFrom___BOOLEAN__SystemType,
     Library_corlib_native_System_Type::IsInstanceOfType___BOOLEAN__OBJECT,
     Library_corlib_native_System_Type::get_DeclaringType___SystemType,
     Library_corlib_native_System_Type::get_IsAbstract___BOOLEAN,
@@ -480,7 +481,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
-    0x532E6934,
+    0x2EFFF643,
 
 #elif !CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 

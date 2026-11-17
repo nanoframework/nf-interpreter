@@ -237,12 +237,24 @@ HRESULT CLR_RT_HeapBlock::SetReflection(const CLR_RT_TypeSpec_Index &typeSpec)
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+    if (!typeSpec.IsRuntime())
+    {
+        CLR_RT_TypeSpec_Instance row{};
+
+        if (!row.InitializeFromIndex(typeSpec) || !row.IsClosedGenericType())
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+        }
+    }
+#endif
+
     m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_REFLECTION, 0, 1);
     m_data.reflection.kind = REFLECTION_TYPESPEC;
     m_data.reflection.levels = 0;
     m_data.reflection.data.typeSpec = typeSpec;
 
-    NANOCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_HeapBlock::SetReflection(const CLR_RT_TypeDef_Index &cls)
@@ -1406,6 +1418,23 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, C
         }
         break;
 
+        case DATATYPE_REFLECTION:
+        {
+            const CLR_RT_ReflectionDef_Index &reflex = ptr->ReflectionDataConst();
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+            CLR_UINT32 identityHash;
+
+            if (reflex.kind == REFLECTION_TYPESPEC &&
+                CLR_RT_TypeSystem::GetTypeSpecIdentityHash(reflex.data.typeSpec, identityHash))
+            {
+                crc ^= identityHash + reflex.levels;
+                break;
+            }
+#endif
+            crc ^= SUPPORT_ComputeCRC(&reflex, sizeof(reflex), crc);
+        }
+        break;
+
         default:
             crc ^= SUPPORT_ComputeCRC((const void *)&ptr->DataByRefConst(), ptr->GetAtomicDataUsedBytes(), crc);
 
@@ -1543,6 +1572,13 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
             {
                 return true;
             }
+
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+            if (CLR_RT_TypeSystem::IsSameTypeSpecWord(pArgLeft.ReflectionDataConst(), pArgRight.ReflectionDataConst()))
+            {
+                return true;
+            }
+#endif
             break;
 
         case DATATYPE_STRING:
@@ -1933,6 +1969,13 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const C
                 const CLR_RT_HeapBlock *ptrRight;
                 CLR_RT_HeapBlock hbLeft;
                 CLR_RT_HeapBlock hbRight;
+
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+                if (CLR_RT_TypeSystem::IsSameTypeSpecWord(left.ReflectionDataConst(), right.ReflectionDataConst()))
+                {
+                    return 0;
+                }
+#endif
 
                 if (left.ReflectionDataConst().kind != right.ReflectionDataConst().kind)
                 {
