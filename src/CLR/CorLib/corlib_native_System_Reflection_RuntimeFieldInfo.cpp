@@ -43,7 +43,17 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeFieldInfo::get_DeclaringT
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
 
         hbObj = top.Dereference();
-        hbObj->SetReflection(cls);
+
+        CLR_RT_TypeSpec_Index owner;
+
+        if (CLR_RT_TypeSystem::GetGenericOwnerRow(hbField->ReflectionDataConst().genericOwner, cls, owner))
+        {
+            hbObj->SetReflection(owner);
+        }
+        else
+        {
+            hbObj->SetReflection(cls);
+        }
     }
 
     NANOCLR_NOCLEANUP();
