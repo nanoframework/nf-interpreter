@@ -1268,10 +1268,11 @@ HRESULT Library_corlib_native_System_Type::IsAssignableFrom___BOOLEAN__SystemTyp
             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }
 
-        NANOCLR_CHECK_HRESULT(CLR_RT_TypeSystem::IsAssignableFrom(
-            hbType->ReflectionDataConst(),
-            hbSource->ReflectionDataConst(),
-            result));
+        NANOCLR_CHECK_HRESULT(
+            CLR_RT_TypeSystem::IsAssignableFrom(
+                hbType->ReflectionDataConst(),
+                hbSource->ReflectionDataConst(),
+                result));
     }
 
     stack.SetResult_Boolean(result);
