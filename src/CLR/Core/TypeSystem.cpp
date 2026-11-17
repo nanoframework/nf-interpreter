@@ -10088,6 +10088,11 @@ HRESULT CLR_RT_TypeSystem::GetOpenGenericRow(
         }
         else
         {
+            if (count >= CLR_RT_GenericInstance::c_MaxNodes)
+            {
+                return CLR_E_NOT_SUPPORTED;
+            }
+
             nodes[count] = node;
 
             if (node.DataType == DATATYPE_VAR)
@@ -10599,6 +10604,7 @@ HRESULT CLR_RT_TypeSystem::IsAssignableFrom(
     CLR_RT_ReflectionDef_Index source = sourceType;
     CLR_RT_ReflectionDef_Index words[32];
     bool inArray = false;
+    bool unsupported = false;
     HRESULT hr;
 
     result = false;
@@ -10741,9 +10747,10 @@ HRESULT CLR_RT_TypeSystem::IsAssignableFrom(
             return S_OK;
         }
 
+        // an exact match found later wins over a comparison that would need variance
         if (sourceDef.data == targetDef.data && HasVariantParameter(targetDef))
         {
-            return CLR_E_NOT_SUPPORTED;
+            unsupported = true;
         }
 
         if (target.kind == REFLECTION_TYPESPEC && targetDef.data == g_CLR_RT_WellKnownTypes.Nullable.data)
@@ -10785,11 +10792,11 @@ HRESULT CLR_RT_TypeSystem::IsAssignableFrom(
                 if (SUCCEEDED(GetWordDefinition(words[i], candidate)) && candidate.data == targetDef.data &&
                     HasVariantParameter(targetDef))
                 {
-                    return CLR_E_NOT_SUPPORTED;
+                    unsupported = true;
                 }
             }
 
-            return S_OK;
+            return unsupported ? CLR_E_NOT_SUPPORTED : S_OK;
         }
 
         // a class or a struct: the base chain of the source
@@ -10810,7 +10817,7 @@ HRESULT CLR_RT_TypeSystem::IsAssignableFrom(
 
                 if (hr == S_FALSE)
                 {
-                    return S_OK;
+                    return unsupported ? CLR_E_NOT_SUPPORTED : S_OK;
                 }
 
                 if (IsSameTypeWord(parent, target))
@@ -10823,7 +10830,7 @@ HRESULT CLR_RT_TypeSystem::IsAssignableFrom(
                 if (SUCCEEDED(GetWordDefinition(parent, candidate)) && candidate.data == targetDef.data &&
                     HasVariantParameter(targetDef))
                 {
-                    return CLR_E_NOT_SUPPORTED;
+                    unsupported = true;
                 }
 
                 current = parent;

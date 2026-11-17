@@ -140,6 +140,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_RuntimeType::GetFields___SZARRAY_SystemReflectionFieldInfo__SystemReflectionBindingFlags,
     Library_corlib_native_System_RuntimeType::GetInterfaces___SZARRAY_SystemType,
     Library_corlib_native_System_RuntimeType::GetMethods___SZARRAY_SystemReflectionMethodInfo__SystemReflectionBindingFlags,
+    Library_corlib_native_System_RuntimeType::ToString___STRING,
     Library_corlib_native_System_RuntimeType::get_Assembly___SystemReflectionAssembly,
     Library_corlib_native_System_RuntimeType::get_BaseType___SystemType,
     Library_corlib_native_System_RuntimeType::get_FullName___STRING,
@@ -481,7 +482,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
-    0x2EFFF643,
+    0xB725569A,
 
 #elif !CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 

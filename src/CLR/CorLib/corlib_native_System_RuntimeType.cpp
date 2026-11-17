@@ -35,7 +35,7 @@ HRESULT Library_corlib_native_System_RuntimeType::get_Name___STRING(CLR_RT_Stack
     NANOCLR_HEADER();
     CLR_RT_HeapBlock *hbType = stack.This();
 
-    NANOCLR_CHECK_HRESULT(GetName(*hbType, false, stack.PushValueAndClear()));
+    NANOCLR_CHECK_HRESULT(GetName(*hbType, false, stack.PushValueAndClear(), false));
 
     NANOCLR_NOCLEANUP();
 }
@@ -46,7 +46,18 @@ HRESULT Library_corlib_native_System_RuntimeType::get_FullName___STRING(CLR_RT_S
     NANOCLR_HEADER();
     CLR_RT_HeapBlock *hbType = stack.This();
 
-    NANOCLR_CHECK_HRESULT(GetName(*hbType, true, stack.PushValueAndClear()));
+    NANOCLR_CHECK_HRESULT(GetName(*hbType, true, stack.PushValueAndClear(), false));
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_corlib_native_System_RuntimeType::ToString___STRING(CLR_RT_StackFrame &stack)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+    CLR_RT_HeapBlock *hbType = stack.This();
+
+    NANOCLR_CHECK_HRESULT(GetName(*hbType, true, stack.PushValueAndClear(), true));
 
     NANOCLR_NOCLEANUP();
 }
@@ -290,7 +301,11 @@ HRESULT Library_corlib_native_System_RuntimeType::GetTypeDescriptor(
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_corlib_native_System_RuntimeType::GetName(CLR_RT_HeapBlock &arg, bool fFullName, CLR_RT_HeapBlock &res)
+HRESULT Library_corlib_native_System_RuntimeType::GetName(
+    CLR_RT_HeapBlock &arg,
+    bool fFullName,
+    CLR_RT_HeapBlock &res,
+    bool fOpenAsString)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -305,6 +320,15 @@ HRESULT Library_corlib_native_System_RuntimeType::GetName(CLR_RT_HeapBlock &arg,
 
     szBuffer = rgBuffer;
     iBuffer = MAXSTRLEN(rgBuffer);
+
+    // FullName of a type that contains generic parameters is null, ToString names the parameters
+    if (fFullName && !fOpenAsString && arg.ReflectionDataConst().kind == REFLECTION_TYPESPEC &&
+        CLR_RT_TypeSystem::IsOpenInstance(arg.ReflectionDataConst().data.typeSpec))
+    {
+        res.SetObjectReference(nullptr);
+
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
 
     if (fFullName && arg.ReflectionDataConst().kind == REFLECTION_TYPESPEC)
     {
