@@ -689,6 +689,9 @@ endif()
 set(IS_COMMUNITY_TARGET FALSE CACHE INTERNAL "Community target flag")
 
 
+# clear the target source and include lists left in the cache by a previous configure
+nf_clear_cached_target_lists()
+
 # Define PLATFORM base path
 set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR}/targets/${RTOS})
 
