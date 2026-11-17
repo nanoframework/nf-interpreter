@@ -9249,6 +9249,30 @@ CLR_UINT16 CLR_RT_TypeSystem::GetGenericOwnerSlot(const CLR_RT_TypeSpec_Index &t
     return 0;
 }
 
+bool CLR_RT_TypeSystem::GetGenericOwnerRow(
+    CLR_UINT16 slot,
+    const CLR_RT_TypeDef_Index &declaring,
+    CLR_RT_TypeSpec_Index &row)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    if (slot == 0 || slot > g_CLR_RT_TypeSystem.m_genericInstancesCount)
+    {
+        return false;
+    }
+
+    const CLR_RT_GenericInstance *record = g_CLR_RT_TypeSystem.m_genericInstances[slot - 1];
+
+    if (record->m_nodes[0].Class.data != declaring.data)
+    {
+        return false;
+    }
+
+    row = record->m_self;
+
+    return true;
+}
+
 static const int c_MaxInheritanceDepth = 32;
 
 CLR_RT_GenericInstance *CLR_RT_TypeSystem::FindOrCreateGenericBase(
@@ -9496,6 +9520,117 @@ CLR_RT_GenericInstance *CLR_RT_TypeSystem::FindOrCreateGenericInstanceByNodes(
 
     return instance;
 }
+
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+
+HRESULT CLR_RT_TypeSystem::GetClosedGenericBase(
+    const CLR_RT_TypeDef_Instance &child,
+    const CLR_RT_TypeSpec_Index *childContext,
+    CLR_RT_TypeSpec_Index &row)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    CLR_RT_TypeSpec_Index baseSpec;
+    CLR_RT_TypeSpec_Instance baseInstance{};
+    CLR_RT_GenericInstance *record;
+    HRESULT hr;
+
+    if (!child.GetExtendsTypeSpec(baseSpec) || !baseInstance.InitializeFromIndex(baseSpec))
+    {
+        return S_FALSE;
+    }
+
+    record = FindOrCreateGenericInstance(
+        baseInstance,
+        (childContext != nullptr && NANOCLR_INDEX_IS_VALID(*childContext)) ? childContext : nullptr,
+        nullptr,
+        &hr);
+
+    if (record == nullptr)
+    {
+        return hr;
+    }
+
+    row = (baseInstance.assembly->crossReferenceTypeSpec[baseSpec.TypeSpec()].genericInstance == record)
+              ? baseSpec
+              : record->m_self;
+
+    return S_OK;
+}
+
+HRESULT CLR_RT_TypeSystem::GetClosedEnclosingType(
+    const CLR_RT_TypeSpec_Index &nested,
+    CLR_UINT32 enclosingArgCount,
+    const CLR_RT_TypeDef_Index &enclosing,
+    CLR_RT_TypeSpec_Index &row)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    CLR_RT_TypeSpec_Instance nestedInstance{};
+    CLR_RT_GenericInstance *record;
+    CLR_RT_GenericInstanceNode nodes[CLR_RT_GenericInstance::c_MaxNodes];
+    int count = 1;
+    int source = 1;
+    HRESULT hr;
+
+    if (!nestedInstance.InitializeFromIndex(nested) || nestedInstance.levels != 0)
+    {
+        return CLR_E_WRONG_TYPE;
+    }
+
+    record = FindOrCreateGenericInstance(nestedInstance, nullptr, nullptr, &hr);
+
+    if (record == nullptr)
+    {
+        return hr;
+    }
+
+    if (enclosingArgCount == 0 || enclosingArgCount > record->m_nodes[0].ArgCount)
+    {
+        return S_FALSE;
+    }
+
+    CLR_RT_TypeDef_Instance enclosingInstance{};
+
+    if (!enclosingInstance.InitializeFromIndex(enclosing))
+    {
+        return CLR_E_WRONG_TYPE;
+    }
+
+    nodes[0] = record->m_nodes[0];
+    nodes[0].Class = enclosing;
+    nodes[0].DataType = enclosingInstance.target->dataType;
+    nodes[0].ArgCount = (CLR_UINT8)enclosingArgCount;
+
+    for (CLR_UINT32 arg = 0; arg < enclosingArgCount; arg++)
+    {
+        int remaining = 1;
+
+        while (remaining > 0)
+        {
+            if (source >= record->m_nodeCount || count >= CLR_RT_GenericInstance::c_MaxNodes)
+            {
+                return CLR_E_NOT_SUPPORTED;
+            }
+
+            remaining += record->m_nodes[source].ArgCount - 1;
+            nodes[count++] = record->m_nodes[source++];
+        }
+    }
+
+    record = FindOrCreateGenericInstanceByNodes(nodes, count, &hr);
+
+    if (record == nullptr)
+    {
+        return hr;
+    }
+
+    row = record->m_self;
+
+    return S_OK;
+}
+
+#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
 bool CLR_RT_TypeSystem::CloseMethodSpec(
     const CLR_RT_MethodDef_Instance &caller,

@@ -22,11 +22,40 @@ HRESULT Library_corlib_native_System_Type::get_DeclaringType___SystemType(CLR_RT
     if (td.target->HasValidEnclosingType())
     {
         CLR_RT_HeapBlock *hbObj;
+        const CLR_RT_ReflectionDef_Index &reflex = hbType->ReflectionDataConst();
+        CLR_RT_TypeSpec_Index closedEnclosing;
+        bool isClosedEnclosing = false;
+
         td.Set(td.Assembly(), td.target->EnclosingTypeIndex());
+
+        if (reflex.kind == REFLECTION_TYPESPEC && reflex.levels == 0 && td.InitializeFromIndex(td) &&
+            td.target->genericParamCount > 0)
+        {
+            HRESULT closeHr = CLR_RT_TypeSystem::GetClosedEnclosingType(
+                reflex.data.typeSpec,
+                td.target->genericParamCount,
+                td,
+                closedEnclosing);
+
+            if (FAILED(closeHr))
+            {
+                NANOCLR_SET_AND_LEAVE(closeHr);
+            }
+
+            isClosedEnclosing = (closeHr == S_OK);
+        }
 
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
         hbObj = top.Dereference();
-        hbObj->SetReflection(td);
+
+        if (isClosedEnclosing)
+        {
+            hbObj->SetReflection(closedEnclosing);
+        }
+        else
+        {
+            hbObj->SetReflection(td);
+        }
     }
 
     NANOCLR_NOCLEANUP();

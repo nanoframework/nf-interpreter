@@ -71,13 +71,36 @@ HRESULT Library_corlib_native_System_RuntimeType::get_BaseType___SystemType(CLR_
         hbObj = top.Dereference();
         hbObj->SetReflection(g_CLR_RT_WellKnownTypes.Array);
     }
-    else if (td.SwitchToParent())
+    else
     {
+        CLR_RT_TypeSpec_Index extendsSpec;
         CLR_RT_HeapBlock *hbObj;
 
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
-        hbObj = top.Dereference();
-        hbObj->SetReflection(td);
+        if (td.GetExtendsTypeSpec(extendsSpec))
+        {
+            const CLR_RT_ReflectionDef_Index &reflex = hbType->ReflectionDataConst();
+            CLR_RT_TypeSpec_Index baseRow;
+            HRESULT closeHr = CLR_RT_TypeSystem::GetClosedGenericBase(
+                td,
+                reflex.kind == REFLECTION_TYPESPEC ? &reflex.data.typeSpec : nullptr,
+                baseRow);
+
+            if (closeHr != S_OK)
+            {
+                // the base is open (generic definition) or can't be closed
+                NANOCLR_SET_AND_LEAVE(FAILED(closeHr) ? closeHr : CLR_E_NOT_SUPPORTED);
+            }
+
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
+            hbObj = top.Dereference();
+            hbObj->SetReflection(baseRow);
+        }
+        else if (td.SwitchToParent())
+        {
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
+            hbObj = top.Dereference();
+            hbObj->SetReflection(td);
+        }
     }
 
     NANOCLR_NOCLEANUP();
@@ -222,6 +245,76 @@ HRESULT Library_corlib_native_System_RuntimeType::GetElementType___SystemType(CL
 
 //--//
 
+HRESULT Library_corlib_native_System_RuntimeType::AppendGenericArguments(
+    const CLR_RT_GenericInstance &record,
+    char *&sz,
+    size_t &size)
+{
+    NANOCLR_HEADER();
+
+    CLR_UINT8 pending[CLR_RT_GenericInstance::c_MaxNodes];
+    CLR_UINT8 openLevels[CLR_RT_GenericInstance::c_MaxNodes];
+    int depth = 0;
+    bool comma = false;
+
+    if (record.m_nodes[0].ArgCount == 0)
+    {
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
+
+    pending[0] = record.m_nodes[0].ArgCount;
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.QueueStringToBuffer(sz, size, "["));
+
+    for (int i = 1; i < record.m_nodeCount; i++)
+    {
+        const CLR_RT_GenericInstanceNode &node = record.m_nodes[i];
+
+        if (comma)
+        {
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.QueueStringToBuffer(sz, size, ","));
+        }
+
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.BuildTypeName(node.Class, sz, size));
+
+        if (node.ArgCount > 0)
+        {
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.QueueStringToBuffer(sz, size, "["));
+
+            pending[++depth] = node.ArgCount;
+            openLevels[depth] = (CLR_UINT8)node.Levels;
+            comma = false;
+            continue;
+        }
+
+        for (int level = 0; level < node.Levels; level++)
+        {
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.QueueStringToBuffer(sz, size, "[]"));
+        }
+
+        comma = true;
+        pending[depth]--;
+
+        while (pending[depth] == 0)
+        {
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.QueueStringToBuffer(sz, size, "]"));
+
+            if (depth == 0)
+            {
+                break;
+            }
+
+            for (int level = 0; level < openLevels[depth]; level++)
+            {
+                NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.QueueStringToBuffer(sz, size, "[]"));
+            }
+
+            pending[--depth]--;
+        }
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_corlib_native_System_RuntimeType::GetTypeDescriptor(
     CLR_RT_HeapBlock &arg,
     CLR_RT_TypeDef_Instance &inst,
@@ -266,9 +359,47 @@ HRESULT Library_corlib_native_System_RuntimeType::GetName(CLR_RT_HeapBlock &arg,
     szBuffer = rgBuffer;
     iBuffer = MAXSTRLEN(rgBuffer);
 
-    NANOCLR_CHECK_HRESULT(
-        g_CLR_RT_TypeSystem
-            .BuildTypeName(td, szBuffer, iBuffer, fFullName ? CLR_RT_TypeSystem::TYPENAME_FLAGS_FULL : 0, levels));
+    if (fFullName && arg.ReflectionDataConst().kind == REFLECTION_TYPESPEC)
+    {
+        // closed generic: Ns.Name`1[Ns.Argument], the arguments follow the name and precede the array brackets
+        CLR_RT_TypeSpec_Instance spec{};
+        CLR_RT_GenericInstance *record = nullptr;
+        char *argBuffer;
+        size_t argSize;
+
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_TypeSystem.BuildTypeName(td, szBuffer, iBuffer, CLR_RT_TypeSystem::TYPENAME_FLAGS_FULL, 0));
+
+        if (spec.InitializeFromIndex(arg.ReflectionDataConst().data.typeSpec))
+        {
+            record = CLR_RT_TypeSystem::FindOrCreateGenericInstance(spec);
+        }
+
+        // too long for the buffer: the name stays without arguments
+        argBuffer = szBuffer;
+        argSize = iBuffer;
+
+        if (record == nullptr || FAILED(AppendGenericArguments(*record, argBuffer, argSize)))
+        {
+            *szBuffer = 0;
+        }
+        else
+        {
+            szBuffer = argBuffer;
+            iBuffer = argSize;
+        }
+
+        while (levels-- > 0)
+        {
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.QueueStringToBuffer(szBuffer, iBuffer, "[]"));
+        }
+    }
+    else
+    {
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_TypeSystem
+                .BuildTypeName(td, szBuffer, iBuffer, fFullName ? CLR_RT_TypeSystem::TYPENAME_FLAGS_FULL : 0, levels));
+    }
 
     NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_String::CreateInstance(res, rgBuffer));
 

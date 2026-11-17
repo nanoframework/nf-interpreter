@@ -2173,10 +2173,21 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
     static bool GetArrayElementMethodSpec(const CLR_RT_HeapBlock_Array &array, CLR_RT_MethodSpec_Index &methodSpec);
 
     static CLR_UINT16 GetGenericOwnerSlot(const CLR_RT_TypeSpec_Index &typeSpec);
+    static bool GetGenericOwnerRow(CLR_UINT16 slot, const CLR_RT_TypeDef_Index &declaring, CLR_RT_TypeSpec_Index &row);
     static CLR_RT_GenericInstance *FindOrCreateGenericBase(
         const CLR_RT_TypeDef_Instance &child,
         const CLR_RT_TypeSpec_Index *childContext);
     static bool IsSameGenericInstance(const CLR_RT_TypeSpec_Index &left, const CLR_RT_TypeSpec_Index &right);
+
+    static HRESULT GetClosedGenericBase(
+        const CLR_RT_TypeDef_Instance &child,
+        const CLR_RT_TypeSpec_Index *childContext,
+        CLR_RT_TypeSpec_Index &row);
+    static HRESULT GetClosedEnclosingType(
+        const CLR_RT_TypeSpec_Index &nested,
+        CLR_UINT32 enclosingArgCount,
+        const CLR_RT_TypeDef_Index &enclosing,
+        CLR_RT_TypeSpec_Index &row);
 
     static HRESULT CollectGenericTarget(
         const CLR_RT_SignatureParser &at,

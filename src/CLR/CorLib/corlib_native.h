@@ -901,6 +901,7 @@ struct Library_corlib_native_System_RuntimeType
 
     //--//
 
+    static HRESULT AppendGenericArguments(const CLR_RT_GenericInstance &record, char *&sz, size_t &size);
     static HRESULT GetTypeDescriptor(CLR_RT_HeapBlock &arg, CLR_RT_TypeDef_Instance &inst, CLR_UINT32 *levels);
     static HRESULT GetTypeDescriptor(CLR_RT_HeapBlock &arg, CLR_RT_TypeDef_Instance &inst);
     static HRESULT GetName(CLR_RT_HeapBlock &arg, bool fFullName, CLR_RT_HeapBlock &res);
