@@ -2193,7 +2193,15 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
         const CLR_RT_ReflectionDef_Index &word,
         CLR_RT_Assembly *&assembly,
         const CLR_RECORD_GENERICPARAM *&record);
-    static bool IsUnconstrainedGenericParam(const CLR_RT_ReflectionDef_Index &word);
+    static HRESULT GetGenericParamOwner(
+        const CLR_RT_ReflectionDef_Index &word,
+        bool &isMethod,
+        CLR_RT_TypeDef_Index &type,
+        CLR_RT_MethodDef_Index &method);
+    static HRESULT GetGenericParamConstraintWord(
+        const CLR_RT_ReflectionDef_Index &param,
+        int index,
+        CLR_RT_ReflectionDef_Index &constraint);
     static HRESULT GetDefinitionArgumentWord(
         const CLR_RT_TypeDef_Instance &definition,
         int position,
@@ -2208,7 +2216,8 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
         const CLR_RT_TypeSpec_Index &origin,
         const CLR_RT_TypeDef_Index &level,
         const CLR_RT_TypeSpec_Index *openContext,
-        CLR_RT_TypeSpec_Index &row);
+        CLR_RT_TypeSpec_Index &row,
+        const CLR_RT_MethodDef_Index *method = nullptr);
     static HRESULT GetOpenSignatureWord(
         const CLR_RT_SignatureParser &at,
         const CLR_RT_TypeSpec_Index *openOwner,
@@ -2235,6 +2244,11 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
     static bool IsSameTypeWord(const CLR_RT_ReflectionDef_Index &left, const CLR_RT_ReflectionDef_Index &right);
     static HRESULT GetBaseTypeWord(const CLR_RT_ReflectionDef_Index &reflex, CLR_RT_ReflectionDef_Index &word);
     static HRESULT CollectInterfaceWords(
+        const CLR_RT_ReflectionDef_Index &reflex,
+        CLR_RT_ReflectionDef_Index *words,
+        int max,
+        int &count);
+    static HRESULT AppendInterfaceWords(
         const CLR_RT_ReflectionDef_Index &reflex,
         CLR_RT_ReflectionDef_Index *words,
         int max,

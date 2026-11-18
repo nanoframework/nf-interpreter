@@ -10093,14 +10093,207 @@ bool CLR_RT_TypeSystem::GetGenericParam(
     return true;
 }
 
-bool CLR_RT_TypeSystem::IsUnconstrainedGenericParam(const CLR_RT_ReflectionDef_Index &word)
+HRESULT CLR_RT_TypeSystem::GetGenericParamOwner(
+    const CLR_RT_ReflectionDef_Index &word,
+    bool &isMethod,
+    CLR_RT_TypeDef_Index &type,
+    CLR_RT_MethodDef_Index &method)
 {
     CLR_RT_Assembly *assembly;
     const CLR_RECORD_GENERICPARAM *record;
 
-    // variance (0x3) does not constrain; class, struct and new() (0x1C) and a constraint list do
-    return GetGenericParam(word, assembly, record) && (record->flags & 0x1C) == 0 &&
-           record->signature == CLR_EmptyIndex;
+    if (!GetGenericParam(word, assembly, record))
+    {
+        return CLR_E_WRONG_TYPE;
+    }
+
+    isMethod = (record->owner & 0x8000) != 0;
+
+    if (isMethod)
+    {
+        CLR_RT_MethodDef_Instance owner{};
+
+        method.Set(word.data.genericParam.Assembly(), record->owner & 0x7FFF);
+
+        if (!owner.InitializeFromIndex(method))
+        {
+            return CLR_E_WRONG_TYPE;
+        }
+
+        type.Set(word.data.genericParam.Assembly(), owner.CrossReference().GetOwner());
+    }
+    else
+    {
+        type.Set(word.data.genericParam.Assembly(), record->owner & 0x7FFF);
+    }
+
+    return S_OK;
+}
+
+HRESULT CLR_RT_TypeSystem::GetGenericParamConstraintWord(
+    const CLR_RT_ReflectionDef_Index &param,
+    int index,
+    CLR_RT_ReflectionDef_Index &constraint)
+{
+    CLR_RT_Assembly *assembly;
+    const CLR_RECORD_GENERICPARAM *record;
+    CLR_RT_SignatureParser parser{};
+    CLR_RT_TypeDef_Index declaring;
+    CLR_RT_MethodDef_Index method;
+    CLR_PMETADATA signature;
+    bool isMethod;
+    HRESULT hr;
+
+    constraint.Clear();
+
+    if (!GetGenericParam(param, assembly, record))
+    {
+        return CLR_E_WRONG_TYPE;
+    }
+
+    if (record->signature == CLR_EmptyIndex)
+    {
+        return S_FALSE;
+    }
+
+    signature = assembly->GetSignature(record->signature);
+
+    if (index >= signature[0])
+    {
+        return S_FALSE;
+    }
+
+    hr = GetGenericParamOwner(param, isMethod, declaring, method);
+
+    if (FAILED(hr))
+    {
+        return hr;
+    }
+
+    parser.Initialize_TypeSpec(assembly, signature + 1);
+    parser.ParamCount = signature[0];
+
+    for (int i = 0; i <= index; i++)
+    {
+        CLR_RT_TypeDescriptor desc{};
+        CLR_RT_TypeSpec_Index element;
+
+        hr = desc.InitializeFromClosedSignature(parser, nullptr, &element, &declaring, isMethod ? &method : nullptr);
+
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+
+        constraint = desc.m_reflex;
+    }
+
+    return S_OK;
+}
+
+static const int c_MaxParamConstraintChain = 4;
+
+// The parameter and the parameters it is constrained by, directly or not.
+static HRESULT GetGenericParamClosure(
+    const CLR_RT_ReflectionDef_Index &param,
+    CLR_RT_ReflectionDef_Index *list,
+    int &count)
+{
+    list[0] = param;
+    count = 1;
+
+    for (int next = 0; next < count; next++)
+    {
+        for (int i = 0;; i++)
+        {
+            CLR_RT_ReflectionDef_Index constraint;
+            bool known = false;
+            HRESULT hr = CLR_RT_TypeSystem::GetGenericParamConstraintWord(list[next], i, constraint);
+
+            if (hr != S_OK)
+            {
+                if (FAILED(hr))
+                {
+                    return hr;
+                }
+
+                break;
+            }
+
+            if (constraint.kind != REFLECTION_GENERICPARAM)
+            {
+                continue;
+            }
+
+            for (int j = 0; j < count; j++)
+            {
+                known = known || CLR_RT_TypeSystem::IsSameTypeWord(list[j], constraint);
+            }
+
+            if (!known)
+            {
+                if (count == c_MaxParamConstraintChain)
+                {
+                    return CLR_E_NOT_SUPPORTED;
+                }
+
+                list[count++] = constraint;
+            }
+        }
+    }
+
+    return S_OK;
+}
+
+// S_FALSE when the parameter has no class constraint.
+static HRESULT GetGenericParamClassWord(const CLR_RT_ReflectionDef_Index &param, CLR_RT_ReflectionDef_Index &word)
+{
+    CLR_RT_Assembly *assembly;
+    const CLR_RECORD_GENERICPARAM *record;
+
+    if (!CLR_RT_TypeSystem::GetGenericParam(param, assembly, record))
+    {
+        return CLR_E_WRONG_TYPE;
+    }
+
+    for (int i = 0;; i++)
+    {
+        CLR_RT_TypeDef_Instance td{};
+        HRESULT hr = CLR_RT_TypeSystem::GetGenericParamConstraintWord(param, i, word);
+
+        if (hr != S_OK)
+        {
+            return hr;
+        }
+
+        if (word.kind == REFLECTION_GENERICPARAM)
+        {
+            continue;
+        }
+
+        if (!td.InitializeFromReflection(word, nullptr))
+        {
+            return CLR_E_WRONG_TYPE;
+        }
+
+        if (td.target->IsInterface())
+        {
+            continue;
+        }
+
+        if (td.data == g_CLR_RT_WellKnownTypes.Enum.data)
+        {
+            return CLR_E_NOT_SUPPORTED;
+        }
+
+        if ((record->flags & CLR_RECORD_GENERICPARAM::GP_NotNullableValueType) != 0 &&
+            td.data == g_CLR_RT_WellKnownTypes.ValueType.data)
+        {
+            continue;
+        }
+
+        return S_OK;
+    }
 }
 
 HRESULT CLR_RT_TypeSystem::GetDefinitionArgumentWord(
@@ -10155,13 +10348,25 @@ HRESULT CLR_RT_TypeSystem::GetGenericArgumentWord(
         return S_OK;
     }
 
-    if (end - first == 1)
+    if (head.DataType == DATATYPE_MVAR)
     {
-        if (head.DataType == DATATYPE_MVAR)
+        CLR_RT_MethodDef_Index owner;
+        CLR_RT_MethodDef_Instance method{};
+
+        owner.data = head.Class.data;
+
+        if (!method.InitializeFromIndex(owner) || head.Position >= method.target->genericParamCount)
         {
-            return CLR_E_NOT_SUPPORTED;
+            return CLR_E_WRONG_TYPE;
         }
 
+        SetGenericParamWord(word, method.Assembly(), method.target->firstGenericParam + head.Position, head.Levels);
+
+        return S_OK;
+    }
+
+    if (end - first == 1)
+    {
         word.kind = REFLECTION_TYPE;
         word.levels = head.Levels;
         word.data.type = head.Class;
@@ -10174,12 +10379,7 @@ HRESULT CLR_RT_TypeSystem::GetGenericArgumentWord(
 
     for (int i = 0; i < end - first; i++)
     {
-        if (nodes[i].DataType == DATATYPE_MVAR)
-        {
-            return CLR_E_NOT_SUPPORTED;
-        }
-
-        hasParameter = hasParameter || nodes[i].DataType == DATATYPE_VAR;
+        hasParameter = hasParameter || nodes[i].DataType == DATATYPE_VAR || nodes[i].DataType == DATATYPE_MVAR;
     }
 
     none.Clear();
@@ -10208,7 +10408,8 @@ HRESULT CLR_RT_TypeSystem::GetOpenGenericRecord(
     const CLR_RT_TypeSpec_Index &origin,
     const CLR_RT_TypeDef_Index &level,
     const CLR_RT_TypeSpec_Index *openContext,
-    CLR_RT_TypeSpec_Index &row)
+    CLR_RT_TypeSpec_Index &row,
+    const CLR_RT_MethodDef_Index *method)
 {
     NATIVE_PROFILE_CLR_CORE();
 
@@ -10234,7 +10435,7 @@ HRESULT CLR_RT_TypeSystem::GetOpenGenericRecord(
     {
         const CLR_RT_GenericInstanceNode &node = rowNodes[i];
 
-        if (node.DataType == DATATYPE_MVAR)
+        if (node.DataType == DATATYPE_MVAR && method == nullptr)
         {
             return CLR_E_NOT_SUPPORTED;
         }
@@ -10275,6 +10476,10 @@ HRESULT CLR_RT_TypeSystem::GetOpenGenericRecord(
             {
                 nodes[count].Class = level;
             }
+            else if (node.DataType == DATATYPE_MVAR)
+            {
+                nodes[count].Class.data = method->data;
+            }
 
             count++;
         }
@@ -10286,7 +10491,7 @@ HRESULT CLR_RT_TypeSystem::GetOpenGenericRecord(
 
         for (int i = 0; i < count; i++)
         {
-            hasParameter = hasParameter || nodes[i].DataType == DATATYPE_VAR;
+            hasParameter = hasParameter || nodes[i].DataType == DATATYPE_VAR || nodes[i].DataType == DATATYPE_MVAR;
 
             if (nodes[i].ArgCount > 0)
             {
@@ -10446,7 +10651,7 @@ HRESULT CLR_RT_TypeSystem::GetOpenSignatureWord(
     nodes[0].Levels = 0;
     none.Clear();
 
-    hr = GetOpenGenericRecord(nodes, count, none, declaring, openOwner, row);
+    hr = GetOpenGenericRecord(nodes, count, none, declaring, openOwner, row, method);
 
     if (FAILED(hr))
     {
@@ -10617,13 +10822,37 @@ HRESULT CLR_RT_TypeSystem::GetBaseTypeWord(const CLR_RT_ReflectionDef_Index &ref
 
     if (reflex.kind == REFLECTION_GENERICPARAM)
     {
-        if (reflex.levels == 0 && !IsUnconstrainedGenericParam(reflex))
+        CLR_RT_Assembly *assembly;
+        const CLR_RECORD_GENERICPARAM *record;
+
+        if (reflex.levels == 0)
         {
-            return CLR_E_NOT_SUPPORTED;
+            HRESULT hr = GetGenericParamClassWord(reflex, word);
+
+            if (hr != S_FALSE)
+            {
+                return hr;
+            }
         }
 
+        if (!GetGenericParam(reflex, assembly, record))
+        {
+            return CLR_E_WRONG_TYPE;
+        }
+
+        word.Clear();
         word.kind = REFLECTION_TYPE;
-        word.data.type = reflex.levels > 0 ? g_CLR_RT_WellKnownTypes.Array : g_CLR_RT_WellKnownTypes.Object;
+
+        if (reflex.levels > 0)
+        {
+            word.data.type = g_CLR_RT_WellKnownTypes.Array;
+        }
+        else
+        {
+            word.data.type = (record->flags & CLR_RECORD_GENERICPARAM::GP_NotNullableValueType) != 0
+                                 ? g_CLR_RT_WellKnownTypes.ValueType
+                                 : g_CLR_RT_WellKnownTypes.Object;
+        }
 
         return S_OK;
     }
@@ -10696,7 +10925,71 @@ static HRESULT AddInterfaceWord(
     return S_OK;
 }
 
+static HRESULT AppendGenericParamInterfaceWords(
+    const CLR_RT_ReflectionDef_Index &param,
+    CLR_RT_ReflectionDef_Index *words,
+    int max,
+    int &count)
+{
+    CLR_RT_ReflectionDef_Index closure[c_MaxParamConstraintChain];
+    int members;
+    HRESULT hr = GetGenericParamClosure(param, closure, members);
+
+    for (int m = 0; SUCCEEDED(hr) && m < members; m++)
+    {
+        for (int i = 0;; i++)
+        {
+            CLR_RT_ReflectionDef_Index constraint;
+            CLR_RT_TypeDef_Instance td{};
+
+            hr = CLR_RT_TypeSystem::GetGenericParamConstraintWord(closure[m], i, constraint);
+
+            if (hr != S_OK)
+            {
+                hr = SUCCEEDED(hr) ? S_OK : hr;
+
+                break;
+            }
+
+            if (constraint.kind == REFLECTION_GENERICPARAM)
+            {
+                continue;
+            }
+
+            if (!td.InitializeFromReflection(constraint, nullptr) || td.data == g_CLR_RT_WellKnownTypes.Enum.data)
+            {
+                return CLR_E_NOT_SUPPORTED;
+            }
+
+            hr = td.target->IsInterface() ? AddInterfaceWord(words, max, count, constraint) : S_OK;
+
+            if (SUCCEEDED(hr))
+            {
+                hr = CLR_RT_TypeSystem::AppendInterfaceWords(constraint, words, max, count);
+            }
+
+            if (FAILED(hr))
+            {
+                break;
+            }
+        }
+    }
+
+    return hr;
+}
+
 HRESULT CLR_RT_TypeSystem::CollectInterfaceWords(
+    const CLR_RT_ReflectionDef_Index &reflex,
+    CLR_RT_ReflectionDef_Index *words,
+    int max,
+    int &count)
+{
+    count = 0;
+
+    return AppendInterfaceWords(reflex, words, max, count);
+}
+
+HRESULT CLR_RT_TypeSystem::AppendInterfaceWords(
     const CLR_RT_ReflectionDef_Index &reflex,
     CLR_RT_ReflectionDef_Index *words,
     int max,
@@ -10711,13 +11004,12 @@ HRESULT CLR_RT_TypeSystem::CollectInterfaceWords(
     bool isDefinition;
     HRESULT hr;
 
-    count = 0;
     context.Clear();
     word.Clear();
 
     if (reflex.kind == REFLECTION_GENERICPARAM)
     {
-        return reflex.levels == 0 && IsUnconstrainedGenericParam(reflex) ? S_OK : CLR_E_NOT_SUPPORTED;
+        return reflex.levels == 0 ? AppendGenericParamInterfaceWords(reflex, words, max, count) : CLR_E_NOT_SUPPORTED;
     }
 
     // an array has the interfaces of System.Array
@@ -10920,6 +11212,11 @@ static HRESULT GetArgumentWord(const CLR_RT_GenericInstance &record, int argumen
 
 static HRESULT GetWordDefinition(const CLR_RT_ReflectionDef_Index &word, CLR_RT_TypeDef_Instance &td)
 {
+    if (word.kind == REFLECTION_GENERICPARAM)
+    {
+        return td.InitializeFromIndex(g_CLR_RT_WellKnownTypes.Object) ? S_OK : CLR_E_WRONG_TYPE;
+    }
+
     return td.InitializeFromReflection(word, nullptr) ? S_OK : CLR_E_WRONG_TYPE;
 }
 
@@ -10929,8 +11226,6 @@ static HRESULT IsAssignableGenericParam(
     bool inArray,
     bool &result)
 {
-    bool targetParam = target.kind == REFLECTION_GENERICPARAM;
-
     if (!inArray && target.kind == REFLECTION_TYPE && target.levels == 0 &&
         target.data.type.data == g_CLR_RT_WellKnownTypes.Object.data)
     {
@@ -10939,14 +11234,31 @@ static HRESULT IsAssignableGenericParam(
         return S_OK;
     }
 
-    if (inArray || target.levels > 0 || source.levels > 0 ||
-        !CLR_RT_TypeSystem::IsUnconstrainedGenericParam(targetParam ? target : source) ||
-        (target.kind == source.kind && !CLR_RT_TypeSystem::IsUnconstrainedGenericParam(source)))
+    if (inArray || target.levels > 0 || source.levels > 0)
     {
         return CLR_E_NOT_SUPPORTED;
     }
 
+    if (target.kind != REFLECTION_GENERICPARAM)
+    {
+        return S_FALSE;
+    }
+
     result = false;
+
+    if (source.kind == REFLECTION_GENERICPARAM)
+    {
+        CLR_RT_ReflectionDef_Index closure[c_MaxParamConstraintChain];
+        int members;
+        HRESULT hr = GetGenericParamClosure(source, closure, members);
+
+        for (int i = 1; SUCCEEDED(hr) && i < members; i++)
+        {
+            result = result || CLR_RT_TypeSystem::IsSameTypeWord(closure[i], target);
+        }
+
+        return hr;
+    }
 
     return S_OK;
 }
@@ -10981,11 +11293,17 @@ HRESULT CLR_RT_TypeSystem::IsAssignableFrom(
 
         if (target.kind == REFLECTION_GENERICPARAM || source.kind == REFLECTION_GENERICPARAM)
         {
-            return IsAssignableGenericParam(target, source, inArray, result);
+            hr = IsAssignableGenericParam(target, source, inArray, result);
+
+            if (hr != S_FALSE)
+            {
+                return hr;
+            }
         }
 
         if ((target.kind != REFLECTION_TYPE && target.kind != REFLECTION_TYPESPEC) ||
-            (source.kind != REFLECTION_TYPE && source.kind != REFLECTION_TYPESPEC))
+            (source.kind != REFLECTION_TYPE && source.kind != REFLECTION_TYPESPEC &&
+             source.kind != REFLECTION_GENERICPARAM))
         {
             return CLR_E_WRONG_TYPE;
         }
@@ -11162,44 +11480,70 @@ HRESULT CLR_RT_TypeSystem::IsAssignableFrom(
             return unsupported ? CLR_E_NOT_SUPPORTED : S_OK;
         }
 
-        // a class or a struct: the base chain of the source
+        // a class or a struct: the base chain of the source, of each parameter that constrains it
         {
-            CLR_RT_ReflectionDef_Index current = source;
+            CLR_RT_ReflectionDef_Index starts[c_MaxParamConstraintChain];
+            int startCount = 1;
 
-            for (int depth = 0; depth < c_MaxInheritanceDepth; depth++)
+            starts[0] = source;
+
+            if (source.kind == REFLECTION_GENERICPARAM)
             {
-                CLR_RT_ReflectionDef_Index parent;
-                CLR_RT_TypeDef_Instance candidate{};
-
-                hr = GetBaseTypeWord(current, parent);
+                hr = GetGenericParamClosure(source, starts, startCount);
 
                 if (FAILED(hr))
                 {
                     return hr;
                 }
-
-                if (hr == S_FALSE)
-                {
-                    return unsupported ? CLR_E_NOT_SUPPORTED : S_OK;
-                }
-
-                if (IsSameTypeWord(parent, target))
-                {
-                    result = true;
-
-                    return S_OK;
-                }
-
-                if (SUCCEEDED(GetWordDefinition(parent, candidate)) && candidate.data == targetDef.data &&
-                    HasVariantParameter(targetDef))
-                {
-                    unsupported = true;
-                }
-
-                current = parent;
             }
 
-            return CLR_E_NOT_SUPPORTED;
+            for (int start = 0; start < startCount; start++)
+            {
+                CLR_RT_ReflectionDef_Index current = starts[start];
+                bool ended = false;
+
+                for (int depth = 0; depth < c_MaxInheritanceDepth && !ended; depth++)
+                {
+                    CLR_RT_ReflectionDef_Index parent;
+                    CLR_RT_TypeDef_Instance candidate{};
+
+                    hr = GetBaseTypeWord(current, parent);
+
+                    if (FAILED(hr))
+                    {
+                        return hr;
+                    }
+
+                    ended = hr == S_FALSE;
+
+                    if (ended)
+                    {
+                        break;
+                    }
+
+                    if (IsSameTypeWord(parent, target))
+                    {
+                        result = true;
+
+                        return S_OK;
+                    }
+
+                    if (SUCCEEDED(GetWordDefinition(parent, candidate)) && candidate.data == targetDef.data &&
+                        HasVariantParameter(targetDef))
+                    {
+                        unsupported = true;
+                    }
+
+                    current = parent;
+                }
+
+                if (!ended)
+                {
+                    return CLR_E_NOT_SUPPORTED;
+                }
+            }
+
+            return unsupported ? CLR_E_NOT_SUPPORTED : S_OK;
         }
     }
 
