@@ -19,16 +19,12 @@ network stacks retain their existing code paths.
 
 ## Building
 
-Install Visual Studio 2022 (or newer) with:
+Install Visual Studio 2026 (or newer) with:
 
-- Desktop development with C++, including the project's v143 toolset.
+- Desktop development with C++, including the project's v145 toolset.
 - A Windows SDK.
 - C++ CMake tools for Windows, or CMake on `PATH`.
 - Git, for downloading the pinned mbedTLS sources and submodules.
-
-With Visual Studio 2026 and only the v145 toolset installed, add
-`/p:PlatformToolset=v145` to the build command; installing v143 is not required
-when explicitly overriding the toolset.
 
 Set `LITTLEFS_PATH` to an existing littlefs checkout, as required by the virtual
 device. From a Visual Studio Developer Command Prompt:
