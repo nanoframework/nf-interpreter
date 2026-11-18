@@ -2795,6 +2795,11 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromReflection(const CLR_RT_ReflectionD
     CLR_RT_TypeDef_Instance inst{};
     CLR_UINT32 levels;
 
+    if (reflex.kind == REFLECTION_GENERICPARAM)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+    }
+
     if (inst.InitializeFromReflection(reflex, &levels) == false)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
@@ -2941,7 +2946,8 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromGenericType(const CLR_RT_TypeSpec_I
 HRESULT CLR_RT_TypeDescriptor::InitializeFromFieldDefinition(
     const CLR_RT_FieldDef_Instance &fd,
     const CLR_RT_TypeSpec_Index *ownerTypeSpec,
-    CLR_RT_TypeSpec_Index *elementSpec)
+    CLR_RT_TypeSpec_Index *elementSpec,
+    const CLR_RT_TypeDef_Index *declaringType)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -2954,7 +2960,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromFieldDefinition(
         NANOCLR_SET_AND_LEAVE(InitializeFromSignatureParser(parser));
     }
 
-    NANOCLR_SET_AND_LEAVE(InitializeFromClosedSignature(parser, ownerTypeSpec, elementSpec));
+    NANOCLR_SET_AND_LEAVE(InitializeFromClosedSignature(parser, ownerTypeSpec, elementSpec, declaringType));
 
     NANOCLR_NOCLEANUP();
 }
@@ -2962,7 +2968,9 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromFieldDefinition(
 HRESULT CLR_RT_TypeDescriptor::InitializeFromClosedSignature(
     CLR_RT_SignatureParser &parser,
     const CLR_RT_TypeSpec_Index *ownerTypeSpec,
-    CLR_RT_TypeSpec_Index *elementSpec)
+    CLR_RT_TypeSpec_Index *elementSpec,
+    const CLR_RT_TypeDef_Index *declaringType,
+    const CLR_RT_MethodDef_Index *declaringMethod)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -2977,6 +2985,37 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromClosedSignature(
     if (elementSpec != nullptr)
     {
         elementSpec->Clear();
+    }
+
+    if (declaringType != nullptr)
+    {
+        bool noOwner = ownerTypeSpec == nullptr || !NANOCLR_INDEX_IS_VALID(*ownerTypeSpec);
+        bool openOwner = !noOwner && CLR_RT_TypeSystem::IsOpenInstance(*ownerTypeSpec);
+        CLR_RT_SignatureParser peek = parser;
+        CLR_RT_ReflectionDef_Index openWord;
+
+        NANOCLR_CHECK_HRESULT(peek.AdvanceParameter(res));
+
+        if (noOwner || openOwner || res.DataType == DATATYPE_MVAR)
+        {
+            HRESULT open = CLR_RT_TypeSystem::GetOpenSignatureWord(
+                parser,
+                openOwner ? ownerTypeSpec : nullptr,
+                *declaringType,
+                declaringMethod,
+                openWord);
+
+            if (open != S_FALSE)
+            {
+                if (SUCCEEDED(open))
+                {
+                    m_reflex = openWord;
+                    parser = peek;
+                }
+
+                NANOCLR_SET_AND_LEAVE(open);
+            }
+        }
     }
 
     NANOCLR_CHECK_HRESULT(parser.AdvanceParameter(res));
@@ -3469,6 +3508,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromObject(const CLR_RT_HeapBlock &ref)
                         cls = &g_CLR_RT_WellKnownTypes.Type;
                         break;
                     case REFLECTION_TYPESPEC:
+                    case REFLECTION_GENERICPARAM:
                         cls = &g_CLR_RT_WellKnownTypes.Type;
                         break;
                 }
@@ -9241,12 +9281,23 @@ CLR_UINT16 CLR_RT_TypeSystem::GetGenericOwnerSlot(const CLR_RT_TypeSpec_Index &t
     CLR_RT_TypeSpec_Instance inst{};
     CLR_RT_GenericInstance *record;
 
-    if (!NANOCLR_INDEX_IS_VALID(typeSpec) || !inst.InitializeFromIndex(typeSpec) || inst.levels != 0)
+    if (!NANOCLR_INDEX_IS_VALID(typeSpec))
     {
         return 0;
     }
 
-    record = FindOrCreateGenericInstance(inst);
+    if (IsOpenInstance(typeSpec))
+    {
+        record = GetGenericInstance(typeSpec);
+    }
+    else if (!inst.InitializeFromIndex(typeSpec) || inst.levels != 0)
+    {
+        return 0;
+    }
+    else
+    {
+        record = FindOrCreateGenericInstance(inst);
+    }
 
     if (record == nullptr)
     {
@@ -10006,43 +10057,168 @@ bool CLR_RT_TypeSystem::IsOpenInstance(const CLR_RT_TypeSpec_Index &row)
     return record != nullptr && (record->m_flags & CLR_RT_GenericInstance::c_Open) != 0;
 }
 
-HRESULT CLR_RT_TypeSystem::GetOpenGenericRow(
-    const CLR_RT_TypeSpec_Index &sourceRow,
+void CLR_RT_TypeSystem::SetGenericParamWord(
+    CLR_RT_ReflectionDef_Index &word,
+    CLR_UINT32 assembly,
+    CLR_UINT32 row,
+    CLR_UINT32 levels)
+{
+    word.Clear();
+    word.kind = REFLECTION_GENERICPARAM;
+    word.levels = (CLR_UINT16)levels;
+    word.data.genericParam.Set(assembly, row);
+}
+
+bool CLR_RT_TypeSystem::GetGenericParam(
+    const CLR_RT_ReflectionDef_Index &word,
+    CLR_RT_Assembly *&assembly,
+    const CLR_RECORD_GENERICPARAM *&record)
+{
+    CLR_UINT32 index = word.data.genericParam.Assembly();
+
+    if (word.kind != REFLECTION_GENERICPARAM || index == 0 || index > g_CLR_RT_TypeSystem.m_assembliesMax)
+    {
+        return false;
+    }
+
+    assembly = g_CLR_RT_TypeSystem.m_assemblies[index - 1];
+
+    if (assembly == nullptr || word.data.genericParam.Type() >= assembly->tablesSize[TBL_GenericParam])
+    {
+        return false;
+    }
+
+    record = assembly->GetGenericParam(word.data.genericParam.Type());
+
+    return true;
+}
+
+bool CLR_RT_TypeSystem::IsUnconstrainedGenericParam(const CLR_RT_ReflectionDef_Index &word)
+{
+    CLR_RT_Assembly *assembly;
+    const CLR_RECORD_GENERICPARAM *record;
+
+    // variance (0x3) does not constrain; class, struct and new() (0x1C) and a constraint list do
+    return GetGenericParam(word, assembly, record) && (record->flags & 0x1C) == 0 &&
+           record->signature == CLR_EmptyIndex;
+}
+
+HRESULT CLR_RT_TypeSystem::GetDefinitionArgumentWord(
+    const CLR_RT_TypeDef_Instance &definition,
+    int position,
+    CLR_RT_ReflectionDef_Index &word)
+{
+    if (position >= definition.target->genericParamCount)
+    {
+        return CLR_E_WRONG_TYPE;
+    }
+
+    SetGenericParamWord(word, definition.Assembly(), definition.target->firstGenericParam + position, 0);
+
+    return S_OK;
+}
+
+HRESULT CLR_RT_TypeSystem::GetGenericArgumentWord(
+    const CLR_RT_TypeSpec_Index &row,
+    int argument,
+    CLR_RT_ReflectionDef_Index &word)
+{
+    CLR_RT_GenericInstanceNode nodes[CLR_RT_GenericInstance::c_MaxNodes];
+    CLR_RT_TypeSpec_Index none;
+    const CLR_RT_GenericInstance *record = row.IsRuntime() ? GetGenericInstance(row) : nullptr;
+    CLR_RT_GenericInstance *instance;
+    bool hasParameter = false;
+    int first;
+    int end;
+    HRESULT hr;
+
+    word.Clear();
+
+    if (record == nullptr || !GetArgumentRange(*record, argument, first, end))
+    {
+        return CLR_E_WRONG_TYPE;
+    }
+
+    const CLR_RT_GenericInstanceNode &head = record->m_nodes[first];
+
+    if (head.DataType == DATATYPE_VAR)
+    {
+        CLR_RT_TypeDef_Instance owner{};
+
+        if (!owner.InitializeFromIndex(head.Class) || head.Position >= owner.target->genericParamCount)
+        {
+            return CLR_E_WRONG_TYPE;
+        }
+
+        SetGenericParamWord(word, owner.Assembly(), owner.target->firstGenericParam + head.Position, head.Levels);
+
+        return S_OK;
+    }
+
+    if (end - first == 1)
+    {
+        if (head.DataType == DATATYPE_MVAR)
+        {
+            return CLR_E_NOT_SUPPORTED;
+        }
+
+        word.kind = REFLECTION_TYPE;
+        word.levels = head.Levels;
+        word.data.type = head.Class;
+
+        return S_OK;
+    }
+
+    memcpy(nodes, &record->m_nodes[first], sizeof(CLR_RT_GenericInstanceNode) * (end - first));
+    nodes[0].Levels = 0;
+
+    for (int i = 0; i < end - first; i++)
+    {
+        if (nodes[i].DataType == DATATYPE_MVAR)
+        {
+            return CLR_E_NOT_SUPPORTED;
+        }
+
+        hasParameter = hasParameter || nodes[i].DataType == DATATYPE_VAR;
+    }
+
+    none.Clear();
+    instance = RegisterGenericInstance(nodes, end - first, none, none, hr);
+
+    if (instance == nullptr)
+    {
+        return hr;
+    }
+
+    if (hasParameter)
+    {
+        instance->m_flags |= CLR_RT_GenericInstance::c_Open;
+    }
+
+    word.kind = REFLECTION_TYPESPEC;
+    word.levels = head.Levels;
+    word.data.typeSpec = instance->m_self;
+
+    return S_OK;
+}
+
+HRESULT CLR_RT_TypeSystem::GetOpenGenericRecord(
+    const CLR_RT_GenericInstanceNode *rowNodes,
+    int rowCount,
+    const CLR_RT_TypeSpec_Index &origin,
     const CLR_RT_TypeDef_Index &level,
     const CLR_RT_TypeSpec_Index *openContext,
     CLR_RT_TypeSpec_Index &row)
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    CLR_RT_TypeSpec_Instance source{};
-    CLR_RT_GenericInstanceNode rowNodes[CLR_RT_GenericInstance::c_MaxNodes];
     CLR_RT_GenericInstanceNode nodes[CLR_RT_GenericInstance::c_MaxNodes];
     CLR_RT_GenericInstance *context = nullptr;
     CLR_RT_GenericInstance *record;
     CLR_RT_TypeSpec_Index none;
-    int rowCount;
     int count = 0;
-    bool closed;
-    bool substituted;
     bool hasParameter = false;
     HRESULT hr;
-
-    if (!source.InitializeFromIndex(sourceRow))
-    {
-        return CLR_E_WRONG_TYPE;
-    }
-
-    hr = CollectGenericInstanceNodes(source, nullptr, nullptr, nullptr, rowNodes, rowCount, closed, substituted);
-
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
-    if (closed)
-    {
-        return S_FALSE;
-    }
 
     if (openContext != nullptr)
     {
@@ -10132,7 +10308,7 @@ HRESULT CLR_RT_TypeSystem::GetOpenGenericRow(
     }
 
     none.Clear();
-    record = RegisterGenericInstance(nodes, count, none, sourceRow, hr);
+    record = RegisterGenericInstance(nodes, count, none, origin, hr);
 
     if (record == nullptr)
     {
@@ -10145,6 +10321,142 @@ HRESULT CLR_RT_TypeSystem::GetOpenGenericRow(
     }
 
     row = record->m_self;
+
+    return S_OK;
+}
+
+HRESULT CLR_RT_TypeSystem::GetOpenGenericRow(
+    const CLR_RT_TypeSpec_Index &sourceRow,
+    const CLR_RT_TypeDef_Index &level,
+    const CLR_RT_TypeSpec_Index *openContext,
+    CLR_RT_TypeSpec_Index &row)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    CLR_RT_TypeSpec_Instance source{};
+    CLR_RT_GenericInstanceNode rowNodes[CLR_RT_GenericInstance::c_MaxNodes];
+    int rowCount;
+    bool closed;
+    bool substituted;
+    HRESULT hr;
+
+    if (!source.InitializeFromIndex(sourceRow))
+    {
+        return CLR_E_WRONG_TYPE;
+    }
+
+    hr = CollectGenericInstanceNodes(source, nullptr, nullptr, nullptr, rowNodes, rowCount, closed, substituted);
+
+    if (FAILED(hr))
+    {
+        return hr;
+    }
+
+    if (closed)
+    {
+        return S_FALSE;
+    }
+
+    return GetOpenGenericRecord(rowNodes, rowCount, sourceRow, level, openContext, row);
+}
+
+HRESULT CLR_RT_TypeSystem::GetOpenSignatureWord(
+    const CLR_RT_SignatureParser &at,
+    const CLR_RT_TypeSpec_Index *openOwner,
+    const CLR_RT_TypeDef_Index &declaring,
+    const CLR_RT_MethodDef_Index *method,
+    CLR_RT_ReflectionDef_Index &word)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    CLR_RT_SignatureParser peek = at;
+    CLR_RT_SignatureParser::Element elem;
+    CLR_RT_GenericInstanceNode nodes[CLR_RT_GenericInstance::c_MaxNodes];
+    CLR_RT_TypeSpec_Index none;
+    CLR_RT_TypeSpec_Index row;
+    int count;
+    bool closed;
+    bool substituted;
+    HRESULT hr;
+
+    word.Clear();
+
+    hr = peek.Advance(elem);
+
+    if (FAILED(hr))
+    {
+        return hr;
+    }
+
+    if (elem.DataType == DATATYPE_MVAR)
+    {
+        CLR_RT_MethodDef_Instance md{};
+
+        if (method == nullptr || !md.InitializeFromIndex(*method) ||
+            elem.GenericParamPosition >= md.target->genericParamCount)
+        {
+            return CLR_E_NOT_SUPPORTED;
+        }
+
+        SetGenericParamWord(word, md.Assembly(), md.target->firstGenericParam + elem.GenericParamPosition, elem.Levels);
+
+        return S_OK;
+    }
+
+    if (elem.DataType == DATATYPE_VAR)
+    {
+        if (openOwner != nullptr)
+        {
+            hr = GetGenericArgumentWord(*openOwner, elem.GenericParamPosition, word);
+
+            if (SUCCEEDED(hr))
+            {
+                word.levels = (CLR_UINT16)(word.levels + elem.Levels);
+            }
+
+            return hr;
+        }
+
+        CLR_RT_TypeDef_Instance td{};
+
+        if (!td.InitializeFromIndex(declaring))
+        {
+            return CLR_E_WRONG_TYPE;
+        }
+
+        hr = GetDefinitionArgumentWord(td, elem.GenericParamPosition, word);
+        word.levels = elem.Levels;
+
+        return hr;
+    }
+
+    if (elem.DataType != DATATYPE_GENERICINST)
+    {
+        return S_FALSE;
+    }
+
+    hr = CollectGenericNodesAt(at, nullptr, nullptr, nullptr, nodes, count, closed, substituted);
+
+    if (FAILED(hr) || closed)
+    {
+        return FAILED(hr) ? hr : S_FALSE;
+    }
+
+    word.levels = nodes[0].Levels;
+    nodes[0].Levels = 0;
+    none.Clear();
+
+    hr = GetOpenGenericRecord(nodes, count, none, declaring, openOwner, row);
+
+    if (FAILED(hr))
+    {
+        word.Clear();
+
+        return hr;
+    }
+
+    word.kind = REFLECTION_TYPESPEC;
+    word.data.typeSpec = row;
 
     return S_OK;
 }
@@ -10303,6 +10615,19 @@ HRESULT CLR_RT_TypeSystem::GetBaseTypeWord(const CLR_RT_ReflectionDef_Index &ref
 
     word.Clear();
 
+    if (reflex.kind == REFLECTION_GENERICPARAM)
+    {
+        if (reflex.levels == 0 && !IsUnconstrainedGenericParam(reflex))
+        {
+            return CLR_E_NOT_SUPPORTED;
+        }
+
+        word.kind = REFLECTION_TYPE;
+        word.data.type = reflex.levels > 0 ? g_CLR_RT_WellKnownTypes.Array : g_CLR_RT_WellKnownTypes.Object;
+
+        return S_OK;
+    }
+
     if (!td.InitializeFromReflection(reflex, &levels))
     {
         return CLR_E_WRONG_TYPE;
@@ -10389,6 +10714,11 @@ HRESULT CLR_RT_TypeSystem::CollectInterfaceWords(
     count = 0;
     context.Clear();
     word.Clear();
+
+    if (reflex.kind == REFLECTION_GENERICPARAM)
+    {
+        return reflex.levels == 0 && IsUnconstrainedGenericParam(reflex) ? S_OK : CLR_E_NOT_SUPPORTED;
+    }
 
     // an array has the interfaces of System.Array
     if (!td.InitializeFromReflection(reflex, nullptr))
@@ -10593,6 +10923,27 @@ static HRESULT GetWordDefinition(const CLR_RT_ReflectionDef_Index &word, CLR_RT_
     return td.InitializeFromReflection(word, nullptr) ? S_OK : CLR_E_WRONG_TYPE;
 }
 
+static HRESULT IsAssignableGenericParam(
+    const CLR_RT_ReflectionDef_Index &target,
+    const CLR_RT_ReflectionDef_Index &source,
+    bool inArray,
+    bool &result)
+{
+    bool targetParam = target.kind == REFLECTION_GENERICPARAM;
+
+    if (inArray || target.levels > 0 || source.levels > 0 ||
+        !CLR_RT_TypeSystem::IsUnconstrainedGenericParam(targetParam ? target : source) ||
+        (target.kind == source.kind && !CLR_RT_TypeSystem::IsUnconstrainedGenericParam(source)))
+    {
+        return CLR_E_NOT_SUPPORTED;
+    }
+
+    result = !targetParam && source.kind == REFLECTION_GENERICPARAM && target.kind == REFLECTION_TYPE &&
+             target.data.type.data == g_CLR_RT_WellKnownTypes.Object.data;
+
+    return S_OK;
+}
+
 HRESULT CLR_RT_TypeSystem::IsAssignableFrom(
     const CLR_RT_ReflectionDef_Index &targetType,
     const CLR_RT_ReflectionDef_Index &sourceType,
@@ -10619,6 +10970,11 @@ HRESULT CLR_RT_TypeSystem::IsAssignableFrom(
             result = true;
 
             return S_OK;
+        }
+
+        if (target.kind == REFLECTION_GENERICPARAM || source.kind == REFLECTION_GENERICPARAM)
+        {
+            return IsAssignableGenericParam(target, source, inArray, result);
         }
 
         if ((target.kind != REFLECTION_TYPE && target.kind != REFLECTION_TYPESPEC) ||

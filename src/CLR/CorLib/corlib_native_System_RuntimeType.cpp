@@ -13,7 +13,14 @@ HRESULT Library_corlib_native_System_RuntimeType::get_Assembly___SystemReflectio
     CLR_RT_TypeDef_Instance td;
     CLR_RT_HeapBlock *hbType = stack.This();
 
-    NANOCLR_CHECK_HRESULT(GetTypeDescriptor(*hbType, td, nullptr));
+    if (hbType->ReflectionDataConst().kind == REFLECTION_GENERICPARAM)
+    {
+        td.Set(hbType->ReflectionDataConst().data.genericParam.Assembly(), 0);
+    }
+    else
+    {
+        NANOCLR_CHECK_HRESULT(GetTypeDescriptor(*hbType, td, nullptr));
+    }
 
     {
         CLR_RT_Assembly_Index index{};
@@ -156,7 +163,14 @@ HRESULT Library_corlib_native_System_RuntimeType::GetElementType___SystemType(CL
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
     CLR_RT_HeapBlock *hbType = stack.This();
 
-    if (hbType->ReflectionDataConst().kind == REFLECTION_TYPESPEC && hbType->ReflectionDataConst().levels > 0)
+    if (hbType->ReflectionDataConst().kind == REFLECTION_GENERICPARAM && hbType->ReflectionDataConst().levels == 0)
+    {
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
+
+    if ((hbType->ReflectionDataConst().kind == REFLECTION_TYPESPEC ||
+         hbType->ReflectionDataConst().kind == REFLECTION_GENERICPARAM) &&
+        hbType->ReflectionDataConst().levels > 0)
     {
         CLR_RT_ReflectionDef_Index element = hbType->ReflectionDataConst();
 
@@ -279,6 +293,19 @@ HRESULT Library_corlib_native_System_RuntimeType::GetTypeDescriptor(
     CLR_UINT32 *levels)
 {
     NATIVE_PROFILE_CLR_CORE();
+
+    if (arg.DataType() == DATATYPE_REFLECTION && arg.ReflectionDataConst().kind == REFLECTION_GENERICPARAM)
+    {
+        if (levels != nullptr)
+        {
+            *levels = arg.ReflectionDataConst().levels;
+        }
+
+        return arg.ReflectionDataConst().levels > 0 && inst.InitializeFromIndex(g_CLR_RT_WellKnownTypes.Array)
+                   ? S_OK
+                   : CLR_E_NOT_SUPPORTED;
+    }
+
     return CLR_RT_ReflectionDef_Index::Convert(arg, inst, levels) ? S_OK : CLR_E_NULL_REFERENCE;
 }
 
@@ -316,10 +343,38 @@ HRESULT Library_corlib_native_System_RuntimeType::GetName(
     char *szBuffer;
     size_t iBuffer;
 
-    NANOCLR_CHECK_HRESULT(GetTypeDescriptor(arg, td, &levels));
-
     szBuffer = rgBuffer;
     iBuffer = MAXSTRLEN(rgBuffer);
+
+    if (arg.ReflectionDataConst().kind == REFLECTION_GENERICPARAM)
+    {
+        CLR_RT_Assembly *assembly;
+        const CLR_RECORD_GENERICPARAM *record;
+
+        if (fFullName && !fOpenAsString)
+        {
+            res.SetObjectReference(nullptr);
+
+            NANOCLR_SET_AND_LEAVE(S_OK);
+        }
+
+        if (!CLR_RT_TypeSystem::GetGenericParam(arg.ReflectionDataConst(), assembly, record))
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        }
+
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_TypeSystem.QueueStringToBuffer(szBuffer, iBuffer, assembly->GetString(record->name)));
+
+        for (int level = 0; level < arg.ReflectionDataConst().levels; level++)
+        {
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.QueueStringToBuffer(szBuffer, iBuffer, "[]"));
+        }
+
+        NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_String::CreateInstance(res, rgBuffer));
+    }
+
+    NANOCLR_CHECK_HRESULT(GetTypeDescriptor(arg, td, &levels));
 
     // FullName of a type that contains generic parameters is null, ToString names the parameters
     if (fFullName && !fOpenAsString && arg.ReflectionDataConst().kind == REFLECTION_TYPESPEC &&

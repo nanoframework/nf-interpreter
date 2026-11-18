@@ -8,6 +8,48 @@
 
 typedef Library_corlib_native_System_Reflection_MethodBase MethodBase;
 
+static bool IsGenericParameterWord(const CLR_RT_HeapBlock *type)
+{
+    return type->ReflectionDataConst().kind == REFLECTION_GENERICPARAM;
+}
+
+static HRESULT GetGenericParamOwner(
+    const CLR_RT_ReflectionDef_Index &word,
+    bool &isMethod,
+    CLR_RT_TypeDef_Index &type,
+    CLR_RT_MethodDef_Index &method)
+{
+    CLR_RT_Assembly *assembly;
+    const CLR_RECORD_GENERICPARAM *record;
+
+    if (!CLR_RT_TypeSystem::GetGenericParam(word, assembly, record))
+    {
+        return CLR_E_WRONG_TYPE;
+    }
+
+    isMethod = (record->owner & 0x8000) != 0;
+
+    if (isMethod)
+    {
+        CLR_RT_MethodDef_Instance owner{};
+
+        method.Set(word.data.genericParam.Assembly(), record->owner & 0x7FFF);
+
+        if (!owner.InitializeFromIndex(method))
+        {
+            return CLR_E_WRONG_TYPE;
+        }
+
+        type.Set(word.data.genericParam.Assembly(), owner.CrossReference().GetOwner());
+    }
+    else
+    {
+        type.Set(word.data.genericParam.Assembly(), record->owner & 0x7FFF);
+    }
+
+    return S_OK;
+}
+
 HRESULT Library_corlib_native_System_Type::get_DeclaringType___SystemType(CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -16,6 +58,23 @@ HRESULT Library_corlib_native_System_Type::get_DeclaringType___SystemType(CLR_RT
     CLR_RT_TypeDef_Instance td;
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
     CLR_RT_HeapBlock *hbType = stack.This();
+
+    if (IsGenericParameterWord(hbType))
+    {
+        bool isMethod;
+        CLR_RT_TypeDef_Index ownerType;
+        CLR_RT_MethodDef_Index ownerMethod;
+
+        NANOCLR_CHECK_HRESULT(GetGenericParamOwner(hbType->ReflectionDataConst(), isMethod, ownerType, ownerMethod));
+
+        if (hbType->ReflectionDataConst().levels == 0)
+        {
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
+            NANOCLR_SET_AND_LEAVE(top.Dereference()->SetReflection(ownerType));
+        }
+
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
 
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_RuntimeType::GetTypeDescriptor(*hbType, td));
 
@@ -73,6 +132,11 @@ HRESULT Library_corlib_native_System_Type::GetGenericTypeDefinition___SystemType
 
     // build a TypeDescriptor from "this"
     CLR_RT_HeapBlock *hbType = stack.This();
+
+    if (IsGenericParameterWord(hbType))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+    }
 
     NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
 
@@ -134,6 +198,12 @@ HRESULT Library_corlib_native_System_Type::IsInstanceOfType___BOOLEAN__OBJECT(CL
 
     if (hbType->DataType() != DATATYPE_REFLECTION)
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+
+    if (IsGenericParameterWord(hbType))
+    {
+        stack.SetResult_Boolean(false);
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
 
     NANOCLR_CHECK_HRESULT(descTarget.InitializeFromReflection(hbType->ReflectionDataConst()));
 
@@ -209,6 +279,11 @@ HRESULT Library_corlib_native_System_Type::GetGenericArguments___SZARRAY_SystemT
     // build a TypeDescriptor from "this"
     hbType = stack.This();
 
+    if (IsGenericParameterWord(hbType))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_Array::CreateInstance(top, 0, g_CLR_RT_WellKnownTypes.TypeStatic));
+    }
+
     if (hbType->ReflectionDataConst().kind != CLR_ReflectionType::REFLECTION_TYPESPEC ||
         hbType->ReflectionDataConst().levels > 0)
     {
@@ -216,10 +291,27 @@ HRESULT Library_corlib_native_System_Type::GetGenericArguments___SZARRAY_SystemT
 
         NANOCLR_CHECK_HRESULT(Library_corlib_native_System_RuntimeType::GetTypeDescriptor(*hbType, td));
 
-        // a definition would return its generic parameters, which have no Type here
         if (hbType->ReflectionDataConst().levels == 0 && td.target->genericParamCount > 0)
         {
-            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+            NANOCLR_CHECK_HRESULT(
+                CLR_RT_HeapBlock_Array::CreateInstance(
+                    top,
+                    td.target->genericParamCount,
+                    g_CLR_RT_WellKnownTypes.TypeStatic));
+
+            pElems = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
+
+            for (int i = 0; i < td.target->genericParamCount; i++)
+            {
+                CLR_RT_ReflectionDef_Index word;
+
+                NANOCLR_CHECK_HRESULT(CLR_RT_TypeSystem::GetDefinitionArgumentWord(td, i, word));
+                NANOCLR_CHECK_HRESULT(
+                    g_CLR_RT_ExecutionEngine.NewObjectFromIndex(pElems[i], g_CLR_RT_WellKnownTypes.TypeStatic));
+                NANOCLR_CHECK_HRESULT(pElems[i].Dereference()->SetReflection(word));
+            }
+
+            NANOCLR_SET_AND_LEAVE(S_OK);
         }
 
         NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, 0, g_CLR_RT_WellKnownTypes.TypeStatic));
@@ -231,7 +323,33 @@ HRESULT Library_corlib_native_System_Type::GetGenericArguments___SZARRAY_SystemT
     {
         if (!genericInstance.IsClosedGenericType())
         {
-            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+            const CLR_RT_TypeSpec_Index &openRow = hbType->ReflectionDataConst().data.typeSpec;
+            const CLR_RT_GenericInstance *record =
+                CLR_RT_TypeSystem::IsOpenInstance(openRow) ? CLR_RT_TypeSystem::GetGenericInstance(openRow) : nullptr;
+
+            if (record == nullptr)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+            }
+
+            count = record->m_nodes[0].ArgCount;
+
+            NANOCLR_CHECK_HRESULT(
+                CLR_RT_HeapBlock_Array::CreateInstance(top, count, g_CLR_RT_WellKnownTypes.TypeStatic));
+
+            pElems = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
+
+            for (int i = 0; i < count; i++)
+            {
+                CLR_RT_ReflectionDef_Index word;
+
+                NANOCLR_CHECK_HRESULT(CLR_RT_TypeSystem::GetGenericArgumentWord(openRow, i, word));
+                NANOCLR_CHECK_HRESULT(
+                    g_CLR_RT_ExecutionEngine.NewObjectFromIndex(pElems[i], g_CLR_RT_WellKnownTypes.TypeStatic));
+                NANOCLR_CHECK_HRESULT(pElems[i].Dereference()->SetReflection(word));
+            }
+
+            NANOCLR_SET_AND_LEAVE(S_OK);
         }
 
         // parse the type spec to get the generic arguments
@@ -463,7 +581,12 @@ HRESULT Library_corlib_native_System_Type::get_IsArray___BOOLEAN(CLR_RT_StackFra
 
     CLR_RT_HeapBlock *hbType = stack.This();
 
-    if (hbType->ReflectionDataConst().kind == CLR_ReflectionType::REFLECTION_TYPESPEC &&
+    if (IsGenericParameterWord(hbType))
+    {
+        stack.SetResult_Boolean(hbType->ReflectionDataConst().levels > 0);
+    }
+    else if (
+        hbType->ReflectionDataConst().kind == CLR_ReflectionType::REFLECTION_TYPESPEC &&
         hbType->ReflectionDataConst().levels > 0)
     {
         stack.SetResult_Boolean(true);
@@ -504,6 +627,12 @@ HRESULT Library_corlib_native_System_Type::get_IsGenericType___BOOLEAN(CLR_RT_St
 
     CLR_RT_HeapBlock *hbType = stack.This();
 
+    if (IsGenericParameterWord(hbType))
+    {
+        stack.SetResult_Boolean(false);
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
+
     // turn the boxed System.Type ("this") into a TypeDescriptor
     NANOCLR_CHECK_HRESULT(desc.InitializeFromReflection(hbType->ReflectionDataConst()));
 
@@ -526,7 +655,7 @@ HRESULT Library_corlib_native_System_Type::get_IsGenericTypeDefinition___BOOLEAN
 
     // a TypeSpec is a constructed type, open or closed; only the TypeDef of a generic type is its definition
     if (hbType->ReflectionDataConst().kind != CLR_ReflectionType::REFLECTION_TYPESPEC &&
-        hbType->ReflectionDataConst().levels == 0)
+        !IsGenericParameterWord(hbType) && hbType->ReflectionDataConst().levels == 0)
     {
         NANOCLR_CHECK_HRESULT(desc.InitializeFromReflection(hbType->ReflectionDataConst()));
 
@@ -649,6 +778,18 @@ HRESULT Library_corlib_native_System_Type::CheckFlags(CLR_RT_StackFrame &stack, 
     bool fRes;
     CLR_RT_HeapBlock *hbType = stack.This();
 
+    if (IsGenericParameterWord(hbType) && hbType->ReflectionDataConst().levels == 0)
+    {
+        if (!CLR_RT_TypeSystem::IsUnconstrainedGenericParam(hbType->ReflectionDataConst()))
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+        }
+
+        stack.SetResult_Boolean(
+            ((CLR_RECORD_TYPEDEF::TD_Scope_Public | CLR_RECORD_TYPEDEF::TD_Semantics_Class) & mask) == flag);
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
+
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_RuntimeType::GetTypeDescriptor(*hbType, td));
 
     if ((td.target->flags & mask) == flag)
@@ -704,7 +845,25 @@ static CLR_UINT16 GetBaseOwnerSlot(const CLR_RT_TypeDef_Instance &child, CLR_UIN
 
     record = CLR_RT_TypeSystem::FindOrCreateGenericBase(child, &context);
 
-    return record != nullptr ? CLR_RT_TypeSystem::GetGenericOwnerSlot(record->m_self) : 0;
+    if (record == nullptr)
+    {
+        CLR_RT_TypeSpec_Index extends;
+        CLR_RT_TypeSpec_Index row;
+
+        if (child.GetExtendsTypeSpec(extends) &&
+            CLR_RT_TypeSystem::GetOpenGenericRow(
+                extends,
+                child,
+                NANOCLR_INDEX_IS_VALID(context) && CLR_RT_TypeSystem::IsOpenInstance(context) ? &context : nullptr,
+                row) == S_OK)
+        {
+            return CLR_RT_TypeSystem::GetGenericOwnerSlot(row);
+        }
+
+        return 0;
+    }
+
+    return CLR_RT_TypeSystem::GetGenericOwnerSlot(record->m_self);
 }
 
 static const CLR_RT_TypeSpec_Index *SlotOwner(CLR_UINT16 slot, CLR_RT_TypeSpec_Index &storage)
@@ -1243,6 +1402,98 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                 CLR_RT_HeapBlock_Array::CreateInstance(top, iMethod, g_CLR_RT_WellKnownTypes.MethodInfo));
         }
     }
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_corlib_native_System_Type::get_IsGenericParameter___BOOLEAN(CLR_RT_StackFrame &stack)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock *hbType = stack.This();
+
+    stack.SetResult_Boolean(IsGenericParameterWord(hbType) && hbType->ReflectionDataConst().levels == 0);
+
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
+
+HRESULT Library_corlib_native_System_Type::get_GenericParameterPosition___I4(CLR_RT_StackFrame &stack)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    CLR_RT_Assembly *assembly;
+    const CLR_RECORD_GENERICPARAM *record;
+    CLR_RT_HeapBlock *hbType = stack.This();
+
+    if (!IsGenericParameterWord(hbType) || hbType->ReflectionDataConst().levels > 0 ||
+        !CLR_RT_TypeSystem::GetGenericParam(hbType->ReflectionDataConst(), assembly, record))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+    }
+
+    stack.SetResult_I4(record->number);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_corlib_native_System_Type::get_DeclaringMethod___SystemReflectionMethodBase(CLR_RT_StackFrame &stack)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    bool isMethod;
+    CLR_RT_TypeDef_Index ownerType;
+    CLR_RT_MethodDef_Index ownerMethod;
+    CLR_RT_HeapBlock &top = stack.PushValueAndClear();
+    CLR_RT_HeapBlock *hbType = stack.This();
+
+    if (!IsGenericParameterWord(hbType) || hbType->ReflectionDataConst().levels > 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+    }
+
+    NANOCLR_CHECK_HRESULT(GetGenericParamOwner(hbType->ReflectionDataConst(), isMethod, ownerType, ownerMethod));
+
+    if (isMethod)
+    {
+        CLR_RT_HeapBlock *hbObj;
+
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.MethodInfo));
+        hbObj = top.Dereference();
+        NANOCLR_CHECK_HRESULT(hbObj->SetReflection(ownerMethod));
+        hbObj[MethodBase::FIELD___token].NumericByRef().u4 = ownerMethod.data;
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_corlib_native_System_Type::get_ContainsGenericParameters___BOOLEAN(CLR_RT_StackFrame &stack)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    CLR_RT_TypeDef_Instance td{};
+    const CLR_RT_ReflectionDef_Index &reflex = stack.This()->ReflectionDataConst();
+    bool contains = false;
+
+    if (reflex.kind == REFLECTION_GENERICPARAM)
+    {
+        contains = true;
+    }
+    else if (reflex.kind == REFLECTION_TYPESPEC)
+    {
+        contains = CLR_RT_TypeSystem::IsOpenInstance(reflex.data.typeSpec);
+    }
+    else if (reflex.kind == REFLECTION_TYPE && reflex.levels == 0)
+    {
+        NANOCLR_CHECK_HRESULT(Library_corlib_native_System_RuntimeType::GetTypeDescriptor(*stack.This(), td));
+
+        contains = td.target->genericParamCount > 0;
+    }
+
+    stack.SetResult_Boolean(contains);
 
     NANOCLR_NOCLEANUP();
 }

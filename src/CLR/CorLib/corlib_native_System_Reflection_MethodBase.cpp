@@ -419,7 +419,12 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::GetParametersNative_
             CLR_RT_TypeSpec_Index elementSpec;
             CLR_RT_HeapBlock &paraTypeHB = hbObj[ParameterInfo::FIELD___parameterType];
 
-            NANOCLR_CHECK_HRESULT(desc.InitializeFromClosedSignature(parameter, &owner, &elementSpec));
+            CLR_RT_TypeDef_Index declaring;
+
+            declaring.Set(inst.Assembly(), inst.CrossReference().GetOwner());
+
+            NANOCLR_CHECK_HRESULT(
+                desc.InitializeFromClosedSignature(parameter, &owner, &elementSpec, &declaring, &inst));
             NANOCLR_CHECK_HRESULT(
                 g_CLR_RT_ExecutionEngine.NewObjectFromIndex(paraTypeHB, g_CLR_RT_WellKnownTypes.TypeStatic));
             NANOCLR_CHECK_HRESULT(paraTypeHB.Dereference()->SetReflection(desc.GetTypeReflection(elementSpec)));

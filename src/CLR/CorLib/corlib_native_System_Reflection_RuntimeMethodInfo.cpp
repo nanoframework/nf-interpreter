@@ -24,7 +24,13 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeMethodInfo::get_ReturnTyp
     owner.Clear();
     hbMeth->ReflectionDataConst().GetGenericOwner(owner);
 
-    NANOCLR_CHECK_HRESULT(desc.InitializeFromClosedSignature(parser, &owner, &elementSpec));
+    {
+        CLR_RT_TypeDef_Index declaring;
+
+        declaring.Set(md.Assembly(), md.CrossReference().GetOwner());
+
+        NANOCLR_CHECK_HRESULT(desc.InitializeFromClosedSignature(parser, &owner, &elementSpec, &declaring, &md));
+    }
 
     {
         CLR_RT_HeapBlock &top = stack.PushValue();
