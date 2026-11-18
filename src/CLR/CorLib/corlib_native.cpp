@@ -252,6 +252,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Type::GetConstructor___SystemReflectionConstructorInfo__SZARRAY_SystemType,
     Library_corlib_native_System_Type::GetConstructors___SZARRAY_SystemReflectionConstructorInfo,
     Library_corlib_native_System_Type::GetGenericArguments___SZARRAY_SystemType,
+    Library_corlib_native_System_Type::GetGenericParameterConstraints___SZARRAY_SystemType,
     Library_corlib_native_System_Type::GetGenericTypeDefinition___SystemType,
     Library_corlib_native_System_Type::GetMethod___SystemReflectionMethodInfo__STRING,
     Library_corlib_native_System_Type::GetMethod___SystemReflectionMethodInfo__STRING__SZARRAY_SystemType,
@@ -264,6 +265,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Type::get_ContainsGenericParameters___BOOLEAN,
     Library_corlib_native_System_Type::get_DeclaringMethod___SystemReflectionMethodBase,
     Library_corlib_native_System_Type::get_DeclaringType___SystemType,
+    Library_corlib_native_System_Type::get_GenericParameterAttributes___SystemReflectionGenericParameterAttributes,
     Library_corlib_native_System_Type::get_GenericParameterPosition___I4,
     Library_corlib_native_System_Type::get_IsAbstract___BOOLEAN,
     Library_corlib_native_System_Type::get_IsArray___BOOLEAN,
@@ -486,7 +488,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
-    0xCCC738E0,
+    0x824177B9,
 
 #elif !CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 

@@ -1672,6 +1672,10 @@ CT_ASSERT(sizeof(CLR_RECORD_TYPESPEC) == sizeOf_CLR_RECORD_TYPESPEC)
 
 struct CLR_RECORD_GENERICPARAM
 {
+    static const CLR_UINT16 GP_Variance_Mask = 0x0003;
+    static const CLR_UINT16 GP_NotNullableValueType = 0x0008;
+    static const CLR_UINT16 GP_SpecialConstraint_Mask = 0x001C;
+
     /// @brief 2-byte index of the generic parameter, numbered left -to-right, from zero.
     ///
     CLR_UINT16 number;
@@ -1685,7 +1689,7 @@ struct CLR_RECORD_GENERICPARAM
     CLR_TYPEORMETHODDEF owner;
 
     /// @brief Index into TBL_Signatures for the type constraints (a count followed by the types), CLR_EmptyIndex when
-    /// there are none. Not read by the CLR.
+    /// there are none.
     ///
     CLR_SIG signature;
 
