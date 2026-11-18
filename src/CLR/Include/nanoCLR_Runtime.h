@@ -2216,7 +2216,8 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
         const CLR_RT_TypeSpec_Index &origin,
         const CLR_RT_TypeDef_Index &level,
         const CLR_RT_TypeSpec_Index *openContext,
-        CLR_RT_TypeSpec_Index &row);
+        CLR_RT_TypeSpec_Index &row,
+        const CLR_RT_MethodDef_Index *method = nullptr);
     static HRESULT GetOpenSignatureWord(
         const CLR_RT_SignatureParser &at,
         const CLR_RT_TypeSpec_Index *openOwner,

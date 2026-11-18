@@ -229,12 +229,32 @@ HRESULT Library_corlib_native_System_RuntimeType::AppendGenericArguments(
             NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.QueueStringToBuffer(sz, size, ","));
         }
 
-        if (node.DataType == DATATYPE_VAR)
+        if (node.DataType == DATATYPE_VAR || node.DataType == DATATYPE_MVAR)
         {
-            // the open parameter of the type that owns it, by its name
+            // the open parameter of the type or method that owns it, by its name
             CLR_RT_TypeDef_Instance owner{};
+            CLR_RT_MethodDef_Instance method{};
+            CLR_RT_Assembly *assembly;
+            CLR_UINT16 first;
+            CLR_UINT8 count;
 
-            if (!owner.InitializeFromIndex(node.Class) || node.Position >= owner.target->genericParamCount)
+            if (node.DataType == DATATYPE_VAR)
+            {
+                assembly = owner.InitializeFromIndex(node.Class) ? owner.assembly : nullptr;
+                first = owner.target != nullptr ? owner.target->firstGenericParam : 0;
+                count = owner.target != nullptr ? owner.target->genericParamCount : 0;
+            }
+            else
+            {
+                CLR_RT_MethodDef_Index index;
+
+                index.data = node.Class.data;
+                assembly = method.InitializeFromIndex(index) ? method.assembly : nullptr;
+                first = method.target != nullptr ? method.target->firstGenericParam : 0;
+                count = method.target != nullptr ? method.target->genericParamCount : 0;
+            }
+
+            if (assembly == nullptr || node.Position >= count)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
             }
@@ -242,8 +262,7 @@ HRESULT Library_corlib_native_System_RuntimeType::AppendGenericArguments(
             NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.QueueStringToBuffer(
                 sz,
                 size,
-                owner.assembly->GetString(
-                    owner.assembly->GetGenericParam(owner.target->firstGenericParam + node.Position)->name)));
+                assembly->GetString(assembly->GetGenericParam(first + node.Position)->name)));
         }
         else
         {

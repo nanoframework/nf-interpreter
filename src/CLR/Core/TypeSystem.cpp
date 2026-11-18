@@ -10348,13 +10348,25 @@ HRESULT CLR_RT_TypeSystem::GetGenericArgumentWord(
         return S_OK;
     }
 
-    if (end - first == 1)
+    if (head.DataType == DATATYPE_MVAR)
     {
-        if (head.DataType == DATATYPE_MVAR)
+        CLR_RT_MethodDef_Index owner;
+        CLR_RT_MethodDef_Instance method{};
+
+        owner.data = head.Class.data;
+
+        if (!method.InitializeFromIndex(owner) || head.Position >= method.target->genericParamCount)
         {
-            return CLR_E_NOT_SUPPORTED;
+            return CLR_E_WRONG_TYPE;
         }
 
+        SetGenericParamWord(word, method.Assembly(), method.target->firstGenericParam + head.Position, head.Levels);
+
+        return S_OK;
+    }
+
+    if (end - first == 1)
+    {
         word.kind = REFLECTION_TYPE;
         word.levels = head.Levels;
         word.data.type = head.Class;
@@ -10367,12 +10379,7 @@ HRESULT CLR_RT_TypeSystem::GetGenericArgumentWord(
 
     for (int i = 0; i < end - first; i++)
     {
-        if (nodes[i].DataType == DATATYPE_MVAR)
-        {
-            return CLR_E_NOT_SUPPORTED;
-        }
-
-        hasParameter = hasParameter || nodes[i].DataType == DATATYPE_VAR;
+        hasParameter = hasParameter || nodes[i].DataType == DATATYPE_VAR || nodes[i].DataType == DATATYPE_MVAR;
     }
 
     none.Clear();
@@ -10401,7 +10408,8 @@ HRESULT CLR_RT_TypeSystem::GetOpenGenericRecord(
     const CLR_RT_TypeSpec_Index &origin,
     const CLR_RT_TypeDef_Index &level,
     const CLR_RT_TypeSpec_Index *openContext,
-    CLR_RT_TypeSpec_Index &row)
+    CLR_RT_TypeSpec_Index &row,
+    const CLR_RT_MethodDef_Index *method)
 {
     NATIVE_PROFILE_CLR_CORE();
 
@@ -10427,7 +10435,7 @@ HRESULT CLR_RT_TypeSystem::GetOpenGenericRecord(
     {
         const CLR_RT_GenericInstanceNode &node = rowNodes[i];
 
-        if (node.DataType == DATATYPE_MVAR)
+        if (node.DataType == DATATYPE_MVAR && method == nullptr)
         {
             return CLR_E_NOT_SUPPORTED;
         }
@@ -10468,6 +10476,10 @@ HRESULT CLR_RT_TypeSystem::GetOpenGenericRecord(
             {
                 nodes[count].Class = level;
             }
+            else if (node.DataType == DATATYPE_MVAR)
+            {
+                nodes[count].Class.data = method->data;
+            }
 
             count++;
         }
@@ -10479,7 +10491,7 @@ HRESULT CLR_RT_TypeSystem::GetOpenGenericRecord(
 
         for (int i = 0; i < count; i++)
         {
-            hasParameter = hasParameter || nodes[i].DataType == DATATYPE_VAR;
+            hasParameter = hasParameter || nodes[i].DataType == DATATYPE_VAR || nodes[i].DataType == DATATYPE_MVAR;
 
             if (nodes[i].ArgCount > 0)
             {
@@ -10639,7 +10651,7 @@ HRESULT CLR_RT_TypeSystem::GetOpenSignatureWord(
     nodes[0].Levels = 0;
     none.Clear();
 
-    hr = GetOpenGenericRecord(nodes, count, none, declaring, openOwner, row);
+    hr = GetOpenGenericRecord(nodes, count, none, declaring, openOwner, row, method);
 
     if (FAILED(hr))
     {
