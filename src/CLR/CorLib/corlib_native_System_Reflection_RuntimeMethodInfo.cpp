@@ -61,10 +61,11 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeMethodInfo::GetCustomAttr
     // get the caller method
     callerMethod = stack.This();
 
-    NANOCLR_CHECK_HRESULT(Library_corlib_native_System_Reflection_MethodBase::GetMethodDescriptor(
-        stack,
-        *callerMethod,
-        methodDefinition));
+    NANOCLR_CHECK_HRESULT(
+        Library_corlib_native_System_Reflection_MethodBase::GetMethodDescriptor(
+            stack,
+            *callerMethod,
+            methodDefinition));
 
     // setup attribute enumerator
     CLR_RT_AttributeEnumerator attributeEnumerator;
