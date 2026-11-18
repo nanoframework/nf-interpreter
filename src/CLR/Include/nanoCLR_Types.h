@@ -1325,6 +1325,16 @@ struct CLR_RECORD_TYPEDEF
         return (flags & (TD_Semantics_Mask)) == TD_Semantics_Enum;
     }
 
+    bool IsInterface() const
+    {
+        return (flags & (TD_Semantics_Mask)) == TD_Semantics_Interface;
+    }
+
+    bool IsValueTypeOrEnum() const
+    {
+        return (flags & (TD_Semantics_Mask)) == TD_Semantics_ValueType || IsEnum();
+    }
+
     bool IsDelegate() const
     {
         return (flags & (TD_Delegate | TD_MulticastDelegate)) != 0;

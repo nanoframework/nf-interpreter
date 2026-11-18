@@ -4763,10 +4763,11 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                                     closedSpec));
                                         }
 
-                                        evalPos[0].SetReflection(
-                                            NANOCLR_INDEX_IS_VALID(closedSpec)
-                                                ? closedSpec
-                                                : (const CLR_RT_TypeSpec_Index &)tsInst.data);
+                                        NANOCLR_CHECK_HRESULT(
+                                            evalPos[0].SetReflection(
+                                                NANOCLR_INDEX_IS_VALID(closedSpec)
+                                                    ? closedSpec
+                                                    : (const CLR_RT_TypeSpec_Index &)tsInst.data));
                                     }
                                     else if (NANOCLR_INDEX_IS_VALID(tsInst.cachedElementType))
                                     {

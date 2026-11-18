@@ -3981,17 +3981,6 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(CLR_RT_TypeDescriptor desc, CLR_RT_Typ
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    static const struct
-    {
-        const char *assembly;
-        const char *name;
-    } c_ArrayGenericInterfaces[] = {
-        {"mscorlib", "IEnumerable`1"},
-        {"mscorlib", "ICollection`1"},
-        {"nanoFramework.System.Collections", "IList`1"},
-        {"nanoFramework.System.Collections", "IReadOnlyCollection`1"},
-        {"nanoFramework.System.Collections", "IReadOnlyList`1"}};
-
     if (IsAssignableByHierarchy(desc, descTarget))
     {
         return true;
@@ -4011,25 +4000,8 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(CLR_RT_TypeDescriptor desc, CLR_RT_Typ
 
     const CLR_RT_TypeDef_Instance &instTarget = descTarget.m_handlerCls;
 
-    if (desc.m_reflex.levels == 0 || descTarget.m_reflex.levels > 0 ||
-        (instTarget.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) !=
-            CLR_RECORD_TYPEDEF::TD_Semantics_Interface ||
-        strcmp(instTarget.assembly->GetString(instTarget.target->nameSpace), "System.Collections.Generic") != 0)
-    {
-        return false;
-    }
-
-    const char *name = instTarget.assembly->GetString(instTarget.target->name);
-
-    for (const auto &candidate : c_ArrayGenericInterfaces)
-    {
-        if (strcmp(name, candidate.name) == 0 && strcmp(instTarget.assembly->name, candidate.assembly) == 0)
-        {
-            return true;
-        }
-    }
-
-    return false;
+    return desc.m_reflex.levels > 0 && descTarget.m_reflex.levels == 0 && instTarget.target->IsInterface() &&
+           CLR_RT_TypeSystem::IsArrayGenericInterface(instTarget);
 }
 
 bool CLR_RT_ExecutionEngine::IsInstanceOf(const CLR_RT_TypeDef_Index &cls, const CLR_RT_TypeDef_Index &clsTarget)

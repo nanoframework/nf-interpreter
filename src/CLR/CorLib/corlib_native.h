@@ -95,6 +95,7 @@ struct Library_corlib_native_System_Type
     NANOCLR_NATIVE_DECLARE(GetGenericTypeDefinition___SystemType);
     NANOCLR_NATIVE_DECLARE(GetMethod___SystemReflectionMethodInfo__STRING__SystemReflectionBindingFlags);
     NANOCLR_NATIVE_DECLARE(IsInstanceOfType___BOOLEAN__OBJECT);
+    NANOCLR_NATIVE_DECLARE(IsAssignableFrom___BOOLEAN__SystemType);
     NANOCLR_NATIVE_DECLARE(GetGenericArguments___SZARRAY_SystemType);
     NANOCLR_NATIVE_DECLARE(
         InvokeMember___OBJECT__STRING__SystemReflectionBindingFlags__SystemReflectionBinder__OBJECT__SZARRAY_OBJECT);
@@ -890,6 +891,7 @@ struct Library_corlib_native_System_RuntimeType
 {
     NANOCLR_NATIVE_DECLARE(get_Assembly___SystemReflectionAssembly);
     NANOCLR_NATIVE_DECLARE(get_Name___STRING);
+    NANOCLR_NATIVE_DECLARE(ToString___STRING);
     NANOCLR_NATIVE_DECLARE(get_FullName___STRING);
     NANOCLR_NATIVE_DECLARE(get_BaseType___SystemType);
     NANOCLR_NATIVE_DECLARE(GetMethods___SZARRAY_SystemReflectionMethodInfo__SystemReflectionBindingFlags);
@@ -904,7 +906,7 @@ struct Library_corlib_native_System_RuntimeType
     static HRESULT AppendGenericArguments(const CLR_RT_GenericInstance &record, char *&sz, size_t &size);
     static HRESULT GetTypeDescriptor(CLR_RT_HeapBlock &arg, CLR_RT_TypeDef_Instance &inst, CLR_UINT32 *levels);
     static HRESULT GetTypeDescriptor(CLR_RT_HeapBlock &arg, CLR_RT_TypeDef_Instance &inst);
-    static HRESULT GetName(CLR_RT_HeapBlock &arg, bool fFullName, CLR_RT_HeapBlock &res);
+    static HRESULT GetName(CLR_RT_HeapBlock &arg, bool fFullName, CLR_RT_HeapBlock &res, bool fOpenAsString);
     static HRESULT GetCustomAttributes(
         CLR_RT_AttributeEnumerator attributeEnumerator,
         CLR_RT_HeapBlock *&returnArray,

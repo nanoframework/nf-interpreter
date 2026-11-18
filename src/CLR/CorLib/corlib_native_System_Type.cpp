@@ -136,6 +136,18 @@ HRESULT Library_corlib_native_System_Type::IsInstanceOfType___BOOLEAN__OBJECT(CL
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
     NANOCLR_CHECK_HRESULT(descTarget.InitializeFromReflection(hbType->ReflectionDataConst()));
+
+    // a type that contains generic parameters has no instances
+    if (hbType->ReflectionDataConst().levels == 0 &&
+        ((hbType->ReflectionDataConst().kind == REFLECTION_TYPE &&
+          descTarget.m_handlerCls.target->genericParamCount > 0) ||
+         (hbType->ReflectionDataConst().kind == REFLECTION_TYPESPEC &&
+          CLR_RT_TypeSystem::IsOpenInstance(hbType->ReflectionDataConst().data.typeSpec))))
+    {
+        stack.SetResult_Boolean(false);
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
+
     NANOCLR_CHECK_HRESULT(desc.InitializeFromObject(stack.Arg1()));
 
     isInstance = CLR_RT_ExecutionEngine::IsInstanceOf(desc, descTarget);
@@ -197,16 +209,31 @@ HRESULT Library_corlib_native_System_Type::GetGenericArguments___SZARRAY_SystemT
     // build a TypeDescriptor from "this"
     hbType = stack.This();
 
-    // sanity check for type spec instance
     if (hbType->ReflectionDataConst().kind != CLR_ReflectionType::REFLECTION_TYPESPEC ||
         hbType->ReflectionDataConst().levels > 0)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+        CLR_RT_TypeDef_Instance td{};
+
+        NANOCLR_CHECK_HRESULT(Library_corlib_native_System_RuntimeType::GetTypeDescriptor(*hbType, td));
+
+        // a definition would return its generic parameters, which have no Type here
+        if (hbType->ReflectionDataConst().levels == 0 && td.target->genericParamCount > 0)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+        }
+
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, 0, g_CLR_RT_WellKnownTypes.TypeStatic));
+        NANOCLR_SET_AND_LEAVE(S_OK);
     }
 
     // instanciate the generic type
     if (genericInstance.InitializeFromIndex(hbType->ObjectGenericType()))
     {
+        if (!genericInstance.IsClosedGenericType())
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+        }
+
         // parse the type spec to get the generic arguments
         parser.Initialize_TypeSpec(genericInstance);
 
@@ -494,62 +521,13 @@ HRESULT Library_corlib_native_System_Type::get_IsGenericTypeDefinition___BOOLEAN
 
     bool isTypeDefinition = false;
     CLR_RT_TypeDescriptor desc{};
-    CLR_RT_TypeSpec_Instance genericInstance = {};
 
     CLR_RT_HeapBlock *hbType = stack.This();
 
-    if (hbType->ReflectionDataConst().kind == CLR_ReflectionType::REFLECTION_TYPESPEC &&
-        hbType->ReflectionDataConst().levels > 0)
+    // a TypeSpec is a constructed type, open or closed; only the TypeDef of a generic type is its definition
+    if (hbType->ReflectionDataConst().kind != CLR_ReflectionType::REFLECTION_TYPESPEC &&
+        hbType->ReflectionDataConst().levels == 0)
     {
-        isTypeDefinition = false;
-    }
-    else if (hbType->ReflectionDataConst().kind == CLR_ReflectionType::REFLECTION_TYPESPEC)
-    {
-        // instanciate the generic type
-        genericInstance.InitializeFromIndex(hbType->ObjectGenericType());
-
-        CLR_RT_SignatureParser parser;
-        parser.Initialize_TypeSpec(genericInstance);
-
-        CLR_RT_SignatureParser::Element element;
-
-        // consume GENERICINST
-        parser.Advance(element);
-
-        // consume class | value type
-        parser.Advance(element);
-
-        // check if it has generic parameters
-        if (element.GenParamCount == 0)
-        {
-            isTypeDefinition = false;
-        }
-        else
-        {
-            // keep reading the generic parameters
-            for (int i = 0; i < element.GenParamCount; i++)
-            {
-                if (SUCCEEDED(parser.Advance(element)))
-                {
-                    if (element.DataType == DATATYPE_VAR || element.DataType == DATATYPE_MVAR)
-                    {
-                        // if we find a VAR or MVAR, then this is a generic type definition
-                        isTypeDefinition = true;
-                        break;
-                    }
-                    else
-                    {
-                        // anything else, this is not a generic type definition
-                        isTypeDefinition = false;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    else
-    {
-        // turn the boxed System.Type ("this") into a TypeDescriptor
         NANOCLR_CHECK_HRESULT(desc.InitializeFromReflection(hbType->ReflectionDataConst()));
 
         isTypeDefinition = (desc.m_handlerCls.target->genericParamCount > 0);
@@ -1265,6 +1243,39 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                 CLR_RT_HeapBlock_Array::CreateInstance(top, iMethod, g_CLR_RT_WellKnownTypes.MethodInfo));
         }
     }
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_corlib_native_System_Type::IsAssignableFrom___BOOLEAN__SystemType(CLR_RT_StackFrame &stack)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock *hbType = stack.This();
+    CLR_RT_HeapBlock *hbSource = stack.Arg1().Dereference();
+    bool result = false;
+
+    if (hbType->DataType() != DATATYPE_REFLECTION)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
+
+    if (hbSource != nullptr)
+    {
+        if (hbSource->DataType() != DATATYPE_REFLECTION)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        }
+
+        NANOCLR_CHECK_HRESULT(
+            CLR_RT_TypeSystem::IsAssignableFrom(
+                hbType->ReflectionDataConst(),
+                hbSource->ReflectionDataConst(),
+                result));
+    }
+
+    stack.SetResult_Boolean(result);
 
     NANOCLR_NOCLEANUP();
 }

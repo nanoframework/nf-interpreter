@@ -1976,6 +1976,7 @@ struct CLR_RT_GenericInstance
 {
     static const CLR_UINT8 c_Scheduled = 0x01;
     static const CLR_UINT8 c_Executed = 0x02;
+    static const CLR_UINT8 c_Open = 0x04;
 
     static const int c_MaxNodes = 16;
 
@@ -2178,6 +2179,42 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
         const CLR_RT_TypeDef_Instance &child,
         const CLR_RT_TypeSpec_Index *childContext);
     static bool IsSameGenericInstance(const CLR_RT_TypeSpec_Index &left, const CLR_RT_TypeSpec_Index &right);
+
+    static bool IsSameTypeSpecIdentity(const CLR_RT_TypeSpec_Index &left, const CLR_RT_TypeSpec_Index &right);
+    static bool GetTypeSpecIdentityHash(const CLR_RT_TypeSpec_Index &row, CLR_UINT32 &hash);
+    static bool IsOpenInstance(const CLR_RT_TypeSpec_Index &row);
+    static HRESULT GetOpenGenericRow(
+        const CLR_RT_TypeSpec_Index &sourceRow,
+        const CLR_RT_TypeDef_Index &level,
+        const CLR_RT_TypeSpec_Index *openContext,
+        CLR_RT_TypeSpec_Index &row);
+    static HRESULT GetTypeBase(
+        const CLR_RT_TypeDef_Instance &child,
+        const CLR_RT_TypeSpec_Index *context,
+        bool isDefinition,
+        CLR_RT_TypeSpec_Index &row);
+    static HRESULT GetInterfaceRow(
+        const CLR_RT_TypeSpec_Index &entry,
+        const CLR_RT_TypeDef_Index &level,
+        const CLR_RT_TypeSpec_Index *context,
+        bool isDefinition,
+        CLR_RT_TypeSpec_Index &row);
+    static bool IsSameTypeSpecWord(const CLR_RT_ReflectionDef_Index &left, const CLR_RT_ReflectionDef_Index &right);
+    static bool IsSameTypeWord(const CLR_RT_ReflectionDef_Index &left, const CLR_RT_ReflectionDef_Index &right);
+    static HRESULT GetBaseTypeWord(const CLR_RT_ReflectionDef_Index &reflex, CLR_RT_ReflectionDef_Index &word);
+    static HRESULT CollectInterfaceWords(
+        const CLR_RT_ReflectionDef_Index &reflex,
+        CLR_RT_ReflectionDef_Index *words,
+        int max,
+        int &count);
+    static HRESULT IsAssignableFrom(
+        const CLR_RT_ReflectionDef_Index &target,
+        const CLR_RT_ReflectionDef_Index &source,
+        bool &result);
+    static int GetArrayInterfaceCount();
+    static bool GetArrayInterfaceDefinition(int index, CLR_RT_TypeDef_Index &definition);
+    static bool IsArrayGenericInterface(const CLR_RT_TypeDef_Instance &definition);
+    static HRESULT GetArrayInterfaceRow(const CLR_RT_ReflectionDef_Index &array, int index, CLR_RT_TypeSpec_Index &row);
 
     static HRESULT GetClosedGenericBase(
         const CLR_RT_TypeDef_Instance &child,

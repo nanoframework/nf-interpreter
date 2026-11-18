@@ -414,56 +414,15 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::GetParametersNative_
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*paramInfoElement, paramInfoTypeDef));
         hbObj = paramInfoElement->Dereference();
 
-        bool isClosed = false;
-
-        if (NANOCLR_INDEX_IS_VALID(owner))
         {
             CLR_RT_TypeDescriptor desc{};
             CLR_RT_TypeSpec_Index elementSpec;
-
-            if (SUCCEEDED(desc.InitializeFromClosedSignature(parameter, &owner, &elementSpec)))
-            {
-                CLR_RT_HeapBlock &paraTypeHB = hbObj[ParameterInfo::FIELD___parameterType];
-
-                NANOCLR_CHECK_HRESULT(
-                    g_CLR_RT_ExecutionEngine.NewObjectFromIndex(paraTypeHB, g_CLR_RT_WellKnownTypes.TypeStatic));
-                paraTypeHB.Dereference()->SetReflection(desc.GetTypeReflection(elementSpec));
-                isClosed = true;
-            }
-        }
-
-        // VAR, MVAR and arrays of them that couldn't be closed have no generic context, parameter type stays null
-        if (!isClosed && NANOCLR_INDEX_IS_VALID(paramElement.Class))
-        {
-            // get reference to the <ParameterInfo> instance
             CLR_RT_HeapBlock &paraTypeHB = hbObj[ParameterInfo::FIELD___parameterType];
 
-            // create a new instance of the parameter type
+            NANOCLR_CHECK_HRESULT(desc.InitializeFromClosedSignature(parameter, &owner, &elementSpec));
             NANOCLR_CHECK_HRESULT(
                 g_CLR_RT_ExecutionEngine.NewObjectFromIndex(paraTypeHB, g_CLR_RT_WellKnownTypes.TypeStatic));
-            hbObj = paraTypeHB.Dereference();
-            hbObj->SetReflection(paramElement.Class);
-
-            // deal with array types
-            if (paramElement.Levels > 0)
-            {
-                CLR_RT_GenericTarget target;
-
-                hbObj->ReflectionData().levels = (CLR_UINT16)paramElement.Levels;
-
-                if (CLR_RT_TypeSystem::CollectGenericTarget(parameter, nullptr, nullptr, target, true) == S_OK &&
-                    target.m_count > 0)
-                {
-                    CLR_RT_GenericInstance *record =
-                        CLR_RT_TypeSystem::FindOrCreateGenericInstanceByNodes(target.m_nodes, target.m_count);
-
-                    if (record != nullptr)
-                    {
-                        hbObj->ReflectionData().kind = REFLECTION_TYPESPEC;
-                        hbObj->ReflectionData().data.typeSpec = record->m_self;
-                    }
-                }
-            }
+            NANOCLR_CHECK_HRESULT(paraTypeHB.Dereference()->SetReflection(desc.GetTypeReflection(elementSpec)));
         }
 
         // move pointer to the next element
