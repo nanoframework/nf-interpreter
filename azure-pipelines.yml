@@ -1654,7 +1654,8 @@ jobs:
             eq(variables['System.PullRequest.PullRequestId'], ''),
             or(
               eq(variables['ForceUpload'], true),
-              eq(variables['Build.SourceBranchName'], 'main')
+              eq(variables['Build.SourceBranchName'], 'main'),
+              eq(variables['Build.SourceBranchName'], 'develop')
             )
           )
         continueOnError: true
