@@ -42,10 +42,10 @@ jobs:
           - os: macos-15-intel
             label: macOS-x64
             posix_rid: osx-x64
-          - os: ubuntu-24.04
+          - os: ubuntu-26.04
             label: Linux-x64
             posix_rid: linux-x64
-          - os: ubuntu-24.04-arm
+          - os: ubuntu-26.04-arm
             label: Linux-arm64
             posix_rid: linux-arm64
       fail-fast: false
@@ -56,15 +56,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Install GCC 15
-        if: startsWith(matrix.os, 'ubuntu')
-        run: |
-          sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-          sudo apt-get update
-          sudo apt-get install -y gcc-15 g++-15
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-15 100
-          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-15 100
 
       - name: Configure
         run: |
