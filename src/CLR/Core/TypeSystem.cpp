@@ -10442,7 +10442,7 @@ HRESULT CLR_RT_TypeSystem::GetOpenSignatureWord(
         return FAILED(hr) ? hr : S_FALSE;
     }
 
-    word.levels = nodes[0].Levels;
+    word.levels = elem.Levels;
     nodes[0].Levels = 0;
     none.Clear();
 
@@ -10931,6 +10931,14 @@ static HRESULT IsAssignableGenericParam(
 {
     bool targetParam = target.kind == REFLECTION_GENERICPARAM;
 
+    if (!inArray && target.kind == REFLECTION_TYPE && target.levels == 0 &&
+        target.data.type.data == g_CLR_RT_WellKnownTypes.Object.data)
+    {
+        result = true;
+
+        return S_OK;
+    }
+
     if (inArray || target.levels > 0 || source.levels > 0 ||
         !CLR_RT_TypeSystem::IsUnconstrainedGenericParam(targetParam ? target : source) ||
         (target.kind == source.kind && !CLR_RT_TypeSystem::IsUnconstrainedGenericParam(source)))
@@ -10938,8 +10946,7 @@ static HRESULT IsAssignableGenericParam(
         return CLR_E_NOT_SUPPORTED;
     }
 
-    result = !targetParam && source.kind == REFLECTION_GENERICPARAM && target.kind == REFLECTION_TYPE &&
-             target.data.type.data == g_CLR_RT_WellKnownTypes.Object.data;
+    result = false;
 
     return S_OK;
 }

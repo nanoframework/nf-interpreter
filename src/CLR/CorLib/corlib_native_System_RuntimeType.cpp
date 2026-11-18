@@ -13,18 +13,20 @@ HRESULT Library_corlib_native_System_RuntimeType::get_Assembly___SystemReflectio
     CLR_RT_TypeDef_Instance td;
     CLR_RT_HeapBlock *hbType = stack.This();
 
-    if (hbType->ReflectionDataConst().kind == REFLECTION_GENERICPARAM)
-    {
-        td.Set(hbType->ReflectionDataConst().data.genericParam.Assembly(), 0);
-    }
-    else
-    {
-        NANOCLR_CHECK_HRESULT(GetTypeDescriptor(*hbType, td, nullptr));
-    }
-
     {
         CLR_RT_Assembly_Index index{};
-        index.Set(td.Assembly());
+
+        if (hbType->ReflectionDataConst().kind == REFLECTION_GENERICPARAM)
+        {
+            index.Set(hbType->ReflectionDataConst().data.genericParam.Assembly());
+        }
+        else
+        {
+            NANOCLR_CHECK_HRESULT(GetTypeDescriptor(*hbType, td, nullptr));
+
+            index.Set(td.Assembly());
+        }
+
         CLR_RT_HeapBlock &top = stack.PushValue();
         CLR_RT_HeapBlock *hbObj;
 
