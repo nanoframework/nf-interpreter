@@ -96,6 +96,10 @@ struct Library_corlib_native_System_Type
     NANOCLR_NATIVE_DECLARE(GetMethod___SystemReflectionMethodInfo__STRING__SystemReflectionBindingFlags);
     NANOCLR_NATIVE_DECLARE(IsInstanceOfType___BOOLEAN__OBJECT);
     NANOCLR_NATIVE_DECLARE(IsAssignableFrom___BOOLEAN__SystemType);
+    NANOCLR_NATIVE_DECLARE(get_IsGenericParameter___BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(get_GenericParameterPosition___I4);
+    NANOCLR_NATIVE_DECLARE(get_DeclaringMethod___SystemReflectionMethodBase);
+    NANOCLR_NATIVE_DECLARE(get_ContainsGenericParameters___BOOLEAN);
     NANOCLR_NATIVE_DECLARE(GetGenericArguments___SZARRAY_SystemType);
     NANOCLR_NATIVE_DECLARE(
         InvokeMember___OBJECT__STRING__SystemReflectionBindingFlags__SystemReflectionBinder__OBJECT__SZARRAY_OBJECT);

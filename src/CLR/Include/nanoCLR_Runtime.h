@@ -847,6 +847,7 @@ struct CLR_RT_ReflectionDef_Index
         CLR_RT_MethodDef_Index method;
         CLR_RT_FieldDef_Index field;
         CLR_RT_TypeSpec_Index typeSpec;
+        CLR_RT_TypeDef_Index genericParam;
         CLR_UINT32 raw;
     } data;
 
@@ -2183,6 +2184,37 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
     static bool IsSameTypeSpecIdentity(const CLR_RT_TypeSpec_Index &left, const CLR_RT_TypeSpec_Index &right);
     static bool GetTypeSpecIdentityHash(const CLR_RT_TypeSpec_Index &row, CLR_UINT32 &hash);
     static bool IsOpenInstance(const CLR_RT_TypeSpec_Index &row);
+    static void SetGenericParamWord(
+        CLR_RT_ReflectionDef_Index &word,
+        CLR_UINT32 assembly,
+        CLR_UINT32 row,
+        CLR_UINT32 levels);
+    static bool GetGenericParam(
+        const CLR_RT_ReflectionDef_Index &word,
+        CLR_RT_Assembly *&assembly,
+        const CLR_RECORD_GENERICPARAM *&record);
+    static bool IsUnconstrainedGenericParam(const CLR_RT_ReflectionDef_Index &word);
+    static HRESULT GetDefinitionArgumentWord(
+        const CLR_RT_TypeDef_Instance &definition,
+        int position,
+        CLR_RT_ReflectionDef_Index &word);
+    static HRESULT GetGenericArgumentWord(
+        const CLR_RT_TypeSpec_Index &row,
+        int argument,
+        CLR_RT_ReflectionDef_Index &word);
+    static HRESULT GetOpenGenericRecord(
+        const CLR_RT_GenericInstanceNode *rowNodes,
+        int rowCount,
+        const CLR_RT_TypeSpec_Index &origin,
+        const CLR_RT_TypeDef_Index &level,
+        const CLR_RT_TypeSpec_Index *openContext,
+        CLR_RT_TypeSpec_Index &row);
+    static HRESULT GetOpenSignatureWord(
+        const CLR_RT_SignatureParser &at,
+        const CLR_RT_TypeSpec_Index *openOwner,
+        const CLR_RT_TypeDef_Index &declaring,
+        const CLR_RT_MethodDef_Index *method,
+        CLR_RT_ReflectionDef_Index &word);
     static HRESULT GetOpenGenericRow(
         const CLR_RT_TypeSpec_Index &sourceRow,
         const CLR_RT_TypeDef_Index &level,
@@ -2676,11 +2708,14 @@ struct CLR_RT_TypeDescriptor
     HRESULT InitializeFromFieldDefinition(
         const CLR_RT_FieldDef_Instance &fd,
         const CLR_RT_TypeSpec_Index *ownerTypeSpec = nullptr,
-        CLR_RT_TypeSpec_Index *elementSpec = nullptr);
+        CLR_RT_TypeSpec_Index *elementSpec = nullptr,
+        const CLR_RT_TypeDef_Index *declaringType = nullptr);
     HRESULT InitializeFromClosedSignature(
         CLR_RT_SignatureParser &parser,
         const CLR_RT_TypeSpec_Index *ownerTypeSpec,
-        CLR_RT_TypeSpec_Index *elementSpec = nullptr);
+        CLR_RT_TypeSpec_Index *elementSpec = nullptr,
+        const CLR_RT_TypeDef_Index *declaringType = nullptr,
+        const CLR_RT_MethodDef_Index *declaringMethod = nullptr);
     CLR_RT_ReflectionDef_Index GetTypeReflection(const CLR_RT_TypeSpec_Index &elementSpec) const;
     HRESULT InitializeFromSignatureParser(
         CLR_RT_SignatureParser &parser,

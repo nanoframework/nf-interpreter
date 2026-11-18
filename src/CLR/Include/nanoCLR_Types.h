@@ -535,6 +535,7 @@ enum CLR_ReflectionType
     REFLECTION_GENERICTYPE = 0x07,
     REFLECTION_TYPESPEC = 0x08,
     REFLECTION_STORAGE_PTR = 0x09,
+    REFLECTION_GENERICPARAM = 0x0A,
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
