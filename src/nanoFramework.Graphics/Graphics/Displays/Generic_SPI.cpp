@@ -31,7 +31,7 @@ void ProcessCommand(CLR_RT_HeapBlock_Array *array)
         // This is a sleep instruction
         if (*cmd == GraphicDriverCommandType::GraphicDriverCommandType_Sleep)
         {
-            OS_DELAY(*cmd * *size * 10);
+            OS_DELAY(*size * 10);
         }
         // This is the normal command
         else if (*cmd == GraphicDriverCommandType::GraphicDriverCommandType_Command)
@@ -154,11 +154,10 @@ void DisplayDriver::SetupDisplayAttributes()
     if (g_DisplayInterfaceConfig.GenericDriverCommands.Height == 0)
     {
         Attributes.ShorterSide = g_DisplayInterfaceConfig.Screen.height;
-        ;
     }
     else
     {
-        Attributes.LongerSide = g_DisplayInterfaceConfig.GenericDriverCommands.Height;
+        Attributes.ShorterSide = g_DisplayInterfaceConfig.GenericDriverCommands.Height;
     }
 
     Attributes.PowerSave = PowerSaveState::NORMAL;
