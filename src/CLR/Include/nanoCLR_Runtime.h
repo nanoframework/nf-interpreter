@@ -2013,6 +2013,46 @@ enum CLR_RT_GenericMatch
     GenericMatch_Unresolved,
 };
 
+enum CLR_RT_GenericAssign
+{
+    GenericAssign_Fail,
+    GenericAssign_Pass,
+    GenericAssign_Unknown,
+};
+
+// A type in a node stream: the root of a pre-order subtree and the array levels still to peel.
+struct CLR_RT_GenericRef
+{
+    const CLR_RT_GenericInstanceNode *node;
+    const CLR_RT_GenericInstanceNode *end;
+    int levels;
+};
+
+// Assignability between closed generic instances: variance of each argument, interface and base walks, array elements.
+struct CLR_RT_GenericAssignability
+{
+    static int SubtreeSize(const CLR_RT_GenericInstanceNode *n, const CLR_RT_GenericInstanceNode *end);
+    static int VarianceOf(const CLR_RT_TypeDef_Instance &def, int index);
+    static CLR_RT_GenericInstance *RecordOfSubtree(const CLR_RT_GenericInstanceNode *n, int size);
+
+    static bool SameClassAssignable(CLR_RT_GenericRef s, CLR_RT_GenericRef t, int depth);
+    static CLR_RT_GenericAssign AncestorSearch(
+        const CLR_RT_TypeDef_Instance &start,
+        const CLR_RT_GenericInstance *context,
+        CLR_RT_GenericRef t,
+        int depth,
+        bool &open);
+    static CLR_RT_GenericAssign Assignable(CLR_RT_GenericRef s, CLR_RT_GenericRef t, bool element, int depth);
+
+    static bool IsVariantAssignable(const CLR_RT_GenericInstance &source, const CLR_RT_GenericInstance &target);
+    static bool IsVariantWord(const CLR_RT_ReflectionDef_Index &source, const CLR_RT_ReflectionDef_Index &target);
+
+    static CLR_RT_GenericMatch MatchObjectNodes(
+        const CLR_RT_HeapBlock &ref,
+        const CLR_RT_GenericInstanceNode *nodes,
+        int count);
+};
+
 //--//
 
 struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
@@ -2280,6 +2320,8 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
         bool allowLevels = false);
 
     static CLR_RT_GenericMatch MatchGenericArguments(const CLR_RT_HeapBlock &ref, const CLR_RT_GenericTarget &target);
+
+    static int IntegralSize(CLR_UINT32 dataType);
 
     // The closed instance of the element of an array TypeSpec, cleared when the element isn't a closed generic
     // instance.

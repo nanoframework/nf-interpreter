@@ -446,6 +446,16 @@ HRESULT CLR_RT_HeapBlock_Array::IndexOf(
     NANOCLR_NOCLEANUP();
 }
 
+static bool HasSameSizeIntegralElements(const CLR_RT_HeapBlock_Array &source, const CLR_RT_HeapBlock_Array &target)
+{
+    int size = CLR_RT_TypeSystem::IntegralSize(source.m_typeOfElement);
+
+    return size != 0 && !source.m_fReference && !target.m_fReference &&
+           source.ReflectionDataConst().kind == REFLECTION_TYPE &&
+           target.ReflectionDataConst().kind == REFLECTION_TYPE &&
+           size == CLR_RT_TypeSystem::IntegralSize(target.m_typeOfElement);
+}
+
 HRESULT CLR_RT_HeapBlock_Array::Copy(
     CLR_RT_HeapBlock_Array *arraySrc,
     int indexSrc,
@@ -474,7 +484,8 @@ HRESULT CLR_RT_HeapBlock_Array::Copy(
         if (arraySrc == arrayDst && indexSrc == indexDst)
             NANOCLR_SET_AND_LEAVE(S_OK);
 
-        if (arraySrc->SameHeader(*arrayDst) && arraySrc->SameElementTypeSpec(*arrayDst))
+        if ((arraySrc->SameHeader(*arrayDst) && arraySrc->SameElementTypeSpec(*arrayDst)) ||
+            HasSameSizeIntegralElements(*arraySrc, *arrayDst))
         {
             CLR_UINT8 *dataSrc = arraySrc->GetFirstElement();
             CLR_UINT8 *dataDst = arrayDst->GetFirstElement();

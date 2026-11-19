@@ -3930,12 +3930,14 @@ static bool IsAssignableByHierarchy(CLR_RT_TypeDescriptor desc, CLR_RT_TypeDescr
         const CLR_UINT32 valueTypeFlags =
             CLR_RT_DataTypeLookup::c_OptimizedValueType | CLR_RT_DataTypeLookup::c_ValueType;
 
-        // Value-type elements are invariant, except types sharing storage (enum and its underlying type).
+        // Value-type elements are invariant, except types of the same size (integral types and enums).
         if ((c_CLR_RT_DataTypeLookup[inst.target->dataType].m_flags & valueTypeFlags) != 0 ||
             (c_CLR_RT_DataTypeLookup[instTarget.target->dataType].m_flags & valueTypeFlags) != 0)
         {
-            return inst.data == instTarget.data || (inst.target->dataType == instTarget.target->dataType &&
-                                                    inst.target->dataType != DATATYPE_VALUETYPE);
+            int size = CLR_RT_TypeSystem::IntegralSize(inst.target->dataType);
+
+            return inst.data == instTarget.data ||
+                   (size != 0 && size == CLR_RT_TypeSystem::IntegralSize(instTarget.target->dataType));
         }
 
         // Interface elements have no parent chain to reach System.Object.
