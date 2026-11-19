@@ -4406,7 +4406,7 @@ HRESULT CLR_RT_Assembly::ResolveTypeRef()
 
             const char *szName = GetString(src->name);
 
-            if (inst.assembly->FindTypeDef(szName, inst.Type(), dst->target) == false)
+            if (inst.assembly->FindTypeDef(szName, inst.Type(), dst->target, src->name) == false)
             {
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf("Resolve: unknown type: %s\r\n", szName);
@@ -4436,7 +4436,7 @@ HRESULT CLR_RT_Assembly::ResolveTypeRef()
             const char *szNameSpace = GetString(src->nameSpace);
             const char *szName = GetString(src->name);
 
-            if (assm->FindTypeDef(szName, szNameSpace, dst->target) == false)
+            if (assm->FindTypeDef(szName, szNameSpace, dst->target, src->name, src->nameSpace) == false)
             {
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf("Resolve: unknown type: %s.%s\r\n", szNameSpace, szName);
@@ -4558,7 +4558,8 @@ HRESULT CLR_RT_Assembly::ResolveFieldRef()
 #endif
             }
 
-            if (!typeSpecInstance.assembly->FindFieldDef(&typeSpec, fieldName, this, src->signature, dst->target))
+            if (!typeSpecInstance.assembly
+                     ->FindFieldDef(&typeSpec, fieldName, this, src->signature, dst->target, src->name))
             {
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf("Unknown FieldRef: %s.%s.%s\r\n", "???", "???", fieldName);
@@ -4610,7 +4611,8 @@ HRESULT CLR_RT_Assembly::ResolveFieldRef()
 #endif
 
             if (typeDefInstance.assembly
-                    ->FindFieldDef(typeDefInstance.target, fieldName, this, src->signature, dst->target) == false)
+                    ->FindFieldDef(typeDefInstance.target, fieldName, this, src->signature, dst->target, src->name) ==
+                false)
             {
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf("Unknown FieldRef: %s\r\n", fieldName);
@@ -4754,7 +4756,8 @@ HRESULT CLR_RT_Assembly::ResolveMethodRef()
                     this,
                     src->signature,
                     dst->target,
-                    dummyAssemblyIndex))
+                    dummyAssemblyIndex,
+                    src->name))
             {
                 fGot = true;
 
@@ -4769,8 +4772,13 @@ HRESULT CLR_RT_Assembly::ResolveMethodRef()
                 {
                     while (NANOCLR_INDEX_IS_VALID(typeDefInst))
                     {
-                        if (typeDefInst.assembly
-                                ->FindMethodDef(typeDefInst.target, methodName, this, src->signature, dst->target))
+                        if (typeDefInst.assembly->FindMethodDef(
+                                typeDefInst.target,
+                                methodName,
+                                this,
+                                src->signature,
+                                dst->target,
+                                src->name))
                         {
                             fGot = true;
                             dst->genericType.data = typeSpec.data;
@@ -4789,8 +4797,13 @@ HRESULT CLR_RT_Assembly::ResolveMethodRef()
                 {
                     while (NANOCLR_INDEX_IS_VALID(typeDefInst))
                     {
-                        if (typeDefInst.assembly
-                                ->FindMethodDef(typeDefInst.target, methodName, this, CLR_SIG_INVALID, dst->target))
+                        if (typeDefInst.assembly->FindMethodDef(
+                                typeDefInst.target,
+                                methodName,
+                                this,
+                                CLR_SIG_INVALID,
+                                dst->target,
+                                src->name))
                         {
                             fGot = true;
                             dst->genericType.data = typeSpec.data;
@@ -4870,8 +4883,13 @@ HRESULT CLR_RT_Assembly::ResolveMethodRef()
 
             while (NANOCLR_INDEX_IS_VALID(searchInstance))
             {
-                if (searchInstance.assembly
-                        ->FindMethodDef(searchInstance.target, methodName, this, src->signature, dst->target))
+                if (searchInstance.assembly->FindMethodDef(
+                        searchInstance.target,
+                        methodName,
+                        this,
+                        src->signature,
+                        dst->target,
+                        src->name))
                 {
                     fGot = true;
 
@@ -6259,7 +6277,12 @@ CLR_UINT32 CLR_RT_Assembly::ComputeAssemblyHash(const CLR_RECORD_ASSEMBLYREF *ar
 
 //--//
 
-bool CLR_RT_Assembly::FindTypeDef(const char *typeName, const char *nameSpace, CLR_RT_TypeDef_Index &index)
+bool CLR_RT_Assembly::FindTypeDef(
+    const char *typeName,
+    const char *nameSpace,
+    CLR_RT_TypeDef_Index &index,
+    CLR_STRING typeNameId,
+    CLR_STRING nameSpaceId)
 {
     NATIVE_PROFILE_CLR_CORE();
     const CLR_RECORD_TYPEDEF *target = GetTypeDef(0);
@@ -6329,10 +6352,8 @@ bool CLR_RT_Assembly::FindTypeDef(const char *typeName, const char *nameSpace, C
         }
         else if (!target->HasValidEnclosingType())
         {
-            const char *szNameSpace = GetString(target->nameSpace);
-            const char *szName = GetString(target->name);
-
-            if (!strcmp(szName, typeName) && !strcmp(szNameSpace, nameSpace))
+            if (StringEquals(target->name, typeName, typeNameId) &&
+                StringEquals(target->nameSpace, nameSpace, nameSpaceId))
             {
                 index.Set(assemblyIndex, i);
                 return true;
@@ -6344,7 +6365,11 @@ bool CLR_RT_Assembly::FindTypeDef(const char *typeName, const char *nameSpace, C
     return false;
 }
 
-bool CLR_RT_Assembly::FindTypeDef(const char *typeName, CLR_INDEX scope, CLR_RT_TypeDef_Index &index)
+bool CLR_RT_Assembly::FindTypeDef(
+    const char *typeName,
+    CLR_INDEX scope,
+    CLR_RT_TypeDef_Index &index,
+    CLR_STRING typeNameId)
 {
     NATIVE_PROFILE_CLR_CORE();
     const CLR_RECORD_TYPEDEF *target = GetTypeDef(0);
@@ -6368,9 +6393,7 @@ bool CLR_RT_Assembly::FindTypeDef(const char *typeName, CLR_INDEX scope, CLR_RT_
 
         if (enclosingTypeIndex == scope)
         {
-            const char *szName = GetString(target->name);
-
-            if (!strcmp(szName, typeName))
+            if (StringEquals(target->name, typeName, typeNameId))
             {
                 index.Set(assemblyIndex, i);
 
@@ -6441,16 +6464,15 @@ static bool local_FindFieldDef(
     const char *szText,
     CLR_RT_Assembly *base,
     CLR_INDEX sig,
-    CLR_RT_FieldDef_Index &res)
+    CLR_RT_FieldDef_Index &res,
+    CLR_STRING textId)
 {
     NATIVE_PROFILE_CLR_CORE();
     const CLR_RECORD_FIELDDEF *fd = assm->GetFieldDef(first);
 
     for (CLR_UINT32 i = 0; i < num; i++, fd++)
     {
-        const char *fieldName = assm->GetString(fd->name);
-
-        if (!strcmp(fieldName, szText))
+        if (assm->StringEquals(fd->name, szText, textId))
         {
             if (base)
             {
@@ -6481,16 +6503,25 @@ bool CLR_RT_Assembly::FindFieldDef(
     const char *fieldName,
     CLR_RT_Assembly *base,
     CLR_INDEX sig,
-    CLR_RT_FieldDef_Index &index)
+    CLR_RT_FieldDef_Index &index,
+    CLR_STRING fieldNameId)
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    if (local_FindFieldDef(this, td->firstInstanceField, td->instanceFieldsCount, fieldName, base, sig, index))
+    if (local_FindFieldDef(
+            this,
+            td->firstInstanceField,
+            td->instanceFieldsCount,
+            fieldName,
+            base,
+            sig,
+            index,
+            fieldNameId))
     {
         return true;
     }
 
-    if (local_FindFieldDef(this, td->firstStaticField, td->staticFieldsCount, fieldName, base, sig, index))
+    if (local_FindFieldDef(this, td->firstStaticField, td->staticFieldsCount, fieldName, base, sig, index, fieldNameId))
     {
         return true;
     }
@@ -6505,7 +6536,8 @@ bool CLR_RT_Assembly::FindFieldDef(
     const char *fieldName,
     CLR_RT_Assembly *base,
     CLR_SIG sig,
-    CLR_RT_FieldDef_Index &index)
+    CLR_RT_FieldDef_Index &index,
+    CLR_STRING fieldNameId)
 {
     NATIVE_PROFILE_CLR_CORE();
 
@@ -6548,10 +6580,8 @@ bool CLR_RT_Assembly::FindFieldDef(
 
     for (int i = 0; i < tablesSize[TBL_FieldDef]; i++, fd++)
     {
-        const char *tempTypeName = GetString(fd->type);
-        const char *tempFieldName = GetString(fd->name);
-
-        if (!strcmp(typeName, tempTypeName) && !strcmp(fieldName, tempFieldName))
+        if (StringEquals(fd->type, typeName, typeDefInstance.target->name) &&
+            StringEquals(fd->name, fieldName, fieldNameId))
         {
             if (base)
             {
@@ -6583,7 +6613,8 @@ bool CLR_RT_Assembly::FindMethodDef(
     const char *methodName,
     CLR_RT_Assembly *base,
     CLR_SIG sig,
-    CLR_RT_MethodDef_Index &index)
+    CLR_RT_MethodDef_Index &index,
+    CLR_STRING methodNameId)
 {
     NATIVE_PROFILE_CLR_CORE();
     int i;
@@ -6592,9 +6623,7 @@ bool CLR_RT_Assembly::FindMethodDef(
 
     for (i = 0; i < num; i++, md++)
     {
-        const char *tempMethodName = GetString(md->name);
-
-        if (!strcmp(methodName, tempMethodName))
+        if (StringEquals(md->name, methodName, methodNameId))
         {
             bool fMatch = true;
 
@@ -6628,7 +6657,8 @@ bool CLR_RT_Assembly::FindMethodDef(
     CLR_RT_Assembly *base,
     CLR_SIG sig,
     CLR_RT_MethodDef_Index &index,
-    CLR_UINT32 &assmIndex)
+    CLR_UINT32 &assmIndex,
+    CLR_STRING methodNameId)
 {
     NATIVE_PROFILE_CLR_CORE();
 
@@ -6680,7 +6710,7 @@ bool CLR_RT_Assembly::FindMethodDef(
 
     while (NANOCLR_INDEX_IS_VALID(typeDefInstance))
     {
-        if (typeDefInstance.assembly->FindMethodDef(typeDefInstance.target, methodName, this, sig, index))
+        if (typeDefInstance.assembly->FindMethodDef(typeDefInstance.target, methodName, this, sig, index, methodNameId))
         {
             assmIndex = typeDefInstance.assembly->assemblyIndex;
 
