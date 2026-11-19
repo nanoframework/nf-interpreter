@@ -9360,6 +9360,28 @@ CLR_RT_GenericInstance *CLR_RT_TypeSystem::FindOrCreateGenericBase(
         (childContext != nullptr && NANOCLR_INDEX_IS_VALID(*childContext)) ? childContext : nullptr);
 }
 
+// The size of an integral primitive or of the underlying type of an enum, 0 for anything else.
+int CLR_RT_TypeSystem::IntegralSize(CLR_UINT32 dataType)
+{
+    switch (dataType)
+    {
+        case DATATYPE_I1:
+        case DATATYPE_U1:
+            return 1;
+        case DATATYPE_I2:
+        case DATATYPE_U2:
+            return 2;
+        case DATATYPE_I4:
+        case DATATYPE_U4:
+            return 4;
+        case DATATYPE_I8:
+        case DATATYPE_U8:
+            return 8;
+        default:
+            return 0;
+    }
+}
+
 bool CLR_RT_TypeSystem::IsSameGenericInstance(const CLR_RT_TypeSpec_Index &left, const CLR_RT_TypeSpec_Index &right)
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -11132,41 +11154,6 @@ HRESULT CLR_RT_TypeSystem::AppendInterfaceWords(
     return S_OK;
 }
 
-// The size of an integral primitive or of the underlying type of an enum, 0 for anything else.
-static int IntegralSize(const CLR_RT_TypeDef_Instance &td)
-{
-    switch (td.target->dataType)
-    {
-        case DATATYPE_I1:
-        case DATATYPE_U1:
-            return 1;
-        case DATATYPE_I2:
-        case DATATYPE_U2:
-            return 2;
-        case DATATYPE_I4:
-        case DATATYPE_U4:
-            return 4;
-        case DATATYPE_I8:
-        case DATATYPE_U8:
-            return 8;
-        default:
-            return 0;
-    }
-}
-
-static bool HasVariantParameter(const CLR_RT_TypeDef_Instance &td)
-{
-    for (int i = 0; i < td.target->genericParamCount; i++)
-    {
-        if ((td.assembly->GetGenericParam(td.target->firstGenericParam + i)->flags & 0x3) != 0)
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 // The type word of an argument of a closed instance.
 static HRESULT GetArgumentWord(const CLR_RT_GenericInstance &record, int argument, CLR_RT_ReflectionDef_Index &word)
 {
@@ -11274,7 +11261,6 @@ HRESULT CLR_RT_TypeSystem::IsAssignableFrom(
     CLR_RT_ReflectionDef_Index source = sourceType;
     CLR_RT_ReflectionDef_Index words[32];
     bool inArray = false;
-    bool unsupported = false;
     HRESULT hr;
 
     result = false;
@@ -11348,11 +11334,12 @@ HRESULT CLR_RT_TypeSystem::IsAssignableFrom(
             // the element types of arrays: a value type is only assignable to itself
             if (sourceDef.target->IsValueTypeOrEnum())
             {
-                int size = IntegralSize(sourceDef);
+                int size = IntegralSize(sourceDef.target->dataType);
 
-                return (size != 0 && size == IntegralSize(targetDef) && targetDef.target->IsValueTypeOrEnum())
-                           ? CLR_E_NOT_SUPPORTED
-                           : S_OK;
+                result = size != 0 && size == IntegralSize(targetDef.target->dataType) &&
+                         targetDef.target->IsValueTypeOrEnum();
+
+                return S_OK;
             }
 
             if (targetDef.target->IsValueTypeOrEnum())
@@ -11428,10 +11415,11 @@ HRESULT CLR_RT_TypeSystem::IsAssignableFrom(
             return S_OK;
         }
 
-        // an exact match found later wins over a comparison that would need variance
-        if (sourceDef.data == targetDef.data && HasVariantParameter(targetDef))
+        if (sourceDef.data == targetDef.data && CLR_RT_GenericAssignability::IsVariantWord(source, target))
         {
-            unsupported = true;
+            result = true;
+
+            return S_OK;
         }
 
         if (target.kind == REFLECTION_TYPESPEC && targetDef.data == g_CLR_RT_WellKnownTypes.Nullable.data)
@@ -11461,23 +11449,15 @@ HRESULT CLR_RT_TypeSystem::IsAssignableFrom(
 
             for (int i = 0; i < count; i++)
             {
-                CLR_RT_TypeDef_Instance candidate{};
-
-                if (IsSameTypeWord(words[i], target))
+                if (IsSameTypeWord(words[i], target) || CLR_RT_GenericAssignability::IsVariantWord(words[i], target))
                 {
                     result = true;
 
                     return S_OK;
                 }
-
-                if (SUCCEEDED(GetWordDefinition(words[i], candidate)) && candidate.data == targetDef.data &&
-                    HasVariantParameter(targetDef))
-                {
-                    unsupported = true;
-                }
             }
 
-            return unsupported ? CLR_E_NOT_SUPPORTED : S_OK;
+            return S_OK;
         }
 
         // a class or a struct: the base chain of the source, of each parameter that constrains it
@@ -11505,7 +11485,6 @@ HRESULT CLR_RT_TypeSystem::IsAssignableFrom(
                 for (int depth = 0; depth < c_MaxInheritanceDepth && !ended; depth++)
                 {
                     CLR_RT_ReflectionDef_Index parent;
-                    CLR_RT_TypeDef_Instance candidate{};
 
                     hr = GetBaseTypeWord(current, parent);
 
@@ -11521,17 +11500,11 @@ HRESULT CLR_RT_TypeSystem::IsAssignableFrom(
                         break;
                     }
 
-                    if (IsSameTypeWord(parent, target))
+                    if (IsSameTypeWord(parent, target) || CLR_RT_GenericAssignability::IsVariantWord(parent, target))
                     {
                         result = true;
 
                         return S_OK;
-                    }
-
-                    if (SUCCEEDED(GetWordDefinition(parent, candidate)) && candidate.data == targetDef.data &&
-                        HasVariantParameter(targetDef))
-                    {
-                        unsupported = true;
                     }
 
                     current = parent;
@@ -11543,7 +11516,7 @@ HRESULT CLR_RT_TypeSystem::IsAssignableFrom(
                 }
             }
 
-            return unsupported ? CLR_E_NOT_SUPPORTED : S_OK;
+            return S_OK;
         }
     }
 
@@ -11884,96 +11857,321 @@ HRESULT CLR_RT_TypeSystem::ResolveParameterArgument(
     return S_OK;
 }
 
-// The interfaces of an object's class and of its parents, closed level by level, against a closed interface target.
-static CLR_RT_GenericMatch MatchInterfaceArguments(
-    CLR_RT_TypeDef_Instance inst,
-    CLR_RT_GenericInstance *own,
-    const CLR_RT_GenericTarget &target)
+// The number of nodes of the subtree rooted at n, 0 when the stream ends inside it.
+int CLR_RT_GenericAssignability::SubtreeSize(const CLR_RT_GenericInstanceNode *n, const CLR_RT_GenericInstanceNode *end)
 {
-    const CLR_RT_TypeDef_Index &targetClass = target.m_nodes[0].Class;
-    bool different = false;
-    bool openAtOwnLevel = false;
-    int level = 0;
+    int need = 1;
+    int count = 0;
 
-    CLR_RT_GenericInstance *levelContext = own;
-
-    do
+    while (need > 0 && n + count < end)
     {
-        CLR_RT_SignatureParser parser{};
+        need += n[count].ArgCount - 1;
+        count++;
+    }
 
-        parser.Initialize_Interfaces(inst.assembly, inst.target);
+    return need == 0 ? count : 0;
+}
 
-        while (parser.Available() > 0)
+int CLR_RT_GenericAssignability::VarianceOf(const CLR_RT_TypeDef_Instance &def, int index)
+{
+    return index < def.target->genericParamCount
+               ? (def.assembly->GetGenericParam(def.target->firstGenericParam + index)->flags & 0x3)
+               : 0;
+}
+
+CLR_RT_GenericInstance *CLR_RT_GenericAssignability::RecordOfSubtree(const CLR_RT_GenericInstanceNode *n, int size)
+{
+    CLR_RT_GenericInstanceNode copy[CLR_RT_GenericInstance::c_MaxNodes];
+
+    memcpy(copy, n, sizeof(CLR_RT_GenericInstanceNode) * size);
+    copy[0].Levels = 0;
+
+    return CLR_RT_TypeSystem::FindOrCreateGenericInstanceByNodes(copy, size);
+}
+
+// Two instances of the same generic definition: each argument identical, or compatible through its variance.
+bool CLR_RT_GenericAssignability::SameClassAssignable(CLR_RT_GenericRef s, CLR_RT_GenericRef t, int depth)
+{
+    CLR_RT_TypeDef_Instance def{};
+    const CLR_RT_GenericInstanceNode *sa = s.node + 1;
+    const CLR_RT_GenericInstanceNode *ta = t.node + 1;
+
+    if (s.node->Class.data != t.node->Class.data || s.node->ArgCount != t.node->ArgCount ||
+        !def.InitializeFromIndex(t.node->Class))
+    {
+        return false;
+    }
+
+    for (int i = 0; i < t.node->ArgCount; i++)
+    {
+        int sSize = SubtreeSize(sa, s.end);
+        int tSize = SubtreeSize(ta, t.end);
+
+        if (sSize == 0 || tSize == 0)
         {
-            CLR_RT_SignatureParser peek = parser;
-            CLR_RT_SignatureParser::Element elem;
-            CLR_UINT32 tk = CLR_TkFromStream(peek.Signature);
-
-            if (FAILED(parser.Advance(elem)))
-            {
-                break;
-            }
-
-            if (elem.Class.data != targetClass.data || CLR_TypeFromTk(tk) != TBL_TypeSpec)
-            {
-                continue;
-            }
-
-            CLR_RT_TypeSpec_Index entryIndex;
-            CLR_RT_TypeSpec_Instance entry{};
-            CLR_RT_SignatureParser at{};
-            CLR_RT_GenericTarget entryTarget;
-
-            entryIndex.Set(inst.assembly->assemblyIndex, CLR_DataFromTk(tk));
-
-            if (!entry.InitializeFromIndex(entryIndex))
-            {
-                continue;
-            }
-
-            at.Initialize_TypeSpec(entry);
-
-            HRESULT hr = CLR_RT_TypeSystem::CollectGenericTarget(
-                at,
-                levelContext != nullptr ? &levelContext->m_self : nullptr,
-                nullptr,
-                entryTarget);
-
-            if (hr != S_OK || entryTarget.m_count == 0)
-            {
-                openAtOwnLevel = openAtOwnLevel || level == 0;
-                continue;
-            }
-
-            if (entryTarget.m_count == target.m_count &&
-                SameGenericInstanceNodes(entryTarget.m_nodes, target.m_nodes, target.m_count))
-            {
-                return GenericMatch_Same;
-            }
-
-            different = true;
+            return false;
         }
 
-        CLR_RT_GenericInstance *closedBase =
-            CLR_RT_TypeSystem::FindOrCreateGenericBase(inst, levelContext != nullptr ? &levelContext->m_self : nullptr);
+        if (sSize != tSize || memcmp(sa, ta, sizeof(CLR_RT_GenericInstanceNode) * tSize) != 0)
+        {
+            int variance = VarianceOf(def, i);
+            CLR_RT_GenericRef sArg = {sa, s.end, sa->Levels};
+            CLR_RT_GenericRef tArg = {ta, t.end, ta->Levels};
 
-        level++;
+            if (variance == 0 || (variance == 1 ? Assignable(sArg, tArg, false, depth + 1)
+                                                : Assignable(tArg, sArg, false, depth + 1)) != GenericAssign_Pass)
+            {
+                return false;
+            }
+        }
+
+        sa += sSize;
+        ta += tSize;
+    }
+
+    return true;
+}
+
+// The interfaces and the generic bases of a class, closed level by level, against the target. Pass on the first one that
+// is compatible, Fail when some had the target's class and none was, Unknown when none could be read or closed.
+CLR_RT_GenericAssign CLR_RT_GenericAssignability::AncestorSearch(
+    const CLR_RT_TypeDef_Instance &start,
+    const CLR_RT_GenericInstance *context,
+    CLR_RT_GenericRef t,
+    int depth,
+    bool &open)
+{
+    const CLR_RT_TypeDef_Index &targetClass = t.node->Class;
+    CLR_RT_TypeDef_Instance inst = start;
+    CLR_RT_TypeDef_Instance targetDef{};
+    bool found = false;
+
+    if (!targetDef.InitializeFromIndex(targetClass))
+    {
+        return GenericAssign_Unknown;
+    }
+
+    const bool wantInterface = targetDef.target->IsInterface();
+
+    for (int level = 0; level < c_MaxInheritanceDepth; level++)
+    {
+        const CLR_RT_TypeSpec_Index *self = context != nullptr ? &context->m_self : nullptr;
+
+        if (wantInterface)
+        {
+            CLR_RT_SignatureParser parser{};
+
+            parser.Initialize_Interfaces(inst.assembly, inst.target);
+
+            while (parser.Available() > 0)
+            {
+                CLR_RT_SignatureParser peek = parser;
+                CLR_RT_SignatureParser::Element elem;
+                CLR_UINT32 tk = CLR_TkFromStream(peek.Signature);
+
+                if (FAILED(parser.Advance(elem)))
+                {
+                    break;
+                }
+
+                if (elem.Class.data != targetClass.data || CLR_TypeFromTk(tk) != TBL_TypeSpec)
+                {
+                    continue;
+                }
+
+                CLR_RT_TypeSpec_Index entryIndex;
+                CLR_RT_TypeSpec_Instance entry{};
+                CLR_RT_SignatureParser at{};
+                CLR_RT_GenericTarget entryTarget;
+
+                entryIndex.Set(inst.assembly->assemblyIndex, CLR_DataFromTk(tk));
+
+                if (!entry.InitializeFromIndex(entryIndex))
+                {
+                    continue;
+                }
+
+                at.Initialize_TypeSpec(entry);
+
+                if (CLR_RT_TypeSystem::CollectGenericTarget(at, self, nullptr, entryTarget) != S_OK ||
+                    entryTarget.m_count == 0)
+                {
+                    open = open || level == 0;
+                    continue;
+                }
+
+                CLR_RT_GenericRef candidate = {entryTarget.m_nodes, entryTarget.m_nodes + entryTarget.m_count, 0};
+
+                if (SameClassAssignable(candidate, t, depth))
+                {
+                    return GenericAssign_Pass;
+                }
+
+                found = true;
+            }
+        }
+
+        const bool hasTypeSpecBase = inst.target->HasValidExtendsType() && inst.target->ExtendsIsTypeSpec();
+        CLR_RT_GenericInstance *closedBase = CLR_RT_TypeSystem::FindOrCreateGenericBase(inst, self);
 
         if (!inst.SwitchToParent())
         {
             break;
         }
 
-        levelContext = closedBase;
-    } while (level < c_MaxInheritanceDepth);
+        if (!wantInterface && inst.data == targetClass.data)
+        {
+            if (closedBase == nullptr)
+            {
+                open = open || hasTypeSpecBase;
 
-    if (different)
-    {
-        return GenericMatch_Different;
+                return GenericAssign_Unknown;
+            }
+
+            CLR_RT_GenericRef candidate = {closedBase->m_nodes, closedBase->m_nodes + closedBase->m_nodeCount, 0};
+
+            return SameClassAssignable(candidate, t, depth) ? GenericAssign_Pass : GenericAssign_Fail;
+        }
+
+        context = closedBase;
     }
 
-    return openAtOwnLevel ? GenericMatch_NoTypeSpec : GenericMatch_Unresolved;
+    return found ? GenericAssign_Fail : GenericAssign_Unknown;
 }
+
+// A value of type s stored in a location of type t, both reference types or, for the elements of arrays, value types
+// of the same size. Depth is bounded by the nesting of the registry.
+CLR_RT_GenericAssign CLR_RT_GenericAssignability::Assignable(CLR_RT_GenericRef s, CLR_RT_GenericRef t, bool element, int depth)
+{
+    CLR_RT_TypeDef_Instance sDef{};
+    CLR_RT_TypeDef_Instance tDef{};
+    int sSize = SubtreeSize(s.node, s.end);
+    int tSize = SubtreeSize(t.node, t.end);
+    bool open = false;
+
+    if (sSize == 0 || tSize == 0 || depth > c_MaxGenericNestingDepth + 1 || s.node->Class.data == 0 ||
+        t.node->Class.data == 0)
+    {
+        return GenericAssign_Fail;
+    }
+
+    if (s.levels == t.levels && sSize == tSize && s.node->Class.data == t.node->Class.data &&
+        (sSize == 1 || memcmp(s.node + 1, t.node + 1, sizeof(CLR_RT_GenericInstanceNode) * (sSize - 1)) == 0))
+    {
+        return GenericAssign_Pass;
+    }
+
+    while (s.levels > 0 && t.levels > 0)
+    {
+        s.levels--;
+        t.levels--;
+        element = true;
+    }
+
+    if (t.levels > 0 || !tDef.InitializeFromIndex(t.node->Class))
+    {
+        return GenericAssign_Fail;
+    }
+
+    if (s.levels > 0)
+    {
+        if (tDef.data == g_CLR_RT_WellKnownTypes.Object.data || tDef.data == g_CLR_RT_WellKnownTypes.Array.data)
+        {
+            return GenericAssign_Pass;
+        }
+
+        if (t.node->ArgCount == 0)
+        {
+            return CLR_RT_ExecutionEngine::IsInstanceOf(g_CLR_RT_WellKnownTypes.Array, t.node->Class) ? GenericAssign_Pass
+                                                                                                    : GenericAssign_Fail;
+        }
+
+        if (t.node->ArgCount == 1 && CLR_RT_TypeSystem::IsArrayGenericInterface(tDef))
+        {
+            CLR_RT_GenericRef elementRef = {t.node + 1, t.end, t.node[1].Levels};
+
+            s.levels--;
+
+            return Assignable(s, elementRef, true, depth + 1);
+        }
+
+        return GenericAssign_Fail;
+    }
+
+    if (!sDef.InitializeFromIndex(s.node->Class))
+    {
+        return GenericAssign_Fail;
+    }
+
+    if (sDef.target->IsValueTypeOrEnum() || tDef.target->IsValueTypeOrEnum())
+    {
+        int size = CLR_RT_TypeSystem::IntegralSize(sDef.target->dataType);
+
+        return (element && size != 0 && size == CLR_RT_TypeSystem::IntegralSize(tDef.target->dataType))
+                   ? GenericAssign_Pass
+                   : GenericAssign_Fail;
+    }
+
+    if (tDef.data == g_CLR_RT_WellKnownTypes.Object.data)
+    {
+        return GenericAssign_Pass;
+    }
+
+    if (s.node->Class.data == t.node->Class.data)
+    {
+        return SameClassAssignable(s, t, depth) ? GenericAssign_Pass : GenericAssign_Fail;
+    }
+
+    if (t.node->ArgCount == 0)
+    {
+        return CLR_RT_ExecutionEngine::IsInstanceOf(s.node->Class, t.node->Class) ? GenericAssign_Pass : GenericAssign_Fail;
+    }
+
+    CLR_RT_GenericInstance *record = nullptr;
+
+    if (s.node->ArgCount > 0)
+    {
+        record = RecordOfSubtree(s.node, sSize);
+
+        if (record == nullptr)
+        {
+            return GenericAssign_Fail;
+        }
+    }
+
+    CLR_RT_GenericAssign result = AncestorSearch(sDef, record, t, depth, open);
+
+    // a hierarchy that was read completely and doesn't hold the target is a definite answer
+    return (result == GenericAssign_Unknown && !open) ? GenericAssign_Fail : result;
+}
+
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+bool CLR_RT_GenericAssignability::IsVariantAssignable(
+    const CLR_RT_GenericInstance &source,
+    const CLR_RT_GenericInstance &target)
+{
+    CLR_RT_GenericRef s = {source.m_nodes, source.m_nodes + source.m_nodeCount, 0};
+    CLR_RT_GenericRef t = {target.m_nodes, target.m_nodes + target.m_nodeCount, 0};
+
+    return ((source.m_flags | target.m_flags) & CLR_RT_GenericInstance::c_Open) == 0 && SameClassAssignable(s, t, 0);
+}
+
+bool CLR_RT_GenericAssignability::IsVariantWord(
+    const CLR_RT_ReflectionDef_Index &source,
+    const CLR_RT_ReflectionDef_Index &target)
+{
+    if (source.kind != REFLECTION_TYPESPEC || target.kind != REFLECTION_TYPESPEC || source.levels != 0 ||
+        target.levels != 0)
+    {
+        return false;
+    }
+
+    CLR_RT_GenericInstance *s = RecordOfTypeSpec(source.data.typeSpec);
+    CLR_RT_GenericInstance *t = RecordOfTypeSpec(target.data.typeSpec);
+
+    return s != nullptr && t != nullptr && IsVariantAssignable(*s, *t);
+}
+#endif
 
 bool CLR_RT_TypeSystem::IsElementInstanceAssignable(
     const CLR_RT_TypeSpec_Index &actual,
@@ -11989,64 +12187,122 @@ bool CLR_RT_TypeSystem::IsElementInstanceAssignable(
         return true;
     }
 
-    // another instantiation of the same generic type
-    if (current->m_nodes[0].Class.data == wanted->m_nodes[0].Class.data)
+    CLR_RT_GenericRef s = {current->m_nodes, current->m_nodes + current->m_nodeCount, 0};
+    CLR_RT_GenericRef t = {wanted->m_nodes, wanted->m_nodes + wanted->m_nodeCount, 0};
+
+    return CLR_RT_GenericAssignability::Assignable(s, t, true, 0) != GenericAssign_Fail;
+}
+
+CLR_RT_GenericMatch CLR_RT_GenericAssignability::MatchObjectNodes(const CLR_RT_HeapBlock &ref, const CLR_RT_GenericInstanceNode *nodes, int count)
+{
+    const CLR_RT_HeapBlock *obj = &ref;
+    CLR_RT_GenericInstance *own = nullptr;
+    CLR_RT_TypeDef_Instance inst{};
+    CLR_RT_GenericRef t = {nodes, nodes + count, 0};
+    bool open = false;
+    CLR_RT_GenericAssign result;
+
+    while (obj->DataType() == DATATYPE_OBJECT || obj->DataType() == DATATYPE_BYREF)
     {
-        return false;
+        obj = obj->Dereference();
+
+        if (obj == nullptr)
+        {
+            return GenericMatch_Unresolved;
+        }
     }
 
+    if (count == 0)
     {
-        CLR_RT_TypeDef_Instance wantedDef{};
-        CLR_RT_TypeDef_Instance currentDef{};
+        return GenericMatch_Unresolved;
+    }
 
-        if (wantedDef.InitializeFromIndex(wanted->m_nodes[0].Class) &&
-            (wantedDef.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
-                CLR_RECORD_TYPEDEF::TD_Semantics_Interface &&
-            currentDef.InitializeFromIndex(current->m_nodes[0].Class))
+    if (obj->DataType() == DATATYPE_SZARRAY)
+    {
+        const CLR_RT_ReflectionDef_Index &reflex = obj->ReflectionDataConst();
+        const CLR_RT_TypeSpec_Index *elementSpec = ((const CLR_RT_HeapBlock_Array *)obj)->ElementTypeSpec();
+        CLR_RT_GenericInstance *element = elementSpec != nullptr ? RecordOfTypeSpec(*elementSpec) : nullptr;
+        CLR_RT_GenericInstanceNode single{};
+        CLR_RT_GenericRef s;
+
+        if (nodes[0].ArgCount != 1 || count < 2 || reflex.levels == 0)
         {
-            CLR_RT_GenericTarget target;
+            return GenericMatch_Unresolved;
+        }
 
-            target.m_count = wanted->m_nodeCount;
-            memcpy(target.m_nodes, wanted->m_nodes, sizeof(CLR_RT_GenericInstanceNode) * wanted->m_nodeCount);
+        if (element != nullptr)
+        {
+            s = {element->m_nodes, element->m_nodes + element->m_nodeCount, reflex.levels};
+        }
+        else
+        {
+            if (!inst.InitializeFromIndex(reflex.data.type))
+            {
+                return GenericMatch_Unresolved;
+            }
 
-            return MatchInterfaceArguments(currentDef, current, target) != GenericMatch_Different;
+            if (inst.target->genericParamCount > 0)
+            {
+                return GenericMatch_NoTypeSpec;
+            }
+
+            single.Class = reflex.data.type;
+            s = {&single, &single + 1, reflex.levels};
+        }
+
+        result = Assignable(s, t, false, 0);
+
+        return result == GenericAssign_Pass ? GenericMatch_Same
+                                      : (result == GenericAssign_Fail ? GenericMatch_Different : GenericMatch_Unresolved);
+    }
+
+    if ((obj->DataType() != DATATYPE_CLASS && obj->DataType() != DATATYPE_VALUETYPE) ||
+        !inst.InitializeFromIndex(obj->ObjectCls()))
+    {
+        return GenericMatch_Unresolved;
+    }
+
+    // A stored TypeSpec of another class is the context of whoever created the object, not its own.
+    if (obj->IsAGenericInstance())
+    {
+        CLR_RT_TypeSpec_Instance stored{};
+
+        if (stored.InitializeFromIndex(obj->ObjectGenericType()))
+        {
+            own = CLR_RT_TypeSystem::FindOrCreateGenericInstance(stored);
+
+            if (own != nullptr && own->m_nodes[0].Class.data != inst.data)
+            {
+                own = nullptr;
+            }
         }
     }
 
-    // a generic base class of the element, closed level by level; interfaces and bases that aren't generic instances
-    // aren't compared, the TypeDefs were already checked
-    for (int depth = 0; depth < c_MaxInheritanceDepth; depth++)
+    if (inst.data == nodes[0].Class.data)
     {
-        CLR_RT_TypeDef_Instance definition{};
-        CLR_RT_GenericInstance *parent;
-
-        if (!definition.InitializeFromIndex(current->m_nodes[0].Class))
+        if (own == nullptr)
         {
-            break;
+            return GenericMatch_NoTypeSpec;
         }
 
-        parent = FindOrCreateGenericBase(definition, &current->m_self);
-
-        if (parent == nullptr)
+        if (own->m_nodeCount == count && memcmp(own->m_nodes, nodes, sizeof(CLR_RT_GenericInstanceNode) * count) == 0)
         {
-            break;
+            return GenericMatch_Same;
         }
 
-        if (parent->m_nodeCount == wanted->m_nodeCount &&
-            SameGenericInstanceNodes(parent->m_nodes, wanted->m_nodes, wanted->m_nodeCount))
-        {
-            return true;
-        }
+        CLR_RT_GenericRef s = {own->m_nodes, own->m_nodes + own->m_nodeCount, 0};
 
-        if (parent->m_nodes[0].Class.data == wanted->m_nodes[0].Class.data)
-        {
-            return false;
-        }
-
-        current = parent;
+        return SameClassAssignable(s, t, 0) ? GenericMatch_Same : GenericMatch_Different;
     }
 
-    return true;
+    result = AncestorSearch(inst, own, t, 0, open);
+
+    if (result == GenericAssign_Unknown)
+    {
+        return open ? GenericMatch_NoTypeSpec : GenericMatch_Unresolved;
+    }
+
+    return result == GenericAssign_Pass ? GenericMatch_Same : GenericMatch_Different;
 }
 
 bool CLR_RT_TypeSystem::ElementMatchesArraySpec(const CLR_RT_HeapBlock &object, const CLR_RT_TypeSpec_Index &element)
@@ -12054,7 +12310,6 @@ bool CLR_RT_TypeSystem::ElementMatchesArraySpec(const CLR_RT_HeapBlock &object, 
     NATIVE_PROFILE_CLR_CORE();
 
     CLR_RT_GenericInstance *record = RecordOfTypeSpec(element);
-    CLR_RT_GenericTarget target;
     const CLR_RT_HeapBlock *obj = &object;
 
     if (record == nullptr)
@@ -12075,10 +12330,7 @@ bool CLR_RT_TypeSystem::ElementMatchesArraySpec(const CLR_RT_HeapBlock &object, 
         return actual == nullptr || IsElementInstanceAssignable(*actual, element);
     }
 
-    target.m_count = record->m_nodeCount;
-    memcpy(target.m_nodes, record->m_nodes, sizeof(CLR_RT_GenericInstanceNode) * record->m_nodeCount);
-
-    return MatchGenericArguments(object, target) != GenericMatch_Different;
+    return CLR_RT_GenericAssignability::MatchObjectNodes(object, record->m_nodes, record->m_nodeCount) != GenericMatch_Different;
 }
 
 CLR_RT_GenericMatch CLR_RT_TypeSystem::MatchGenericArguments(
@@ -12087,179 +12339,7 @@ CLR_RT_GenericMatch CLR_RT_TypeSystem::MatchGenericArguments(
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    const CLR_RT_HeapBlock *obj = &ref;
-    const CLR_RT_TypeDef_Index &targetClass = target.m_nodes[0].Class;
-    CLR_RT_GenericInstance *own = nullptr;
-    CLR_RT_TypeDef_Instance inst{};
-    CLR_RT_TypeDef_Instance targetDef{};
-
-    while (obj->DataType() == DATATYPE_OBJECT || obj->DataType() == DATATYPE_BYREF)
-    {
-        obj = obj->Dereference();
-
-        if (obj == nullptr)
-        {
-            return GenericMatch_Unresolved;
-        }
-    }
-
-    if (target.m_count == 0)
-    {
-        return GenericMatch_Unresolved;
-    }
-
-    if (obj->DataType() == DATATYPE_SZARRAY)
-    {
-        const CLR_RT_ReflectionDef_Index &reflex = obj->ReflectionDataConst();
-
-        if (target.m_nodes[0].ArgCount != 1 || target.m_count < 2 || reflex.levels == 0)
-        {
-            return GenericMatch_Unresolved;
-        }
-
-        if (target.m_nodes[1].Levels + 1 != reflex.levels)
-        {
-            return GenericMatch_Different;
-        }
-
-        if (target.m_nodes[1].Class.data == reflex.data.type.data)
-        {
-            if (target.m_nodes[1].ArgCount == 0)
-            {
-                return GenericMatch_Same;
-            }
-
-            const CLR_RT_HeapBlock_Array *elementArray = (const CLR_RT_HeapBlock_Array *)obj;
-            const CLR_RT_TypeSpec_Index *elementSpec = elementArray->ElementTypeSpec();
-            CLR_RT_GenericInstance *element = elementSpec != nullptr ? RecordOfTypeSpec(*elementSpec) : nullptr;
-
-            if (element == nullptr)
-            {
-                return GenericMatch_NoTypeSpec;
-            }
-
-            // the arguments of an element are nodes 1.. of the target in the same order, the element's own record
-            // has its levels in the array
-            int needed = 1;
-            int count = 0;
-
-            while (needed > 0 && 1 + count < target.m_count)
-            {
-                needed += target.m_nodes[1 + count].ArgCount - 1;
-                count++;
-            }
-
-            if (needed != 0 || count != element->m_nodeCount ||
-                element->m_nodes[0].ArgCount != target.m_nodes[1].ArgCount ||
-                (count > 1 && !SameGenericInstanceNodes(&element->m_nodes[1], &target.m_nodes[2], count - 1)))
-            {
-                return GenericMatch_Different;
-            }
-
-            return GenericMatch_Same;
-        }
-
-        // Reference-type elements are covariant, one level only.
-        if (reflex.levels == 1 && target.m_nodes[1].ArgCount == 0 &&
-            (target.m_nodes[1].Class.data == g_CLR_RT_WellKnownTypes.Object.data ||
-             CLR_RT_ExecutionEngine::IsInstanceOf(reflex.data.type, target.m_nodes[1].Class)))
-        {
-            CLR_RT_TypeDef_Instance element{};
-            const CLR_UINT32 valueTypeFlags =
-                CLR_RT_DataTypeLookup::c_OptimizedValueType | CLR_RT_DataTypeLookup::c_ValueType;
-
-            if (element.InitializeFromIndex(reflex.data.type) &&
-                (c_CLR_RT_DataTypeLookup[element.target->dataType].m_flags & valueTypeFlags) == 0 &&
-                (element.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) !=
-                    CLR_RECORD_TYPEDEF::TD_Semantics_Enum)
-            {
-                return GenericMatch_Same;
-            }
-        }
-
-        return GenericMatch_Different;
-    }
-
-    if ((obj->DataType() != DATATYPE_CLASS && obj->DataType() != DATATYPE_VALUETYPE) ||
-        !inst.InitializeFromIndex(obj->ObjectCls()))
-    {
-        return GenericMatch_Unresolved;
-    }
-
-    // A stored TypeSpec of another class is the context of whoever created the object, not its own.
-    if (obj->IsAGenericInstance())
-    {
-        CLR_RT_TypeSpec_Instance stored{};
-
-        if (stored.InitializeFromIndex(obj->ObjectGenericType()))
-        {
-            own = FindOrCreateGenericInstance(stored);
-
-            if (own != nullptr && own->m_nodes[0].Class.data != inst.data)
-            {
-                own = nullptr;
-            }
-        }
-    }
-
-    if (inst.data == targetClass.data)
-    {
-        if (own == nullptr)
-        {
-            return GenericMatch_NoTypeSpec;
-        }
-
-        return (own->m_nodeCount == target.m_count &&
-                SameGenericInstanceNodes(own->m_nodes, target.m_nodes, target.m_count))
-                   ? GenericMatch_Same
-                   : GenericMatch_Different;
-    }
-
-    if (!targetDef.InitializeFromIndex(targetClass))
-    {
-        return GenericMatch_Unresolved;
-    }
-
-    if ((targetDef.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) != CLR_RECORD_TYPEDEF::TD_Semantics_Interface)
-    {
-        CLR_RT_TypeDef_Instance walk = inst;
-        CLR_RT_GenericInstance *current = own;
-
-        for (int depth = 0; depth < c_MaxInheritanceDepth; depth++)
-        {
-            CLR_RT_TypeDef_Instance parent = walk;
-            bool hasTypeSpecBase = walk.target->HasValidExtendsType() && walk.target->ExtendsIsTypeSpec();
-            CLR_RT_GenericInstance *closedBase =
-                hasTypeSpecBase ? FindOrCreateGenericBase(walk, current != nullptr ? &current->m_self : nullptr)
-                                : nullptr;
-
-            if (!parent.SwitchToParent())
-            {
-                break;
-            }
-
-            current = closedBase;
-
-            if (parent.data == targetClass.data)
-            {
-                if (current == nullptr)
-                {
-                    return hasTypeSpecBase ? GenericMatch_NoTypeSpec : GenericMatch_Unresolved;
-                }
-
-                return (current->m_nodeCount == target.m_count &&
-                        SameGenericInstanceNodes(current->m_nodes, target.m_nodes, target.m_count))
-                           ? GenericMatch_Same
-                           : GenericMatch_Different;
-            }
-
-            walk = parent;
-        }
-
-        return GenericMatch_Unresolved;
-    }
-
-    return MatchInterfaceArguments(inst, own, target);
+    return CLR_RT_GenericAssignability::MatchObjectNodes(ref, target.m_nodes, target.m_count);
 }
 
 HRESULT CLR_RT_TypeSystem::AllocateGenericInstanceStatics(CLR_RT_GenericInstance &instance)
