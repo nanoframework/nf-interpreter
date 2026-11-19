@@ -42,9 +42,8 @@ static const char *GetSharedString(size_t index)
 const char *CLR_RT_Assembly::GetString(CLR_STRING i)
 {
     NATIVE_PROFILE_CLR_CORE();
-    static const CLR_STRING iMax = 0xFFFF - c_CLR_StringTable_Size;
 
-    if (i >= iMax)
+    if (IsSharedString(i))
     {
         return GetSharedString((CLR_STRING)0xFFFF - i);
     }
