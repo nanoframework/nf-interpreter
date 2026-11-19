@@ -451,7 +451,8 @@ static bool HasSameSizeIntegralElements(const CLR_RT_HeapBlock_Array &source, co
     int size = CLR_RT_TypeSystem::IntegralSize(source.m_typeOfElement);
 
     return size != 0 && !source.m_fReference && !target.m_fReference &&
-           source.ReflectionDataConst().kind == REFLECTION_TYPE && target.ReflectionDataConst().kind == REFLECTION_TYPE &&
+           source.ReflectionDataConst().kind == REFLECTION_TYPE &&
+           target.ReflectionDataConst().kind == REFLECTION_TYPE &&
            size == CLR_RT_TypeSystem::IntegralSize(target.m_typeOfElement);
 }
 

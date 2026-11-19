@@ -11932,8 +11932,8 @@ bool CLR_RT_GenericAssignability::SameClassAssignable(CLR_RT_GenericRef s, CLR_R
     return true;
 }
 
-// The interfaces and the generic bases of a class, closed level by level, against the target. Pass on the first one that
-// is compatible, Fail when some had the target's class and none was, Unknown when none could be read or closed.
+// The interfaces and the generic bases of a class, closed level by level, against the target. Pass on the first one
+// that is compatible, Fail when some had the target's class and none was, Unknown when none could be read or closed.
 CLR_RT_GenericAssign CLR_RT_GenericAssignability::AncestorSearch(
     const CLR_RT_TypeDef_Instance &start,
     const CLR_RT_GenericInstance *context,
@@ -12041,7 +12041,11 @@ CLR_RT_GenericAssign CLR_RT_GenericAssignability::AncestorSearch(
 
 // A value of type s stored in a location of type t, both reference types or, for the elements of arrays, value types
 // of the same size. Depth is bounded by the nesting of the registry.
-CLR_RT_GenericAssign CLR_RT_GenericAssignability::Assignable(CLR_RT_GenericRef s, CLR_RT_GenericRef t, bool element, int depth)
+CLR_RT_GenericAssign CLR_RT_GenericAssignability::Assignable(
+    CLR_RT_GenericRef s,
+    CLR_RT_GenericRef t,
+    bool element,
+    int depth)
 {
     CLR_RT_TypeDef_Instance sDef{};
     CLR_RT_TypeDef_Instance tDef{};
@@ -12082,8 +12086,9 @@ CLR_RT_GenericAssign CLR_RT_GenericAssignability::Assignable(CLR_RT_GenericRef s
 
         if (t.node->ArgCount == 0)
         {
-            return CLR_RT_ExecutionEngine::IsInstanceOf(g_CLR_RT_WellKnownTypes.Array, t.node->Class) ? GenericAssign_Pass
-                                                                                                    : GenericAssign_Fail;
+            return CLR_RT_ExecutionEngine::IsInstanceOf(g_CLR_RT_WellKnownTypes.Array, t.node->Class)
+                       ? GenericAssign_Pass
+                       : GenericAssign_Fail;
         }
 
         if (t.node->ArgCount == 1 && CLR_RT_TypeSystem::IsArrayGenericInterface(tDef))
@@ -12124,7 +12129,8 @@ CLR_RT_GenericAssign CLR_RT_GenericAssignability::Assignable(CLR_RT_GenericRef s
 
     if (t.node->ArgCount == 0)
     {
-        return CLR_RT_ExecutionEngine::IsInstanceOf(s.node->Class, t.node->Class) ? GenericAssign_Pass : GenericAssign_Fail;
+        return CLR_RT_ExecutionEngine::IsInstanceOf(s.node->Class, t.node->Class) ? GenericAssign_Pass
+                                                                                  : GenericAssign_Fail;
     }
 
     CLR_RT_GenericInstance *record = nullptr;
@@ -12193,7 +12199,10 @@ bool CLR_RT_TypeSystem::IsElementInstanceAssignable(
     return CLR_RT_GenericAssignability::Assignable(s, t, true, 0) != GenericAssign_Fail;
 }
 
-CLR_RT_GenericMatch CLR_RT_GenericAssignability::MatchObjectNodes(const CLR_RT_HeapBlock &ref, const CLR_RT_GenericInstanceNode *nodes, int count)
+CLR_RT_GenericMatch CLR_RT_GenericAssignability::MatchObjectNodes(
+    const CLR_RT_HeapBlock &ref,
+    const CLR_RT_GenericInstanceNode *nodes,
+    int count)
 {
     const CLR_RT_HeapBlock *obj = &ref;
     CLR_RT_GenericInstance *own = nullptr;
@@ -12252,8 +12261,9 @@ CLR_RT_GenericMatch CLR_RT_GenericAssignability::MatchObjectNodes(const CLR_RT_H
 
         result = Assignable(s, t, false, 0);
 
-        return result == GenericAssign_Pass ? GenericMatch_Same
-                                      : (result == GenericAssign_Fail ? GenericMatch_Different : GenericMatch_Unresolved);
+        return result == GenericAssign_Pass
+                   ? GenericMatch_Same
+                   : (result == GenericAssign_Fail ? GenericMatch_Different : GenericMatch_Unresolved);
     }
 
     if ((obj->DataType() != DATATYPE_CLASS && obj->DataType() != DATATYPE_VALUETYPE) ||
@@ -12330,7 +12340,8 @@ bool CLR_RT_TypeSystem::ElementMatchesArraySpec(const CLR_RT_HeapBlock &object, 
         return actual == nullptr || IsElementInstanceAssignable(*actual, element);
     }
 
-    return CLR_RT_GenericAssignability::MatchObjectNodes(object, record->m_nodes, record->m_nodeCount) != GenericMatch_Different;
+    return CLR_RT_GenericAssignability::MatchObjectNodes(object, record->m_nodes, record->m_nodeCount) !=
+           GenericMatch_Different;
 }
 
 CLR_RT_GenericMatch CLR_RT_TypeSystem::MatchGenericArguments(
