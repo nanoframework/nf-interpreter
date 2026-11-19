@@ -1432,8 +1432,13 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     CLR_UINT32 ComputeAssemblyHash();
     CLR_UINT32 ComputeAssemblyHash(const CLR_RECORD_ASSEMBLYREF *ar);
 
-    bool FindTypeDef(const char *name, const char *nameSpace, CLR_RT_TypeDef_Index &index);
-    bool FindTypeDef(const char *name, CLR_INDEX scope, CLR_RT_TypeDef_Index &index);
+    bool FindTypeDef(
+        const char *name,
+        const char *nameSpace,
+        CLR_RT_TypeDef_Index &index,
+        CLR_STRING nameId = 0,
+        CLR_STRING nameSpaceId = 0);
+    bool FindTypeDef(const char *name, CLR_INDEX scope, CLR_RT_TypeDef_Index &index, CLR_STRING nameId = 0);
     bool FindTypeDef(CLR_UINT32 hash, CLR_RT_TypeDef_Index &index);
 
     bool FindTypeSpec(const CLR_PMETADATA sig, CLR_RT_TypeSpec_Index &index);
@@ -1444,26 +1449,30 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
         const char *name,
         CLR_RT_Assembly *base,
         CLR_SIG sig,
-        CLR_RT_FieldDef_Index &index);
+        CLR_RT_FieldDef_Index &index,
+        CLR_STRING nameId = 0);
     bool FindFieldDef(
         const CLR_RT_TypeSpec_Index *tsIndex,
         const char *name,
         CLR_RT_Assembly *base,
         CLR_SIG sig,
-        CLR_RT_FieldDef_Index &index);
+        CLR_RT_FieldDef_Index &index,
+        CLR_STRING nameId = 0);
     bool FindMethodDef(
         const CLR_RECORD_TYPEDEF *src,
         const char *name,
         CLR_RT_Assembly *base,
         CLR_SIG sig,
-        CLR_RT_MethodDef_Index &index);
+        CLR_RT_MethodDef_Index &index,
+        CLR_STRING nameId = 0);
     bool FindMethodDef(
         const CLR_RECORD_TYPESPEC *ts,
         const char *name,
         CLR_RT_Assembly *base,
         CLR_SIG sig,
         CLR_RT_MethodDef_Index &index,
-        CLR_UINT32 &assmIndex);
+        CLR_UINT32 &assmIndex,
+        CLR_STRING nameId = 0);
 
     bool FindNextStaticConstructor(CLR_RT_MethodDef_Index &index);
     bool HasStaticConstructor(const CLR_RT_TypeDef_Index &typeDef) const;
@@ -1543,6 +1552,8 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
         return NANOCLR_ASSEMBLY_RESOLVE(CLR_UINT8, TBL_ResourcesData, i);
     }
     const char *GetString(CLR_STRING i);
+    static bool IsSharedString(CLR_STRING i);
+    bool StringEquals(CLR_STRING i, const char *text, CLR_STRING textId);
     CLR_PMETADATA GetSignature(CLR_SIG i) const
     {
         return NANOCLR_ASSEMBLY_RESOLVE(CLR_UINT8, TBL_Signatures, i);

@@ -19,6 +19,26 @@ void CLR_RT_Assembly::InitString()
     NATIVE_PROFILE_CLR_CORE();
 }
 
+static const char *GetSharedString(size_t index)
+{
+    if (index >= c_CLR_StringTable_RootCount)
+    {
+        return &c_CLR_StringTable_Data
+            [c_CLR_StringTable_Lookup[c_CLR_StringTable_CheckpointCount + index - c_CLR_StringTable_RootCount]];
+    }
+
+    const char *p = &c_CLR_StringTable_Data[c_CLR_StringTable_Lookup[index >> c_CLR_StringTable_StrideShift]];
+
+    for (size_t skip = index & ((1 << c_CLR_StringTable_StrideShift) - 1); skip > 0; skip--)
+    {
+        while (*p++ != 0)
+        {
+        }
+    }
+
+    return p;
+}
+
 const char *CLR_RT_Assembly::GetString(CLR_STRING i)
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -26,10 +46,25 @@ const char *CLR_RT_Assembly::GetString(CLR_STRING i)
 
     if (i >= iMax)
     {
-        return &c_CLR_StringTable_Data[c_CLR_StringTable_Lookup[(CLR_STRING)0xFFFF - i]];
+        return GetSharedString((CLR_STRING)0xFFFF - i);
     }
 
     return &(((const char *)GetTable(TBL_Strings))[i]);
+}
+
+bool CLR_RT_Assembly::IsSharedString(CLR_STRING i)
+{
+    return i >= (CLR_STRING)(0x10000 - c_CLR_StringTable_Size);
+}
+
+bool CLR_RT_Assembly::StringEquals(CLR_STRING i, const char *text, CLR_STRING textId)
+{
+    if (IsSharedString(i) && IsSharedString(textId))
+    {
+        return i == textId;
+    }
+
+    return strcmp(GetString(i), text) == 0;
 }
 
 #if defined(VIRTUAL_DEVICE)
@@ -37,15 +72,12 @@ const char *CLR_RT_Assembly::GetString(CLR_STRING i)
 void CLR_RT_Assembly::InitString(std::map<std::string, CLR_OFFSET> &map)
 {
     NATIVE_PROFILE_CLR_CORE();
-    const CLR_STRING *array = c_CLR_StringTable_Lookup;
-    size_t len = c_CLR_StringTable_Size;
-    CLR_STRING index = 0xFFFF;
 
     map.clear();
 
-    while (len-- > 0)
+    for (size_t index = 0; index < c_CLR_StringTable_Size; index++)
     {
-        map[&c_CLR_StringTable_Data[*array++]] = index--;
+        map[GetSharedString(index)] = (CLR_OFFSET)(0xFFFF - index);
     }
 }
 
