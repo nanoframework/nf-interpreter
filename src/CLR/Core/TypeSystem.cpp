@@ -9032,6 +9032,54 @@ int CLR_RT_GenericDispatch::MatchSignatureInClass(
     return left.Available() == right.Available() ? 1 : 0;
 }
 
+static bool MatchInterfaceQualifier(const char *pattern, const char *target, size_t targetLen)
+{
+    size_t t = 0;
+
+    while (*pattern)
+    {
+        if (*pattern == '`')
+        {
+            int depth = 0;
+
+            pattern++;
+
+            while (*pattern >= '0' && *pattern <= '9')
+            {
+                pattern++;
+            }
+
+            if (t >= targetLen || target[t] != '<')
+            {
+                return false;
+            }
+
+            do
+            {
+                depth += (target[t] == '<') - (target[t] == '>');
+                t++;
+            } while (depth > 0 && t < targetLen);
+
+            if (depth != 0)
+            {
+                return false;
+            }
+        }
+        else
+        {
+            if (t >= targetLen || target[t] != *pattern)
+            {
+                return false;
+            }
+
+            pattern++;
+            t++;
+        }
+    }
+
+    return t == targetLen;
+}
+
 bool CLR_RT_GenericDispatch::FindVirtualMethodInChain(
     const CLR_RT_TypeDef_Index &cls,
     CLR_RT_MethodDef_Instance &calleeInst,
@@ -9055,8 +9103,7 @@ bool CLR_RT_GenericDispatch::FindVirtualMethodInChain(
     CLR_RT_GenericTarget context;
     CLR_RT_GenericTarget next;
     char qualifier[256];
-    size_t qualifierLen = 0;
-    bool genericQualifier = false;
+    bool qualifierValid = false;
 
     if (suffixMatchOnly)
     {
@@ -9072,10 +9119,7 @@ bool CLR_RT_GenericDispatch::FindVirtualMethodInChain(
                 CLR_RT_TypeSystem::TYPENAME_FLAGS_FULL | CLR_RT_TypeSystem::TYPENAME_NESTED_SEPARATOR_DOT,
                 0)))
         {
-            const char *tick = strchr(qualifier, '`');
-
-            genericQualifier = tick != nullptr;
-            qualifierLen = genericQualifier ? (size_t)(tick - qualifier) : hal_strlen_s(qualifier);
+            qualifierValid = qualifier[0] != 0;
         }
     }
 
@@ -9119,20 +9163,13 @@ bool CLR_RT_GenericDispatch::FindVirtualMethodInChain(
             size_t targetLen = hal_strlen_s(targetName);
             bool nameMatch = (helper || !suffixMatchOnly) && !strcmp(targetName, calleeName);
 
-            if (!nameMatch && !helper && suffixMatchOnly && qualifierLen > 0 && targetLen > calleeLen + 1)
+            if (!nameMatch && !helper && suffixMatchOnly && qualifierValid && targetLen > calleeLen + 1)
             {
                 const char *suffix = targetName + targetLen - calleeLen;
 
                 if (suffix[-1] == '.' && !strcmp(suffix, calleeName))
                 {
-                    size_t targetQualifierLen = targetLen - calleeLen - 1;
-
-                    nameMatch = genericQualifier ? (targetQualifierLen > qualifierLen &&
-                                                    !strncmp(targetName, qualifier, qualifierLen) &&
-                                                    targetName[qualifierLen] == '<' &&
-                                                    targetName[targetQualifierLen - 1] == '>')
-                                                 : (targetQualifierLen == qualifierLen &&
-                                                    !strncmp(targetName, qualifier, qualifierLen));
+                    nameMatch = MatchInterfaceQualifier(qualifier, targetName, targetLen - calleeLen - 1);
                 }
             }
 
