@@ -860,6 +860,7 @@ struct CLR_RT_ReflectionDef_Index
     void InitializeFromHash(CLR_UINT32 hash);
 
     bool GetGenericOwner(CLR_RT_TypeSpec_Index &typeSpec) const;
+    bool GetGenericMethodSpec(CLR_RT_MethodSpec_Index &methodSpec) const;
 
     CLR_UINT64 GetRawData() const;
     void SetRawData(CLR_UINT64 data);
@@ -2070,7 +2071,16 @@ struct CLR_RT_GenericAssignability
 struct CLR_RT_GenericDispatch
 {
     static bool CollectElementNodes(CLR_RT_SignatureParser &parser, CLR_RT_GenericTarget &out, bool &isByRef);
-    static bool SubstituteNodes(CLR_RT_GenericTarget &stream, const CLR_RT_GenericTarget *binding);
+    static bool SubstituteNodes(CLR_RT_GenericTarget &stream, const CLR_RT_GenericTarget *binding)
+    {
+        return binding == nullptr || SubstituteNodes(stream, binding->m_nodes, binding->m_count, nullptr, 0);
+    }
+    static bool SubstituteNodes(
+        CLR_RT_GenericTarget &stream,
+        const CLR_RT_GenericInstanceNode *binding,
+        int bindingCount,
+        const CLR_RT_GenericInstanceNode *methodBinding,
+        int methodCount);
     static bool GetBaseContext(
         const CLR_RT_TypeDef_Instance &inst,
         const CLR_RT_GenericTarget *context,
@@ -2102,6 +2112,46 @@ struct CLR_RT_GenericDispatch
         const char *calleeName,
         CLR_RT_MethodDef_Index &index);
 };
+
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+
+// Generic types and methods instantiated from Types (MakeGenericType, MakeGenericMethod, Delegate.Method).
+struct CLR_RT_GenericInstantiation
+{
+    static HRESULT MakeGenericInstance(
+        const CLR_RT_TypeDef_Instance &type,
+        const CLR_RT_MethodDef_Instance *method,
+        CLR_UINT16 ownerSlot,
+        CLR_RT_HeapBlock_Array *arguments,
+        CLR_RT_GenericInstance *&record);
+    static CLR_UINT16 GetMethodInstanceSlot(const CLR_RT_MethodSpec_Index &methodSpec, CLR_UINT16 ownerSlot);
+    static HRESULT AppendArgumentNodes(
+        CLR_RT_HeapBlock_Array *arguments,
+        CLR_UINT32 assembly,
+        CLR_UINT32 first,
+        int arity,
+        CLR_RT_GenericTarget &built,
+        CLR_RT_ReflectionDef_Index *words);
+    static int GetNestingDepth(const CLR_RT_GenericInstanceNode *nodes, int count);
+    static HRESULT CheckGenericConstraints(
+        CLR_UINT32 assembly,
+        CLR_UINT32 first,
+        int arity,
+        const CLR_RT_ReflectionDef_Index *words,
+        const CLR_RT_GenericTarget &built,
+        const CLR_RT_GenericInstance *owner,
+        bool method);
+    static HRESULT CloseConstraintWord(
+        CLR_RT_ReflectionDef_Index &constraint,
+        const CLR_RT_ReflectionDef_Index *words,
+        const CLR_RT_GenericTarget &built,
+        const CLR_RT_GenericInstance *owner,
+        bool method);
+    static bool HasPublicDefaultConstructor(const CLR_RT_TypeDef_Instance &td);
+    static bool IsByRefLike(const CLR_RT_TypeDef_Instance &td);
+};
+
+#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
 //--//
 
@@ -2261,6 +2311,12 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
     static bool GetArrayElementMethodSpec(const CLR_RT_HeapBlock_Array &array, CLR_RT_MethodSpec_Index &methodSpec);
 
     static CLR_UINT16 GetGenericOwnerSlot(const CLR_RT_TypeSpec_Index &typeSpec);
+    static const CLR_RT_GenericInstance *GetMemberRecord(CLR_UINT16 slot, bool method);
+    static bool PositionAtParameterArgument(
+        const CLR_RT_SignatureParser::Element &element,
+        const CLR_RT_TypeSpec_Index *owner,
+        const CLR_RT_MethodSpec_Index *methodSpec,
+        CLR_RT_SignatureParser &argument);
     static bool GetGenericOwnerRow(CLR_UINT16 slot, const CLR_RT_TypeDef_Index &declaring, CLR_RT_TypeSpec_Index &row);
     static CLR_RT_GenericInstance *FindOrCreateGenericBase(
         const CLR_RT_TypeDef_Instance &child,
@@ -2294,6 +2350,10 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
         CLR_RT_ReflectionDef_Index &word);
     static HRESULT GetGenericArgumentWord(
         const CLR_RT_TypeSpec_Index &row,
+        int argument,
+        CLR_RT_ReflectionDef_Index &word);
+    static HRESULT GetArgumentWord(
+        const CLR_RT_GenericInstance &record,
         int argument,
         CLR_RT_ReflectionDef_Index &word);
     static HRESULT GetOpenGenericRecord(
@@ -2817,7 +2877,8 @@ struct CLR_RT_TypeDescriptor
         const CLR_RT_TypeSpec_Index *ownerTypeSpec,
         CLR_RT_TypeSpec_Index *elementSpec = nullptr,
         const CLR_RT_TypeDef_Index *declaringType = nullptr,
-        const CLR_RT_MethodDef_Index *declaringMethod = nullptr);
+        const CLR_RT_MethodDef_Index *declaringMethod = nullptr,
+        const CLR_RT_MethodDef_Instance *context = nullptr);
     CLR_RT_ReflectionDef_Index GetTypeReflection(const CLR_RT_TypeSpec_Index &elementSpec) const;
     HRESULT InitializeFromSignatureParser(
         CLR_RT_SignatureParser &parser,

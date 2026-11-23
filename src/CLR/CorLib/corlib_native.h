@@ -10,6 +10,17 @@
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
+#include <nanoPackStruct.h>
+
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+typedef enum __nfpack MethodBase_GenericMethodFlags
+{
+    MethodBase_GenericMethodFlags_None = 0,
+    MethodBase_GenericMethodFlags_GenericMethod = 1,
+    MethodBase_GenericMethodFlags_GenericMethodDefinition = 2,
+    MethodBase_GenericMethodFlags_ContainsGenericParameters = 4,
+} MethodBase_GenericMethodFlags;
+#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
 #if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 struct Library_corlib_native_System_AppDomain
@@ -103,6 +114,7 @@ struct Library_corlib_native_System_Type
     NANOCLR_NATIVE_DECLARE(get_DeclaringMethod___SystemReflectionMethodBase);
     NANOCLR_NATIVE_DECLARE(get_ContainsGenericParameters___BOOLEAN);
     NANOCLR_NATIVE_DECLARE(GetGenericArguments___SZARRAY_SystemType);
+    NANOCLR_NATIVE_DECLARE(MakeGenericType___SystemType__SZARRAY_SystemType);
     NANOCLR_NATIVE_DECLARE(
         InvokeMember___OBJECT__STRING__SystemReflectionBindingFlags__SystemReflectionBinder__OBJECT__SZARRAY_OBJECT);
     NANOCLR_NATIVE_DECLARE(GetConstructor___SystemReflectionConstructorInfo__SZARRAY_SystemType);
@@ -786,8 +798,6 @@ struct Library_corlib_native_System_Reflection_ConstructorInfo
 struct Library_corlib_native_System_Reflection_MethodBase
 {
 #if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
-    static const int FIELD___token = 1;
-
     NANOCLR_NATIVE_DECLARE(get_Name___STRING);
     NANOCLR_NATIVE_DECLARE(get_DeclaringType___SystemType);
     NANOCLR_NATIVE_DECLARE(get_IsPublic___BOOLEAN);
@@ -797,6 +807,7 @@ struct Library_corlib_native_System_Reflection_MethodBase
     NANOCLR_NATIVE_DECLARE(get_IsAbstract___BOOLEAN);
     NANOCLR_NATIVE_DECLARE(Invoke___OBJECT__OBJECT__SZARRAY_OBJECT);
     NANOCLR_NATIVE_DECLARE(GetParametersNative___SZARRAY_SystemReflectionParameterInfo);
+    NANOCLR_NATIVE_DECLARE(GetGenericFlags___SystemReflectionMethodBaseGenericMethodFlags);
 
 #endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
     //--//
@@ -808,6 +819,8 @@ struct Library_corlib_native_System_Reflection_MethodBase
         CLR_RT_MethodDef_Instance &inst);
     static HRESULT CheckFlags(CLR_RT_StackFrame &stack, CLR_UINT32 mask, CLR_UINT32 flag);
     static HRESULT CheckInvokeArguments(const CLR_RT_MethodDef_Instance &md, CLR_RT_HeapBlock *args, int numArgs);
+    static CLR_UINT32 GetGenericFlags(const CLR_RT_MethodDef_Instance &md);
+    static HRESULT NewMethodInfo(CLR_RT_HeapBlock &ref, const CLR_RT_MethodDef_Index &md, CLR_UINT16 slot);
 #endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 };
 
@@ -845,6 +858,9 @@ struct Library_corlib_native_System_Reflection_RuntimeFieldInfo
 struct Library_corlib_native_System_Reflection_RuntimeMethodInfo
 {
     NANOCLR_NATIVE_DECLARE(get_ReturnType___SystemType);
+    NANOCLR_NATIVE_DECLARE(GetGenericArguments___SZARRAY_SystemType);
+    NANOCLR_NATIVE_DECLARE(MakeGenericMethod___SystemReflectionMethodInfo__SZARRAY_SystemType);
+    NANOCLR_NATIVE_DECLARE(GetGenericMethodDefinition___SystemReflectionMethodInfo);
     NANOCLR_NATIVE_DECLARE(GetCustomAttributesNative___SZARRAY_OBJECT__BOOLEAN);
 
     //--//

@@ -6,8 +6,6 @@
 
 #include "CorLib.h"
 
-typedef Library_corlib_native_System_Reflection_MethodBase MethodBase;
-
 static bool IsGenericParameterWord(const CLR_RT_HeapBlock *type)
 {
     return type->ReflectionDataConst().kind == REFLECTION_GENERICPARAM;
@@ -131,6 +129,47 @@ HRESULT Library_corlib_native_System_Type::GetGenericTypeDefinition___SystemType
     {
         NANOCLR_CHECK_HRESULT(desc.InitializeFromReflection(hbType->ReflectionDataConst()));
         top.Dereference()->SetReflection(desc.m_handlerCls);
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_corlib_native_System_Type::MakeGenericType___SystemType__SZARRAY_SystemType(CLR_RT_StackFrame &stack)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    CLR_RT_TypeDef_Instance td{};
+    CLR_RT_GenericInstance *record;
+    CLR_RT_HeapBlock *hbType = stack.This();
+    const CLR_RT_ReflectionDef_Index &reflex = hbType->ReflectionDataConst();
+    CLR_RT_HeapBlock &top = stack.PushValueAndClear();
+
+    if (reflex.kind != REFLECTION_TYPE || reflex.levels != 0 || !td.InitializeFromIndex(reflex.data.type) ||
+        td.target->genericParamCount == 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+    }
+
+    hr = CLR_RT_GenericInstantiation::MakeGenericInstance(td, nullptr, 0, stack.Arg1().DereferenceArray(), record);
+
+    NANOCLR_CHECK_HRESULT(hr);
+
+    if (hr == S_FALSE)
+    {
+        top.SetObjectReference(hbType);
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
+
+    {
+        CLR_RT_ReflectionDef_Index word;
+
+        word.Clear();
+        word.kind = REFLECTION_TYPESPEC;
+        word.data.typeSpec = record->m_self;
+
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
+        NANOCLR_CHECK_HRESULT(top.Dereference()->SetReflection(word));
     }
 
     NANOCLR_NOCLEANUP();
@@ -1228,23 +1267,15 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                     if (pass == 1)
                     {
                         CLR_RT_HeapBlock *elem = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetElement(iMethod);
-                        CLR_RT_HeapBlock *hbObj;
-                        NANOCLR_CHECK_HRESULT(
-                            g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*elem, g_CLR_RT_WellKnownTypes.MethodInfo));
-                        hbObj = elem->Dereference();
-                        NANOCLR_CHECK_HRESULT(hbObj->SetReflection(index));
-                        SetOwnerSlot(hbObj, levelSlot);
 
-                        // store token for type
-                        hbObj[MethodBase::FIELD___token].NumericByRef().u4 = index.data;
+                        NANOCLR_CHECK_HRESULT(
+                            Library_corlib_native_System_Reflection_MethodBase::NewMethodInfo(*elem, index, levelSlot));
                     }
 
                     iMethod++;
                 }
                 else
                 {
-                    CLR_RT_HeapBlock *hbObj;
-
                     if (NANOCLR_INDEX_IS_VALID(inst))
                     {
                         CLR_RT_SignatureParser parserLeft{};
@@ -1348,13 +1379,7 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                     foundSlot = levelSlot;
 
                     NANOCLR_CHECK_HRESULT(
-                        g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.MethodInfo));
-                    hbObj = top.Dereference();
-                    hbObj->SetReflection(inst);
-                    SetOwnerSlot(hbObj, foundSlot);
-
-                    // store token for type
-                    hbObj[MethodBase::FIELD___token].NumericByRef().u4 = inst.data;
+                        Library_corlib_native_System_Reflection_MethodBase::NewMethodInfo(top, inst, foundSlot));
                 }
             }
 
@@ -1433,12 +1458,7 @@ HRESULT Library_corlib_native_System_Type::get_DeclaringMethod___SystemReflectio
 
     if (isMethod)
     {
-        CLR_RT_HeapBlock *hbObj;
-
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.MethodInfo));
-        hbObj = top.Dereference();
-        NANOCLR_CHECK_HRESULT(hbObj->SetReflection(ownerMethod));
-        hbObj[MethodBase::FIELD___token].NumericByRef().u4 = ownerMethod.data;
+        NANOCLR_CHECK_HRESULT(Library_corlib_native_System_Reflection_MethodBase::NewMethodInfo(top, ownerMethod, 0));
     }
 
     NANOCLR_NOCLEANUP();

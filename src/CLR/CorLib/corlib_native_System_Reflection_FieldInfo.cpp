@@ -180,16 +180,18 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::Initialize(
 
     if (instFD.target->flags & CLR_RECORD_FIELDDEF::FD_Static)
     {
+        if (instTD.target->genericParamCount > 0 &&
+            (NANOCLR_INDEX_IS_INVALID(owner) || CLR_RT_TypeSystem::IsOpenInstance(owner)))
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+        }
+
         if (NANOCLR_INDEX_IS_VALID(owner))
         {
             NANOCLR_CHECK_HRESULT(
                 g_CLR_RT_ExecutionEngine.EnsureGenericStaticConstructorCompleted(owner, stack.m_owningThread));
 
             obj = instFD.assembly->GetStaticFieldByFieldDef(instFD, &owner, nullptr, nullptr);
-        }
-        else if (instTD.target->genericParamCount > 0)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
         }
         else
         {

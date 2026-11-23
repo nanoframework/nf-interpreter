@@ -819,22 +819,24 @@ HRESULT CLR_RT_StackFrame::FixCall()
             if (res.Levels > 0)
                 continue; // Array, no need to fix.
 
-            if (res.DataType == DATATYPE_VAR && m_call.genericType != nullptr &&
-                NANOCLR_INDEX_IS_VALID(*m_call.genericType))
             {
-                CLR_RT_TypeSpec_Instance owner{};
                 CLR_RT_SignatureParser argument;
                 CLR_RT_SignatureParser::Element resolved;
 
-                if (!owner.InitializeFromIndex(*m_call.genericType) ||
-                    !owner.PositionAtGenericParam(res.GenericParamPosition, argument) ||
-                    FAILED(argument.AdvanceParameter(resolved)) || resolved.Levels > 0)
+                if (CLR_RT_TypeSystem::PositionAtParameterArgument(
+                        res,
+                        m_call.genericType,
+                        &m_call.methodSpec,
+                        argument))
                 {
-                    continue;
-                }
+                    if (FAILED(argument.AdvanceParameter(resolved)) || resolved.Levels > 0)
+                    {
+                        continue;
+                    }
 
-                res.Class = resolved.Class;
-                res.DataType = resolved.DataType;
+                    res.Class = resolved.Class;
+                    res.DataType = resolved.DataType;
+                }
             }
 
             if (!NANOCLR_INDEX_IS_VALID(res.Class))
