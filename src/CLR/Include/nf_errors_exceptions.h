@@ -41,7 +41,7 @@ typedef int HRESULT;
 // Return the code
 //
 
-#define HRESULT_CODE(hr) ((hr)&0xFFFF)
+#define HRESULT_CODE(hr) ((hr) & 0xFFFF)
 
 //
 //  Return the facility

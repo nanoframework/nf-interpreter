@@ -93,10 +93,11 @@ HRESULT Library_corlib_native_System_Exception::get_StackTrace___STRING(CLR_RT_S
         pBlkString++;
     }
 
-    NANOCLR_SET_AND_LEAVE(Library_corlib_native_System_String::Concat(
-        stack,
-        (CLR_RT_HeapBlock *)tmpArray.DereferenceArray()->GetFirstElement(),
-        depth));
+    NANOCLR_SET_AND_LEAVE(
+        Library_corlib_native_System_String::Concat(
+            stack,
+            (CLR_RT_HeapBlock *)tmpArray.DereferenceArray()->GetFirstElement(),
+            depth));
 
     NANOCLR_NOCLEANUP();
 }
@@ -226,10 +227,11 @@ HRESULT Library_corlib_native_System_Exception::SetStackTrace(CLR_RT_HeapBlock &
             }
             NANOCLR_FOREACH_NODE_BACKWARD_END();
 
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
-                obj[FIELD___stackTrace],
-                depth * sizeof(StackTrace),
-                g_CLR_RT_WellKnownTypes.UInt8));
+            NANOCLR_CHECK_HRESULT(
+                CLR_RT_HeapBlock_Array::CreateInstance(
+                    obj[FIELD___stackTrace],
+                    depth * sizeof(StackTrace),
+                    g_CLR_RT_WellKnownTypes.UInt8));
 
             // get a pointer to the array
             array = obj[FIELD___stackTrace].DereferenceArray();
