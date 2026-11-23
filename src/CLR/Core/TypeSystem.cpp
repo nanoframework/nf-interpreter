@@ -9054,6 +9054,30 @@ bool CLR_RT_GenericDispatch::FindVirtualMethodInChain(
     bool contextOk = true;
     CLR_RT_GenericTarget context;
     CLR_RT_GenericTarget next;
+    char qualifier[256];
+    size_t qualifierLen = 0;
+    bool genericQualifier = false;
+
+    if (suffixMatchOnly)
+    {
+        CLR_RT_TypeDef_Instance declaringType{};
+        char *szBuffer = qualifier;
+        size_t iBuffer = MAXSTRLEN(qualifier);
+
+        if (declaringType.InitializeFromMethod(calleeInst) &&
+            SUCCEEDED(g_CLR_RT_TypeSystem.BuildTypeName(
+                declaringType,
+                szBuffer,
+                iBuffer,
+                CLR_RT_TypeSystem::TYPENAME_FLAGS_FULL | CLR_RT_TypeSystem::TYPENAME_NESTED_SEPARATOR_DOT,
+                0)))
+        {
+            const char *tick = strchr(qualifier, '`');
+
+            genericQualifier = tick != nullptr;
+            qualifierLen = genericQualifier ? (size_t)(tick - qualifier) : hal_strlen_s(qualifier);
+        }
+    }
 
     // A generic interface on an array goes to SZArrayHelper, not to the explicit non-generic members of Array.
     if (hasHelper)
@@ -9095,10 +9119,21 @@ bool CLR_RT_GenericDispatch::FindVirtualMethodInChain(
             size_t targetLen = hal_strlen_s(targetName);
             bool nameMatch = (helper || !suffixMatchOnly) && !strcmp(targetName, calleeName);
 
-            if (!nameMatch && !helper && targetLen > calleeLen + 1)
+            if (!nameMatch && !helper && suffixMatchOnly && qualifierLen > 0 && targetLen > calleeLen + 1)
             {
                 const char *suffix = targetName + targetLen - calleeLen;
-                nameMatch = (suffix[-1] == '.' && !strcmp(suffix, calleeName));
+
+                if (suffix[-1] == '.' && !strcmp(suffix, calleeName))
+                {
+                    size_t targetQualifierLen = targetLen - calleeLen - 1;
+
+                    nameMatch = genericQualifier ? (targetQualifierLen > qualifierLen &&
+                                                    !strncmp(targetName, qualifier, qualifierLen) &&
+                                                    targetName[qualifierLen] == '<' &&
+                                                    targetName[targetQualifierLen - 1] == '>')
+                                                 : (targetQualifierLen == qualifierLen &&
+                                                    !strncmp(targetName, qualifier, qualifierLen));
+                }
             }
 
             if (!nameMatch)

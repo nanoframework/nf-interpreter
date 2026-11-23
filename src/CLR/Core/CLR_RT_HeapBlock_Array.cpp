@@ -482,6 +482,14 @@ static bool AreElementsRelated(const CLR_RT_HeapBlock_Array &source, const CLR_R
         return true;
     }
 
+    if ((descSrc.m_reflex.levels == 0 && NANOCLR_INDEX_IS_VALID(descSrc.m_handlerCls) &&
+         descSrc.m_handlerCls.target->IsInterface()) ||
+        (descDst.m_reflex.levels == 0 && NANOCLR_INDEX_IS_VALID(descDst.m_handlerCls) &&
+         descDst.m_handlerCls.target->IsInterface()))
+    {
+        return true;
+    }
+
     if (!CLR_RT_ExecutionEngine::IsInstanceOf(descSrc, descDst) &&
         !CLR_RT_ExecutionEngine::IsInstanceOf(descDst, descSrc))
     {
