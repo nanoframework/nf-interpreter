@@ -117,6 +117,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Reflection_ConstructorInfo::Invoke___OBJECT__SZARRAY_OBJECT,
     Library_corlib_native_System_Reflection_FieldInfo::GetCustomAttributesNative___SZARRAY_OBJECT__BOOLEAN,
     Library_corlib_native_System_Reflection_FieldInfo::SetValue___VOID__OBJECT__OBJECT,
+    Library_corlib_native_System_Reflection_MethodBase::GetGenericFlags___SystemReflectionMethodBaseGenericMethodFlags,
     Library_corlib_native_System_Reflection_MethodBase::GetParametersNative___SZARRAY_SystemReflectionParameterInfo,
     Library_corlib_native_System_Reflection_MethodBase::Invoke___OBJECT__OBJECT__SZARRAY_OBJECT,
     Library_corlib_native_System_Reflection_MethodBase::get_DeclaringType___SystemType,
@@ -133,6 +134,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Reflection_RuntimeFieldInfo::get_FieldType___SystemType,
     Library_corlib_native_System_Reflection_RuntimeFieldInfo::get_Name___STRING,
     Library_corlib_native_System_Reflection_RuntimeMethodInfo::GetCustomAttributesNative___SZARRAY_OBJECT__BOOLEAN,
+    Library_corlib_native_System_Reflection_RuntimeMethodInfo::GetGenericArguments___SZARRAY_SystemType,
+    Library_corlib_native_System_Reflection_RuntimeMethodInfo::GetGenericMethodDefinition___SystemReflectionMethodInfo,
+    Library_corlib_native_System_Reflection_RuntimeMethodInfo::MakeGenericMethod___SystemReflectionMethodInfo__SZARRAY_SystemType,
     Library_corlib_native_System_Reflection_RuntimeMethodInfo::get_ReturnType___SystemType,
     Library_corlib_native_System_RuntimeType::GetCustomAttributesNative___SZARRAY_OBJECT__BOOLEAN,
     Library_corlib_native_System_RuntimeType::GetElementType___SystemType,
@@ -262,6 +266,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Type::InvokeMember___OBJECT__STRING__SystemReflectionBindingFlags__SystemReflectionBinder__OBJECT__SZARRAY_OBJECT,
     Library_corlib_native_System_Type::IsAssignableFrom___BOOLEAN__SystemType,
     Library_corlib_native_System_Type::IsInstanceOfType___BOOLEAN__OBJECT,
+    Library_corlib_native_System_Type::MakeGenericType___SystemType__SZARRAY_SystemType,
     Library_corlib_native_System_Type::get_ContainsGenericParameters___BOOLEAN,
     Library_corlib_native_System_Type::get_DeclaringMethod___SystemReflectionMethodBase,
     Library_corlib_native_System_Type::get_DeclaringType___SystemType,
@@ -488,7 +493,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
-    0x824177B9,
+    0x940E6E23,
 
 #elif !CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 

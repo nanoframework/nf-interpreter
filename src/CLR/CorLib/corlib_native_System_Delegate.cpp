@@ -98,12 +98,33 @@ HRESULT Library_corlib_native_System_Delegate::get_Method___SystemReflectionMeth
 
     {
         CLR_RT_HeapBlock &top = stack.PushValue();
-        CLR_RT_HeapBlock *hbObj;
+        CLR_RT_MethodDef_Index ftn = dlg->DelegateFtn();
+        CLR_RT_MethodDef_Instance inst{};
+        CLR_RT_TypeDef_Index declaring;
+        CLR_RT_TypeSpec_Index row;
+        CLR_UINT16 slot = 0;
 
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.MethodInfo));
-        hbObj = top.Dereference();
+        if (inst.InitializeFromIndex(ftn))
+        {
+            declaring.Set(inst.Assembly(), inst.CrossReference().GetOwner());
 
-        hbObj->SetReflection(dlg->DelegateFtn());
+            if (NANOCLR_INDEX_IS_VALID(dlg->m_genericTypeSpec))
+            {
+                slot = CLR_RT_TypeSystem::GetGenericOwnerSlot(dlg->m_genericTypeSpec);
+            }
+
+            if (!CLR_RT_TypeSystem::GetGenericOwnerRow(slot, declaring, row))
+            {
+                slot = 0;
+            }
+
+            if (inst.target->genericParamCount > 0 && NANOCLR_INDEX_IS_VALID(dlg->m_genericMethodSpec))
+            {
+                slot = CLR_RT_GenericInstantiation::GetMethodInstanceSlot(dlg->m_genericMethodSpec, slot);
+            }
+        }
+
+        NANOCLR_CHECK_HRESULT(Library_corlib_native_System_Reflection_MethodBase::NewMethodInfo(top, ftn, slot));
     }
 
     NANOCLR_NOCLEANUP();
