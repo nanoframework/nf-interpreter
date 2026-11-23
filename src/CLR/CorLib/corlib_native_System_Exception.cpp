@@ -18,6 +18,9 @@ static const ExceptionLookup c_ExceptionLookup[] = {
     EL(CLR_E_ARGUMENT_NULL, ArgumentNullException),
     EL(CLR_E_OUT_OF_RANGE, ArgumentOutOfRangeException),
     EL(CLR_E_INDEX_OUT_OF_RANGE, IndexOutOfRangeException),
+    EL(CLR_E_ARRAY_TYPE_MISMATCH, ArrayTypeMismatchException),
+    EL(CLR_E_TARGET, TargetException),
+    EL(CLR_E_TARGET_PARAMETER_COUNT, TargetParameterCountException),
     EL(CLR_E_INVALID_CAST, InvalidCastException),
     EL(CLR_E_FORMAT_EXCEPTION, FormatException),
     EL(CLR_E_INVALID_OPERATION, InvalidOperationException),
@@ -165,7 +168,11 @@ HRESULT Library_corlib_native_System_Exception::CreateInstance(
     {
         if (c_ExceptionLookup[i].hr == hrIn)
         {
-            cls = c_ExceptionLookup[i].ptr;
+            if (NANOCLR_INDEX_IS_VALID(*c_ExceptionLookup[i].ptr))
+            {
+                cls = c_ExceptionLookup[i].ptr;
+            }
+
             break;
         }
     }

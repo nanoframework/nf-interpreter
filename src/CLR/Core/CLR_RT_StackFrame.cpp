@@ -692,7 +692,7 @@ HRESULT CLR_RT_StackFrame::MakeCall(
     }
 
     if (ArgumentsCount != nArgs)
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        NANOCLR_SET_AND_LEAVE(CLR_E_TARGET_PARAMETER_COUNT);
 
     //
     // In case the invoked method is abstract or virtual, resolve it to the correct method implementation.
@@ -707,7 +707,7 @@ HRESULT CLR_RT_StackFrame::MakeCall(
 
         NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(*obj, cls));
 
-        if (g_CLR_RT_EventCache.FindVirtualMethod(cls, md, mdReal) == false)
+        if (g_CLR_RT_EventCache.FindVirtualMethod(cls, md, mdReal, md.genericType) == false)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }
@@ -866,7 +866,7 @@ HRESULT CLR_RT_StackFrame::FixCall()
                     }
                     else
                     {
-                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
                     }
                 }
             }

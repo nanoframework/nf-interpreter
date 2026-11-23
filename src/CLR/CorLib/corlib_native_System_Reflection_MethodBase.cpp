@@ -147,7 +147,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::Invoke___OBJECT__OBJ
             if (declaringType.InitializeFromMethod(md) == false ||
                 CLR_RT_ExecutionEngine::IsInstanceOf(obj, declaringType) == false)
             {
-                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+                NANOCLR_SET_AND_LEAVE(CLR_E_TARGET);
             }
 
             if (md.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*md.genericType))
@@ -158,7 +158,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::Invoke___OBJECT__OBJ
                     target->ObjectCls().data == declaringType.data &&
                     !CLR_RT_TypeSystem::IsSameGenericInstance(target->ObjectGenericType(), *md.genericType))
                 {
-                    NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_TARGET);
                 }
             }
         }
@@ -306,7 +306,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckInvokeArguments
         if (FAILED(sourceType.InitializeFromObject(arg)) ||
             CLR_RT_ExecutionEngine::IsInstanceOf(sourceType, targetType) == false)
         {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
         if (target.m_count > 0)
@@ -315,7 +315,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckInvokeArguments
 
             if (match == GenericMatch_Different || match == GenericMatch_NoTypeSpec)
             {
-                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
             }
         }
     }
