@@ -456,6 +456,54 @@ static bool HasSameSizeIntegralElements(const CLR_RT_HeapBlock_Array &source, co
            size == CLR_RT_TypeSystem::IntegralSize(target.m_typeOfElement);
 }
 
+static bool AreElementsRelated(const CLR_RT_HeapBlock_Array &source, const CLR_RT_HeapBlock_Array &target)
+{
+    CLR_RT_TypeDescriptor descSrc{};
+    CLR_RT_TypeDescriptor descDst{};
+    int sizeSrc = CLR_RT_TypeSystem::IntegralSize(source.m_typeOfElement);
+    int sizeDst = CLR_RT_TypeSystem::IntegralSize(target.m_typeOfElement);
+
+    if (FAILED(descSrc.InitializeFromObject(source)) || FAILED(descDst.InitializeFromObject(target)))
+    {
+        return true;
+    }
+
+    if (!source.m_fReference && !target.m_fReference && sizeSrc != 0 && sizeDst != 0 && sizeSrc < sizeDst)
+    {
+        return true;
+    }
+
+    descSrc.GetElementType(descSrc);
+    descDst.GetElementType(descDst);
+
+    if ((descSrc.m_reflex.levels == 0 && descSrc.m_reflex.data.type.data == g_CLR_RT_WellKnownTypes.Object.data) ||
+        (descDst.m_reflex.levels == 0 && descDst.m_reflex.data.type.data == g_CLR_RT_WellKnownTypes.Object.data))
+    {
+        return true;
+    }
+
+    if ((descSrc.m_reflex.levels == 0 && NANOCLR_INDEX_IS_VALID(descSrc.m_handlerCls) &&
+         descSrc.m_handlerCls.target->IsInterface()) ||
+        (descDst.m_reflex.levels == 0 && NANOCLR_INDEX_IS_VALID(descDst.m_handlerCls) &&
+         descDst.m_handlerCls.target->IsInterface()))
+    {
+        return true;
+    }
+
+    if (!CLR_RT_ExecutionEngine::IsInstanceOf(descSrc, descDst) &&
+        !CLR_RT_ExecutionEngine::IsInstanceOf(descDst, descSrc))
+    {
+        return false;
+    }
+
+    const CLR_RT_TypeSpec_Index *specSrc = source.ElementTypeSpec();
+    const CLR_RT_TypeSpec_Index *specDst = target.ElementTypeSpec();
+
+    return specSrc == nullptr || specDst == nullptr ||
+           CLR_RT_TypeSystem::IsElementInstanceAssignable(*specSrc, *specDst) ||
+           CLR_RT_TypeSystem::IsElementInstanceAssignable(*specDst, *specSrc);
+}
+
 HRESULT CLR_RT_HeapBlock_Array::Copy(
     CLR_RT_HeapBlock_Array *arraySrc,
     int indexSrc,
@@ -537,6 +585,10 @@ HRESULT CLR_RT_HeapBlock_Array::Copy(
                     NANOCLR_CHECK_HRESULT(ptrDst->Reassign(*ptrSrc));
                 }
             }
+        }
+        else if (!AreElementsRelated(*arraySrc, *arrayDst))
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_ARRAY_TYPE_MISMATCH);
         }
         else if (arraySrc->m_fReference && arrayDst->m_fReference)
         {

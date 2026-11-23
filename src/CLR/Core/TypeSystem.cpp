@@ -5782,6 +5782,9 @@ static const TypeIndexLookup c_TypeIndexLookup[] = {
     TIL("System",                                   "ArgumentOutOfRangeException",      ArgumentOutOfRangeException),
     TIL("System",                                   "Exception",                        Exception),
     TIL("System",                                   "IndexOutOfRangeException",         IndexOutOfRangeException),
+    TIL("System",                                   "ArrayTypeMismatchException",       ArrayTypeMismatchException),
+    TIL("System.Reflection",                        "TargetException",                  TargetException),
+    TIL("System.Reflection",                        "TargetParameterCountException",    TargetParameterCountException),
     TIL("System",                                   "InvalidCastException",             InvalidCastException),
     TIL("System",                                   "FormatException",                  FormatException),
     TIL("System",                                   "InvalidOperationException",        InvalidOperationException),
@@ -8703,146 +8706,438 @@ HRESULT CLR_RT_TypeSystem::BuildMethodSpecName(
 }
 //--//
 
-bool CLR_RT_TypeSystem::FindVirtualMethodDef(
+static const int c_MaxInheritanceDepth = 32;
+
+static HRESULT CollectGenericNodesAt(
+    CLR_RT_SignatureParser parser,
+    const CLR_RT_TypeSpec_Index *contextTypeSpec,
+    const CLR_RT_MethodDef_Instance *contextMethod,
+    const CLR_RT_TypeDef_Index *mvarFallback,
+    CLR_RT_GenericInstanceNode *nodes,
+    int &nodeCount,
+    bool &isClosed,
+    bool &substituted);
+static bool AppendGenericInstanceNode(
+    CLR_RT_GenericInstanceNode *nodes,
+    int &nodeCount,
+    const CLR_RT_SignatureParser::Element &elem,
+    int levels);
+static CLR_RT_GenericInstance *RecordOfTypeSpec(const CLR_RT_TypeSpec_Index &index);
+
+bool CLR_RT_GenericDispatch::CollectElementNodes(
+    CLR_RT_SignatureParser &parser,
+    CLR_RT_GenericTarget &out,
+    bool &isByRef)
+{
+    const int end = parser.Available() - 1;
+    CLR_RT_SignatureParser start = parser;
+    CLR_RT_SignatureParser::Element elem;
+
+    out.m_count = 0;
+
+    if (FAILED(parser.Advance(elem)))
+    {
+        return false;
+    }
+
+    isByRef = elem.IsByRef;
+
+    if (elem.DataType == DATATYPE_GENERICINST)
+    {
+        bool closed;
+        bool substituted;
+
+        if (FAILED(
+                CollectGenericNodesAt(start, nullptr, nullptr, nullptr, out.m_nodes, out.m_count, closed, substituted)))
+        {
+            return false;
+        }
+
+        out.m_nodes[0].Levels = (CLR_UINT8)elem.Levels;
+    }
+    else if (elem.GenParamCount > 0 || !AppendGenericInstanceNode(out.m_nodes, out.m_count, elem, elem.Levels))
+    {
+        return false;
+    }
+
+    return DrainGenericInstSubtree(parser, end);
+}
+
+bool CLR_RT_GenericDispatch::SubstituteNodes(CLR_RT_GenericTarget &stream, const CLR_RT_GenericTarget *binding)
+{
+    CLR_RT_GenericTarget result;
+
+    if (binding == nullptr)
+    {
+        return true;
+    }
+
+    result.m_count = 0;
+
+    for (int i = 0; i < stream.m_count; i++)
+    {
+        const CLR_RT_GenericInstanceNode &node = stream.m_nodes[i];
+
+        if (node.DataType != DATATYPE_VAR)
+        {
+            if (result.m_count >= CLR_RT_GenericInstance::c_MaxNodes)
+            {
+                return false;
+            }
+
+            result.m_nodes[result.m_count++] = node;
+            continue;
+        }
+
+        const CLR_RT_GenericInstanceNode *end = binding->m_nodes + binding->m_count;
+        const CLR_RT_GenericInstanceNode *argument = binding->m_nodes + 1;
+        int size = 0;
+
+        if (binding->m_count == 0 || node.Position >= binding->m_nodes[0].ArgCount)
+        {
+            return false;
+        }
+
+        for (int a = 0; a <= node.Position; a++)
+        {
+            argument += size;
+            size = CLR_RT_GenericAssignability::SubtreeSize(argument, end);
+
+            if (size == 0)
+            {
+                return false;
+            }
+        }
+
+        if (result.m_count + size > CLR_RT_GenericInstance::c_MaxNodes || argument->Levels + node.Levels > 0xFF)
+        {
+            return false;
+        }
+
+        memcpy(&result.m_nodes[result.m_count], argument, sizeof(CLR_RT_GenericInstanceNode) * size);
+        result.m_nodes[result.m_count].Levels = (CLR_UINT8)(result.m_nodes[result.m_count].Levels + node.Levels);
+        result.m_count += size;
+    }
+
+    stream = result;
+
+    return true;
+}
+
+bool CLR_RT_GenericDispatch::GetBaseContext(
+    const CLR_RT_TypeDef_Instance &inst,
+    const CLR_RT_GenericTarget *context,
+    CLR_RT_GenericTarget &base)
+{
+    CLR_RT_TypeSpec_Index baseSpec;
+    CLR_RT_TypeSpec_Instance baseInstance{};
+    CLR_RT_SignatureParser parser;
+    CLR_RT_GenericTarget stream;
+    bool isByRef;
+
+    base.m_count = 0;
+
+    if (!inst.GetExtendsTypeSpec(baseSpec))
+    {
+        return true;
+    }
+
+    if (!baseInstance.InitializeFromIndex(baseSpec))
+    {
+        return false;
+    }
+
+    parser.Initialize_TypeSpec(baseInstance);
+
+    if (!CollectElementNodes(parser, stream, isByRef) || !SubstituteNodes(stream, context))
+    {
+        return false;
+    }
+
+    base = stream;
+
+    return true;
+}
+
+HRESULT CLR_RT_GenericDispatch::GetCalleeBinding(
     const CLR_RT_TypeDef_Index &cls,
-    const CLR_RT_MethodDef_Index &calleeMD,
+    const CLR_RT_TypeDef_Instance &declaring,
+    const CLR_RT_GenericInstance *site,
+    CLR_RT_GenericTarget &binding,
+    bool &ambiguous)
+{
+    CLR_RT_TypeDef_Instance inst{};
+    CLR_RT_GenericTarget context;
+    CLR_RT_GenericTarget candidate;
+    const bool isInterface = declaring.target->IsInterface();
+    bool haveContext = false;
+    int best = 0;
+
+    inst.InitializeFromIndex(cls);
+    binding.m_count = 0;
+
+    for (int level = 0; level < c_MaxInheritanceDepth && NANOCLR_INDEX_IS_VALID(inst); level++)
+    {
+        const CLR_RT_GenericTarget *outer = haveContext ? &context : nullptr;
+
+        if (!isInterface)
+        {
+            if (inst.data == declaring.data)
+            {
+                if (haveContext)
+                {
+                    binding = context;
+                }
+
+                return S_OK;
+            }
+        }
+        else
+        {
+            CLR_RT_SignatureParser parser{};
+
+            parser.Initialize_Interfaces(inst.assembly, inst.target);
+
+            while (parser.Available() > 0)
+            {
+                CLR_RT_SignatureParser peek = parser;
+                CLR_RT_SignatureParser::Element elem;
+                CLR_UINT32 tk = CLR_TkFromStream(peek.Signature);
+
+                if (FAILED(parser.Advance(elem)))
+                {
+                    break;
+                }
+
+                if (elem.Class.data != declaring.data || CLR_TypeFromTk(tk) != TBL_TypeSpec)
+                {
+                    continue;
+                }
+
+                CLR_RT_TypeSpec_Index entryIndex;
+                CLR_RT_TypeSpec_Instance entry{};
+                CLR_RT_SignatureParser at{};
+                bool isByRef;
+
+                entryIndex.Set(inst.assembly->assemblyIndex, CLR_DataFromTk(tk));
+
+                if (!entry.InitializeFromIndex(entryIndex))
+                {
+                    continue;
+                }
+
+                at.Initialize_TypeSpec(entry);
+
+                if (!CollectElementNodes(at, candidate, isByRef) || !SubstituteNodes(candidate, outer))
+                {
+                    return CLR_E_NOT_SUPPORTED;
+                }
+
+                int kind = 1;
+
+                if (site != nullptr)
+                {
+                    CLR_RT_GenericRef source = {candidate.m_nodes, candidate.m_nodes + candidate.m_count, 0};
+                    CLR_RT_GenericRef target = {site->m_nodes, site->m_nodes + site->m_nodeCount, 0};
+
+                    if (candidate.m_count == site->m_nodeCount &&
+                        memcmp(
+                            candidate.m_nodes,
+                            site->m_nodes,
+                            sizeof(CLR_RT_GenericInstanceNode) * candidate.m_count) == 0)
+                    {
+                        kind = 3;
+                    }
+                    else if (CLR_RT_GenericAssignability::SameClassAssignable(source, target, 0))
+                    {
+                        kind = 2;
+                    }
+                }
+
+                if (best != 0 && (candidate.m_count != binding.m_count ||
+                                  memcmp(
+                                      candidate.m_nodes,
+                                      binding.m_nodes,
+                                      sizeof(CLR_RT_GenericInstanceNode) * candidate.m_count) != 0))
+                {
+                    ambiguous = true;
+                }
+
+                if (kind > best)
+                {
+                    binding = candidate;
+                    best = kind;
+                }
+            }
+        }
+
+        if (!GetBaseContext(inst, outer, candidate))
+        {
+            return CLR_E_NOT_SUPPORTED;
+        }
+
+        context = candidate;
+        haveContext = true;
+
+        if (!inst.SwitchToParent())
+        {
+            break;
+        }
+    }
+
+    return best > 0 ? S_OK : S_FALSE;
+}
+
+int CLR_RT_GenericDispatch::MatchSignatureInClass(
+    CLR_RT_MethodDef_Instance &callee,
+    const CLR_RT_GenericTarget *calleeBinding,
+    CLR_RT_Assembly *assembly,
+    const CLR_RECORD_METHODDEF *method,
+    const CLR_RT_GenericTarget *context)
+{
+    CLR_RT_SignatureParser left{};
+    CLR_RT_SignatureParser right{};
+    CLR_RT_GenericTarget leftNodes;
+    CLR_RT_GenericTarget rightNodes;
+    bool leftByRef;
+    bool rightByRef;
+
+    left.Initialize_MethodSignature(&callee);
+    right.Initialize_MethodSignature(assembly, method);
+
+    if (left.Type != right.Type || left.Flags != right.Flags)
+    {
+        return 0;
+    }
+
+    while (left.Available() > 0 && right.Available() > 0)
+    {
+        if (!CollectElementNodes(left, leftNodes, leftByRef) || !CollectElementNodes(right, rightNodes, rightByRef))
+        {
+            return -1;
+        }
+
+        if (!SubstituteNodes(leftNodes, calleeBinding) || !SubstituteNodes(rightNodes, context))
+        {
+            return 0;
+        }
+
+        if (leftByRef != rightByRef || leftNodes.m_count != rightNodes.m_count ||
+            memcmp(leftNodes.m_nodes, rightNodes.m_nodes, sizeof(CLR_RT_GenericInstanceNode) * leftNodes.m_count) != 0)
+        {
+            return 0;
+        }
+    }
+
+    return left.Available() == right.Available() ? 1 : 0;
+}
+
+static bool MatchInterfaceQualifier(const char *pattern, const char *target, size_t targetLen)
+{
+    size_t t = 0;
+
+    while (*pattern)
+    {
+        if (*pattern == '`')
+        {
+            int depth = 0;
+
+            pattern++;
+
+            while (*pattern >= '0' && *pattern <= '9')
+            {
+                pattern++;
+            }
+
+            if (t >= targetLen || target[t] != '<')
+            {
+                return false;
+            }
+
+            do
+            {
+                depth += (target[t] == '<') - (target[t] == '>');
+                t++;
+            } while (depth > 0 && t < targetLen);
+
+            if (depth != 0)
+            {
+                return false;
+            }
+        }
+        else
+        {
+            if (t >= targetLen || target[t] != *pattern)
+            {
+                return false;
+            }
+
+            pattern++;
+            t++;
+        }
+    }
+
+    return t == targetLen;
+}
+
+bool CLR_RT_GenericDispatch::FindVirtualMethodInChain(
+    const CLR_RT_TypeDef_Index &cls,
+    CLR_RT_MethodDef_Instance &calleeInst,
+    const char *calleeName,
+    bool suffixMatchOnly,
+    bool useNodes,
+    const CLR_RT_GenericTarget *calleeBinding,
     CLR_RT_MethodDef_Index &index)
 {
-    NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_MethodDef_Instance calleeInst{};
+    CLR_RT_TypeDef_Instance clsInst{};
+    clsInst.InitializeFromIndex(cls);
 
-    if (calleeInst.InitializeFromIndex(calleeMD))
+    const CLR_RECORD_METHODDEF *calleeMDR = calleeInst.target;
+    const CLR_UINT8 calleeArgumentsCount = calleeMDR->argumentsCount;
+    const size_t calleeLen = hal_strlen_s(calleeName);
+    const bool hasHelper =
+        cls.data == g_CLR_RT_WellKnownTypes.Array.data && NANOCLR_INDEX_IS_VALID(g_CLR_RT_WellKnownTypes.SZArrayHelper);
+    bool helper = false;
+    bool haveContext = false;
+    bool contextOk = true;
+    CLR_RT_GenericTarget context;
+    CLR_RT_GenericTarget next;
+    char qualifier[256];
+    bool qualifierValid = false;
+
+    if (suffixMatchOnly)
     {
-        const char *calleeName = calleeInst.assembly->GetString(calleeInst.target->name);
+        CLR_RT_TypeDef_Instance declaringType{};
+        char *szBuffer = qualifier;
+        size_t iBuffer = MAXSTRLEN(qualifier);
 
-        CLR_RT_TypeDef_Instance inst{};
-        inst.InitializeFromMethod(calleeInst);
-
-        if ((inst.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_Interface)
-        {
-            //
-            // It's an interface method, it could be that the class is implementing explicitly the method.
-            // Prepend the Interface name to the method name and try again.
-            //
-            char rgBuffer[512];
-            char *szBuffer = rgBuffer;
-            size_t iBuffer = MAXSTRLEN(rgBuffer);
-
-            BuildTypeName(
-                inst,
+        if (declaringType.InitializeFromMethod(calleeInst) &&
+            SUCCEEDED(g_CLR_RT_TypeSystem.BuildTypeName(
+                declaringType,
                 szBuffer,
                 iBuffer,
                 CLR_RT_TypeSystem::TYPENAME_FLAGS_FULL | CLR_RT_TypeSystem::TYPENAME_NESTED_SEPARATOR_DOT,
-                0);
-            QueueStringToBuffer(szBuffer, iBuffer, ".");
-            QueueStringToBuffer(szBuffer, iBuffer, calleeName);
-
-            if (FindVirtualMethodDef(cls, calleeMD, rgBuffer, index))
-                return true;
-
-            // Second pass: suffix-only ".<calleeName>" — matches explicit interface
-            // impls stored under the expanded name form when BuildTypeName produced the
-            // backtick form. See CLAUDE.md "Virtual method dispatch on generics".
-            if (FindVirtualMethodDef(cls, calleeMD, calleeName, index, /*suffixMatchOnly=*/true))
-                return true;
-        }
-
-        if (FindVirtualMethodDef(cls, calleeMD, calleeName, index))
-            return true;
-    }
-
-    index.Clear();
-
-    return false;
-}
-
-static bool MatchSignatureForVirtualDispatch(CLR_RT_SignatureParser &parserLeft, CLR_RT_SignatureParser &parserRight)
-{
-    if (parserLeft.Type != parserRight.Type)
-        return false;
-    if (parserLeft.Flags != parserRight.Flags)
-        return false;
-
-    while (true)
-    {
-        int iAvailLeft = parserLeft.Available();
-        int iAvailRight = parserRight.Available();
-
-        if (iAvailLeft != iAvailRight)
-            return false;
-        if (!iAvailLeft)
-            return true;
-
-        CLR_RT_SignatureParser::Element resLeft;
-        if (FAILED(parserLeft.Advance(resLeft)))
-            return false;
-
-        CLR_RT_SignatureParser::Element resRight;
-        if (FAILED(parserRight.Advance(resRight)))
-            return false;
-
-        // Relaxed VAR <-> GENERICINST match for explicit interface impls — drain the
-        // expanded side's sub-tree. See CLAUDE.md "Virtual method dispatch on generics".
-        if (resLeft.DataType == DATATYPE_VAR && resRight.DataType == DATATYPE_GENERICINST)
+                0)))
         {
-            int targetAvail = iAvailLeft - 1;
-            if (!DrainGenericInstSubtree(parserRight, targetAvail))
-            {
-                return false;
-            }
-
-            continue;
+            qualifierValid = qualifier[0] != 0;
         }
-
-        if (resLeft.DataType == DATATYPE_GENERICINST && resRight.DataType == DATATYPE_VAR)
-        {
-            int targetAvail = iAvailRight - 1;
-
-            if (!DrainGenericInstSubtree(parserLeft, targetAvail))
-            {
-                return false;
-            }
-
-            continue;
-        }
-
-        // Fall back to the standard element matcher for everything else.
-        if (!CLR_RT_TypeSystem::MatchSignatureElement(resLeft, resRight, parserLeft, parserRight, false))
-            return false;
     }
-}
-
-bool CLR_RT_TypeSystem::FindVirtualMethodDef(
-    const CLR_RT_TypeDef_Index &cls,
-    const CLR_RT_MethodDef_Index &calleeMD,
-    const char *calleeName,
-    CLR_RT_MethodDef_Index &index,
-    bool suffixMatchOnly)
-{
-    NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_TypeDef_Instance clsInst{};
-    clsInst.InitializeFromIndex(cls);
-    CLR_RT_MethodDef_Instance calleeInst{};
-    calleeInst.InitializeFromIndex(calleeMD);
-
-    const bool isArrayClass = (cls.data == g_CLR_RT_WellKnownTypes.Array.data);
-
-    const CLR_RECORD_METHODDEF *calleeMDR = calleeInst.target;
-    CLR_UINT8 calleeArgumentsCount = calleeMDR->argumentsCount;
 
     // A generic interface on an array goes to SZArrayHelper, not to the explicit non-generic members of Array.
-    bool helperOnly = false;
-
-    if (isArrayClass && NANOCLR_INDEX_IS_VALID(g_CLR_RT_WellKnownTypes.SZArrayHelper))
+    if (hasHelper)
     {
         CLR_RT_TypeDef_Instance owner{};
 
-        helperOnly =
-            owner.InitializeFromMethod(calleeInst) && owner.target->genericParamCount > 0 &&
-            (owner.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_Interface;
+        helper = owner.InitializeFromMethod(calleeInst) && owner.target->genericParamCount > 0 &&
+                 owner.target->IsInterface();
+
+        if (helper)
+        {
+            clsInst.InitializeFromIndex(g_CLR_RT_WellKnownTypes.SZArrayHelper);
+        }
     }
 
-    while (!helperOnly && NANOCLR_INDEX_IS_VALID(clsInst))
+    while (NANOCLR_INDEX_IS_VALID(clsInst))
     {
         CLR_RT_Assembly *targetAssm = clsInst.assembly;
         const CLR_RECORD_TYPEDEF *targetTDR = clsInst.target;
@@ -8851,95 +9146,182 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
 
         for (int i = 0; i < num; i++, targetMDR++)
         {
-            if (targetMDR == calleeMDR)
+            if (!helper && targetMDR == calleeMDR)
             {
-                // Shortcut for identity.
                 index = calleeInst;
                 return true;
             }
 
-            if (targetMDR->argumentsCount == calleeArgumentsCount &&
-                (targetMDR->flags & CLR_RECORD_METHODDEF::MD_Abstract) == 0)
+            if (targetMDR->argumentsCount != calleeArgumentsCount ||
+                (targetMDR->flags & (helper ? CLR_RECORD_METHODDEF::MD_Static : CLR_RECORD_METHODDEF::MD_Abstract)) !=
+                    0)
             {
-                const char *targetName = targetAssm->GetString(targetMDR->name);
+                continue;
+            }
 
-                // Match exact short name, OR suffix ".<calleeName>" for explicit interface
-                // impls. suffixMatchOnly=true skips the exact short-name path so a public
-                // method does not shadow an explicit impl with the same short name.
-                size_t targetLen = hal_strlen_s(targetName);
-                size_t calleeLen = hal_strlen_s(calleeName);
-                bool nameMatch = (!suffixMatchOnly && !strcmp(targetName, calleeName));
-                if (!nameMatch && targetLen > calleeLen + 1)
+            const char *targetName = targetAssm->GetString(targetMDR->name);
+            size_t targetLen = hal_strlen_s(targetName);
+            bool nameMatch = (helper || !suffixMatchOnly) && !strcmp(targetName, calleeName);
+
+            if (!nameMatch && !helper && suffixMatchOnly && qualifierValid && targetLen > calleeLen + 1)
+            {
+                const char *suffix = targetName + targetLen - calleeLen;
+
+                if (suffix[-1] == '.' && !strcmp(suffix, calleeName))
                 {
-                    // Check whether targetName ends with "." + calleeName
-                    const char *suffix = targetName + targetLen - calleeLen;
-                    nameMatch = (suffix[-1] == '.' && !strcmp(suffix, calleeName));
+                    nameMatch = MatchInterfaceQualifier(qualifier, targetName, targetLen - calleeLen - 1);
+                }
+            }
+
+            if (!nameMatch)
+            {
+                continue;
+            }
+
+            int matched = 1;
+
+            if (!helper)
+            {
+                if (useNodes)
+                {
+                    matched = contextOk ? MatchSignatureInClass(
+                                              calleeInst,
+                                              calleeBinding,
+                                              targetAssm,
+                                              targetMDR,
+                                              haveContext ? &context : nullptr)
+                                        : 0;
+                }
+                else
+                {
+                    matched = -1;
                 }
 
-                if (nameMatch)
+                if (matched < 0)
                 {
                     CLR_RT_SignatureParser parserLeft{};
-                    parserLeft.Initialize_MethodSignature(&calleeInst);
                     CLR_RT_SignatureParser parserRight{};
+
+                    parserLeft.Initialize_MethodSignature(&calleeInst);
                     parserRight.Initialize_MethodSignature(targetAssm, targetMDR);
 
-                    if (MatchSignatureForVirtualDispatch(parserLeft, parserRight))
-                    {
-                        index.Set(targetAssm->assemblyIndex, i + targetTDR->firstMethod);
+                    matched = CLR_RT_TypeSystem::MatchSignature(parserLeft, parserRight) ? 1 : 0;
+                }
+            }
 
-                        return true;
-                    }
+            if (matched == 1)
+            {
+                index.Set(targetAssm->assemblyIndex, i + targetTDR->firstMethod);
+
+                return true;
+            }
+        }
+
+        if (helper)
+        {
+            break;
+        }
+
+        if (useNodes && contextOk)
+        {
+            contextOk = GetBaseContext(clsInst, haveContext ? &context : nullptr, next);
+            context = next;
+            haveContext = true;
+        }
+
+        if (!clsInst.SwitchToParent() && hasHelper)
+        {
+            helper = true;
+            clsInst.InitializeFromIndex(g_CLR_RT_WellKnownTypes.SZArrayHelper);
+        }
+    }
+
+    index.Clear();
+
+    return false;
+}
+
+bool CLR_RT_GenericDispatch::FindExplicitImplementation(
+    const CLR_RT_TypeDef_Index &cls,
+    CLR_RT_MethodDef_Instance &calleeInst,
+    const CLR_RT_TypeDef_Instance &declaring,
+    const char *calleeName,
+    CLR_RT_MethodDef_Index &index)
+{
+    char rgBuffer[512];
+    char *szBuffer = rgBuffer;
+    size_t iBuffer = MAXSTRLEN(rgBuffer);
+
+    g_CLR_RT_TypeSystem.BuildTypeName(
+        declaring,
+        szBuffer,
+        iBuffer,
+        CLR_RT_TypeSystem::TYPENAME_FLAGS_FULL | CLR_RT_TypeSystem::TYPENAME_NESTED_SEPARATOR_DOT,
+        0);
+    g_CLR_RT_TypeSystem.QueueStringToBuffer(szBuffer, iBuffer, ".");
+    g_CLR_RT_TypeSystem.QueueStringToBuffer(szBuffer, iBuffer, calleeName);
+
+    return FindVirtualMethodInChain(cls, calleeInst, rgBuffer, false, false, nullptr, index);
+}
+
+bool CLR_RT_TypeSystem::FindVirtualMethodDef(
+    const CLR_RT_TypeDef_Index &cls,
+    const CLR_RT_MethodDef_Index &calleeMD,
+    CLR_RT_MethodDef_Index &index,
+    const CLR_RT_TypeSpec_Index *callSite,
+    bool *cacheable)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    CLR_RT_MethodDef_Instance calleeInst{};
+
+    if (calleeInst.InitializeFromIndex(calleeMD))
+    {
+        const char *calleeName = calleeInst.assembly->GetString(calleeInst.target->name);
+        CLR_RT_TypeDef_Instance declaring{};
+        CLR_RT_GenericTarget binding;
+        bool useNodes = false;
+        bool ambiguous = false;
+
+        declaring.InitializeFromMethod(calleeInst);
+
+        if (declaring.target->genericParamCount > 0)
+        {
+            useNodes = CLR_RT_GenericDispatch::GetCalleeBinding(cls, declaring, nullptr, binding, ambiguous) == S_OK;
+
+            if (useNodes && ambiguous && callSite != nullptr && NANOCLR_INDEX_IS_VALID(*callSite))
+            {
+                const CLR_RT_GenericInstance *site = RecordOfTypeSpec(*callSite);
+
+                if (site != nullptr)
+                {
+                    useNodes =
+                        CLR_RT_GenericDispatch::GetCalleeBinding(cls, declaring, site, binding, ambiguous) == S_OK;
                 }
             }
         }
 
-        clsInst.SwitchToParent();
-    }
+        const CLR_RT_GenericTarget *calleeBinding = (useNodes && binding.m_count > 0) ? &binding : nullptr;
 
-    // SZ arrays expose IList generic interfaces through System.Array+SZArrayHelper, so fall back to that helper
-    // type
-    if (isArrayClass)
-    {
-        const CLR_RT_TypeDef_Index &arrayHelperIdx = g_CLR_RT_WellKnownTypes.SZArrayHelper;
-
-        if (NANOCLR_INDEX_IS_VALID(arrayHelperIdx))
+        if ((declaring.target->IsInterface() &&
+             ((declaring.target->genericParamCount == 0 &&
+               CLR_RT_GenericDispatch::FindExplicitImplementation(cls, calleeInst, declaring, calleeName, index)) ||
+              CLR_RT_GenericDispatch::
+                  FindVirtualMethodInChain(cls, calleeInst, calleeName, true, useNodes, calleeBinding, index))) ||
+            CLR_RT_GenericDispatch::FindVirtualMethodInChain(
+                cls,
+                calleeInst,
+                calleeName,
+                false,
+                useNodes,
+                calleeBinding,
+                index))
         {
-            CLR_RT_TypeDef_Instance helperInst{};
-            helperInst.InitializeFromIndex(arrayHelperIdx);
-
-            CLR_RT_Assembly *arrayHelperAssm = helperInst.assembly;
-            const CLR_RECORD_TYPEDEF *arrayHelperTypeDef = helperInst.target;
-
-            if (arrayHelperAssm != nullptr && arrayHelperTypeDef != nullptr)
+            if (cacheable != nullptr)
             {
-                int methodCount = arrayHelperTypeDef->virtualMethodCount + arrayHelperTypeDef->instanceMethodCount;
-
-                if (methodCount > 0 && arrayHelperTypeDef->firstMethod != CLR_EmptyIndex)
-                {
-                    const CLR_RECORD_METHODDEF *arrayHelperMethodDef =
-                        arrayHelperAssm->GetMethodDef(arrayHelperTypeDef->firstMethod);
-
-                    for (int i = 0; i < methodCount; i++, arrayHelperMethodDef++)
-                    {
-                        if ((arrayHelperMethodDef->flags & CLR_RECORD_METHODDEF::MD_Static) != 0)
-                        {
-                            continue;
-                        }
-
-                        if (arrayHelperMethodDef->argumentsCount != calleeArgumentsCount)
-                        {
-                            continue;
-                        }
-
-                        const char *methodNameAtHelper = arrayHelperAssm->GetString(arrayHelperMethodDef->name);
-                        if (methodNameAtHelper != nullptr && strcmp(methodNameAtHelper, calleeName) == 0)
-                        {
-                            index.Set(arrayHelperAssm->assemblyIndex, arrayHelperTypeDef->firstMethod + i);
-                            return true;
-                        }
-                    }
-                }
+                *cacheable = !ambiguous;
             }
+
+            return true;
         }
     }
 
@@ -9368,8 +9750,6 @@ bool CLR_RT_TypeSystem::GetGenericOwnerRow(
 
     return true;
 }
-
-static const int c_MaxInheritanceDepth = 32;
 
 CLR_RT_GenericInstance *CLR_RT_TypeSystem::FindOrCreateGenericBase(
     const CLR_RT_TypeDef_Instance &child,

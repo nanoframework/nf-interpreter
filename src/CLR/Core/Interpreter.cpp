@@ -2711,7 +2711,11 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                         (calleeInst.target->flags &
                                          (CLR_RECORD_METHODDEF::MD_Abstract | CLR_RECORD_METHODDEF::MD_Virtual)))
                                     {
-                                        if (g_CLR_RT_EventCache.FindVirtualMethod(cls, calleeInst, calleeReal) == false)
+                                        if (g_CLR_RT_EventCache.FindVirtualMethod(
+                                                cls,
+                                                calleeInst,
+                                                calleeReal,
+                                                calleeInst.genericType) == false)
                                         {
                                             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                                         }
@@ -5015,7 +5019,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     CLR_RT_MethodDef_Index calleeReal;
 
-                    if (g_CLR_RT_EventCache.FindVirtualMethod(cls, callee, calleeReal) == false)
+                    if (g_CLR_RT_EventCache.FindVirtualMethod(cls, callee, calleeReal, callee.genericType) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }

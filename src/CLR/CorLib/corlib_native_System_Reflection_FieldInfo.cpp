@@ -47,7 +47,7 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::SetValue___VOID__OBJE
         // compare with the full field descriptor: its handler class is System.Array for any array field
         if (FAILED(descVal.InitializeFromObject(val)) || !CLR_RT_ExecutionEngine::IsInstanceOf(descVal, instTDescObj))
         {
-            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
         CLR_RT_SignatureParser fieldParser{};
@@ -66,7 +66,7 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::SetValue___VOID__OBJE
 
             if (match == GenericMatch_Different || match == GenericMatch_NoTypeSpec)
             {
-                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
             }
         }
     }
@@ -84,7 +84,7 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::SetValue___VOID__OBJE
         {
             if (val.Dereference() == nullptr || !val.Dereference()->IsBoxed())
             {
-                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
             }
 
             // DateTime and TimeSpan are optimized too, a struct is unboxed as its own type
@@ -103,7 +103,7 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::SetValue___VOID__OBJE
     {
         if (val.Dereference() == nullptr || !val.Dereference()->IsBoxed())
         {
-            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
         if (fValueType)
@@ -203,17 +203,23 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::Initialize(
     }
     else
     {
-        NANOCLR_CHECK_HRESULT(stack.Arg1().EnsureObjectReference(obj));
+        hr = stack.Arg1().EnsureObjectReference(obj);
+
+        if (FAILED(hr))
+        {
+            NANOCLR_SET_AND_LEAVE(
+                hr == CLR_E_WRONG_TYPE ? CLR_E_INVALID_PARAMETER : (hr == CLR_E_NULL_REFERENCE ? CLR_E_TARGET : hr));
+        }
 
         if (CLR_RT_ExecutionEngine::IsInstanceOf(*obj, instTD) == false)
         {
-            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
         if (NANOCLR_INDEX_IS_VALID(owner) && obj->IsAGenericInstance() && obj->ObjectCls().data == instTD.data &&
             !CLR_RT_TypeSystem::IsSameGenericInstance(obj->ObjectGenericType(), owner))
         {
-            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
         if (NANOCLR_INDEX_IS_INVALID(owner) && obj->IsAGenericInstance())

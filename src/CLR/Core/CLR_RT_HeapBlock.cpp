@@ -630,14 +630,14 @@ HRESULT CLR_RT_HeapBlock::StoreToReference(CLR_RT_HeapBlock &ref, int size)
 
                 if (CLR_RT_ExecutionEngine::IsInstanceOf(descSrc, descDstSub) == false)
                 {
-                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_ARRAY_TYPE_MISMATCH);
                 }
 
                 const CLR_RT_TypeSpec_Index *elementSpec = array->ElementTypeSpec();
 
                 if (elementSpec != nullptr && !CLR_RT_TypeSystem::ElementMatchesArraySpec(*this, *elementSpec))
                 {
-                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_ARRAY_TYPE_MISMATCH);
                 }
             }
 

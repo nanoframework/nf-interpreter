@@ -1723,6 +1723,9 @@ struct CLR_RT_WellKnownTypes
     CLR_RT_TypeDef_Index ArgumentOutOfRangeException;
     CLR_RT_TypeDef_Index Exception;
     CLR_RT_TypeDef_Index IndexOutOfRangeException;
+    CLR_RT_TypeDef_Index ArrayTypeMismatchException;
+    CLR_RT_TypeDef_Index TargetException;
+    CLR_RT_TypeDef_Index TargetParameterCountException;
     CLR_RT_TypeDef_Index ThreadAbortException;
     CLR_RT_TypeDef_Index InvalidOperationException;
     CLR_RT_TypeDef_Index InvalidCastException;
@@ -2064,6 +2067,42 @@ struct CLR_RT_GenericAssignability
         int count);
 };
 
+struct CLR_RT_GenericDispatch
+{
+    static bool CollectElementNodes(CLR_RT_SignatureParser &parser, CLR_RT_GenericTarget &out, bool &isByRef);
+    static bool SubstituteNodes(CLR_RT_GenericTarget &stream, const CLR_RT_GenericTarget *binding);
+    static bool GetBaseContext(
+        const CLR_RT_TypeDef_Instance &inst,
+        const CLR_RT_GenericTarget *context,
+        CLR_RT_GenericTarget &base);
+    static HRESULT GetCalleeBinding(
+        const CLR_RT_TypeDef_Index &cls,
+        const CLR_RT_TypeDef_Instance &declaring,
+        const CLR_RT_GenericInstance *site,
+        CLR_RT_GenericTarget &binding,
+        bool &ambiguous);
+    static int MatchSignatureInClass(
+        CLR_RT_MethodDef_Instance &callee,
+        const CLR_RT_GenericTarget *calleeBinding,
+        CLR_RT_Assembly *assembly,
+        const CLR_RECORD_METHODDEF *method,
+        const CLR_RT_GenericTarget *context);
+    static bool FindVirtualMethodInChain(
+        const CLR_RT_TypeDef_Index &cls,
+        CLR_RT_MethodDef_Instance &calleeInst,
+        const char *calleeName,
+        bool suffixMatchOnly,
+        bool useNodes,
+        const CLR_RT_GenericTarget *calleeBinding,
+        CLR_RT_MethodDef_Index &index);
+    static bool FindExplicitImplementation(
+        const CLR_RT_TypeDef_Index &cls,
+        CLR_RT_MethodDef_Instance &calleeInst,
+        const CLR_RT_TypeDef_Instance &declaring,
+        const char *calleeName,
+        CLR_RT_MethodDef_Index &index);
+};
+
 //--//
 
 struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
@@ -2177,13 +2216,9 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
     bool FindVirtualMethodDef(
         const CLR_RT_TypeDef_Index &cls,
         const CLR_RT_MethodDef_Index &calleeMD,
-        CLR_RT_MethodDef_Index &index);
-    bool FindVirtualMethodDef(
-        const CLR_RT_TypeDef_Index &cls,
-        const CLR_RT_MethodDef_Index &calleeMD,
-        const char *calleeName,
         CLR_RT_MethodDef_Index &index,
-        bool suffixMatchOnly = false);
+        const CLR_RT_TypeSpec_Index *callSite = nullptr,
+        bool *cacheable = nullptr);
 
     static bool MatchSignature(CLR_RT_SignatureParser &parserLeft, CLR_RT_SignatureParser &parserRight);
     static bool MatchSignatureDirect(
@@ -3973,7 +4008,8 @@ struct CLR_RT_EventCache
         bool FindVirtualMethod(
             const CLR_RT_TypeDef_Index &cls,
             const CLR_RT_MethodDef_Index &mdVirtual,
-            CLR_RT_MethodDef_Index &md);
+            CLR_RT_MethodDef_Index &md,
+            const CLR_RT_TypeSpec_Index *callSite = nullptr);
 
         //--//
 
@@ -4031,7 +4067,8 @@ struct CLR_RT_EventCache
         bool FindVirtualMethod(
             const CLR_RT_TypeDef_Index &cls,
             const CLR_RT_MethodDef_Index &mdVirtual,
-            CLR_RT_MethodDef_Index &md);
+            CLR_RT_MethodDef_Index &md,
+            const CLR_RT_TypeSpec_Index *callSite = nullptr);
 
       private:
         CLR_UINT32 GetNewEntry()
@@ -4072,7 +4109,8 @@ struct CLR_RT_EventCache
     bool FindVirtualMethod(
         const CLR_RT_TypeDef_Index &cls,
         const CLR_RT_MethodDef_Index &mdVirtual,
-        CLR_RT_MethodDef_Index &md);
+        CLR_RT_MethodDef_Index &md,
+        const CLR_RT_TypeSpec_Index *callSite = nullptr);
 
 #ifndef NANOCLR_NO_IL_INLINE
     bool GetInlineFrameBuffer(CLR_RT_InlineBuffer **ppBuffer);
