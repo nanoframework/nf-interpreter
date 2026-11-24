@@ -58,6 +58,7 @@ HRESULT CLR_RT_HeapBlock_Delegate::CreateInstance(
     dlg->m_object.SetObjectReference(nullptr);
     dlg->m_genericTypeSpec.Clear();
     dlg->m_genericMethodSpec.Clear();
+    dlg->m_delegateTypeSpec.Clear();
 
 #if defined(NANOCLR_APPDOMAINS)
     dlg->m_appDomain = g_CLR_RT_ExecutionEngine.GetCurrentAppDomain();
@@ -82,8 +83,47 @@ HRESULT CLR_RT_HeapBlock_Delegate::CreateInstance(
     NANOCLR_NOCLEANUP();
 }
 
+const CLR_RT_HeapBlock_Delegate *CLR_RT_HeapBlock_Delegate::TypeCarrier(const CLR_RT_HeapBlock *obj)
+{
+    if (obj->DataType() == DATATYPE_DELEGATELIST_HEAD)
+    {
+        CLR_RT_HeapBlock_Delegate_List *list = (CLR_RT_HeapBlock_Delegate_List *)obj;
+        CLR_RT_HeapBlock *items = list->GetDelegates();
+
+        for (CLR_UINT32 i = 0; i < list->m_length; i++)
+        {
+            if (items[i].DereferenceDelegate() != nullptr)
+            {
+                return items[i].DereferenceDelegate();
+            }
+        }
+
+        return nullptr;
+    }
+
+    return (const CLR_RT_HeapBlock_Delegate *)obj;
+}
+
+bool CLR_RT_HeapBlock_Delegate::SameType(const CLR_RT_HeapBlock_Delegate &other) const
+{
+    if (m_cls.data == 0 || other.m_cls.data == 0)
+    {
+        return true;
+    }
+
+    return m_cls.data == other.m_cls.data &&
+           (m_delegateTypeSpec.data == 0 || other.m_delegateTypeSpec.data == 0 ||
+            CLR_RT_TypeSystem::IsSameGenericInstance(m_delegateTypeSpec, other.m_delegateTypeSpec));
+}
+
 int CLR_RT_HeapBlock_Delegate::CompareGenericContext(const CLR_RT_HeapBlock_Delegate &other) const
 {
+    if (!SameType(other))
+    {
+        return m_cls.data != other.m_cls.data ? (m_cls.data > other.m_cls.data ? 1 : -1)
+                                              : (m_delegateTypeSpec.data > other.m_delegateTypeSpec.data ? 1 : -1);
+    }
+
     if (m_genericMethodSpec.data != other.m_genericMethodSpec.data)
     {
         return m_genericMethodSpec.data > other.m_genericMethodSpec.data ? 1 : -1;
