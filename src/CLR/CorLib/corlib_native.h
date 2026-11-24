@@ -115,6 +115,7 @@ struct Library_corlib_native_System_Type
     NANOCLR_NATIVE_DECLARE(get_ContainsGenericParameters___BOOLEAN);
     NANOCLR_NATIVE_DECLARE(GetGenericArguments___SZARRAY_SystemType);
     NANOCLR_NATIVE_DECLARE(MakeGenericType___SystemType__SZARRAY_SystemType);
+    NANOCLR_NATIVE_DECLARE(MakeArrayType___SystemType);
     NANOCLR_NATIVE_DECLARE(
         InvokeMember___OBJECT__STRING__SystemReflectionBindingFlags__SystemReflectionBinder__OBJECT__SZARRAY_OBJECT);
     NANOCLR_NATIVE_DECLARE(GetConstructor___SystemReflectionConstructorInfo__SZARRAY_SystemType);
