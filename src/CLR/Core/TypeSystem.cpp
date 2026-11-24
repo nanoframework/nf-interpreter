@@ -13114,7 +13114,8 @@ bool CLR_RT_GenericAssignability::IsVariantWord(
 
 bool CLR_RT_TypeSystem::IsElementInstanceAssignable(
     const CLR_RT_TypeSpec_Index &actual,
-    const CLR_RT_TypeSpec_Index &requested)
+    const CLR_RT_TypeSpec_Index &requested,
+    int extraLevels)
 {
     NATIVE_PROFILE_CLR_CORE();
 
@@ -13126,7 +13127,7 @@ bool CLR_RT_TypeSystem::IsElementInstanceAssignable(
         return true;
     }
 
-    CLR_RT_GenericRef s = {current->m_nodes, current->m_nodes + current->m_nodeCount, 0};
+    CLR_RT_GenericRef s = {current->m_nodes, current->m_nodes + current->m_nodeCount, extraLevels};
     CLR_RT_GenericRef t = {wanted->m_nodes, wanted->m_nodes + wanted->m_nodeCount, 0};
 
     return CLR_RT_GenericAssignability::Assignable(s, t, true, 0) != GenericAssign_Fail;
