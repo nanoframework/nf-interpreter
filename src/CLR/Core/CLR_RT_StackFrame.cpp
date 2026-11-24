@@ -717,7 +717,7 @@ HRESULT CLR_RT_StackFrame::MakeCall(
 
         NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(*obj, cls));
 
-        if (g_CLR_RT_EventCache.FindVirtualMethod(cls, md, mdReal, md.genericType) == false)
+        if (g_CLR_RT_EventCache.FindVirtualMethod(cls, md, mdReal, md.genericType, obj) == false)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }

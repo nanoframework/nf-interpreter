@@ -147,7 +147,11 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeMethodInfo::GetGenericArg
         }
         else
         {
-            CLR_RT_TypeSystem::SetGenericParamWord(word, md.Assembly(), md.target->firstGenericParam + i, 0);
+            CLR_RT_TypeSystem::SetGenericParamWord(
+                word,
+                md.Assembly(),
+                md.assembly->FirstGenericParam(md.target) + i,
+                0);
         }
 
         NANOCLR_CHECK_HRESULT(

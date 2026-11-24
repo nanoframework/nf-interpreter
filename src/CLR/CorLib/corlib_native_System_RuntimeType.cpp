@@ -250,7 +250,7 @@ HRESULT Library_corlib_native_System_RuntimeType::AppendGenericArguments(
 
                 index.data = node.Class.data;
                 assembly = method.InitializeFromIndex(index) ? method.assembly : nullptr;
-                first = method.target != nullptr ? method.target->firstGenericParam : 0;
+                first = method.target != nullptr ? method.assembly->FirstGenericParam(method.target) : 0;
                 count = method.target != nullptr ? method.target->genericParamCount : 0;
             }
 

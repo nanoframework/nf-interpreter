@@ -2728,7 +2728,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                                 cls,
                                                 calleeInst,
                                                 calleeReal,
-                                                calleeInst.genericType) == false)
+                                                calleeInst.genericType,
+                                                &pThis[0]) == false)
                                         {
                                             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                                         }
@@ -5043,7 +5044,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     CLR_RT_MethodDef_Index calleeReal;
 
-                    if (g_CLR_RT_EventCache.FindVirtualMethod(cls, callee, calleeReal, callee.genericType) == false)
+                    if (g_CLR_RT_EventCache
+                            .FindVirtualMethod(cls, callee, calleeReal, callee.genericType, &evalPos[0]) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
