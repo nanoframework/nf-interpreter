@@ -1073,9 +1073,16 @@ HRESULT CLR_RT_HeapBlock::PerformBoxing(const CLR_RT_TypeDef_Instance &cls)
                 NANOCLR_SET_AND_LEAVE(S_FALSE); // Don't box twice...
             }
 
-            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.CloneObject(*this, *ptr));
+            // the clone is boxed before it replaces this, so a failed allocation leaves the value as it was
+            CLR_RT_HeapBlock copy;
 
-            this->Dereference()->Box();
+            copy.SetObjectReference(nullptr);
+            CLR_RT_ProtectFromGC gc(copy);
+
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.CloneObject(copy, *ptr));
+
+            copy.Dereference()->Box();
+            this->SetObjectReference(copy.Dereference());
         }
         else
         {
