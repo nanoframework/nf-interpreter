@@ -3375,6 +3375,17 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                         dlg->m_cls = cls;
 
+                        if (calleeInst.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType))
+                        {
+                            CLR_RT_TypeSpec_Instance delegateType{};
+
+                            if (delegateType.InitializeFromIndex(*calleeInst.genericType) &&
+                                delegateType.genericTypeDef.data == cls.data && delegateType.IsClosedGenericType())
+                            {
+                                dlg->m_delegateTypeSpec = *calleeInst.genericType;
+                            }
+                        }
+
                         CLR_RT_MethodDef_Instance dlgInst{};
 
                         if (dlgInst.InitializeFromIndex(dlg->DelegateFtn()) == false)

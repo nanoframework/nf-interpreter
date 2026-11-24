@@ -13176,18 +13176,42 @@ CLR_RT_GenericMatch CLR_RT_GenericAssignability::MatchObjectNodes(
                    : (result == GenericAssign_Fail ? GenericMatch_Different : GenericMatch_Unresolved);
     }
 
-    if ((obj->DataType() != DATATYPE_CLASS && obj->DataType() != DATATYPE_VALUETYPE) ||
-        !inst.InitializeFromIndex(obj->ObjectCls()))
+    const CLR_RT_TypeDef_Index *objCls;
+    const CLR_RT_TypeSpec_Index *objSpec = nullptr;
+
+    if (obj->DataType() == DATATYPE_CLASS || obj->DataType() == DATATYPE_VALUETYPE)
+    {
+        objCls = &obj->ObjectCls();
+        objSpec = obj->IsAGenericInstance() ? &obj->ObjectGenericType() : nullptr;
+    }
+    else if (obj->DataType() == DATATYPE_DELEGATE_HEAD || obj->DataType() == DATATYPE_DELEGATELIST_HEAD)
+    {
+        const CLR_RT_HeapBlock_Delegate *carrier = CLR_RT_HeapBlock_Delegate::TypeCarrier(obj);
+
+        if (carrier == nullptr)
+        {
+            return GenericMatch_Unresolved;
+        }
+
+        objCls = &carrier->m_cls;
+        objSpec = carrier->m_delegateTypeSpec.data != 0 ? &carrier->m_delegateTypeSpec : nullptr;
+    }
+    else
+    {
+        return GenericMatch_Unresolved;
+    }
+
+    if (!inst.InitializeFromIndex(*objCls))
     {
         return GenericMatch_Unresolved;
     }
 
     // A stored TypeSpec of another class is the context of whoever created the object, not its own.
-    if (obj->IsAGenericInstance())
+    if (objSpec != nullptr)
     {
         CLR_RT_TypeSpec_Instance stored{};
 
-        if (stored.InitializeFromIndex(obj->ObjectGenericType()))
+        if (stored.InitializeFromIndex(*objSpec))
         {
             own = CLR_RT_TypeSystem::FindOrCreateGenericInstance(stored);
 

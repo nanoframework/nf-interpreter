@@ -136,6 +136,16 @@ HRESULT CLR_RT_HeapBlock_Delegate_List::Change(
             }
         }
 
+        if (oldNum > 0)
+        {
+            const CLR_RT_HeapBlock_Delegate *first = CLR_RT_HeapBlock_Delegate::TypeCarrier(dlgListSrc);
+
+            if (first != nullptr && !first->SameType(*dlg))
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+            }
+        }
+
         if (fCombine)
         {
             if (oldNum == 0 && fWeak == false)

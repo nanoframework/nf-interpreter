@@ -81,6 +81,19 @@ HRESULT Library_corlib_native_System_Object::GetType___SystemType(CLR_RT_StackFr
         }
     }
 
+    if (arg0.DataType() == DATATYPE_OBJECT && pObj &&
+        (pObj->DataType() == DATATYPE_DELEGATE_HEAD || pObj->DataType() == DATATYPE_DELEGATELIST_HEAD))
+    {
+        const CLR_RT_HeapBlock_Delegate *carrier = CLR_RT_HeapBlock_Delegate::TypeCarrier(pObj);
+
+        if (carrier != nullptr && carrier->m_delegateTypeSpec.data != 0)
+        {
+            index.kind = REFLECTION_TYPESPEC;
+            index.levels = 0;
+            index.data.typeSpec = carrier->m_delegateTypeSpec;
+        }
+    }
+
     {
         CLR_RT_HeapBlock &top = stack.PushValue();
         CLR_RT_HeapBlock *hbObj;

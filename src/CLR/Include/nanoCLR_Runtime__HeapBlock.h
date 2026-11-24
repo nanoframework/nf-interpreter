@@ -2026,6 +2026,9 @@ struct CLR_RT_HeapBlock_Delegate : public CLR_RT_HeapBlock_Node // OBJECT HEAP -
     // (data == 0 means not set)
     CLR_RT_MethodSpec_Index m_genericMethodSpec;
 
+    // Closed generic delegate type, e.g. Action<int> (data == 0 means not generic or not known)
+    CLR_RT_TypeSpec_Index m_delegateTypeSpec;
+
     //--//
 
     const CLR_RT_MethodDef_Index &DelegateFtn() const
@@ -2051,6 +2054,12 @@ struct CLR_RT_HeapBlock_Delegate : public CLR_RT_HeapBlock_Node // OBJECT HEAP -
 
     // 0 when both delegates run their method with the same generic context
     int CompareGenericContext(const CLR_RT_HeapBlock_Delegate &other) const;
+
+    // false only when both delegates have a known type and the types differ
+    bool SameType(const CLR_RT_HeapBlock_Delegate &other) const;
+
+    // the delegate that carries the type of a delegate or of a list: itself or the first live element
+    static const CLR_RT_HeapBlock_Delegate *TypeCarrier(const CLR_RT_HeapBlock *obj);
 
     void Relocate();
 };
