@@ -134,6 +134,42 @@ HRESULT Library_corlib_native_System_Type::GetGenericTypeDefinition___SystemType
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_corlib_native_System_Type::MakeArrayType___SystemType(CLR_RT_StackFrame &stack)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    CLR_RT_TypeDef_Instance td{};
+    CLR_RT_ReflectionDef_Index word = stack.This()->ReflectionDataConst();
+    CLR_RT_HeapBlock &top = stack.PushValueAndClear();
+
+    if (word.kind == REFLECTION_TYPE)
+    {
+        // void and a generic type definition have no array type here
+        if (!td.InitializeFromIndex(word.data.type) || td.data == g_CLR_RT_WellKnownTypes.n_Void.data ||
+            (word.levels == 0 && td.target->genericParamCount > 0))
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+        }
+    }
+    else if (word.kind != REFLECTION_TYPESPEC && word.kind != REFLECTION_GENERICPARAM)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+    }
+
+    if (word.levels >= CLR_RT_GenericInstance::c_MaxNodes)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+    }
+
+    word.levels++;
+
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
+    NANOCLR_CHECK_HRESULT(top.Dereference()->SetReflection(word));
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_corlib_native_System_Type::MakeGenericType___SystemType__SZARRAY_SystemType(CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -614,7 +650,7 @@ HRESULT Library_corlib_native_System_Type::get_IsArray___BOOLEAN(CLR_RT_StackFra
     {
         NANOCLR_CHECK_HRESULT(Library_corlib_native_System_RuntimeType::GetTypeDescriptor(*hbType, td));
 
-        stack.SetResult_Boolean(td.data == g_CLR_RT_WellKnownTypes.Array.data);
+        stack.SetResult_Boolean(hbType->ReflectionDataConst().levels > 0);
     }
 
     NANOCLR_NOCLEANUP();
