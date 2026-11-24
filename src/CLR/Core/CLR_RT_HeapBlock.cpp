@@ -254,7 +254,11 @@ HRESULT CLR_RT_HeapBlock::SetReflection(const CLR_RT_TypeSpec_Index &typeSpec)
     m_data.reflection.levels = 0;
     m_data.reflection.data.typeSpec = typeSpec;
 
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
     NANOCLR_NOCLEANUP();
+#else
+    NANOCLR_NOCLEANUP_NOLABEL();
+#endif
 }
 
 HRESULT CLR_RT_HeapBlock::SetReflection(const CLR_RT_TypeDef_Index &cls)
