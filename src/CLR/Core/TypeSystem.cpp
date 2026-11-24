@@ -3332,6 +3332,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
                         if (NANOCLR_INDEX_IS_VALID(paramElement.Class))
                         {
                             this->InitializeFromTypeDef(paramElement.Class);
+                            elem.Levels += paramElement.Levels;
                         }
                         else
                         {
@@ -3370,12 +3371,21 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
                     if (msInst.InitializeFromIndex(caller->methodSpec))
                     {
                         CLR_RT_SignatureParser::Element msElem;
-                        if (msInst.GetGenericArgument(elem.GenericParamPosition, msElem))
+                        CLR_RT_SignatureParser msArgument;
+                        if (msInst.PositionAtGenericArgument(elem.GenericParamPosition, msArgument) &&
+                            SUCCEEDED(msArgument.AdvanceParameter(msElem)))
                         {
                             if (NANOCLR_INDEX_IS_VALID(msElem.Class))
                             {
                                 // Concrete type argument: use it directly.
                                 this->InitializeFromTypeDef(msElem.Class);
+
+                                if (elem.Levels + msElem.Levels > 0)
+                                {
+                                    m_reflex.levels = elem.Levels + msElem.Levels;
+                                    ConvertToArray();
+                                }
+
                                 break;
                             }
                             else if (
@@ -12461,6 +12471,19 @@ HRESULT CLR_RT_TypeSystem::CollectGenericTarget(
 
         if (owner.InitializeFromIndex(*contextTypeSpec) &&
             owner.PositionAtGenericParam(elem.GenericParamPosition, argument))
+        {
+            return CollectGenericTarget(argument, nullptr, nullptr, target);
+        }
+    }
+
+    if (elem.DataType == DATATYPE_MVAR && elem.Levels == 0 && contextMethod != nullptr &&
+        NANOCLR_INDEX_IS_VALID(contextMethod->methodSpec))
+    {
+        CLR_RT_MethodSpec_Instance arguments{};
+        CLR_RT_SignatureParser argument;
+
+        if (arguments.InitializeFromIndex(contextMethod->methodSpec) &&
+            arguments.PositionAtGenericArgument(elem.GenericParamPosition, argument))
         {
             return CollectGenericTarget(argument, nullptr, nullptr, target);
         }
