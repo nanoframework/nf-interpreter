@@ -4108,20 +4108,34 @@ static bool ArrayElementDiffers(
 
     row.Set(assm->assemblyIndex, CLR_DataFromTk(tk));
 
-    if (actual == nullptr || !requested.InitializeFromIndex(row) || requested.levels == 0 ||
+    CLR_RT_TypeDef_Index innermost;
+    bool handled;
+    int levels;
+    const CLR_RT_TypeSpec_Index *context = caller != nullptr ? caller->genericType : nullptr;
+
+    // a type parameter row has its array levels in the argument
+    if (actual == nullptr || !requested.InitializeFromIndex(row) ||
         FAILED(
-            CLR_RT_TypeSystem::GetElementGenericInstance(
-                assm,
-                tk,
-                caller,
-                caller != nullptr ? caller->genericType : nullptr,
-                element)) ||
-        !NANOCLR_INDEX_IS_VALID(element))
+            CLR_RT_TypeSystem::ResolveArrayRow(assm, tk, caller, context, handled, innermost, levels, element, true)) ||
+        (!handled && (requested.levels == 0 ||
+                      FAILED(CLR_RT_TypeSystem::GetElementGenericInstance(assm, tk, caller, context, element)))))
     {
         return false;
     }
 
-    return !CLR_RT_TypeSystem::IsElementInstanceAssignable(*actual, element);
+    if (!NANOCLR_INDEX_IS_VALID(element))
+    {
+        return false;
+    }
+
+    // levels of the array beyond the requested ones are arrays of the element, assigned to its interface
+    int arrayLevels = ((const CLR_RT_HeapBlock_Array *)obj)->ReflectionDataConst().levels;
+    int requestedLevels = handled ? levels : requested.levels;
+
+    return !CLR_RT_TypeSystem::IsElementInstanceAssignable(
+        *actual,
+        element,
+        arrayLevels > requestedLevels ? arrayLevels - requestedLevels : 0);
 }
 
 HRESULT CLR_RT_ExecutionEngine::CastToType(

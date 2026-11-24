@@ -2469,7 +2469,8 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
     // The element instance of an array is the requested one, or derives from it through generic base classes.
     static bool IsElementInstanceAssignable(
         const CLR_RT_TypeSpec_Index &actual,
-        const CLR_RT_TypeSpec_Index &requested);
+        const CLR_RT_TypeSpec_Index &requested,
+        int extraLevels = 0);
 
     static HRESULT AllocateGenericInstanceStatics(CLR_RT_GenericInstance &instance);
 
