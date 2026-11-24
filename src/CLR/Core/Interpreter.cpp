@@ -111,6 +111,19 @@ bool CLR_RT_HeapBlock::InitObject()
         if (!ptr)
             return false;
 
+        // a reference to the value itself, boxed or not: reset its fields in place
+        if (dt == DATATYPE_BYREF && ptr->DataType() == DATATYPE_VALUETYPE && ptr->IsBoxed())
+        {
+            CLR_UINT32 num = ptr->DataSize();
+
+            while (--num)
+            {
+                (++ptr)->InitObject();
+            }
+
+            return false;
+        }
+
         if (ptr->InitObject() == false)
             return false;
 

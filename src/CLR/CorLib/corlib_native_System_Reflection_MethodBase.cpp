@@ -144,6 +144,11 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::Invoke___OBJECT__OBJ
             argumentsCount = pArray->m_numOfElements;
         }
 
+        if ((mdR->flags & CLR_RECORD_METHODDEF::MD_Constructor) && obj.Dereference() == nullptr)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_TARGET);
+        }
+
         // Preserve null-target invocation for instance methods that do not access this.
         if ((mdR->flags & CLR_RECORD_METHODDEF::MD_Static) == 0 && obj.Dereference() != nullptr)
         {

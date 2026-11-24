@@ -44,6 +44,10 @@ HRESULT Library_corlib_native_System_Reflection_ConstructorInfo::Invoke___OBJECT
 
         NANOCLR_CHECK_HRESULT(stack.MakeCall(md, nullptr, args, ArgumentsCount));
     }
+    else
+    {
+        NANOCLR_CHECK_HRESULT(stack.TopValue().PerformBoxingIfNeeded());
+    }
 
     NANOCLR_NOCLEANUP();
 }
