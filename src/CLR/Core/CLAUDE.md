@@ -1033,3 +1033,35 @@ hard-codes the base's field count. When an assembly's contract hash changes, the
 stubs of every assembly with types that derive from its types must be
 regenerated in the same change. `scripts/Test-NativeFieldLayout.ps1` checks the
 pairs listed in `scripts/native-cross-assembly-bases.json`.
+
+### Interface call into a method inherited from a generic base
+
+`class GB0<T> : IGen<T> { string G() => typeof(T).Name; } class GB1<T> : GB0<T> {}`,
+then `((IGen<int>)new GB1<int>()).G()`. The callee is `GB0.G` and its `T` comes
+from the closed TypeSpec of `GB0<int>`, but the object carries `GB1<int>` and
+the call site carries `IGen<int>`. The interpreter's mismatch branch (the
+interface TypeSpec does not belong to the callee's declaring type) asks
+`TryGetReceiverTypeSpec(this, declaringType)` for it. That used to answer only
+when the object's own class was the declaring type, so a derived class got
+`genericType = nullptr`, `T` stayed unresolved and the call failed with
+`CLR_E_WRONG_TYPE` (`System.Exception`). It reproduced for one level of
+inheritance, a non-generic derived class (`class D : GB0<int>`, no TypeSpec on
+the object at all), struct arguments and generic methods on the inherited
+method. Direct calls, calls through the base reference and virtual calls were
+right because their call site already carries the base TypeSpec; a method
+without `T` was right because nothing needed the TypeSpec.
+
+`TryGetReceiverTypeSpec` now walks up from the object: its own TypeSpec (or none
+for a non-generic class) and then `CLR_RT_TypeSystem::GetTypeBase` row by row
+until the row's generic definition is the required one, at most 32 steps (same
+bound as `c_MaxInheritanceDepth`). `GetTypeBase` substitutes the derived type's
+arguments into the `extends` row, so `GB2<int> : GB1<T> : GB0<T>` gives
+`GB0<int>` and `class GB<U> : GB0<Box<U>>` gives `GB0<Box<int>>`. The helper is
+shared by the other receiver lookups (`callvirt` on a non-interface callee,
+delegate targets), which now also see ancestors.
+
+Fails closed, never a wrong `T`: when the walk fails (the base row cannot be
+built, for example it nests generic instances deeper than
+`c_MaxGenericNestingDepth`, see the limits in the generics batch notes) the
+function answers false, `genericType` stays null and the call throws
+`System.Exception` as before. .NET runs those; we do not support them.
