@@ -1123,11 +1123,22 @@ static bool TryGetReceiverTypeSpec(
             }
         }
 
-        CLR_RT_TypeSpec_Index base;
+        if (requiredDef == nullptr)
+        {
+            return false;
+        }
 
-        if (requiredDef == nullptr ||
-            CLR_RT_TypeSystem::GetTypeBase(level, NANOCLR_INDEX_IS_VALID(current) ? &current : nullptr, false, base) !=
-                S_OK)
+        CLR_RT_TypeSpec_Index base;
+        HRESULT hr =
+            CLR_RT_TypeSystem::GetTypeBase(level, NANOCLR_INDEX_IS_VALID(current) ? &current : nullptr, false, base);
+
+        if (hr == S_FALSE && level.SwitchToParent())
+        {
+            current.Clear();
+            continue;
+        }
+
+        if (hr != S_OK)
         {
             return false;
         }
