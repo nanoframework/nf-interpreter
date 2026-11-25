@@ -2561,10 +2561,11 @@ bool CLR_DBG_Debugger::Debugging_Thread_Get(WP_Message *msg)
 
             pRes[Library_corlib_native_System_Threading_Thread::FIELD___priority].NumericByRef().s4 = pri;
 
-            if (SUCCEEDED(CLR_RT_ObjectToEvent_Source::CreateInstance(
-                    th,
-                    *pRes,
-                    pRes[Library_corlib_native_System_Threading_Thread::FIELD___thread])))
+            if (SUCCEEDED(
+                    CLR_RT_ObjectToEvent_Source::CreateInstance(
+                        th,
+                        *pRes,
+                        pRes[Library_corlib_native_System_Threading_Thread::FIELD___thread])))
             {
 #if defined(NANOCLR_APPDOMAINS)
                 CLR_RT_ObjectToEvent_Source::CreateInstance(
@@ -3003,18 +3004,10 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
             }
             else if (res.DataType == DATATYPE_MVAR)
             {
-                // Generic parameter in a generic method definition
-                CLR_RT_Assembly *assembly = md.assembly;
-
-                CLR_RT_GenericParam_Index gpIndex;
-                assembly->FindGenericParamAtMethodDef(md, res.GenericParamPosition, gpIndex);
-
-                CLR_RT_GenericParam_CrossReference gp = assembly->crossReferenceGenericParam[gpIndex.GenericParam()];
-
-                targetClass = gp.classTypeDef;
-                targetDataType = gp.dataType;
-
-                // isGenericInstance = true;
+                // Generic parameter in a generic method definition:
+                // the argument is not known here, show the value as it is on the stack
+                targetClass.Clear();
+                targetDataType = blk->DataType();
             }
             else
             {
@@ -3199,7 +3192,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetArray(WP_Message *msg)
         {
             blk = (CLR_RT_HeapBlock *)array->GetElement(cmd->m_index);
         }
-        else if (array->m_StoragePointer != 0)
+        else if (array->IsStoragePointer())
         {
             // TODO need to handle this case properly
             ASSERT(FALSE);

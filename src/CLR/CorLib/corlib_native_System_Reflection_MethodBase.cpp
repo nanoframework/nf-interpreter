@@ -44,7 +44,17 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::get_DeclaringType___
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
 
         hbObj = top.Dereference();
-        hbObj->SetReflection(cls);
+
+        CLR_RT_TypeSpec_Index owner;
+
+        if (CLR_RT_TypeSystem::GetGenericOwnerRow(hbMeth->ReflectionDataConst().genericOwner, cls, owner))
+        {
+            hbObj->SetReflection(owner);
+        }
+        else
+        {
+            hbObj->SetReflection(cls);
+        }
     }
 
     NANOCLR_NOCLEANUP();
@@ -123,21 +133,30 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::Invoke___OBJECT__OBJ
     {
         stack.m_customState = 1;
 
+        if (GetGenericFlags(md) & MethodBase_GenericMethodFlags_ContainsGenericParameters)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+        }
+
         if (pArray)
         {
             args = (CLR_RT_HeapBlock *)pArray->GetFirstElement();
             argumentsCount = pArray->m_numOfElements;
         }
 
-        // Preserve null-target invocation for instance methods that do not access this.
-        if ((mdR->flags & CLR_RECORD_METHODDEF::MD_Static) == 0 && obj.Dereference() != nullptr)
+        if ((mdR->flags & CLR_RECORD_METHODDEF::MD_Constructor) && obj.Dereference() == nullptr)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_TARGET);
+        }
+
+        if ((mdR->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
         {
             CLR_RT_TypeDef_Instance declaringType{};
 
-            if (declaringType.InitializeFromMethod(md) == false ||
+            if (obj.Dereference() == nullptr || declaringType.InitializeFromMethod(md) == false ||
                 CLR_RT_ExecutionEngine::IsInstanceOf(obj, declaringType) == false)
             {
-                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+                NANOCLR_SET_AND_LEAVE(CLR_E_TARGET);
             }
 
             if (md.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*md.genericType))
@@ -148,7 +167,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::Invoke___OBJECT__OBJ
                     target->ObjectCls().data == declaringType.data &&
                     !CLR_RT_TypeSystem::IsSameGenericInstance(target->ObjectGenericType(), *md.genericType))
                 {
-                    NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_TARGET);
                 }
             }
         }
@@ -161,12 +180,28 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::Invoke___OBJECT__OBJ
     {
         if (mdR->retValDataType != DATATYPE_VOID)
         {
-            // Only small primitives need ChangeDataType
-            bool needsTypeChange = (mdR->retValDataType < DATATYPE_I4);
+            NanoCLRDataType returnType = (NanoCLRDataType)mdR->retValDataType;
 
-            if (needsTypeChange)
+            if (returnType == DATATYPE_VAR || returnType == DATATYPE_MVAR)
             {
-                stack.TopValue().ChangeDataType(mdR->retValDataType);
+                CLR_RT_SignatureParser parser{};
+                CLR_RT_SignatureParser argument;
+                CLR_RT_SignatureParser::Element element;
+
+                parser.Initialize_MethodSignature(md.assembly, md.target);
+
+                if (SUCCEEDED(parser.AdvanceParameter(element)) && element.Levels == 0 &&
+                    CLR_RT_TypeSystem::PositionAtParameterArgument(element, md.genericType, &md.methodSpec, argument) &&
+                    SUCCEEDED(argument.AdvanceParameter(element)) && element.Levels == 0)
+                {
+                    returnType = element.DataType;
+                }
+            }
+
+            // Only small primitives need ChangeDataType
+            if (returnType < DATATYPE_I4)
+            {
+                stack.TopValue().ChangeDataType(returnType);
             }
 
             NANOCLR_CHECK_HRESULT(stack.TopValue().PerformBoxingIfNeeded());
@@ -200,7 +235,63 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::GetMethodDescriptor(
         inst.genericType = &inst.m_typeSpecStorage;
     }
 
+    arg.ReflectionDataConst().GetGenericMethodSpec(inst.methodSpec);
+
     return S_OK;
+}
+
+HRESULT Library_corlib_native_System_Reflection_MethodBase::NewMethodInfo(
+    CLR_RT_HeapBlock &ref,
+    const CLR_RT_MethodDef_Index &md,
+    CLR_UINT16 slot)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(ref, g_CLR_RT_WellKnownTypes.MethodInfo));
+    NANOCLR_CHECK_HRESULT(ref.Dereference()->SetReflection(md));
+
+    ref.Dereference()->ReflectionData().genericOwner = slot;
+
+    NANOCLR_NOCLEANUP();
+}
+
+CLR_UINT32 Library_corlib_native_System_Reflection_MethodBase::GetGenericFlags(const CLR_RT_MethodDef_Instance &md)
+{
+    CLR_UINT32 flags = MethodBase_GenericMethodFlags_None;
+    CLR_RT_TypeDef_Instance declaring{};
+
+    if (md.target->genericParamCount > 0)
+    {
+        flags = NANOCLR_INDEX_IS_VALID(md.methodSpec) ? MethodBase_GenericMethodFlags_GenericMethod
+                                                      : MethodBase_GenericMethodFlags_GenericMethod |
+                                                            MethodBase_GenericMethodFlags_GenericMethodDefinition |
+                                                            MethodBase_GenericMethodFlags_ContainsGenericParameters;
+    }
+
+    if (declaring.InitializeFromMethod(md) && declaring.target->genericParamCount > 0 &&
+        (md.genericType == nullptr || !NANOCLR_INDEX_IS_VALID(*md.genericType) ||
+         CLR_RT_TypeSystem::IsOpenInstance(*md.genericType)))
+    {
+        flags |= MethodBase_GenericMethodFlags_ContainsGenericParameters;
+    }
+
+    return flags;
+}
+
+HRESULT Library_corlib_native_System_Reflection_MethodBase::
+    GetGenericFlags___SystemReflectionMethodBaseGenericMethodFlags(CLR_RT_StackFrame &stack)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    CLR_RT_MethodDef_Instance md;
+
+    NANOCLR_CHECK_HRESULT(GetMethodDescriptor(stack, *stack.This(), md));
+
+    stack.SetResult_I4((CLR_INT32)GetGenericFlags(md));
+
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckInvokeArguments(
@@ -217,6 +308,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckInvokeArguments
 
     const CLR_RT_TypeSpec_Index *owner =
         md.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*md.genericType) ? md.genericType : nullptr;
+    const CLR_RT_MethodDef_Instance *context = NANOCLR_INDEX_IS_VALID(md.methodSpec) ? &md : nullptr;
 
     // Skip the return type; the remaining signature elements are the explicit parameters.
     NANOCLR_CHECK_HRESULT(parser.AdvanceParameter(element));
@@ -229,18 +321,12 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckInvokeArguments
 
         NANOCLR_CHECK_HRESULT(parser.AdvanceParameter(element));
 
-        if (owner != nullptr && element.DataType == DATATYPE_VAR)
+        CLR_RT_SignatureParser argument;
+
+        if (CLR_RT_TypeSystem::PositionAtParameterArgument(element, owner, &md.methodSpec, argument))
         {
-            CLR_RT_TypeSpec_Instance ownerInstance{};
-            CLR_RT_SignatureParser argument;
             CLR_RT_SignatureParser::Element resolved;
             int levels = element.Levels;
-
-            if (!ownerInstance.InitializeFromIndex(*owner) ||
-                !ownerInstance.PositionAtGenericParam(element.GenericParamPosition, argument))
-            {
-                NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
-            }
 
             parameter = argument;
             targetOwner = nullptr;
@@ -258,15 +344,13 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckInvokeArguments
             NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
         }
 
-        bool isUnresolved = !NANOCLR_INDEX_IS_VALID(element.Class);
-
-        // Without a generic context FixCall can't convert a VAR or MVAR argument, not even a null one.
-        if (isUnresolved && element.Levels == 0)
+        // Without a generic context the argument can't be checked or converted, not even a null one.
+        if (!NANOCLR_INDEX_IS_VALID(element.Class))
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
         }
 
-        if (CLR_RT_TypeSystem::CollectGenericTarget(parameter, targetOwner, nullptr, target) == S_FALSE)
+        if (CLR_RT_TypeSystem::CollectGenericTarget(parameter, targetOwner, context, target) == S_FALSE)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
         }
@@ -281,19 +365,6 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckInvokeArguments
         CLR_RT_ReflectionDef_Index expectedType{};
         CLR_RT_TypeDescriptor targetType{};
         CLR_RT_TypeDescriptor sourceType{};
-
-        if (isUnresolved)
-        {
-            // Only the array shape of T[] can be checked.
-            if (FAILED(sourceType.InitializeFromObject(arg)) ||
-                (sourceType.m_flags & CLR_RT_DataTypeLookup::c_Array) == 0 ||
-                sourceType.m_reflex.levels < element.Levels)
-            {
-                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
-            }
-
-            continue;
-        }
 
         expectedType.kind = REFLECTION_TYPE;
         expectedType.levels = (CLR_UINT16)element.Levels;
@@ -311,7 +382,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckInvokeArguments
         if (FAILED(sourceType.InitializeFromObject(arg)) ||
             CLR_RT_ExecutionEngine::IsInstanceOf(sourceType, targetType) == false)
         {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
         if (target.m_count > 0)
@@ -320,7 +391,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckInvokeArguments
 
             if (match == GenericMatch_Different || match == GenericMatch_NoTypeSpec)
             {
-                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
             }
         }
     }
@@ -362,7 +433,6 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::GetParametersNative_
     NANOCLR_HEADER();
 
     CLR_RT_MethodDef_Instance inst{};
-    CLR_RT_MethodDef_Index idx{};
     CLR_RT_SignatureParser sigParser{};
     CLR_RT_TypeDef_Index paramInfoTypeDef;
     CLR_RT_SignatureParser::Element paramElement;
@@ -374,13 +444,14 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::GetParametersNative_
 
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
 
-    CLR_RT_HeapBlock *hbMethodInfo = stack.This();
-
-    idx.data = hbMethodInfo[FIELD___token].NumericByRef().u4;
-    inst.InitializeFromIndex(idx);
+    NANOCLR_CHECK_HRESULT(GetMethodDescriptor(stack, *stack.This(), inst));
 
     owner.Clear();
-    hbMethodInfo->ReflectionDataConst().GetGenericOwner(owner);
+
+    if (inst.genericType != nullptr)
+    {
+        owner = *inst.genericType;
+    }
 
     // 1st pass: get the number of parameters
     sigParser.Initialize_MethodSignature(inst.assembly, inst.target);
@@ -419,40 +490,20 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::GetParametersNative_
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*paramInfoElement, paramInfoTypeDef));
         hbObj = paramInfoElement->Dereference();
 
-        bool isClosed = false;
-
-        if (NANOCLR_INDEX_IS_VALID(owner))
         {
             CLR_RT_TypeDescriptor desc{};
-
-            if (SUCCEEDED(desc.InitializeFromClosedSignature(parameter, &owner)))
-            {
-                CLR_RT_HeapBlock &paraTypeHB = hbObj[ParameterInfo::FIELD___parameterType];
-
-                NANOCLR_CHECK_HRESULT(
-                    g_CLR_RT_ExecutionEngine.NewObjectFromIndex(paraTypeHB, g_CLR_RT_WellKnownTypes.TypeStatic));
-                paraTypeHB.Dereference()->SetReflection(desc.m_reflex);
-                isClosed = true;
-            }
-        }
-
-        // VAR, MVAR and arrays of them that couldn't be closed have no generic context, parameter type stays null
-        if (!isClosed && NANOCLR_INDEX_IS_VALID(paramElement.Class))
-        {
-            // get reference to the <ParameterInfo> instance
+            CLR_RT_TypeSpec_Index elementSpec;
             CLR_RT_HeapBlock &paraTypeHB = hbObj[ParameterInfo::FIELD___parameterType];
 
-            // create a new instance of the parameter type
+            CLR_RT_TypeDef_Index declaring;
+
+            declaring.Set(inst.Assembly(), inst.CrossReference().GetOwner());
+
+            NANOCLR_CHECK_HRESULT(
+                desc.InitializeFromClosedSignature(parameter, &owner, &elementSpec, &declaring, &inst, &inst));
             NANOCLR_CHECK_HRESULT(
                 g_CLR_RT_ExecutionEngine.NewObjectFromIndex(paraTypeHB, g_CLR_RT_WellKnownTypes.TypeStatic));
-            hbObj = paraTypeHB.Dereference();
-            hbObj->SetReflection(paramElement.Class);
-
-            // deal with array types
-            if (paramElement.Levels > 0)
-            {
-                hbObj->ReflectionData().levels = (CLR_UINT16)paramElement.Levels;
-            }
+            NANOCLR_CHECK_HRESULT(paraTypeHB.Dereference()->SetReflection(desc.GetTypeReflection(elementSpec)));
         }
 
         // move pointer to the next element

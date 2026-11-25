@@ -237,12 +237,28 @@ HRESULT CLR_RT_HeapBlock::SetReflection(const CLR_RT_TypeSpec_Index &typeSpec)
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+    if (!typeSpec.IsRuntime())
+    {
+        CLR_RT_TypeSpec_Instance row{};
+
+        if (!row.InitializeFromIndex(typeSpec) || !row.IsClosedGenericType())
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+        }
+    }
+#endif
+
     m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_REFLECTION, 0, 1);
     m_data.reflection.kind = REFLECTION_TYPESPEC;
     m_data.reflection.levels = 0;
     m_data.reflection.data.typeSpec = typeSpec;
 
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+    NANOCLR_NOCLEANUP();
+#else
     NANOCLR_NOCLEANUP_NOLABEL();
+#endif
 }
 
 HRESULT CLR_RT_HeapBlock::SetReflection(const CLR_RT_TypeDef_Index &cls)
@@ -618,7 +634,14 @@ HRESULT CLR_RT_HeapBlock::StoreToReference(CLR_RT_HeapBlock &ref, int size)
 
                 if (CLR_RT_ExecutionEngine::IsInstanceOf(descSrc, descDstSub) == false)
                 {
-                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_ARRAY_TYPE_MISMATCH);
+                }
+
+                const CLR_RT_TypeSpec_Index *elementSpec = array->ElementTypeSpec();
+
+                if (elementSpec != nullptr && !CLR_RT_TypeSystem::ElementMatchesArraySpec(*this, *elementSpec))
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_ARRAY_TYPE_MISMATCH);
                 }
             }
 
@@ -1050,9 +1073,16 @@ HRESULT CLR_RT_HeapBlock::PerformBoxing(const CLR_RT_TypeDef_Instance &cls)
                 NANOCLR_SET_AND_LEAVE(S_FALSE); // Don't box twice...
             }
 
-            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.CloneObject(*this, *ptr));
+            // the clone is boxed before it replaces this, so a failed allocation leaves the value as it was
+            CLR_RT_HeapBlock copy;
 
-            this->Dereference()->Box();
+            copy.SetObjectReference(nullptr);
+            CLR_RT_ProtectFromGC gc(copy);
+
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.CloneObject(copy, *ptr));
+
+            copy.Dereference()->Box();
+            this->SetObjectReference(copy.Dereference());
         }
         else
         {
@@ -1399,6 +1429,23 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, C
         }
         break;
 
+        case DATATYPE_REFLECTION:
+        {
+            const CLR_RT_ReflectionDef_Index &reflex = ptr->ReflectionDataConst();
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+            CLR_UINT32 identityHash;
+
+            if (reflex.kind == REFLECTION_TYPESPEC &&
+                CLR_RT_TypeSystem::GetTypeSpecIdentityHash(reflex.data.typeSpec, identityHash))
+            {
+                crc ^= identityHash + reflex.levels;
+                break;
+            }
+#endif
+            crc ^= SUPPORT_ComputeCRC(&reflex, sizeof(reflex), crc);
+        }
+        break;
+
         default:
             crc ^= SUPPORT_ComputeCRC((const void *)&ptr->DataByRefConst(), ptr->GetAtomicDataUsedBytes(), crc);
 
@@ -1515,7 +1562,7 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
                     objLeft->m_typeOfElement == objRight->m_typeOfElement)
                 {
                     // check that array is not stored in stack
-                    ASSERT(objLeft->m_StoragePointer == 0);
+                    ASSERT(!objLeft->IsStoragePointer());
 
                     if (!objLeft->m_fReference)
                     {
@@ -1536,6 +1583,13 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
             {
                 return true;
             }
+
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+            if (CLR_RT_TypeSystem::IsSameTypeSpecWord(pArgLeft.ReflectionDataConst(), pArgRight.ReflectionDataConst()))
+            {
+                return true;
+            }
+#endif
             break;
 
         case DATATYPE_STRING:
@@ -1909,7 +1963,9 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const C
                 if (leftData < rightData)
                     return -1;
 
-                return Compare_Values(leftDlg->m_object, rightDlg->m_object, fSigned);
+                int objectResult = Compare_Values(leftDlg->m_object, rightDlg->m_object, fSigned);
+
+                return objectResult != 0 ? objectResult : leftDlg->CompareGenericContext(*rightDlg);
             }
 
             case DATATYPE_CLASS:
@@ -1924,6 +1980,13 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const C
                 const CLR_RT_HeapBlock *ptrRight;
                 CLR_RT_HeapBlock hbLeft;
                 CLR_RT_HeapBlock hbRight;
+
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+                if (CLR_RT_TypeSystem::IsSameTypeSpecWord(left.ReflectionDataConst(), right.ReflectionDataConst()))
+                {
+                    return 0;
+                }
+#endif
 
                 if (left.ReflectionDataConst().kind != right.ReflectionDataConst().kind)
                 {

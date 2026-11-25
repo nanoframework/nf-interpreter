@@ -113,20 +113,23 @@ jobs:
                 echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]false"
               }
 
+              # grab PR description
+              $prCommitMessage = $($pr.body)
+
+              # either dependency reference requires the mscorlib test job
+              $hasDependencyReference = $prCommitMessage -match "\[tested against nanoframework/(CoreLibrary|metadata-processor)#\d+\]"
+
               # check if Unit Tests for mscorlib should be run
-              if(($pr.title -like "*[run mscorlib tests]*") -or ($pr.body -like "*[run mscorlib tests]*") -or ($prCommitMessage -match "\[tested against nanoframework/CoreLibrary#\d+\]\.?"))
+              if(($pr.title -like "*[run mscorlib tests]*") -or ($pr.body -like "*[run mscorlib tests]*") -or $hasDependencyReference)
               {
                 'OK' | Write-Host -ForegroundColor Green
               }
-
-              # grab PR commit message
-              $prCommitMessage = $($pr.body)
 
               # debug output
               # echo "=====`r`n$($prCommitMessage)`r`n====="
 
               # check if Unit Tests for mscorlib should be run
-              if(($prCommitMessage -match "\[run mscorlib tests\]") -or ($prCommitMessage -match "\[tested against nanoframework/CoreLibrary#\d+\]\.?"))
+              if(($prCommitMessage -match "\[run mscorlib tests\]") -or $hasDependencyReference)
               {
                 Write-Host "##[command] >> mscorlib tests are to be run"
                 echo "##vso[task.setvariable variable=RUN_MSCORLIB_TESTS;isOutput=true]true"
@@ -1051,7 +1054,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "windows-2025-vs2026"
 
     variables:
       - group: sign-client-credentials
@@ -1478,7 +1481,7 @@ jobs:
       - Build_POSIX_nanoCLR
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "windows-2025-vs2026"
 
     variables:
       - group: sign-client-credentials
@@ -1654,7 +1657,8 @@ jobs:
             eq(variables['System.PullRequest.PullRequestId'], ''),
             or(
               eq(variables['ForceUpload'], true),
-              eq(variables['Build.SourceBranchName'], 'main')
+              eq(variables['Build.SourceBranchName'], 'main'),
+              eq(variables['Build.SourceBranchName'], 'develop')
             )
           )
         continueOnError: true
@@ -1693,7 +1697,7 @@ jobs:
       - Build_Pre_Checks
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "windows-2025-vs2026"
 
     variables:
       DOTNET_NOLOGO: true
@@ -1795,7 +1799,7 @@ jobs:
         displayName: Publish vstest dump files
         inputs:
           targetPath: "$(Build.ArtifactStagingDirectory)/vstest_dumps"
-          artifactName: VsTestCrashDumps
+          artifactName: VsTestCrashDumps-$(System.JobAttempt)
           artifactType: pipeline
 
   #################################

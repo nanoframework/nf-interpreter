@@ -53,6 +53,18 @@ HRESULT Library_corlib_native_System_Object::GetType___SystemType(CLR_RT_StackFr
     {
         index = desc.m_reflex;
 
+        if (arg0.DataType() == DATATYPE_OBJECT && pObj && pObj->DataType() == DATATYPE_SZARRAY &&
+            index.kind == REFLECTION_TYPE && index.levels > 0)
+        {
+            const CLR_RT_TypeSpec_Index *element = ((const CLR_RT_HeapBlock_Array *)pObj)->ElementTypeSpec();
+
+            if (element != nullptr)
+            {
+                index.kind = REFLECTION_TYPESPEC;
+                index.data.typeSpec = *element;
+            }
+        }
+
         if (arg0.DataType() == DATATYPE_OBJECT && pObj &&
             (pObj->DataType() == DATATYPE_CLASS || pObj->DataType() == DATATYPE_VALUETYPE) &&
             pObj->IsAGenericInstance())
@@ -66,6 +78,19 @@ HRESULT Library_corlib_native_System_Object::GetType___SystemType(CLR_RT_StackFr
                 index.levels = 0;
                 index.data.typeSpec = pObj->ObjectGenericType();
             }
+        }
+    }
+
+    if (arg0.DataType() == DATATYPE_OBJECT && pObj &&
+        (pObj->DataType() == DATATYPE_DELEGATE_HEAD || pObj->DataType() == DATATYPE_DELEGATELIST_HEAD))
+    {
+        const CLR_RT_HeapBlock_Delegate *carrier = CLR_RT_HeapBlock_Delegate::TypeCarrier(pObj);
+
+        if (carrier != nullptr && carrier->m_delegateTypeSpec.data != 0)
+        {
+            index.kind = REFLECTION_TYPESPEC;
+            index.levels = 0;
+            index.data.typeSpec = carrier->m_delegateTypeSpec;
         }
     }
 

@@ -13,11 +13,20 @@ HRESULT Library_corlib_native_System_RuntimeType::get_Assembly___SystemReflectio
     CLR_RT_TypeDef_Instance td;
     CLR_RT_HeapBlock *hbType = stack.This();
 
-    NANOCLR_CHECK_HRESULT(GetTypeDescriptor(*hbType, td, nullptr));
-
     {
         CLR_RT_Assembly_Index index{};
-        index.Set(td.Assembly());
+
+        if (hbType->ReflectionDataConst().kind == REFLECTION_GENERICPARAM)
+        {
+            index.Set(hbType->ReflectionDataConst().data.genericParam.Assembly());
+        }
+        else
+        {
+            NANOCLR_CHECK_HRESULT(GetTypeDescriptor(*hbType, td, nullptr));
+
+            index.Set(td.Assembly());
+        }
+
         CLR_RT_HeapBlock &top = stack.PushValue();
         CLR_RT_HeapBlock *hbObj;
 
@@ -35,7 +44,7 @@ HRESULT Library_corlib_native_System_RuntimeType::get_Name___STRING(CLR_RT_Stack
     NANOCLR_HEADER();
     CLR_RT_HeapBlock *hbType = stack.This();
 
-    NANOCLR_CHECK_HRESULT(GetName(*hbType, false, stack.PushValueAndClear()));
+    NANOCLR_CHECK_HRESULT(GetName(*hbType, false, stack.PushValueAndClear(), false));
 
     NANOCLR_NOCLEANUP();
 }
@@ -46,7 +55,18 @@ HRESULT Library_corlib_native_System_RuntimeType::get_FullName___STRING(CLR_RT_S
     NANOCLR_HEADER();
     CLR_RT_HeapBlock *hbType = stack.This();
 
-    NANOCLR_CHECK_HRESULT(GetName(*hbType, true, stack.PushValueAndClear()));
+    NANOCLR_CHECK_HRESULT(GetName(*hbType, true, stack.PushValueAndClear(), false));
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_corlib_native_System_RuntimeType::ToString___STRING(CLR_RT_StackFrame &stack)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+    CLR_RT_HeapBlock *hbType = stack.This();
+
+    NANOCLR_CHECK_HRESULT(GetName(*hbType, true, stack.PushValueAndClear(), true));
 
     NANOCLR_NOCLEANUP();
 }
@@ -56,28 +76,18 @@ HRESULT Library_corlib_native_System_RuntimeType::get_BaseType___SystemType(CLR_
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_TypeDef_Instance td;
-    CLR_UINT32 levels;
+    CLR_RT_ReflectionDef_Index word;
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
     CLR_RT_HeapBlock *hbType = stack.This();
 
-    NANOCLR_CHECK_HRESULT(GetTypeDescriptor(*hbType, td, &levels));
+    hr = CLR_RT_TypeSystem::GetBaseTypeWord(hbType->ReflectionDataConst(), word);
 
-    if (levels > 0)
+    NANOCLR_CHECK_HRESULT(hr);
+
+    if (hr == S_OK)
     {
-        CLR_RT_HeapBlock *hbObj;
-
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
-        hbObj = top.Dereference();
-        hbObj->SetReflection(g_CLR_RT_WellKnownTypes.Array);
-    }
-    else if (td.SwitchToParent())
-    {
-        CLR_RT_HeapBlock *hbObj;
-
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
-        hbObj = top.Dereference();
-        hbObj->SetReflection(td);
+        NANOCLR_CHECK_HRESULT(top.Dereference()->SetReflection(word));
     }
 
     NANOCLR_NOCLEANUP();
@@ -114,70 +124,31 @@ HRESULT Library_corlib_native_System_RuntimeType::
     return Library_corlib_native_System_Type::GetFields(stack, nullptr, stack.Arg1().NumericByRef().s4, true);
 }
 
+static const int c_MaxInterfaces = 32;
+
 HRESULT Library_corlib_native_System_RuntimeType::GetInterfaces___SZARRAY_SystemType(CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_TypeDef_Instance td;
+    CLR_RT_ReflectionDef_Index words[c_MaxInterfaces];
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
-    CLR_RT_HeapBlock *ptr = nullptr;
-    CLR_RT_HeapBlock *hbType = stack.This();
-    int count = 0;
+    int count;
 
-    // 2-pass algorithm. 1. count the interfaces; 2. store the interfaces in an array
-    for (int pass = 1; pass <= 2; pass++)
+    NANOCLR_CHECK_HRESULT(
+        CLR_RT_TypeSystem::CollectInterfaceWords(stack.This()->ReflectionDataConst(), words, c_MaxInterfaces, count));
+
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, count, g_CLR_RT_WellKnownTypes.TypeStatic));
+
+    if (count > 0)
     {
-        NANOCLR_CHECK_HRESULT(GetTypeDescriptor(*hbType, td));
+        CLR_RT_HeapBlock *ptr = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
 
-        do
+        for (int i = 0; i < count; i++, ptr++)
         {
-            // Scan the list of interfaces.
-            CLR_RT_SignatureParser parser{};
-            parser.Initialize_Interfaces(td.assembly, td.target);
-            CLR_RT_SignatureParser::Element res;
-
-            // 1. pass count
-            if (pass == 1)
-            {
-                count += parser.Available();
-            }
-            else
-            {
-                // 2. pass fill the data into the array
-                while (parser.Available() > 0)
-                {
-                    CLR_RT_HeapBlock *hbObj;
-
-                    NANOCLR_CHECK_HRESULT(parser.Advance(res));
-
-                    NANOCLR_CHECK_HRESULT(
-                        g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*ptr, g_CLR_RT_WellKnownTypes.TypeStatic));
-                    hbObj = ptr->Dereference();
-                    hbObj->SetReflection(res.Class);
-
-                    ptr++;
-                    count--;
-                }
-
-                // array full? => Done
-                if (count == 0)
-                {
-                    break;
-                }
-            }
-        } while (td.SwitchToParent());
-
-        if (pass == 1)
-        {
-            // create the result array
             NANOCLR_CHECK_HRESULT(
-                CLR_RT_HeapBlock_Array::CreateInstance(top, count, g_CLR_RT_WellKnownTypes.TypeStatic));
-            // don't need the second pass if nothing found
-            if (count == 0)
-                break;
-            // get the pointer to the first element
-            ptr = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
+                g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*ptr, g_CLR_RT_WellKnownTypes.TypeStatic));
+            NANOCLR_CHECK_HRESULT(ptr->Dereference()->SetReflection(words[i]));
         }
     }
 
@@ -193,6 +164,25 @@ HRESULT Library_corlib_native_System_RuntimeType::GetElementType___SystemType(CL
     CLR_RT_TypeDescriptor descSub;
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
     CLR_RT_HeapBlock *hbType = stack.This();
+
+    if (hbType->ReflectionDataConst().kind == REFLECTION_GENERICPARAM && hbType->ReflectionDataConst().levels == 0)
+    {
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
+
+    if ((hbType->ReflectionDataConst().kind == REFLECTION_TYPESPEC ||
+         hbType->ReflectionDataConst().kind == REFLECTION_GENERICPARAM) &&
+        hbType->ReflectionDataConst().levels > 0)
+    {
+        CLR_RT_ReflectionDef_Index element = hbType->ReflectionDataConst();
+
+        element.levels--;
+
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
+        top.Dereference()->SetReflection(element);
+
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
 
     NANOCLR_CHECK_HRESULT(desc.InitializeFromReflection(hbType->ReflectionDataConst()));
 
@@ -210,12 +200,133 @@ HRESULT Library_corlib_native_System_RuntimeType::GetElementType___SystemType(CL
 
 //--//
 
+HRESULT Library_corlib_native_System_RuntimeType::AppendGenericArguments(
+    const CLR_RT_GenericInstance &record,
+    char *&sz,
+    size_t &size)
+{
+    NANOCLR_HEADER();
+
+    CLR_UINT8 pending[CLR_RT_GenericInstance::c_MaxNodes];
+    CLR_UINT8 openLevels[CLR_RT_GenericInstance::c_MaxNodes];
+    int depth = 0;
+    bool comma = false;
+
+    if (record.m_nodes[0].ArgCount == 0)
+    {
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
+
+    pending[0] = record.m_nodes[0].ArgCount;
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.QueueStringToBuffer(sz, size, "["));
+
+    for (int i = 1; i < record.m_nodeCount; i++)
+    {
+        const CLR_RT_GenericInstanceNode &node = record.m_nodes[i];
+
+        if (comma)
+        {
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.QueueStringToBuffer(sz, size, ","));
+        }
+
+        if (node.DataType == DATATYPE_VAR || node.DataType == DATATYPE_MVAR)
+        {
+            // the open parameter of the type or method that owns it, by its name
+            CLR_RT_TypeDef_Instance owner{};
+            CLR_RT_MethodDef_Instance method{};
+            CLR_RT_Assembly *assembly;
+            CLR_UINT16 first;
+            CLR_UINT8 count;
+
+            if (node.DataType == DATATYPE_VAR)
+            {
+                assembly = owner.InitializeFromIndex(node.Class) ? owner.assembly : nullptr;
+                first = owner.target != nullptr ? owner.target->firstGenericParam : 0;
+                count = owner.target != nullptr ? owner.target->genericParamCount : 0;
+            }
+            else
+            {
+                CLR_RT_MethodDef_Index index;
+
+                index.data = node.Class.data;
+                assembly = method.InitializeFromIndex(index) ? method.assembly : nullptr;
+                first = method.target != nullptr ? method.assembly->FirstGenericParam(method.target) : 0;
+                count = method.target != nullptr ? method.target->genericParamCount : 0;
+            }
+
+            if (assembly == nullptr || node.Position >= count)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            }
+
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.QueueStringToBuffer(
+                sz,
+                size,
+                assembly->GetString(assembly->GetGenericParam(first + node.Position)->name)));
+        }
+        else
+        {
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.BuildTypeName(node.Class, sz, size));
+        }
+
+        if (node.ArgCount > 0)
+        {
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.QueueStringToBuffer(sz, size, "["));
+
+            pending[++depth] = node.ArgCount;
+            openLevels[depth] = (CLR_UINT8)node.Levels;
+            comma = false;
+            continue;
+        }
+
+        for (int level = 0; level < node.Levels; level++)
+        {
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.QueueStringToBuffer(sz, size, "[]"));
+        }
+
+        comma = true;
+        pending[depth]--;
+
+        while (pending[depth] == 0)
+        {
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.QueueStringToBuffer(sz, size, "]"));
+
+            if (depth == 0)
+            {
+                break;
+            }
+
+            for (int level = 0; level < openLevels[depth]; level++)
+            {
+                NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.QueueStringToBuffer(sz, size, "[]"));
+            }
+
+            pending[--depth]--;
+        }
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_corlib_native_System_RuntimeType::GetTypeDescriptor(
     CLR_RT_HeapBlock &arg,
     CLR_RT_TypeDef_Instance &inst,
     CLR_UINT32 *levels)
 {
     NATIVE_PROFILE_CLR_CORE();
+
+    if (arg.DataType() == DATATYPE_REFLECTION && arg.ReflectionDataConst().kind == REFLECTION_GENERICPARAM)
+    {
+        if (levels != nullptr)
+        {
+            *levels = arg.ReflectionDataConst().levels;
+        }
+
+        return arg.ReflectionDataConst().levels > 0 && inst.InitializeFromIndex(g_CLR_RT_WellKnownTypes.Array)
+                   ? S_OK
+                   : CLR_E_NOT_SUPPORTED;
+    }
+
     return CLR_RT_ReflectionDef_Index::Convert(arg, inst, levels) ? S_OK : CLR_E_NULL_REFERENCE;
 }
 
@@ -238,7 +349,11 @@ HRESULT Library_corlib_native_System_RuntimeType::GetTypeDescriptor(
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_corlib_native_System_RuntimeType::GetName(CLR_RT_HeapBlock &arg, bool fFullName, CLR_RT_HeapBlock &res)
+HRESULT Library_corlib_native_System_RuntimeType::GetName(
+    CLR_RT_HeapBlock &arg,
+    bool fFullName,
+    CLR_RT_HeapBlock &res,
+    bool fOpenAsString)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -249,14 +364,89 @@ HRESULT Library_corlib_native_System_RuntimeType::GetName(CLR_RT_HeapBlock &arg,
     char *szBuffer;
     size_t iBuffer;
 
-    NANOCLR_CHECK_HRESULT(GetTypeDescriptor(arg, td, &levels));
-
     szBuffer = rgBuffer;
     iBuffer = MAXSTRLEN(rgBuffer);
 
-    NANOCLR_CHECK_HRESULT(
-        g_CLR_RT_TypeSystem
-            .BuildTypeName(td, szBuffer, iBuffer, fFullName ? CLR_RT_TypeSystem::TYPENAME_FLAGS_FULL : 0, levels));
+    if (arg.ReflectionDataConst().kind == REFLECTION_GENERICPARAM)
+    {
+        CLR_RT_Assembly *assembly;
+        const CLR_RECORD_GENERICPARAM *record;
+
+        if (fFullName && !fOpenAsString)
+        {
+            res.SetObjectReference(nullptr);
+
+            NANOCLR_SET_AND_LEAVE(S_OK);
+        }
+
+        if (!CLR_RT_TypeSystem::GetGenericParam(arg.ReflectionDataConst(), assembly, record))
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        }
+
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_TypeSystem.QueueStringToBuffer(szBuffer, iBuffer, assembly->GetString(record->name)));
+
+        for (int level = 0; level < arg.ReflectionDataConst().levels; level++)
+        {
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.QueueStringToBuffer(szBuffer, iBuffer, "[]"));
+        }
+
+        NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_String::CreateInstance(res, rgBuffer));
+    }
+
+    NANOCLR_CHECK_HRESULT(GetTypeDescriptor(arg, td, &levels));
+
+    // FullName of a type that contains generic parameters is null, ToString names the parameters
+    if (fFullName && !fOpenAsString && arg.ReflectionDataConst().kind == REFLECTION_TYPESPEC &&
+        CLR_RT_TypeSystem::IsOpenInstance(arg.ReflectionDataConst().data.typeSpec))
+    {
+        res.SetObjectReference(nullptr);
+
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
+
+    if (fFullName && arg.ReflectionDataConst().kind == REFLECTION_TYPESPEC)
+    {
+        // closed generic: Ns.Name`1[Ns.Argument], the arguments follow the name and precede the array brackets
+        CLR_RT_TypeSpec_Instance spec{};
+        CLR_RT_GenericInstance *record = nullptr;
+        char *argBuffer;
+        size_t argSize;
+
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_TypeSystem.BuildTypeName(td, szBuffer, iBuffer, CLR_RT_TypeSystem::TYPENAME_FLAGS_FULL, 0));
+
+        if (spec.InitializeFromIndex(arg.ReflectionDataConst().data.typeSpec))
+        {
+            record = CLR_RT_TypeSystem::FindOrCreateGenericInstance(spec);
+        }
+
+        // too long for the buffer: the name stays without arguments
+        argBuffer = szBuffer;
+        argSize = iBuffer;
+
+        if (record == nullptr || FAILED(AppendGenericArguments(*record, argBuffer, argSize)))
+        {
+            *szBuffer = 0;
+        }
+        else
+        {
+            szBuffer = argBuffer;
+            iBuffer = argSize;
+        }
+
+        while (levels-- > 0)
+        {
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.QueueStringToBuffer(szBuffer, iBuffer, "[]"));
+        }
+    }
+    else
+    {
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_TypeSystem
+                .BuildTypeName(td, szBuffer, iBuffer, fFullName ? CLR_RT_TypeSystem::TYPENAME_FLAGS_FULL : 0, levels));
+    }
 
     NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_String::CreateInstance(res, rgBuffer));
 

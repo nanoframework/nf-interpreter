@@ -33,6 +33,16 @@ HRESULT Library_corlib_native_System_Reflection_ConstructorInfo::Invoke___OBJECT
     {
         stack.m_customState = 1;
 
+        CLR_RT_TypeDef_Instance declaring{};
+
+        if (declaring.InitializeFromMethod(md) == false ||
+            (declaring.target->flags & CLR_RECORD_TYPEDEF::TD_Abstract) != 0 ||
+            (Library_corlib_native_System_Reflection_MethodBase::GetGenericFlags(md) &
+             MethodBase_GenericMethodFlags_ContainsGenericParameters) != 0)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_MEMBER_ACCESS);
+        }
+
         if (pArray)
         {
             args = (CLR_RT_HeapBlock *)pArray->GetFirstElement();
@@ -43,6 +53,10 @@ HRESULT Library_corlib_native_System_Reflection_ConstructorInfo::Invoke___OBJECT
             Library_corlib_native_System_Reflection_MethodBase::CheckInvokeArguments(md, args, ArgumentsCount));
 
         NANOCLR_CHECK_HRESULT(stack.MakeCall(md, nullptr, args, ArgumentsCount));
+    }
+    else
+    {
+        NANOCLR_CHECK_HRESULT(stack.TopValue().PerformBoxingIfNeeded());
     }
 
     NANOCLR_NOCLEANUP();

@@ -52,3 +52,6 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 # set required C and C++ standard for ALL targets
 set(CMAKE_C_STANDARD 23 CACHE INTERNAL "C standard for all targets")
 set(CMAKE_CXX_STANDARD 23 CACHE INTERNAL "C++ standard for all targets")
+
+# C++ modules aren't used: disable scanning so CMake doesn't build the std module from the toolchain sources
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF CACHE INTERNAL "C++ modules scanning")

@@ -360,7 +360,6 @@ struct CLR_RT_GenericInstance;
 struct CLR_RT_TypeDef_Instance;
 struct CLR_RT_MethodDef_Instance;
 struct CLR_RT_FieldDef_Instance;
-struct CLR_RT_GenericParam_Instance;
 struct CLR_RT_MethodSpec_Instance;
 
 struct CLR_RT_StackFrame;
@@ -736,6 +735,11 @@ struct CLR_RT_MethodSpec_Index
     {
         return (CLR_INDEX)data;
     }
+
+    bool IsRuntime() const
+    {
+        return (data >> 24) == 0xFF;
+    }
 };
 
 struct CLR_RT_FieldDef_Index
@@ -825,35 +829,6 @@ struct CLR_RT_MethodRef_Index
     }
 };
 
-struct CLR_RT_GenericParam_Index
-{
-    CLR_UINT32 data;
-
-    //--//
-
-    void Clear()
-    {
-        data = 0;
-    }
-
-    void Set(CLR_UINT32 indexAssm, CLR_UINT32 indexGenericParam)
-    {
-        data = indexAssm << 24 | indexGenericParam;
-    }
-
-    //--//
-
-    CLR_INDEX Assembly() const
-    {
-        return (CLR_INDEX)(data >> 24);
-    }
-
-    CLR_UINT8 GenericParam() const
-    {
-        return (CLR_UINT8)(data);
-    }
-};
-
 struct CLR_RT_ReflectionDef_Index
 {
     // CLR_ReflectionType
@@ -872,6 +847,7 @@ struct CLR_RT_ReflectionDef_Index
         CLR_RT_MethodDef_Index method;
         CLR_RT_FieldDef_Index field;
         CLR_RT_TypeSpec_Index typeSpec;
+        CLR_RT_TypeDef_Index genericParam;
         CLR_UINT32 raw;
     } data;
 
@@ -884,6 +860,7 @@ struct CLR_RT_ReflectionDef_Index
     void InitializeFromHash(CLR_UINT32 hash);
 
     bool GetGenericOwner(CLR_RT_TypeSpec_Index &typeSpec) const;
+    bool GetGenericMethodSpec(CLR_RT_MethodSpec_Index &methodSpec) const;
 
     CLR_UINT64 GetRawData() const;
     void SetRawData(CLR_UINT64 data);
@@ -951,27 +928,6 @@ struct CLR_RT_MethodDef_CrossReference
     {
         return (CLR_INDEX)(data);
     }
-};
-
-struct CLR_RT_GenericParam_CrossReference
-{
-    /// @brief Generic Parameter Owner -> Index to TypeDef or MethodDef
-    ///
-    CLR_UINT16 data;
-
-    /// @brief Tag for owner (TypeDef or MethodDef)
-    ///
-    NanoCLRTable typeOrMethodDef;
-
-    /// @brief DataType for the generic parameter
-    ///
-    NanoCLRDataType dataType;
-
-    /// @brief Class of the generic parameter
-    ///
-    CLR_RT_TypeDef_Index classTypeDef;
-
-    CLR_RT_GenericParam_Index m_target;
 };
 
 struct CLR_RT_MethodSpec_CrossReference
@@ -1198,7 +1154,6 @@ struct CLR_RT_SignatureParser
     static const int c_Method = 3;
     static const int c_Locals = 4;
     static const int c_Object = 5;
-    static const int c_GenericParamType = 6;
     static const int c_MethodSpec = 7;
     static const int c_LocalVar = 8;
     static const int c_RuntimeTypeSpec = 9;
@@ -1260,7 +1215,6 @@ struct CLR_RT_SignatureParser
     void Initialize_Interfaces(CLR_RT_Assembly *assm, const CLR_RECORD_TYPEDEF *td);
     void Initialize_MethodLocals(CLR_RT_Assembly *assm, const CLR_RECORD_METHODDEF *md);
     void Initialize_LocalVar(CLR_RT_Assembly *assm, const CLR_PMETADATA sig);
-    bool Initialize_GenericParamTypeSignature(CLR_RT_Assembly *assm, const CLR_RECORD_GENERICPARAM *gp);
 
     void Initialize_FieldDef(CLR_RT_Assembly *assm, const CLR_RECORD_FIELDDEF *fd);
     void Initialize_FieldDef(CLR_RT_Assembly *assm, CLR_PMETADATA fd);
@@ -1352,7 +1306,6 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
         size_t typeDef;
         size_t fieldDef;
         size_t methodDef;
-        size_t genericParam;
         size_t methodSpec;
         size_t typeSpec;
 
@@ -1421,8 +1374,6 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
     CLR_RT_MethodDef_CrossReference *crossReferenceMethodDef;
     // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
-    CLR_RT_GenericParam_CrossReference *crossReferenceGenericParam;
-    // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
     CLR_RT_MethodSpec_CrossReference *crossReferenceMethodSpec;
     // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
     CLR_RT_TypeSpec_CrossReference *crossReferenceTypeSpec;
@@ -1482,16 +1433,16 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     CLR_UINT32 ComputeAssemblyHash();
     CLR_UINT32 ComputeAssemblyHash(const CLR_RECORD_ASSEMBLYREF *ar);
 
-    bool FindTypeDef(const char *name, const char *nameSpace, CLR_RT_TypeDef_Index &index);
-    bool FindTypeDef(const char *name, CLR_INDEX scope, CLR_RT_TypeDef_Index &index);
+    bool FindTypeDef(
+        const char *name,
+        const char *nameSpace,
+        CLR_RT_TypeDef_Index &index,
+        CLR_STRING nameId = 0,
+        CLR_STRING nameSpaceId = 0);
+    bool FindTypeDef(const char *name, CLR_INDEX scope, CLR_RT_TypeDef_Index &index, CLR_STRING nameId = 0);
     bool FindTypeDef(CLR_UINT32 hash, CLR_RT_TypeDef_Index &index);
 
     bool FindTypeSpec(const CLR_PMETADATA sig, CLR_RT_TypeSpec_Index &index);
-    bool FindGenericParamAtMethodDef(
-        CLR_RT_MethodDef_Instance md,
-        CLR_INT32 genericParameterPosition,
-        CLR_RT_GenericParam_Index &index);
-    bool FindGenericParam(CLR_INDEX typeSpecIndex, CLR_RT_GenericParam_Index &index);
     bool FindMethodSpecFromTypeSpec(CLR_INDEX typeSpecIndex, CLR_RT_MethodSpec_Index &index);
 
     bool FindFieldDef(
@@ -1499,26 +1450,30 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
         const char *name,
         CLR_RT_Assembly *base,
         CLR_SIG sig,
-        CLR_RT_FieldDef_Index &index);
+        CLR_RT_FieldDef_Index &index,
+        CLR_STRING nameId = 0);
     bool FindFieldDef(
         const CLR_RT_TypeSpec_Index *tsIndex,
         const char *name,
         CLR_RT_Assembly *base,
         CLR_SIG sig,
-        CLR_RT_FieldDef_Index &index);
+        CLR_RT_FieldDef_Index &index,
+        CLR_STRING nameId = 0);
     bool FindMethodDef(
         const CLR_RECORD_TYPEDEF *src,
         const char *name,
         CLR_RT_Assembly *base,
         CLR_SIG sig,
-        CLR_RT_MethodDef_Index &index);
+        CLR_RT_MethodDef_Index &index,
+        CLR_STRING nameId = 0);
     bool FindMethodDef(
         const CLR_RECORD_TYPESPEC *ts,
         const char *name,
         CLR_RT_Assembly *base,
         CLR_SIG sig,
         CLR_RT_MethodDef_Index &index,
-        CLR_UINT32 &assmIndex);
+        CLR_UINT32 &assmIndex,
+        CLR_STRING nameId = 0);
 
     bool FindNextStaticConstructor(CLR_RT_MethodDef_Index &index);
     bool HasStaticConstructor(const CLR_RT_TypeDef_Index &typeDef) const;
@@ -1569,6 +1524,8 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     {
         return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_METHODDEF, TBL_MethodDef, i);
     }
+    CLR_INDEX FirstGenericParam(const CLR_RECORD_METHODDEF *md) const;
+
     const CLR_RECORD_GENERICPARAM *GetGenericParam(CLR_INDEX i) const
     {
         return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_GENERICPARAM, TBL_GenericParam, i);
@@ -1598,6 +1555,8 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
         return NANOCLR_ASSEMBLY_RESOLVE(CLR_UINT8, TBL_ResourcesData, i);
     }
     const char *GetString(CLR_STRING i);
+    static bool IsSharedString(CLR_STRING i);
+    bool StringEquals(CLR_STRING i, const char *text, CLR_STRING textId);
     CLR_PMETADATA GetSignature(CLR_SIG i) const
     {
         return NANOCLR_ASSEMBLY_RESOLVE(CLR_UINT8, TBL_Signatures, i);
@@ -1767,6 +1726,11 @@ struct CLR_RT_WellKnownTypes
     CLR_RT_TypeDef_Index ArgumentOutOfRangeException;
     CLR_RT_TypeDef_Index Exception;
     CLR_RT_TypeDef_Index IndexOutOfRangeException;
+    CLR_RT_TypeDef_Index ArrayTypeMismatchException;
+    CLR_RT_TypeDef_Index TargetException;
+    CLR_RT_TypeDef_Index TargetParameterCountException;
+    CLR_RT_TypeDef_Index MemberAccessException;
+    CLR_RT_TypeDef_Index MissingMethodException;
     CLR_RT_TypeDef_Index ThreadAbortException;
     CLR_RT_TypeDef_Index InvalidOperationException;
     CLR_RT_TypeDef_Index InvalidCastException;
@@ -2032,6 +1996,7 @@ struct CLR_RT_GenericInstance
 {
     static const CLR_UINT8 c_Scheduled = 0x01;
     static const CLR_UINT8 c_Executed = 0x02;
+    static const CLR_UINT8 c_Open = 0x04;
 
     static const int c_MaxNodes = 16;
 
@@ -2066,6 +2031,132 @@ enum CLR_RT_GenericMatch
     GenericMatch_NoTypeSpec,
     GenericMatch_Unresolved,
 };
+
+enum CLR_RT_GenericAssign
+{
+    GenericAssign_Fail,
+    GenericAssign_Pass,
+    GenericAssign_Unknown,
+};
+
+// A type in a node stream: the root of a pre-order subtree and the array levels still to peel.
+struct CLR_RT_GenericRef
+{
+    const CLR_RT_GenericInstanceNode *node;
+    const CLR_RT_GenericInstanceNode *end;
+    int levels;
+};
+
+// Assignability between closed generic instances: variance of each argument, interface and base walks, array elements.
+struct CLR_RT_GenericAssignability
+{
+    static int SubtreeSize(const CLR_RT_GenericInstanceNode *n, const CLR_RT_GenericInstanceNode *end);
+    static int VarianceOf(const CLR_RT_TypeDef_Instance &def, int index);
+    static CLR_RT_GenericInstance *RecordOfSubtree(const CLR_RT_GenericInstanceNode *n, int size);
+
+    static bool SameClassAssignable(CLR_RT_GenericRef s, CLR_RT_GenericRef t, int depth);
+    static CLR_RT_GenericAssign AncestorSearch(
+        const CLR_RT_TypeDef_Instance &start,
+        const CLR_RT_GenericInstance *context,
+        CLR_RT_GenericRef t,
+        int depth,
+        bool &open);
+    static CLR_RT_GenericAssign Assignable(CLR_RT_GenericRef s, CLR_RT_GenericRef t, bool element, int depth);
+
+    static bool IsVariantAssignable(const CLR_RT_GenericInstance &source, const CLR_RT_GenericInstance &target);
+    static bool IsVariantWord(const CLR_RT_ReflectionDef_Index &source, const CLR_RT_ReflectionDef_Index &target);
+
+    static CLR_RT_GenericMatch MatchObjectNodes(
+        const CLR_RT_HeapBlock &ref,
+        const CLR_RT_GenericInstanceNode *nodes,
+        int count);
+};
+
+struct CLR_RT_GenericDispatch
+{
+    static bool CollectElementNodes(CLR_RT_SignatureParser &parser, CLR_RT_GenericTarget &out, bool &isByRef);
+    static bool SubstituteNodes(CLR_RT_GenericTarget &stream, const CLR_RT_GenericTarget *binding)
+    {
+        return binding == nullptr || SubstituteNodes(stream, binding->m_nodes, binding->m_count, nullptr, 0);
+    }
+    static bool SubstituteNodes(
+        CLR_RT_GenericTarget &stream,
+        const CLR_RT_GenericInstanceNode *binding,
+        int bindingCount,
+        const CLR_RT_GenericInstanceNode *methodBinding,
+        int methodCount);
+    static bool GetBaseContext(
+        const CLR_RT_TypeDef_Instance &inst,
+        const CLR_RT_GenericTarget *context,
+        CLR_RT_GenericTarget &base);
+    static HRESULT GetCalleeBinding(
+        const CLR_RT_TypeDef_Index &cls,
+        const CLR_RT_TypeDef_Instance &declaring,
+        const CLR_RT_GenericInstance *site,
+        const CLR_RT_GenericInstance *receiver,
+        CLR_RT_GenericTarget &binding,
+        bool &ambiguous);
+    static int MatchSignatureInClass(
+        CLR_RT_MethodDef_Instance &callee,
+        const CLR_RT_GenericTarget *calleeBinding,
+        CLR_RT_Assembly *assembly,
+        const CLR_RECORD_METHODDEF *method,
+        const CLR_RT_GenericTarget *context);
+    static bool FindVirtualMethodInChain(
+        const CLR_RT_TypeDef_Index &cls,
+        CLR_RT_MethodDef_Instance &calleeInst,
+        const char *calleeName,
+        bool suffixMatchOnly,
+        bool useNodes,
+        const CLR_RT_GenericTarget *calleeBinding,
+        CLR_RT_MethodDef_Index &index);
+    static bool FindExplicitImplementation(
+        const CLR_RT_TypeDef_Index &cls,
+        CLR_RT_MethodDef_Instance &calleeInst,
+        const CLR_RT_TypeDef_Instance &declaring,
+        const char *calleeName,
+        CLR_RT_MethodDef_Index &index);
+};
+
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
+
+// Generic types and methods instantiated from Types (MakeGenericType, MakeGenericMethod, Delegate.Method).
+struct CLR_RT_GenericInstantiation
+{
+    static HRESULT MakeGenericInstance(
+        const CLR_RT_TypeDef_Instance &type,
+        const CLR_RT_MethodDef_Instance *method,
+        CLR_UINT16 ownerSlot,
+        CLR_RT_HeapBlock_Array *arguments,
+        CLR_RT_GenericInstance *&record);
+    static CLR_UINT16 GetMethodInstanceSlot(const CLR_RT_MethodSpec_Index &methodSpec, CLR_UINT16 ownerSlot);
+    static HRESULT AppendArgumentNodes(
+        CLR_RT_HeapBlock_Array *arguments,
+        CLR_UINT32 assembly,
+        CLR_UINT32 first,
+        int arity,
+        CLR_RT_GenericTarget &built,
+        CLR_RT_ReflectionDef_Index *words);
+    static int GetNestingDepth(const CLR_RT_GenericInstanceNode *nodes, int count);
+    static HRESULT CheckGenericConstraints(
+        CLR_UINT32 assembly,
+        CLR_UINT32 first,
+        int arity,
+        const CLR_RT_ReflectionDef_Index *words,
+        const CLR_RT_GenericTarget &built,
+        const CLR_RT_GenericInstance *owner,
+        bool method);
+    static HRESULT CloseConstraintWord(
+        CLR_RT_ReflectionDef_Index &constraint,
+        const CLR_RT_ReflectionDef_Index *words,
+        const CLR_RT_GenericTarget &built,
+        const CLR_RT_GenericInstance *owner,
+        bool method);
+    static bool HasPublicDefaultConstructor(const CLR_RT_TypeDef_Instance &td);
+    static bool IsByRefLike(const CLR_RT_TypeDef_Instance &td);
+};
+
+#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
 //--//
 
@@ -2180,13 +2271,10 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
     bool FindVirtualMethodDef(
         const CLR_RT_TypeDef_Index &cls,
         const CLR_RT_MethodDef_Index &calleeMD,
-        CLR_RT_MethodDef_Index &index);
-    bool FindVirtualMethodDef(
-        const CLR_RT_TypeDef_Index &cls,
-        const CLR_RT_MethodDef_Index &calleeMD,
-        const char *calleeName,
         CLR_RT_MethodDef_Index &index,
-        bool suffixMatchOnly = false);
+        const CLR_RT_TypeSpec_Index *callSite = nullptr,
+        bool *cacheable = nullptr,
+        const CLR_RT_HeapBlock *receiver = nullptr);
 
     static bool MatchSignature(CLR_RT_SignatureParser &parserLeft, CLR_RT_SignatureParser &parserRight);
     static bool MatchSignatureDirect(
@@ -2221,16 +2309,174 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
 
     static CLR_RT_GenericInstance *GetGenericInstance(const CLR_RT_TypeSpec_Index &index);
 
+    static bool CloseMethodSpec(
+        const CLR_RT_MethodDef_Instance &caller,
+        CLR_RT_MethodSpec_Index &methodSpec,
+        bool registerAlways = false);
+
+    static bool GetArrayElementMethodSpec(const CLR_RT_HeapBlock_Array &array, CLR_RT_MethodSpec_Index &methodSpec);
+
     static CLR_UINT16 GetGenericOwnerSlot(const CLR_RT_TypeSpec_Index &typeSpec);
+    static const CLR_RT_GenericInstance *GetMemberRecord(CLR_UINT16 slot, bool method);
+    static bool PositionAtParameterArgument(
+        const CLR_RT_SignatureParser::Element &element,
+        const CLR_RT_TypeSpec_Index *owner,
+        const CLR_RT_MethodSpec_Index *methodSpec,
+        CLR_RT_SignatureParser &argument);
+    static bool GetGenericOwnerRow(CLR_UINT16 slot, const CLR_RT_TypeDef_Index &declaring, CLR_RT_TypeSpec_Index &row);
+    static CLR_RT_GenericInstance *FindOrCreateGenericBase(
+        const CLR_RT_TypeDef_Instance &child,
+        const CLR_RT_TypeSpec_Index *childContext);
     static bool IsSameGenericInstance(const CLR_RT_TypeSpec_Index &left, const CLR_RT_TypeSpec_Index &right);
+
+    static bool IsSameTypeSpecIdentity(const CLR_RT_TypeSpec_Index &left, const CLR_RT_TypeSpec_Index &right);
+    static bool GetTypeSpecIdentityHash(const CLR_RT_TypeSpec_Index &row, CLR_UINT32 &hash);
+    static bool IsOpenInstance(const CLR_RT_TypeSpec_Index &row);
+    static void SetGenericParamWord(
+        CLR_RT_ReflectionDef_Index &word,
+        CLR_UINT32 assembly,
+        CLR_UINT32 row,
+        CLR_UINT32 levels);
+    static bool GetGenericParam(
+        const CLR_RT_ReflectionDef_Index &word,
+        CLR_RT_Assembly *&assembly,
+        const CLR_RECORD_GENERICPARAM *&record);
+    static HRESULT GetGenericParamOwner(
+        const CLR_RT_ReflectionDef_Index &word,
+        bool &isMethod,
+        CLR_RT_TypeDef_Index &type,
+        CLR_RT_MethodDef_Index &method);
+    static HRESULT GetGenericParamConstraintWord(
+        const CLR_RT_ReflectionDef_Index &param,
+        int index,
+        CLR_RT_ReflectionDef_Index &constraint);
+    static HRESULT GetDefinitionArgumentWord(
+        const CLR_RT_TypeDef_Instance &definition,
+        int position,
+        CLR_RT_ReflectionDef_Index &word);
+    static HRESULT GetGenericArgumentWord(
+        const CLR_RT_TypeSpec_Index &row,
+        int argument,
+        CLR_RT_ReflectionDef_Index &word);
+    static HRESULT GetArgumentWord(
+        const CLR_RT_GenericInstance &record,
+        int argument,
+        CLR_RT_ReflectionDef_Index &word);
+    static HRESULT GetOpenGenericRecord(
+        const CLR_RT_GenericInstanceNode *rowNodes,
+        int rowCount,
+        const CLR_RT_TypeSpec_Index &origin,
+        const CLR_RT_TypeDef_Index &level,
+        const CLR_RT_TypeSpec_Index *openContext,
+        CLR_RT_TypeSpec_Index &row,
+        const CLR_RT_MethodDef_Index *method = nullptr);
+    static HRESULT GetOpenSignatureWord(
+        const CLR_RT_SignatureParser &at,
+        const CLR_RT_TypeSpec_Index *openOwner,
+        const CLR_RT_TypeDef_Index &declaring,
+        const CLR_RT_MethodDef_Index *method,
+        CLR_RT_ReflectionDef_Index &word);
+    static HRESULT GetOpenGenericRow(
+        const CLR_RT_TypeSpec_Index &sourceRow,
+        const CLR_RT_TypeDef_Index &level,
+        const CLR_RT_TypeSpec_Index *openContext,
+        CLR_RT_TypeSpec_Index &row);
+    static HRESULT GetTypeBase(
+        const CLR_RT_TypeDef_Instance &child,
+        const CLR_RT_TypeSpec_Index *context,
+        bool isDefinition,
+        CLR_RT_TypeSpec_Index &row);
+    static HRESULT GetInterfaceRow(
+        const CLR_RT_TypeSpec_Index &entry,
+        const CLR_RT_TypeDef_Index &level,
+        const CLR_RT_TypeSpec_Index *context,
+        bool isDefinition,
+        CLR_RT_TypeSpec_Index &row);
+    static bool IsSameTypeSpecWord(const CLR_RT_ReflectionDef_Index &left, const CLR_RT_ReflectionDef_Index &right);
+    static bool IsSameTypeWord(const CLR_RT_ReflectionDef_Index &left, const CLR_RT_ReflectionDef_Index &right);
+    static HRESULT GetBaseTypeWord(const CLR_RT_ReflectionDef_Index &reflex, CLR_RT_ReflectionDef_Index &word);
+    static HRESULT CollectInterfaceWords(
+        const CLR_RT_ReflectionDef_Index &reflex,
+        CLR_RT_ReflectionDef_Index *words,
+        int max,
+        int &count);
+    static HRESULT AppendInterfaceWords(
+        const CLR_RT_ReflectionDef_Index &reflex,
+        CLR_RT_ReflectionDef_Index *words,
+        int max,
+        int &count);
+    static HRESULT IsAssignableFrom(
+        const CLR_RT_ReflectionDef_Index &target,
+        const CLR_RT_ReflectionDef_Index &source,
+        bool &result);
+    static int GetArrayInterfaceCount();
+    static bool GetArrayInterfaceDefinition(int index, CLR_RT_TypeDef_Index &definition);
+    static bool IsArrayGenericInterface(const CLR_RT_TypeDef_Instance &definition);
+    static HRESULT GetArrayInterfaceRow(const CLR_RT_ReflectionDef_Index &array, int index, CLR_RT_TypeSpec_Index &row);
+
+    static HRESULT GetClosedGenericBase(
+        const CLR_RT_TypeDef_Instance &child,
+        const CLR_RT_TypeSpec_Index *childContext,
+        CLR_RT_TypeSpec_Index &row);
+    static HRESULT GetClosedEnclosingType(
+        const CLR_RT_TypeSpec_Index &nested,
+        CLR_UINT32 enclosingArgCount,
+        const CLR_RT_TypeDef_Index &enclosing,
+        CLR_RT_TypeSpec_Index &row);
 
     static HRESULT CollectGenericTarget(
         const CLR_RT_SignatureParser &at,
         const CLR_RT_TypeSpec_Index *contextTypeSpec,
         const CLR_RT_MethodDef_Instance *contextMethod,
-        CLR_RT_GenericTarget &target);
+        CLR_RT_GenericTarget &target,
+        bool allowLevels = false);
 
     static CLR_RT_GenericMatch MatchGenericArguments(const CLR_RT_HeapBlock &ref, const CLR_RT_GenericTarget &target);
+
+    static int IntegralSize(CLR_UINT32 dataType);
+
+    // The closed instance of the element of an array TypeSpec, cleared when the element isn't a closed generic
+    // instance.
+    static HRESULT GetElementGenericInstance(
+        CLR_RT_Assembly *assm,
+        CLR_UINT32 tk,
+        const CLR_RT_MethodDef_Instance *contextMethod,
+        const CLR_RT_TypeSpec_Index *contextTypeSpec,
+        CLR_RT_TypeSpec_Index &element);
+
+    // A row that is a type parameter of an array of arguments (`T[]`, or `T` with an array argument): the innermost
+    // TypeDef, the total levels and the closed element instance. Not handled leaves the TypeDef resolution to the
+    // caller.
+    static HRESULT ResolveArrayRow(
+        CLR_RT_Assembly *assm,
+        CLR_UINT32 tk,
+        const CLR_RT_MethodDef_Instance *contextMethod,
+        const CLR_RT_TypeSpec_Index *contextTypeSpec,
+        bool &handled,
+        CLR_RT_TypeDef_Index &innermost,
+        int &levels,
+        CLR_RT_TypeSpec_Index &element,
+        bool claimWithoutLevels = false);
+
+    // The same for a bare parameter: `start` carries its kind (VAR or MVAR), position and levels.
+    static HRESULT ResolveParameterArgument(
+        const CLR_RT_SignatureParser::Element &start,
+        const CLR_RT_MethodDef_Instance *contextMethod,
+        const CLR_RT_TypeSpec_Index *contextTypeSpec,
+        bool &handled,
+        CLR_RT_TypeDef_Index &innermost,
+        int &levels,
+        CLR_RT_TypeSpec_Index &element,
+        bool claimWithoutLevels);
+
+    // False only when the object is known to be of another instantiation than the element of the array.
+    static bool ElementMatchesArraySpec(const CLR_RT_HeapBlock &object, const CLR_RT_TypeSpec_Index &element);
+
+    // The element instance of an array is the requested one, or derives from it through generic base classes.
+    static bool IsElementInstanceAssignable(
+        const CLR_RT_TypeSpec_Index &actual,
+        const CLR_RT_TypeSpec_Index &requested,
+        int extraLevels = 0);
 
     static HRESULT AllocateGenericInstanceStatics(CLR_RT_GenericInstance &instance);
 
@@ -2313,6 +2559,7 @@ struct CLR_RT_TypeDef_Instance : public CLR_RT_TypeDef_Index
     }
 
     bool SwitchToParent();
+    bool GetExtendsTypeSpec(CLR_RT_TypeSpec_Index &typeSpec) const;
     bool HasFinalizer() const;
 
     bool IsATypeHandler();
@@ -2416,31 +2663,6 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
         return assembly->debuggingInfoMethodDef[Method()];
     }
 #endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-};
-
-struct CLR_RT_GenericParam_Instance : public CLR_RT_GenericParam_Index
-{
-    CLR_RT_Assembly *assembly;
-    const CLR_RECORD_GENERICPARAM *target;
-
-#if defined(NANOCLR_INSTANCE_NAMES)
-    const char *name;
-#endif
-
-    //--//
-
-    bool InitializeFromIndex(const CLR_RT_GenericParam_Index &index);
-
-    void ClearInstance();
-
-    bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm);
-
-    //--//
-
-    CLR_RT_GenericParam_CrossReference &CrossReference() const
-    {
-        return assembly->crossReferenceGenericParam[GenericParam()];
-    }
 };
 
 struct CLR_RT_MethodSpec_Instance : public CLR_RT_MethodSpec_Index
@@ -2654,8 +2876,17 @@ struct CLR_RT_TypeDescriptor
     HRESULT InitializeFromGenericType(const CLR_RT_TypeSpec_Index &genericType);
     HRESULT InitializeFromFieldDefinition(
         const CLR_RT_FieldDef_Instance &fd,
-        const CLR_RT_TypeSpec_Index *ownerTypeSpec = nullptr);
-    HRESULT InitializeFromClosedSignature(CLR_RT_SignatureParser &parser, const CLR_RT_TypeSpec_Index *ownerTypeSpec);
+        const CLR_RT_TypeSpec_Index *ownerTypeSpec = nullptr,
+        CLR_RT_TypeSpec_Index *elementSpec = nullptr,
+        const CLR_RT_TypeDef_Index *declaringType = nullptr);
+    HRESULT InitializeFromClosedSignature(
+        CLR_RT_SignatureParser &parser,
+        const CLR_RT_TypeSpec_Index *ownerTypeSpec,
+        CLR_RT_TypeSpec_Index *elementSpec = nullptr,
+        const CLR_RT_TypeDef_Index *declaringType = nullptr,
+        const CLR_RT_MethodDef_Index *declaringMethod = nullptr,
+        const CLR_RT_MethodDef_Instance *context = nullptr);
+    CLR_RT_ReflectionDef_Index GetTypeReflection(const CLR_RT_TypeSpec_Index &elementSpec) const;
     HRESULT InitializeFromSignatureParser(
         CLR_RT_SignatureParser &parser,
         const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr);
@@ -3845,7 +4076,9 @@ struct CLR_RT_EventCache
         bool FindVirtualMethod(
             const CLR_RT_TypeDef_Index &cls,
             const CLR_RT_MethodDef_Index &mdVirtual,
-            CLR_RT_MethodDef_Index &md);
+            CLR_RT_MethodDef_Index &md,
+            const CLR_RT_TypeSpec_Index *callSite = nullptr,
+            const CLR_RT_HeapBlock *receiver = nullptr);
 
         //--//
 
@@ -3903,7 +4136,9 @@ struct CLR_RT_EventCache
         bool FindVirtualMethod(
             const CLR_RT_TypeDef_Index &cls,
             const CLR_RT_MethodDef_Index &mdVirtual,
-            CLR_RT_MethodDef_Index &md);
+            CLR_RT_MethodDef_Index &md,
+            const CLR_RT_TypeSpec_Index *callSite = nullptr,
+            const CLR_RT_HeapBlock *receiver = nullptr);
 
       private:
         CLR_UINT32 GetNewEntry()
@@ -3944,7 +4179,9 @@ struct CLR_RT_EventCache
     bool FindVirtualMethod(
         const CLR_RT_TypeDef_Index &cls,
         const CLR_RT_MethodDef_Index &mdVirtual,
-        CLR_RT_MethodDef_Index &md);
+        CLR_RT_MethodDef_Index &md,
+        const CLR_RT_TypeSpec_Index *callSite = nullptr,
+        const CLR_RT_HeapBlock *receiver = nullptr);
 
 #ifndef NANOCLR_NO_IL_INLINE
     bool GetInlineFrameBuffer(CLR_RT_InlineBuffer **ppBuffer);

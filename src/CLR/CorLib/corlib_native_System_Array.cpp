@@ -70,6 +70,23 @@ HRESULT Library_corlib_native_System_Array::CreateInstance___STATIC__SystemArray
 
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_RuntimeType::GetTypeDescriptor(*hbType, td));
 
+    if (hbType->ReflectionDataConst().kind == REFLECTION_TYPESPEC && hbType->ReflectionDataConst().levels == 0)
+    {
+        CLR_RT_ReflectionDef_Index reflex;
+
+        reflex.kind = REFLECTION_TYPE;
+        reflex.levels = 1;
+        reflex.data.type = td;
+
+        NANOCLR_SET_AND_LEAVE(
+            CLR_RT_HeapBlock_Array::CreateInstance(
+                stack.PushValue(),
+                stack.Arg1().NumericByRefConst().s4,
+                reflex,
+                0,
+                &hbType->ReflectionDataConst().data.typeSpec));
+    }
+
     NANOCLR_CHECK_HRESULT(
         CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValue(), stack.Arg1().NumericByRefConst().s4, td));
 
@@ -172,12 +189,13 @@ HRESULT Library_corlib_native_System_Array::Copy(
         NANOCLR_CHECK_HRESULT(CLR_Checks::VerifyArrayReference(argSrc));
         NANOCLR_CHECK_HRESULT(CLR_Checks::VerifyArrayReference(argDst));
 
-        NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_Array::Copy(
-            argSrc.DereferenceArray(),
-            indexSrc,
-            argDst.DereferenceArray(),
-            indexDst,
-            length));
+        NANOCLR_SET_AND_LEAVE(
+            CLR_RT_HeapBlock_Array::Copy(
+                argSrc.DereferenceArray(),
+                indexSrc,
+                argDst.DereferenceArray(),
+                indexDst,
+                length));
     }
 
     NANOCLR_NOCLEANUP();
@@ -201,23 +219,14 @@ HRESULT Library_corlib_native_System_Array::TrySzIndexOf(
 
     NANOCLR_CHECK_HRESULT(CLR_Checks::VerifyArrayReference(argSrc));
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::IndexOf(array, match, start, stop, fForward, index));
-
     _ASSERTE(retValue.DataType() == DATATYPE_BYREF);
 
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::IndexOf(array, match, start, stop, fForward, index));
+
+    // reference and struct elements: the managed loop decides with Equals, so the first match wins
+    fRet = !array->m_fReference && array->m_typeOfElement <= DATATYPE_LAST_PRIMITIVE;
+
     retValue.Dereference()->SetInteger(index);
-
-    fRet = (index >= 0);
-
-    if (array->m_typeOfElement <= DATATYPE_LAST_PRIMITIVE)
-    {
-        // Primitives do not override Equals, so this check is good enough.
-        // If match is not found, index == -1, so the managed Array.IndexOf will
-        // skip the more expensive Object.Equals call.
-
-        _ASSERTE(FIMPLIES(!fRet, index == -1));
-        fRet = true;
-    }
 
     stack.SetResult_Boolean(fRet);
 

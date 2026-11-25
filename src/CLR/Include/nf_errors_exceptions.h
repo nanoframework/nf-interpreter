@@ -41,7 +41,7 @@ typedef int HRESULT;
 // Return the code
 //
 
-#define HRESULT_CODE(hr) ((hr)&0xFFFF)
+#define HRESULT_CODE(hr) ((hr) & 0xFFFF)
 
 //
 //  Return the facility
@@ -96,6 +96,11 @@ typedef int HRESULT;
 #define CLR_E_SERIALIZATION_VIOLATION                   MAKE_HRESULT(SEVERITY_ERROR, 0x2700, 0x0000)
 #define CLR_E_SERIALIZATION_BADSTREAM                   MAKE_HRESULT(SEVERITY_ERROR, 0x2800, 0x0000)
 #define CLR_E_INDEX_OUT_OF_RANGE                        MAKE_HRESULT(SEVERITY_ERROR, 0x2900, 0x0000)
+#define CLR_E_ARRAY_TYPE_MISMATCH                       MAKE_HRESULT(SEVERITY_ERROR, 0x2A00, 0x0000)
+#define CLR_E_TARGET                                    MAKE_HRESULT(SEVERITY_ERROR, 0x2B00, 0x0000)
+#define CLR_E_TARGET_PARAMETER_COUNT                    MAKE_HRESULT(SEVERITY_ERROR, 0x2C00, 0x0000)
+#define CLR_E_MEMBER_ACCESS                             MAKE_HRESULT(SEVERITY_ERROR, 0x2D00, 0x0000)
+#define CLR_E_MISSING_METHOD                            MAKE_HRESULT(SEVERITY_ERROR, 0x2E00, 0x0000)
 
 #define CLR_E_DIVIDE_BY_ZERO                            MAKE_HRESULT(SEVERITY_ERROR, 0x3100, 0x0000)
 

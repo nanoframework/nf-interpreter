@@ -55,9 +55,12 @@ void CLR_RT_EventCache::VirtualMethodTable::Initialize()
 bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
     const CLR_RT_TypeDef_Index &cls,
     const CLR_RT_MethodDef_Index &mdVirtual,
-    CLR_RT_MethodDef_Index &md)
+    CLR_RT_MethodDef_Index &md,
+    const CLR_RT_TypeSpec_Index *callSite,
+    const CLR_RT_HeapBlock *receiver)
 {
     NATIVE_PROFILE_CLR_CORE();
+    bool cacheable = true;
     LookupEntry *en;
     LookupEntry key;
     CLR_RT_MethodDef_Instance instMD;
@@ -97,10 +100,15 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
     }
 
     {
-        if (g_CLR_RT_TypeSystem.FindVirtualMethodDef(cls, mdVirtual, md) == false)
+        if (g_CLR_RT_TypeSystem.FindVirtualMethodDef(cls, mdVirtual, md, callSite, &cacheable, receiver) == false)
         {
             return false;
         }
+    }
+
+    if (!cacheable)
+    {
+        return true;
     }
 
     {
@@ -280,9 +288,12 @@ void CLR_RT_EventCache::VirtualMethodTable::Initialize()
 bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
     const CLR_RT_TypeDef_Index &cls,
     const CLR_RT_MethodDef_Index &mdVirtual,
-    CLR_RT_MethodDef_Index &md)
+    CLR_RT_MethodDef_Index &md,
+    const CLR_RT_TypeSpec_Index *callSite,
+    const CLR_RT_HeapBlock *receiver)
 {
     NATIVE_PROFILE_CLR_CORE();
+    bool cacheable = true;
     Payload::Key key;
     CLR_UINT32 index;
     CLR_UINT32 indexHead;
@@ -395,9 +406,14 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
         }
         else
         {
-            if (g_CLR_RT_TypeSystem.FindVirtualMethodDef(cls, mdVirtual, md) == false)
+            if (g_CLR_RT_TypeSystem.FindVirtualMethodDef(cls, mdVirtual, md, callSite, &cacheable, receiver) == false)
             {
                 return false;
+            }
+
+            if (!cacheable)
+            {
+                return true;
             }
 
             index = GetNewEntry();
@@ -687,10 +703,12 @@ CLR_RT_HeapBlock *CLR_RT_EventCache::Extract_Node(CLR_UINT32 dataType, CLR_UINT3
 bool CLR_RT_EventCache::FindVirtualMethod(
     const CLR_RT_TypeDef_Index &cls,
     const CLR_RT_MethodDef_Index &mdVirtual,
-    CLR_RT_MethodDef_Index &md)
+    CLR_RT_MethodDef_Index &md,
+    const CLR_RT_TypeSpec_Index *callSite,
+    const CLR_RT_HeapBlock *receiver)
 {
     NATIVE_PROFILE_CLR_CORE();
-    return m_lookup_VirtualMethod.FindVirtualMethod(cls, mdVirtual, md);
+    return m_lookup_VirtualMethod.FindVirtualMethod(cls, mdVirtual, md, callSite, receiver);
 }
 
 // -- //

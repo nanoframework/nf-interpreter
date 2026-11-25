@@ -2265,6 +2265,30 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::AccessStaticField(const CLR_RT_FieldDe
     return nullptr;
 }
 
+static HRESULT FindRuntimeArgumentTypeSpec(const CLR_RT_SignatureParser &argParser, CLR_RT_TypeSpec_Index &argTypeSpec)
+{
+    const CLR_RT_GenericInstanceNode *argNodes = (const CLR_RT_GenericInstanceNode *)argParser.Signature;
+    int pending = 1;
+    int count = 0;
+
+    while (pending > 0 && count < argParser.m_runtimeNodesLeft)
+    {
+        pending += argNodes[count++].ArgCount - 1;
+    }
+
+    CLR_RT_GenericInstance *argInstance =
+        pending == 0 ? CLR_RT_TypeSystem::FindOrCreateGenericInstanceByNodes(argNodes, count) : nullptr;
+
+    if (argInstance == nullptr)
+    {
+        return CLR_E_WRONG_TYPE;
+    }
+
+    argTypeSpec = argInstance->m_self;
+
+    return S_OK;
+}
+
 // Resolves a VAR to its whole argument in the closed TypeSpec. See CLAUDE.md "Bare T fields and locals".
 static HRESULT ResolveGenericTypeParameter(
     const CLR_RT_TypeSpec_Index &genericTypeIndex,
@@ -2797,7 +2821,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                 }
                 case DATATYPE_MVAR:
                 {
-                    // MVAR resolution chain: arrayElementType → MethodSpec → GenericParam table.
+                    // MVAR resolution chain: arrayElementType → MethodSpec.
                     // See CLAUDE.md "VAR / MVAR resolution".
                     CLR_UINT8 genericParamPosition = *sig++;
 
@@ -2826,7 +2850,12 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
 
                         CLR_PMETADATA argSignature = argParser.Signature;
                         CLR_PMETADATA argStart = argSignature;
-                        bool argIsGenericInst = CLR_UncompressElementType(argStart) == DATATYPE_GENERICINST;
+                        bool argIsRuntime = argParser.Type == CLR_RT_SignatureParser::c_RuntimeTypeSpec;
+                        CLR_RT_SignatureParser argBefore = argParser;
+                        bool argIsGenericInst = argIsRuntime
+                                                    ? (argParser.m_runtimeNodesLeft > 0 &&
+                                                       ((const CLR_RT_GenericInstanceNode *)argSignature)->ArgCount > 0)
+                                                    : CLR_UncompressElementType(argStart) == DATATYPE_GENERICINST;
 
                         NANOCLR_CHECK_HRESULT(argParser.AdvanceParameter(element));
 
@@ -2838,7 +2867,11 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                         {
                             CLR_RT_TypeSpec_Index argTypeSpec;
 
-                            if (!methodSpec.assembly->FindTypeSpec(argSignature, argTypeSpec))
+                            if (argIsRuntime)
+                            {
+                                NANOCLR_CHECK_HRESULT(FindRuntimeArgumentTypeSpec(argBefore, argTypeSpec));
+                            }
+                            else if (!methodSpec.assembly->FindTypeSpec(argSignature, argTypeSpec))
                             {
                                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                             }
@@ -2848,15 +2881,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     }
                     else
                     {
-                        // Fallback: try to resolve using GenericParam table (for open generic methods)
-                        CLR_RT_GenericParam_Index gpIndex;
-                        assembly->FindGenericParamAtMethodDef(methodDefInstance, genericParamPosition, gpIndex);
-
-                        CLR_RT_GenericParam_CrossReference gp =
-                            assembly->crossReferenceGenericParam[gpIndex.GenericParam()];
-
-                        cls = gp.classTypeDef;
-                        dt = gp.dataType;
+                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
                     goto done;
@@ -3905,12 +3930,14 @@ static bool IsAssignableByHierarchy(CLR_RT_TypeDescriptor desc, CLR_RT_TypeDescr
         const CLR_UINT32 valueTypeFlags =
             CLR_RT_DataTypeLookup::c_OptimizedValueType | CLR_RT_DataTypeLookup::c_ValueType;
 
-        // Value-type elements are invariant, except types sharing storage (enum and its underlying type).
+        // Value-type elements are invariant, except types of the same size (integral types and enums).
         if ((c_CLR_RT_DataTypeLookup[inst.target->dataType].m_flags & valueTypeFlags) != 0 ||
             (c_CLR_RT_DataTypeLookup[instTarget.target->dataType].m_flags & valueTypeFlags) != 0)
         {
-            return inst.data == instTarget.data || (inst.target->dataType == instTarget.target->dataType &&
-                                                    inst.target->dataType != DATATYPE_VALUETYPE);
+            int size = CLR_RT_TypeSystem::IntegralSize(inst.target->dataType);
+
+            return inst.data == instTarget.data ||
+                   (size != 0 && size == CLR_RT_TypeSystem::IntegralSize(instTarget.target->dataType));
         }
 
         // Interface elements have no parent chain to reach System.Object.
@@ -3956,17 +3983,6 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(CLR_RT_TypeDescriptor desc, CLR_RT_Typ
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    static const struct
-    {
-        const char *assembly;
-        const char *name;
-    } c_ArrayGenericInterfaces[] = {
-        {"mscorlib", "IEnumerable`1"},
-        {"mscorlib", "ICollection`1"},
-        {"nanoFramework.System.Collections", "IList`1"},
-        {"nanoFramework.System.Collections", "IReadOnlyCollection`1"},
-        {"nanoFramework.System.Collections", "IReadOnlyList`1"}};
-
     if (IsAssignableByHierarchy(desc, descTarget))
     {
         return true;
@@ -3986,25 +4002,8 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(CLR_RT_TypeDescriptor desc, CLR_RT_Typ
 
     const CLR_RT_TypeDef_Instance &instTarget = descTarget.m_handlerCls;
 
-    if (desc.m_reflex.levels == 0 || descTarget.m_reflex.levels > 0 ||
-        (instTarget.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) !=
-            CLR_RECORD_TYPEDEF::TD_Semantics_Interface ||
-        strcmp(instTarget.assembly->GetString(instTarget.target->nameSpace), "System.Collections.Generic") != 0)
-    {
-        return false;
-    }
-
-    const char *name = instTarget.assembly->GetString(instTarget.target->name);
-
-    for (const auto &candidate : c_ArrayGenericInterfaces)
-    {
-        if (strcmp(name, candidate.name) == 0 && strcmp(instTarget.assembly->name, candidate.assembly) == 0)
-        {
-            return true;
-        }
-    }
-
-    return false;
+    return desc.m_reflex.levels > 0 && descTarget.m_reflex.levels == 0 && instTarget.target->IsInterface() &&
+           CLR_RT_TypeSystem::IsArrayGenericInterface(instTarget);
 }
 
 bool CLR_RT_ExecutionEngine::IsInstanceOf(const CLR_RT_TypeDef_Index &cls, const CLR_RT_TypeDef_Index &clsTarget)
@@ -4088,6 +4087,72 @@ bool CLR_RT_ExecutionEngine::IsInstanceOfToken(
     return CLR_RT_HeapBlock::TypeDescriptorsMatch(expectedDesc, actualDesc);
 }
 
+// An array with a known element instantiation cast to an array of another instantiation.
+static HRESULT ArrayElementDiffers(
+    const CLR_RT_HeapBlock &ref,
+    CLR_UINT32 tk,
+    CLR_RT_Assembly *assm,
+    const CLR_RT_MethodDef_Instance *caller,
+    bool &differs)
+{
+    const CLR_RT_HeapBlock *obj = ref.Dereference();
+
+    differs = false;
+
+    if (obj == nullptr || obj->DataType() != DATATYPE_SZARRAY)
+    {
+        return S_OK;
+    }
+
+    const CLR_RT_TypeSpec_Index *actual = ((const CLR_RT_HeapBlock_Array *)obj)->ElementTypeSpec();
+    CLR_RT_TypeSpec_Instance requested{};
+    CLR_RT_TypeSpec_Index row;
+    CLR_RT_TypeSpec_Index element;
+
+    row.Set(assm->assemblyIndex, CLR_DataFromTk(tk));
+
+    CLR_RT_TypeDef_Index innermost;
+    bool handled;
+    int levels;
+    const CLR_RT_TypeSpec_Index *context = caller != nullptr ? caller->genericType : nullptr;
+
+    if (actual == nullptr || !requested.InitializeFromIndex(row))
+    {
+        return S_OK;
+    }
+
+    // a type parameter row has its array levels in the argument
+    HRESULT hr =
+        CLR_RT_TypeSystem::ResolveArrayRow(assm, tk, caller, context, handled, innermost, levels, element, true);
+
+    if (SUCCEEDED(hr) && !handled)
+    {
+        hr = requested.levels == 0 ? CLR_E_WRONG_TYPE
+                                   : CLR_RT_TypeSystem::GetElementGenericInstance(assm, tk, caller, context, element);
+    }
+
+    if (FAILED(hr))
+    {
+        return hr == CLR_E_NOT_SUPPORTED ? hr : S_OK;
+    }
+
+    if (!NANOCLR_INDEX_IS_VALID(element))
+    {
+        return S_OK;
+    }
+
+    // levels of the array beyond the requested ones are arrays of the element, assigned to its interface
+    int arrayLevels = ((const CLR_RT_HeapBlock_Array *)obj)->ReflectionDataConst().levels;
+    int requestedLevels = handled ? levels : requested.levels;
+
+    differs = !CLR_RT_TypeSystem::IsElementInstanceAssignable(
+        *actual,
+        element,
+        arrayLevels > requestedLevels ? arrayLevels - requestedLevels : 0);
+
+    return S_OK;
+}
+
 HRESULT CLR_RT_ExecutionEngine::CastToType(
     CLR_RT_HeapBlock &ref,
     CLR_UINT32 tk,
@@ -4112,12 +4177,31 @@ HRESULT CLR_RT_ExecutionEngine::CastToType(
 
             parser.Initialize_TypeSpec(assm, assm->GetTypeSpec(CLR_DataFromTk(tk)));
 
-            if (CLR_RT_TypeSystem::CollectGenericTarget(
-                    parser,
-                    hasContext ? caller->genericType : nullptr,
-                    caller,
-                    target) == S_OK &&
-                CLR_RT_TypeSystem::MatchGenericArguments(ref, target) == GenericMatch_Different)
+            bool different = false;
+            HRESULT collected = CLR_RT_TypeSystem::CollectGenericTarget(
+                parser,
+                hasContext ? caller->genericType : nullptr,
+                caller,
+                target);
+
+            if (collected == CLR_E_NOT_SUPPORTED)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+            }
+
+            if (collected == S_OK)
+            {
+                if (target.m_count > 0)
+                {
+                    different = CLR_RT_TypeSystem::MatchGenericArguments(ref, target) == GenericMatch_Different;
+                }
+                else
+                {
+                    NANOCLR_CHECK_HRESULT(ArrayElementDiffers(ref, tk, assm, caller, different));
+                }
+            }
+
+            if (different)
             {
                 if (isInstInstruction == false)
                 {

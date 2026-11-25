@@ -308,6 +308,7 @@ bool CLR_RT_StackFrame::PushInline(
         (md->flags & ~CLR_RECORD_METHODDEF::MD_HasExceptionHandlers) >=
             CLR_RECORD_METHODDEF::MD_Constructor || // Do not try to inline constructors, etc because they require
                                                     // special processing
+        (0 != (md->flags & CLR_RECORD_METHODDEF::MD_HasExceptionHandlers)) || // Exception handlers require a frame
         (0 != (md->flags & CLR_RECORD_METHODDEF::MD_Static)) || // Static methods also requires special processing
         (0 != (md->flags & CLR_RECORD_METHODDEF::MD_Native)) || // Make sure the callee is not an internal method
         (md->rva == CLR_EmptyIndex) ||                          // Make sure we have a valid IP address for the method
@@ -653,6 +654,9 @@ HRESULT CLR_RT_StackFrame::MakeCall(
     int argsOffset = 0;
     CLR_RT_StackFrame *stackSub;
     CLR_RT_HeapBlock tmp;
+    CLR_RT_HeapBlock *created = nullptr;
+    bool valueTypeOwner = false;
+    bool constructing = false;
 
     tmp.SetObjectReference(nullptr);
     CLR_RT_ProtectFromGC gc(tmp);
@@ -662,25 +666,32 @@ HRESULT CLR_RT_StackFrame::MakeCall(
         CLR_RT_TypeDef_Instance owner{};
         owner.InitializeFromMethod(md);
 
-        _ASSERTE(obj == nullptr);
-
         _SIDE_ASSERTE(owner.InitializeFromMethod(md));
 
+        valueTypeOwner =
+            (owner.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_ValueType;
+
+        if (obj == nullptr)
         {
-            CLR_RT_TypeSpec_Instance ownerType{};
-            bool isClosedOwner = md.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*md.genericType) &&
-                                 ownerType.InitializeFromIndex(*md.genericType) &&
-                                 ownerType.genericTypeDef.data == owner.data;
+            {
+                CLR_RT_TypeSpec_Instance ownerType{};
+                bool isClosedOwner = md.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*md.genericType) &&
+                                     ownerType.InitializeFromIndex(*md.genericType) &&
+                                     ownerType.genericTypeDef.data == owner.data;
 
-            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(tmp, owner, isClosedOwner ? &ownerType : nullptr));
+                NANOCLR_CHECK_HRESULT(
+                    g_CLR_RT_ExecutionEngine.NewObject(tmp, owner, isClosedOwner ? &ownerType : nullptr));
+            }
+
+            obj = &tmp;
+
+            //
+            // Make a copy of the object pointer.
+            //
+            created = &PushValueAndAssign(tmp);
+
+            constructing = tmp.DataType() == DATATYPE_OBJECT;
         }
-
-        obj = &tmp;
-
-        //
-        // Make a copy of the object pointer.
-        //
-        PushValueAndAssign(tmp);
     }
 
     if (!fStatic)
@@ -691,7 +702,7 @@ HRESULT CLR_RT_StackFrame::MakeCall(
     }
 
     if (ArgumentsCount != nArgs)
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        NANOCLR_SET_AND_LEAVE(CLR_E_TARGET_PARAMETER_COUNT);
 
     //
     // In case the invoked method is abstract or virtual, resolve it to the correct method implementation.
@@ -706,7 +717,7 @@ HRESULT CLR_RT_StackFrame::MakeCall(
 
         NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(*obj, cls));
 
-        if (g_CLR_RT_EventCache.FindVirtualMethod(cls, md, mdReal) == false)
+        if (g_CLR_RT_EventCache.FindVirtualMethod(cls, md, mdReal, md.genericType, obj) == false)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }
@@ -721,7 +732,10 @@ HRESULT CLR_RT_StackFrame::MakeCall(
             ownerContext = *md.genericType;
         }
 
+        CLR_RT_MethodSpec_Index calledMethodSpec = md.methodSpec;
+
         md.InitializeFromIndex(mdReal);
+        md.methodSpec = calledMethodSpec;
 
         if (NANOCLR_INDEX_IS_VALID(ownerContext) && declaring.InitializeFromMethod(md))
         {
@@ -763,6 +777,19 @@ HRESULT CLR_RT_StackFrame::MakeCall(
         if (!fStatic)
         {
             stackSub->m_arguments[0].Assign(*obj);
+
+            // A value type constructor works on the object itself, not on a copy of it.
+            if (valueTypeOwner)
+            {
+                if (stackSub->m_arguments[0].DataType() == DATATYPE_OBJECT)
+                {
+                    stackSub->m_arguments[0].ChangeDataType(DATATYPE_BYREF);
+                }
+                else
+                {
+                    stackSub->m_arguments[0].SetReference(*created);
+                }
+            }
         }
 
         if (ArgumentsCount)
@@ -772,6 +799,12 @@ HRESULT CLR_RT_StackFrame::MakeCall(
     }
 
     NANOCLR_CHECK_HRESULT(stackSub->FixCall());
+
+    // The constructor can recreate the object (strings); Pop() pushes it back.
+    if (constructing)
+    {
+        m_flags |= c_ExecutingConstructor;
+    }
 
     NANOCLR_SET_AND_LEAVE(CLR_E_RESTART_EXECUTION);
 
@@ -815,22 +848,24 @@ HRESULT CLR_RT_StackFrame::FixCall()
             if (res.Levels > 0)
                 continue; // Array, no need to fix.
 
-            if (res.DataType == DATATYPE_VAR && m_call.genericType != nullptr &&
-                NANOCLR_INDEX_IS_VALID(*m_call.genericType))
             {
-                CLR_RT_TypeSpec_Instance owner{};
                 CLR_RT_SignatureParser argument;
                 CLR_RT_SignatureParser::Element resolved;
 
-                if (!owner.InitializeFromIndex(*m_call.genericType) ||
-                    !owner.PositionAtGenericParam(res.GenericParamPosition, argument) ||
-                    FAILED(argument.AdvanceParameter(resolved)) || resolved.Levels > 0)
+                if (CLR_RT_TypeSystem::PositionAtParameterArgument(
+                        res,
+                        m_call.genericType,
+                        &m_call.methodSpec,
+                        argument))
                 {
-                    continue;
-                }
+                    if (FAILED(argument.AdvanceParameter(resolved)) || resolved.Levels > 0)
+                    {
+                        continue;
+                    }
 
-                res.Class = resolved.Class;
-                res.DataType = resolved.DataType;
+                    res.Class = resolved.Class;
+                    res.DataType = resolved.DataType;
+                }
             }
 
             if (!NANOCLR_INDEX_IS_VALID(res.Class))
@@ -862,7 +897,7 @@ HRESULT CLR_RT_StackFrame::FixCall()
                     }
                     else
                     {
-                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
                     }
                 }
             }

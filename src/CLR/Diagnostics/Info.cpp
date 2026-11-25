@@ -689,8 +689,9 @@ void CLR_RT_Assembly::DumpToken(
                             }
                             else if (element.DataType == DATATYPE_MVAR)
                             {
-                                // nested MVAR not implemented
-                                ASSERT(false);
+                                CLR_Debug::Printf("!!%d", genericPosition);
+
+                                break;
                             }
 
                             char bufArg[256]{};
@@ -1443,6 +1444,11 @@ const char *CLR_RT_DUMP::GETERRORMESSAGE(HRESULT hrError)
         CASE_HRESULT_TO_STRING(CLR_E_TYPE_UNAVAILABLE);
         CASE_HRESULT_TO_STRING(CLR_E_INVALID_CAST);
         CASE_HRESULT_TO_STRING(CLR_E_OUT_OF_RANGE);
+        CASE_HRESULT_TO_STRING(CLR_E_ARRAY_TYPE_MISMATCH);
+        CASE_HRESULT_TO_STRING(CLR_E_TARGET);
+        CASE_HRESULT_TO_STRING(CLR_E_TARGET_PARAMETER_COUNT);
+        CASE_HRESULT_TO_STRING(CLR_E_MEMBER_ACCESS);
+        CASE_HRESULT_TO_STRING(CLR_E_MISSING_METHOD);
         CASE_HRESULT_TO_STRING(CLR_E_FORMAT_EXCEPTION);
         CASE_HRESULT_TO_STRING(CLR_E_SERIALIZATION_VIOLATION);
         CASE_HRESULT_TO_STRING(CLR_E_SERIALIZATION_BADSTREAM);

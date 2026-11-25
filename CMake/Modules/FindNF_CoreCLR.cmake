@@ -109,14 +109,11 @@ set(NF_CoreCLR_SRCS
     corlib_native_System_Number.cpp
     corlib_native_System_Object.cpp
     corlib_native_System_Random.cpp
-    corlib_native_System_ReadOnlySpan_1.cpp
     corlib_native_System_Reflection_Binder.cpp
     corlib_native_System_Reflection_MemberInfo.cpp
     corlib_native_System_Runtime_CompilerServices_RuntimeHelpers.cpp
-    corlib_native_System_Runtime_CompilerServices_Unsafe.cpp
     corlib_native_System_Runtime_Remoting_RemotingServices.cpp
     corlib_native_System_String.cpp
-    corlib_native_System_Span_1.cpp
     corlib_native_System_Threading_AutoResetEvent.cpp
     corlib_native_System_Threading_Interlocked.cpp
     corlib_native_System_Threading_ManualResetEvent.cpp
@@ -188,6 +185,9 @@ endif()
 # include System.Reflection API files depending on build option
 if(NF_FEATURE_SUPPORT_REFLECTION)
     list(APPEND NF_CoreCLR_SRCS corlib_native_System_Reflection_Assembly.cpp)
+    list(APPEND NF_CoreCLR_SRCS corlib_native_System_ReadOnlySpan_1.cpp)
+    list(APPEND NF_CoreCLR_SRCS corlib_native_System_Runtime_CompilerServices_Unsafe.cpp)
+    list(APPEND NF_CoreCLR_SRCS corlib_native_System_Span_1.cpp)
     list(APPEND NF_CoreCLR_SRCS corlib_native_System_Reflection_ConstructorInfo.cpp)
     list(APPEND NF_CoreCLR_SRCS corlib_native_System_Reflection_FieldInfo.cpp)
     list(APPEND NF_CoreCLR_SRCS corlib_native_System_Reflection_MethodBase.cpp)

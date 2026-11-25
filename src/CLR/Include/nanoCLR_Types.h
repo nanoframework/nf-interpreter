@@ -285,7 +285,7 @@ enum CLR_FlowControl
 
 //--//
 
-#define c_CLR_StringTable_Version 1
+#define c_CLR_StringTable_Version 2
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -535,6 +535,7 @@ enum CLR_ReflectionType
     REFLECTION_GENERICTYPE = 0x07,
     REFLECTION_TYPESPEC = 0x08,
     REFLECTION_STORAGE_PTR = 0x09,
+    REFLECTION_GENERICPARAM = 0x0A,
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1084,7 +1085,7 @@ struct CLR_RECORD_ASSEMBLY
 #define sizeOf_CLR_RECORD_TYPEDEF      27
 #define sizeOf_CLR_RECORD_FIELDDEF     10
 #define sizeOf_CLR_RECORD_METHODDEF    19
-#define sizeOf_CLR_RECORD_TYPESPEC     2
+#define sizeOf_CLR_RECORD_TYPESPEC     4
 #define sizeOf_CLR_RECORD_GENERICPARAM 10
 #define sizeOf_CLR_RECORD_METHODSPEC   6
 /////////////////////////////////////////////////////////////////////////
@@ -1325,6 +1326,16 @@ struct CLR_RECORD_TYPEDEF
         return (flags & (TD_Semantics_Mask)) == TD_Semantics_Enum;
     }
 
+    bool IsInterface() const
+    {
+        return (flags & (TD_Semantics_Mask)) == TD_Semantics_Interface;
+    }
+
+    bool IsValueTypeOrEnum() const
+    {
+        return (flags & (TD_Semantics_Mask)) == TD_Semantics_ValueType || IsEnum();
+    }
+
     bool IsDelegate() const
     {
         return (flags & (TD_Delegate | TD_MulticastDelegate)) != 0;
@@ -1344,16 +1355,24 @@ struct CLR_RECORD_TYPEDEF
     ///
     CLR_INDEX ExtendsIndex() const
     {
-        return (encodedExtends & 0x7FFF);
+        return (encodedExtends & (ExtendsIsTypeSpec() ? 0x3FFF : 0x7FFF));
     }
 
-    /// @brief Extends table
+    /// @brief Extends table: TypeDef (bit 15 clear), TypeRef (bit 15 set) or TypeSpec (bits 15 and 14 set)
     ///
     NanoCLRTable Extends() const
     {
-        static const NanoCLRTable c_lookup[2] = {TBL_TypeDef, TBL_TypeRef};
+        if (ExtendsIsTypeSpec())
+        {
+            return TBL_TypeSpec;
+        }
 
-        return c_lookup[(encodedExtends >> 15)];
+        return (encodedExtends & 0x8000) ? TBL_TypeRef : TBL_TypeDef;
+    }
+
+    bool ExtendsIsTypeSpec() const
+    {
+        return (encodedExtends & 0xC000) == 0xC000 && encodedExtends != CLR_EmptyIndex;
     }
 
     /// @brief Index into EnclosingType table
@@ -1505,6 +1524,12 @@ struct CLR_RECORD_METHODDEF
     static const CLR_UINT32 MD_IsGenericInstance = 0x00100000;
     static const CLR_UINT32 MD_ContainsGenericParameter = 0x00200000;
 
+    /// @brief Explicit implementation of a method of a generic interface instance. @ref firstGenericParam holds the
+    /// TypeSpec of that instance; the generic parameters of the method are found by owner
+    /// (@ref CLR_RT_Assembly::FirstGenericParam).
+    ///
+    static const CLR_UINT32 MD_ExplicitOverride = 0x00400000;
+
     static const CLR_UINT32 MD_Synchronized = 0x01000000;
     static const CLR_UINT32 MD_GloballySynchronized = 0x02000000;
     static const CLR_UINT32 MD_Patched = 0x04000000;
@@ -1608,15 +1633,58 @@ struct CLR_RECORD_ATTRIBUTE
 
 struct CLR_RECORD_TYPESPEC
 {
+    /// @brief No VAR or MVAR anywhere in the signature.
+    ///
+    static const CLR_UINT16 TS_Closed = 0x0001;
+
+    /// @brief Generic instance whose arguments are its own parameters, in order (G<!0, !1>).
+    ///
+    static const CLR_UINT16 TS_OverOwnParameters = 0x0002;
+
+    /// @brief The signature contains a VAR.
+    ///
+    static const CLR_UINT16 TS_HasVar = 0x0004;
+
+    /// @brief The signature contains an MVAR.
+    ///
+    static const CLR_UINT16 TS_HasMVar = 0x0008;
+
+    /// @brief Nesting depth of generic instances, 3 bits.
+    ///
+    static const CLR_UINT16 TS_DepthMask = 0x0070;
+
+    /// @brief The signature is a generic instance.
+    ///
+    static const CLR_UINT16 TS_GenericInstance = 0x0080;
+
+    /// @brief The signature is an array.
+    ///
+    static const CLR_UINT16 TS_Array = 0x0100;
+
+    /// @brief The signature is a by-ref or a pointer.
+    ///
+    static const CLR_UINT16 TS_ByRefOrPointer = 0x0200;
+
     /// @brief Index into TBL_Signatures
     ///
     CLR_SIG signature;
+
+    /// @brief TS_* flags, written by the Metadata Processor.
+    ///
+    CLR_UINT16 flags;
 };
 
 CT_ASSERT(sizeof(CLR_RECORD_TYPESPEC) == sizeOf_CLR_RECORD_TYPESPEC)
 
 struct CLR_RECORD_GENERICPARAM
 {
+    static const CLR_UINT16 GP_Variance_Mask = 0x0003;
+    static const CLR_UINT16 GP_ReferenceType = 0x0004;
+    static const CLR_UINT16 GP_NotNullableValueType = 0x0008;
+    static const CLR_UINT16 GP_DefaultConstructor = 0x0010;
+    static const CLR_UINT16 GP_AllowByRefLike = 0x0020;
+    static const CLR_UINT16 GP_SpecialConstraint_Mask = 0x001C;
+
     /// @brief 2-byte index of the generic parameter, numbered left -to-right, from zero.
     ///
     CLR_UINT16 number;
@@ -1629,7 +1697,8 @@ struct CLR_RECORD_GENERICPARAM
     ///
     CLR_TYPEORMETHODDEF owner;
 
-    /// @brief Index into TBL_Signatures for parameter type signature
+    /// @brief Index into TBL_Signatures for the type constraints (a count followed by the types), CLR_EmptyIndex when
+    /// there are none.
     ///
     CLR_SIG signature;
 

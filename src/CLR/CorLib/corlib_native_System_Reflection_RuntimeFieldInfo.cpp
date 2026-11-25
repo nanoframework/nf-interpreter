@@ -43,7 +43,17 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeFieldInfo::get_DeclaringT
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
 
         hbObj = top.Dereference();
-        hbObj->SetReflection(cls);
+
+        CLR_RT_TypeSpec_Index owner;
+
+        if (CLR_RT_TypeSystem::GetGenericOwnerRow(hbField->ReflectionDataConst().genericOwner, cls, owner))
+        {
+            hbObj->SetReflection(owner);
+        }
+        else
+        {
+            hbObj->SetReflection(cls);
+        }
     }
 
     NANOCLR_NOCLEANUP();
@@ -56,16 +66,27 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeFieldInfo::get_FieldType_
 
     CLR_RT_TypeDescriptor desc{};
     CLR_RT_FieldDef_Instance fd;
+    CLR_RT_TypeDef_Instance declaring{};
     CLR_RT_TypeSpec_Index owner;
+    CLR_RT_TypeSpec_Index elementSpec;
     CLR_RT_HeapBlock *hbField = stack.This();
 
     if (GetFieldDescriptor(stack, *hbField, fd) == false)
+    {
         NANOCLR_SET_AND_LEAVE(CLR_E_NULL_REFERENCE);
+    }
+
+    if (declaring.InitializeFromField(fd) == false)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
 
     owner.Clear();
     hbField->ReflectionDataConst().GetGenericOwner(owner);
 
-    NANOCLR_CHECK_HRESULT(desc.InitializeFromFieldDefinition(fd, &owner));
+    elementSpec.Clear();
+
+    NANOCLR_CHECK_HRESULT(desc.InitializeFromFieldDefinition(fd, &owner, &elementSpec, &declaring));
 
     {
         CLR_RT_HeapBlock &top = stack.PushValue();
@@ -73,7 +94,7 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeFieldInfo::get_FieldType_
 
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
         hbObj = top.Dereference();
-        hbObj->SetReflection(desc.m_reflex);
+        hbObj->SetReflection(desc.GetTypeReflection(elementSpec));
     }
 
     NANOCLR_NOCLEANUP();

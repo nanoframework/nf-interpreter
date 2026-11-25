@@ -1893,7 +1893,12 @@ struct CLR_RT_HeapBlock_Array : public CLR_RT_HeapBlock
     CLR_UINT8 m_sizeOfElement;
     CLR_UINT8 m_fReference;
     CLR_UINT8 m_pad;
-    uintptr_t m_StoragePointer;
+
+    union {
+        uintptr_t m_StoragePointer;
+        // closed generic instance of the element, 0 if none. See CLAUDE.md "Array element TypeSpec"
+        CLR_RT_TypeSpec_Index m_elementTypeSpec;
+    };
 
     //--//
 
@@ -1901,7 +1906,8 @@ struct CLR_RT_HeapBlock_Array : public CLR_RT_HeapBlock
         CLR_RT_HeapBlock &reference,
         CLR_UINT32 length,
         const CLR_RT_ReflectionDef_Index &reflex,
-        CLR_UINT32 extraBytes = 0);
+        CLR_UINT32 extraBytes = 0,
+        const CLR_RT_TypeSpec_Index *elementTypeSpec = nullptr);
     static HRESULT CreateInstance(CLR_RT_HeapBlock &reference, CLR_UINT32 length, const CLR_RT_TypeDef_Index &cls);
     static HRESULT CreateInstance(
         CLR_RT_HeapBlock &reference,
@@ -1956,6 +1962,18 @@ struct CLR_RT_HeapBlock_Array : public CLR_RT_HeapBlock
         return (ReflectionData().kind == REFLECTION_STORAGE_PTR);
     }
 
+    const CLR_RT_TypeSpec_Index *ElementTypeSpec() const
+    {
+        if (ReflectionDataConst().kind == REFLECTION_STORAGE_PTR || m_elementTypeSpec.data == 0)
+        {
+            return nullptr;
+        }
+
+        return &m_elementTypeSpec;
+    }
+
+    bool SameElementTypeSpec(const CLR_RT_HeapBlock_Array &other) const;
+
     // Valid only when IsStoragePointer() is true. See CLAUDE.md §16.
     CLR_RT_HeapBlock *StorageOwner()
     {
@@ -2008,6 +2026,9 @@ struct CLR_RT_HeapBlock_Delegate : public CLR_RT_HeapBlock_Node // OBJECT HEAP -
     // (data == 0 means not set)
     CLR_RT_MethodSpec_Index m_genericMethodSpec;
 
+    // Closed generic delegate type, e.g. Action<int> (data == 0 means not generic or not known)
+    CLR_RT_TypeSpec_Index m_delegateTypeSpec;
+
     //--//
 
     const CLR_RT_MethodDef_Index &DelegateFtn() const
@@ -2030,6 +2051,15 @@ struct CLR_RT_HeapBlock_Delegate : public CLR_RT_HeapBlock_Node // OBJECT HEAP -
         CLR_RT_HeapBlock &reference,
         const CLR_RT_MethodDef_Index &ftn,
         CLR_RT_StackFrame *call);
+
+    // 0 when both delegates run their method with the same generic context
+    int CompareGenericContext(const CLR_RT_HeapBlock_Delegate &other) const;
+
+    // false only when both delegates have a known type and the types differ
+    bool SameType(const CLR_RT_HeapBlock_Delegate &other) const;
+
+    // the delegate that carries the type of a delegate or of a list: itself or the first live element
+    static const CLR_RT_HeapBlock_Delegate *TypeCarrier(const CLR_RT_HeapBlock *obj);
 
     void Relocate();
 };
