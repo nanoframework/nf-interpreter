@@ -66,6 +66,8 @@
 #include <targetHAL_Watchdog.h>
 #endif
 
+#define BOOT_STAGE_LOG(stage) BOOT_LOG_INF("boot stage '%s' at %u ms", stage, (unsigned)TIME_I2MS(chVTGetSystemTimeX()))
+
 // ----------------------------------------------------------------------- //
 // do_boot — hand off to the application image selected by MCUboot          //
 // ----------------------------------------------------------------------- //
@@ -174,6 +176,8 @@ int main(void)
     // Start the LED heartbeat
     mcuboot_heartbeat_start();
 
+    BOOT_STAGE_LOG("ext flash ready");
+
 #if defined(MCUBOOT_SERIAL)
     // Check recovery button and - if held - run the SMP serial recovery loop, unless an update is
     // in flight: an upload would rewrite the secondary slot under a swap that has to be finished.
@@ -188,10 +192,14 @@ int main(void)
     }
 #endif
 
+    BOOT_STAGE_LOG("serial recovery check done");
+
 #if defined(NF_MCUBOOT_MEDIA_IMPORT)
     // Look for signed update images on removable media
     mcuboot_media_import_run();
 #endif
+
+    BOOT_STAGE_LOG("media import done");
 
     // Run MCUboot image validation and upgrade logic as two boot_go_for_image_id() passes -
     // image 0 (nanoCLR) first for the actual boot decision, then image 1 (deployment) so a
@@ -205,6 +213,8 @@ int main(void)
     boot_state_init(bootState);
     FIH_DECLARE(bootResult, FIH_FAILURE);
     FIH_CALL(boot_go_for_image_id, bootResult, &rsp, NF_MCUBOOT_IMAGE_CLR);
+
+    BOOT_STAGE_LOG("image 0 pass done");
 
     if (FIH_NOT_EQ(bootResult, FIH_SUCCESS))
     {
@@ -244,6 +254,8 @@ int main(void)
     boot_state_init(bootState);
     FIH_DECLARE(deployResult, FIH_FAILURE);
     FIH_CALL(boot_go_for_image_id, deployResult, &deployRsp, NF_MCUBOOT_IMAGE_DEPLOY);
+
+    BOOT_STAGE_LOG("image 1 pass done");
 
     // Deployment pass is not fatal: empty or invalid deploy_0 must not prevent nanoCLR from booting
     if (FIH_NOT_EQ(deployResult, FIH_SUCCESS))

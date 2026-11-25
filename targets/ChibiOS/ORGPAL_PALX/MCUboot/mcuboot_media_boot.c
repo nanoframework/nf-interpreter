@@ -33,10 +33,10 @@
 
 // Wall-clock budget for a device to show up on the port after the host is started. With
 // VBUS supplied by the board the stick is already powered, but the OTG core needs the
-// forced-host-mode switch plus PHY settle before it reports the pull-up; the CLR never
-// bounds this (it polls forever), so keep it generous.
+// forced-host-mode switch plus PHY settle before it reports the pull-up. Every boot without
+// a stick waits this long, so it is kept short; raise it if a slow stick is missed.
 #ifndef MCUBOOT_USB_MSD_ATTACH_TIMEOUT_MS
-#define MCUBOOT_USB_MSD_ATTACH_TIMEOUT_MS 1000U
+#define MCUBOOT_USB_MSD_ATTACH_TIMEOUT_MS 300U
 #endif
 
 // Wall-clock budget for the whole bring-up: attach + debounce (200 ms) + reset + recovery
