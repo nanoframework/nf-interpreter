@@ -45,10 +45,14 @@ steps:
 
           Write-Host "Checking out mscorlib PR: #$testPR"
           gh pr checkout $testPR --repo nanoframework/CoreLibrary
+
           if($LASTEXITCODE -ne 0)
           {
             throw "Could not check out CoreLibrary PR #$testPR."
           }
+          
+          # gh pr checkout doesn't move submodules: sync them to the PR's pointers (test framework / unit test launcher)
+          git submodule update --init --recursive
         }
         else
         {
