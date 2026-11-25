@@ -1060,8 +1060,19 @@ arguments into the `extends` row, so `GB2<int> : GB1<T> : GB0<T>` gives
 shared by the other receiver lookups (`callvirt` on a non-interface callee,
 delegate targets), which now also see ancestors.
 
-Fails closed, never a wrong `T`: when the walk fails (the base row cannot be
-built, for example it nests generic instances deeper than
-`c_MaxGenericNestingDepth`, see the limits in the generics batch notes) the
-function answers false, `genericType` stays null and the call throws
-`System.Exception` as before. .NET runs those; we do not support them.
+Plain parents (`class D : Plain`, `class Plain : GB0<int>`) are crossed with
+`SwitchToParent`: such a parent has no TypeSpec, so the walk continues from the
+parent's own `extends` row with no context.
+
+Not exact when the walk fails. `GetTypeBase` fails only over the limits (a base
+row that nests generic instances deeper than `c_MaxGenericNestingDepth`, see the
+limits in the generics batch notes). The function then answers false and the
+interpreter continues with `genericType = nullptr`. A callee that needs `T` is
+then closed from whatever context the call has: in a non-generic caller `T` is
+unresolved and the call throws `System.Exception`, but in a generic caller the
+caller's own arguments can be picked up and the answer can be a wrong `T`
+(`CallerCtx<string>` calling over a 4-deep base returned `String`). The same
+happens on develop for any failed recovery. Making it fail closed means
+throwing `NotSupportedException` there, only when the receiver is a class or
+value type object with a generic declaring type (arrays go through
+`SZArrayHelper` and must keep the old path); not done.
