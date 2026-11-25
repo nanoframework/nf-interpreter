@@ -1079,24 +1079,74 @@ static bool TryGetReceiverTypeSpec(
         obj = obj->Dereference();
     }
 
-    if (obj == nullptr || (obj->DataType() != DATATYPE_CLASS && obj->DataType() != DATATYPE_VALUETYPE) ||
-        !obj->IsAGenericInstance())
+    if (obj == nullptr || (obj->DataType() != DATATYPE_CLASS && obj->DataType() != DATATYPE_VALUETYPE))
     {
         return false;
     }
 
-    const CLR_RT_TypeSpec_Index &objTypeSpec = obj->ObjectGenericType();
     const CLR_RT_TypeDef_Index &def = requiredDef != nullptr ? *requiredDef : obj->ObjectCls();
-    CLR_RT_TypeSpec_Instance objTs{};
+    CLR_RT_TypeSpec_Index current{};
+    CLR_RT_TypeDef_Instance level{};
 
-    if (!NANOCLR_INDEX_IS_VALID(objTypeSpec) || !NANOCLR_INDEX_IS_VALID(def) ||
-        !objTs.InitializeFromIndex(objTypeSpec) || objTs.genericTypeDef.data != def.data)
+    current.Clear();
+
+    if (obj->IsAGenericInstance())
+    {
+        current = obj->ObjectGenericType();
+    }
+
+    if (!NANOCLR_INDEX_IS_VALID(def) || !level.InitializeFromIndex(obj->ObjectCls()))
     {
         return false;
     }
 
-    receiverTypeSpec = objTypeSpec;
-    return true;
+    for (int depth = 0; depth < 32; depth++)
+    {
+        if (NANOCLR_INDEX_IS_VALID(current))
+        {
+            CLR_RT_TypeSpec_Instance ts{};
+
+            if (!ts.InitializeFromIndex(current))
+            {
+                return false;
+            }
+
+            if (ts.genericTypeDef.data == def.data)
+            {
+                receiverTypeSpec = current;
+                return true;
+            }
+
+            if (!level.InitializeFromIndex(ts.genericTypeDef))
+            {
+                return false;
+            }
+        }
+
+        if (requiredDef == nullptr)
+        {
+            return false;
+        }
+
+        CLR_RT_TypeSpec_Index base;
+        HRESULT hr =
+            CLR_RT_TypeSystem::GetTypeBase(level, NANOCLR_INDEX_IS_VALID(current) ? &current : nullptr, false, base);
+
+        if (hr == S_FALSE && level.SwitchToParent())
+        {
+            current.Clear();
+            continue;
+        }
+
+        if (hr != S_OK)
+        {
+            return false;
+        }
+
+        current = base;
+    }
+
+    return false;
 }
 
 static void StoreDelegateGenericContext(

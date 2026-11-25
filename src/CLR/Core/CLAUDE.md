@@ -1033,3 +1033,46 @@ hard-codes the base's field count. When an assembly's contract hash changes, the
 stubs of every assembly with types that derive from its types must be
 regenerated in the same change. `scripts/Test-NativeFieldLayout.ps1` checks the
 pairs listed in `scripts/native-cross-assembly-bases.json`.
+
+### Interface call into a method inherited from a generic base
+
+`class GB0<T> : IGen<T> { string G() => typeof(T).Name; } class GB1<T> : GB0<T> {}`,
+then `((IGen<int>)new GB1<int>()).G()`. The callee is `GB0.G` and its `T` comes
+from the closed TypeSpec of `GB0<int>`, but the object carries `GB1<int>` and
+the call site carries `IGen<int>`. The interpreter's mismatch branch (the
+interface TypeSpec does not belong to the callee's declaring type) asks
+`TryGetReceiverTypeSpec(this, declaringType)` for it. That used to answer only
+when the object's own class was the declaring type, so a derived class got
+`genericType = nullptr`, `T` stayed unresolved and the call failed with
+`CLR_E_WRONG_TYPE` (`System.Exception`). It reproduced for one level of
+inheritance, a non-generic derived class (`class D : GB0<int>`, no TypeSpec on
+the object at all), struct arguments and generic methods on the inherited
+method. Direct calls, calls through the base reference and virtual calls were
+right because their call site already carries the base TypeSpec; a method
+without `T` was right because nothing needed the TypeSpec.
+
+`TryGetReceiverTypeSpec` now walks up from the object: its own TypeSpec (or none
+for a non-generic class) and then `CLR_RT_TypeSystem::GetTypeBase` row by row
+until the row's generic definition is the required one, at most 32 steps (same
+bound as `c_MaxInheritanceDepth`). `GetTypeBase` substitutes the derived type's
+arguments into the `extends` row, so `GB2<int> : GB1<T> : GB0<T>` gives
+`GB0<int>` and `class GB<U> : GB0<Box<U>>` gives `GB0<Box<int>>`. The helper is
+shared by the other receiver lookups (`callvirt` on a non-interface callee,
+delegate targets), which now also see ancestors.
+
+Plain parents (`class D : Plain`, `class Plain : GB0<int>`) are crossed with
+`SwitchToParent`: such a parent has no TypeSpec, so the walk continues from the
+parent's own `extends` row with no context.
+
+Not exact when the walk fails. `GetTypeBase` fails only over the limits (a base
+row that nests generic instances deeper than `c_MaxGenericNestingDepth`, see the
+limits in the generics batch notes). The function then answers false and the
+interpreter continues with `genericType = nullptr`. A callee that needs `T` is
+then closed from whatever context the call has: in a non-generic caller `T` is
+unresolved and the call throws `System.Exception`, but in a generic caller the
+caller's own arguments can be picked up and the answer can be a wrong `T`
+(`CallerCtx<string>` calling over a 4-deep base returned `String`). The same
+happens on develop for any failed recovery. Making it fail closed means
+throwing `NotSupportedException` there, only when the receiver is a class or
+value type object with a generic declaring type (arrays go through
+`SZArrayHelper` and must keep the old path); not done. Skipping the caller-context fallbacks of the two context selectors in `CEE_CALLVIRT` (inline and `Push` paths) for generic callee owners is not enough: all suites passed but the wrong `T` was still returned, so the context is also picked up somewhere else.
