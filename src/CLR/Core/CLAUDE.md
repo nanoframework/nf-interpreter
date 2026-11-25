@@ -1075,4 +1075,4 @@ caller's own arguments can be picked up and the answer can be a wrong `T`
 happens on develop for any failed recovery. Making it fail closed means
 throwing `NotSupportedException` there, only when the receiver is a class or
 value type object with a generic declaring type (arrays go through
-`SZArrayHelper` and must keep the old path); not done.
+`SZArrayHelper` and must keep the old path); not done. Skipping the caller-context fallbacks of the two context selectors in `CEE_CALLVIRT` (inline and `Push` paths) for generic callee owners is not enough: all suites passed but the wrong `T` was still returned, so the context is also picked up somewhere else.
