@@ -460,7 +460,7 @@ HRESULT Library_corlib_native_System_Type::GetConstructor___SystemReflectionCons
     NANOCLR_SET_AND_LEAVE(GetMethods(
         stack,
         nullptr,
-        c_BindingFlags_CreateInstance | c_BindingFlags_Instance | c_BindingFlags_Public | c_BindingFlags_NonPublic,
+        c_BindingFlags_CreateInstance | c_BindingFlags_Instance | c_BindingFlags_Public,
         pParams,
         iParams,
         false));

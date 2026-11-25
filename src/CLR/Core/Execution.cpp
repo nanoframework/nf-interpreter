@@ -4088,17 +4088,20 @@ bool CLR_RT_ExecutionEngine::IsInstanceOfToken(
 }
 
 // An array with a known element instantiation cast to an array of another instantiation.
-static bool ArrayElementDiffers(
+static HRESULT ArrayElementDiffers(
     const CLR_RT_HeapBlock &ref,
     CLR_UINT32 tk,
     CLR_RT_Assembly *assm,
-    const CLR_RT_MethodDef_Instance *caller)
+    const CLR_RT_MethodDef_Instance *caller,
+    bool &differs)
 {
     const CLR_RT_HeapBlock *obj = ref.Dereference();
 
+    differs = false;
+
     if (obj == nullptr || obj->DataType() != DATATYPE_SZARRAY)
     {
-        return false;
+        return S_OK;
     }
 
     const CLR_RT_TypeSpec_Index *actual = ((const CLR_RT_HeapBlock_Array *)obj)->ElementTypeSpec();
@@ -4113,29 +4116,41 @@ static bool ArrayElementDiffers(
     int levels;
     const CLR_RT_TypeSpec_Index *context = caller != nullptr ? caller->genericType : nullptr;
 
-    // a type parameter row has its array levels in the argument
-    if (actual == nullptr || !requested.InitializeFromIndex(row) ||
-        FAILED(
-            CLR_RT_TypeSystem::ResolveArrayRow(assm, tk, caller, context, handled, innermost, levels, element, true)) ||
-        (!handled && (requested.levels == 0 ||
-                      FAILED(CLR_RT_TypeSystem::GetElementGenericInstance(assm, tk, caller, context, element)))))
+    if (actual == nullptr || !requested.InitializeFromIndex(row))
     {
-        return false;
+        return S_OK;
+    }
+
+    // a type parameter row has its array levels in the argument
+    HRESULT hr =
+        CLR_RT_TypeSystem::ResolveArrayRow(assm, tk, caller, context, handled, innermost, levels, element, true);
+
+    if (SUCCEEDED(hr) && !handled)
+    {
+        hr = requested.levels == 0 ? CLR_E_WRONG_TYPE
+                                   : CLR_RT_TypeSystem::GetElementGenericInstance(assm, tk, caller, context, element);
+    }
+
+    if (FAILED(hr))
+    {
+        return hr == CLR_E_NOT_SUPPORTED ? hr : S_OK;
     }
 
     if (!NANOCLR_INDEX_IS_VALID(element))
     {
-        return false;
+        return S_OK;
     }
 
     // levels of the array beyond the requested ones are arrays of the element, assigned to its interface
     int arrayLevels = ((const CLR_RT_HeapBlock_Array *)obj)->ReflectionDataConst().levels;
     int requestedLevels = handled ? levels : requested.levels;
 
-    return !CLR_RT_TypeSystem::IsElementInstanceAssignable(
+    differs = !CLR_RT_TypeSystem::IsElementInstanceAssignable(
         *actual,
         element,
         arrayLevels > requestedLevels ? arrayLevels - requestedLevels : 0);
+
+    return S_OK;
 }
 
 HRESULT CLR_RT_ExecutionEngine::CastToType(
@@ -4163,16 +4178,27 @@ HRESULT CLR_RT_ExecutionEngine::CastToType(
             parser.Initialize_TypeSpec(assm, assm->GetTypeSpec(CLR_DataFromTk(tk)));
 
             bool different = false;
+            HRESULT collected = CLR_RT_TypeSystem::CollectGenericTarget(
+                parser,
+                hasContext ? caller->genericType : nullptr,
+                caller,
+                target);
 
-            if (CLR_RT_TypeSystem::CollectGenericTarget(
-                    parser,
-                    hasContext ? caller->genericType : nullptr,
-                    caller,
-                    target) == S_OK)
+            if (collected == CLR_E_NOT_SUPPORTED)
             {
-                different = target.m_count > 0
-                                ? CLR_RT_TypeSystem::MatchGenericArguments(ref, target) == GenericMatch_Different
-                                : ArrayElementDiffers(ref, tk, assm, caller);
+                NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+            }
+
+            if (collected == S_OK)
+            {
+                if (target.m_count > 0)
+                {
+                    different = CLR_RT_TypeSystem::MatchGenericArguments(ref, target) == GenericMatch_Different;
+                }
+                else
+                {
+                    NANOCLR_CHECK_HRESULT(ArrayElementDiffers(ref, tk, assm, caller, different));
+                }
             }
 
             if (different)
