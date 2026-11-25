@@ -149,12 +149,11 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::Invoke___OBJECT__OBJ
             NANOCLR_SET_AND_LEAVE(CLR_E_TARGET);
         }
 
-        // Preserve null-target invocation for instance methods that do not access this.
-        if ((mdR->flags & CLR_RECORD_METHODDEF::MD_Static) == 0 && obj.Dereference() != nullptr)
+        if ((mdR->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
         {
             CLR_RT_TypeDef_Instance declaringType{};
 
-            if (declaringType.InitializeFromMethod(md) == false ||
+            if (obj.Dereference() == nullptr || declaringType.InitializeFromMethod(md) == false ||
                 CLR_RT_ExecutionEngine::IsInstanceOf(obj, declaringType) == false)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_TARGET);
