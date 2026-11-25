@@ -21,6 +21,8 @@ static const ExceptionLookup c_ExceptionLookup[] = {
     EL(CLR_E_ARRAY_TYPE_MISMATCH, ArrayTypeMismatchException),
     EL(CLR_E_TARGET, TargetException),
     EL(CLR_E_TARGET_PARAMETER_COUNT, TargetParameterCountException),
+    EL(CLR_E_MEMBER_ACCESS, MemberAccessException),
+    EL(CLR_E_MISSING_METHOD, MissingMethodException),
     EL(CLR_E_INVALID_CAST, InvalidCastException),
     EL(CLR_E_FORMAT_EXCEPTION, FormatException),
     EL(CLR_E_INVALID_OPERATION, InvalidOperationException),

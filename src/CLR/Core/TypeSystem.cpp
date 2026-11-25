@@ -5850,6 +5850,8 @@ static const TypeIndexLookup c_TypeIndexLookup[] = {
     TIL("System",                                   "ArrayTypeMismatchException",       ArrayTypeMismatchException),
     TIL("System.Reflection",                        "TargetException",                  TargetException),
     TIL("System.Reflection",                        "TargetParameterCountException",    TargetParameterCountException),
+    TIL("System",                                   "MemberAccessException",            MemberAccessException),
+    TIL("System",                                   "MissingMethodException",           MissingMethodException),
     TIL("System",                                   "InvalidCastException",             InvalidCastException),
     TIL("System",                                   "FormatException",                  FormatException),
     TIL("System",                                   "InvalidOperationException",        InvalidOperationException),

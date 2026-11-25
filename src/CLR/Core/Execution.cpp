@@ -4163,12 +4163,18 @@ HRESULT CLR_RT_ExecutionEngine::CastToType(
             parser.Initialize_TypeSpec(assm, assm->GetTypeSpec(CLR_DataFromTk(tk)));
 
             bool different = false;
+            HRESULT collected = CLR_RT_TypeSystem::CollectGenericTarget(
+                parser,
+                hasContext ? caller->genericType : nullptr,
+                caller,
+                target);
 
-            if (CLR_RT_TypeSystem::CollectGenericTarget(
-                    parser,
-                    hasContext ? caller->genericType : nullptr,
-                    caller,
-                    target) == S_OK)
+            if (collected == CLR_E_NOT_SUPPORTED)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+            }
+
+            if (collected == S_OK)
             {
                 different = target.m_count > 0
                                 ? CLR_RT_TypeSystem::MatchGenericArguments(ref, target) == GenericMatch_Different

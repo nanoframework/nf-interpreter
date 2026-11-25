@@ -1729,6 +1729,8 @@ struct CLR_RT_WellKnownTypes
     CLR_RT_TypeDef_Index ArrayTypeMismatchException;
     CLR_RT_TypeDef_Index TargetException;
     CLR_RT_TypeDef_Index TargetParameterCountException;
+    CLR_RT_TypeDef_Index MemberAccessException;
+    CLR_RT_TypeDef_Index MissingMethodException;
     CLR_RT_TypeDef_Index ThreadAbortException;
     CLR_RT_TypeDef_Index InvalidOperationException;
     CLR_RT_TypeDef_Index InvalidCastException;
