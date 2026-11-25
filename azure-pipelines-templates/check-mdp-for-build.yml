@@ -40,7 +40,7 @@ steps:
           $buildApi = 'https://dev.azure.com/nanoframework/metadata-processor/_apis/build'
           $branch = [uri]::EscapeDataString("refs/pull/$testPR/merge")
           $buildsUri = "$buildApi/builds?definitions=43&repositoryId=nanoframework%2Fmetadata-processor" +
-            "&repositoryType=GitHub&branchName=$branch&statusFilter=completed&resultFilter=succeeded,failed" +
+            "&repositoryType=GitHub&branchName=$branch&statusFilter=completed&resultFilter=succeeded,partiallySucceeded,failed" +
             '&queryOrder=queueTimeDescending&$top=100&api-version=7.1'
           $continuationToken = $null
           $selectedBuild = $null
@@ -56,7 +56,7 @@ steps:
             $response = Invoke-WebRequest -Uri $pageUri -UseBasicParsing -Method GET
             $builds = $response.Content | ConvertFrom-Json
             $selectedBuild = $builds.value | Where-Object {
-              $_.status -eq 'completed' -and $_.result -in @('succeeded', 'failed') -and
+              $_.status -eq 'completed' -and $_.result -in @('succeeded', 'partiallySucceeded', 'failed') -and
               $_.triggerInfo.'pr.number' -eq $testPR -and
               $_.triggerInfo.'pr.sourceSha' -eq $headSha
             } | Select-Object -First 1
@@ -93,6 +93,7 @@ steps:
       project: 'metadata-processor'
       definition: '43'
       buildVersionToDownload: specific
+      allowPartiallySucceededBuilds: true
       allowFailedBuilds: true
       pipelineId: $(MDP_BUILDID)
       artifactName: 'deployables'
