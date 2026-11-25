@@ -1524,6 +1524,12 @@ struct CLR_RECORD_METHODDEF
     static const CLR_UINT32 MD_IsGenericInstance = 0x00100000;
     static const CLR_UINT32 MD_ContainsGenericParameter = 0x00200000;
 
+    /// @brief Explicit implementation of a method of a generic interface instance. @ref firstGenericParam holds the
+    /// TypeSpec of that instance; the generic parameters of the method are found by owner
+    /// (@ref CLR_RT_Assembly::FirstGenericParam).
+    ///
+    static const CLR_UINT32 MD_ExplicitOverride = 0x00400000;
+
     static const CLR_UINT32 MD_Synchronized = 0x01000000;
     static const CLR_UINT32 MD_GloballySynchronized = 0x02000000;
     static const CLR_UINT32 MD_Patched = 0x04000000;

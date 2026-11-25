@@ -56,7 +56,8 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
     const CLR_RT_TypeDef_Index &cls,
     const CLR_RT_MethodDef_Index &mdVirtual,
     CLR_RT_MethodDef_Index &md,
-    const CLR_RT_TypeSpec_Index *callSite)
+    const CLR_RT_TypeSpec_Index *callSite,
+    const CLR_RT_HeapBlock *receiver)
 {
     NATIVE_PROFILE_CLR_CORE();
     bool cacheable = true;
@@ -99,7 +100,7 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
     }
 
     {
-        if (g_CLR_RT_TypeSystem.FindVirtualMethodDef(cls, mdVirtual, md, callSite, &cacheable) == false)
+        if (g_CLR_RT_TypeSystem.FindVirtualMethodDef(cls, mdVirtual, md, callSite, &cacheable, receiver) == false)
         {
             return false;
         }
@@ -288,7 +289,8 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
     const CLR_RT_TypeDef_Index &cls,
     const CLR_RT_MethodDef_Index &mdVirtual,
     CLR_RT_MethodDef_Index &md,
-    const CLR_RT_TypeSpec_Index *callSite)
+    const CLR_RT_TypeSpec_Index *callSite,
+    const CLR_RT_HeapBlock *receiver)
 {
     NATIVE_PROFILE_CLR_CORE();
     bool cacheable = true;
@@ -404,7 +406,7 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
         }
         else
         {
-            if (g_CLR_RT_TypeSystem.FindVirtualMethodDef(cls, mdVirtual, md, callSite, &cacheable) == false)
+            if (g_CLR_RT_TypeSystem.FindVirtualMethodDef(cls, mdVirtual, md, callSite, &cacheable, receiver) == false)
             {
                 return false;
             }
@@ -702,10 +704,11 @@ bool CLR_RT_EventCache::FindVirtualMethod(
     const CLR_RT_TypeDef_Index &cls,
     const CLR_RT_MethodDef_Index &mdVirtual,
     CLR_RT_MethodDef_Index &md,
-    const CLR_RT_TypeSpec_Index *callSite)
+    const CLR_RT_TypeSpec_Index *callSite,
+    const CLR_RT_HeapBlock *receiver)
 {
     NATIVE_PROFILE_CLR_CORE();
-    return m_lookup_VirtualMethod.FindVirtualMethod(cls, mdVirtual, md, callSite);
+    return m_lookup_VirtualMethod.FindVirtualMethod(cls, mdVirtual, md, callSite, receiver);
 }
 
 // -- //

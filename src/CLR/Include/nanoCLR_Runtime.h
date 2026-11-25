@@ -1524,6 +1524,8 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     {
         return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_METHODDEF, TBL_MethodDef, i);
     }
+    CLR_INDEX FirstGenericParam(const CLR_RECORD_METHODDEF *md) const;
+
     const CLR_RECORD_GENERICPARAM *GetGenericParam(CLR_INDEX i) const
     {
         return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_GENERICPARAM, TBL_GenericParam, i);
@@ -2089,6 +2091,7 @@ struct CLR_RT_GenericDispatch
         const CLR_RT_TypeDef_Index &cls,
         const CLR_RT_TypeDef_Instance &declaring,
         const CLR_RT_GenericInstance *site,
+        const CLR_RT_GenericInstance *receiver,
         CLR_RT_GenericTarget &binding,
         bool &ambiguous);
     static int MatchSignatureInClass(
@@ -2268,7 +2271,8 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
         const CLR_RT_MethodDef_Index &calleeMD,
         CLR_RT_MethodDef_Index &index,
         const CLR_RT_TypeSpec_Index *callSite = nullptr,
-        bool *cacheable = nullptr);
+        bool *cacheable = nullptr,
+        const CLR_RT_HeapBlock *receiver = nullptr);
 
     static bool MatchSignature(CLR_RT_SignatureParser &parserLeft, CLR_RT_SignatureParser &parserRight);
     static bool MatchSignatureDirect(
@@ -4071,7 +4075,8 @@ struct CLR_RT_EventCache
             const CLR_RT_TypeDef_Index &cls,
             const CLR_RT_MethodDef_Index &mdVirtual,
             CLR_RT_MethodDef_Index &md,
-            const CLR_RT_TypeSpec_Index *callSite = nullptr);
+            const CLR_RT_TypeSpec_Index *callSite = nullptr,
+            const CLR_RT_HeapBlock *receiver = nullptr);
 
         //--//
 
@@ -4130,7 +4135,8 @@ struct CLR_RT_EventCache
             const CLR_RT_TypeDef_Index &cls,
             const CLR_RT_MethodDef_Index &mdVirtual,
             CLR_RT_MethodDef_Index &md,
-            const CLR_RT_TypeSpec_Index *callSite = nullptr);
+            const CLR_RT_TypeSpec_Index *callSite = nullptr,
+            const CLR_RT_HeapBlock *receiver = nullptr);
 
       private:
         CLR_UINT32 GetNewEntry()
@@ -4172,7 +4178,8 @@ struct CLR_RT_EventCache
         const CLR_RT_TypeDef_Index &cls,
         const CLR_RT_MethodDef_Index &mdVirtual,
         CLR_RT_MethodDef_Index &md,
-        const CLR_RT_TypeSpec_Index *callSite = nullptr);
+        const CLR_RT_TypeSpec_Index *callSite = nullptr,
+        const CLR_RT_HeapBlock *receiver = nullptr);
 
 #ifndef NANOCLR_NO_IL_INLINE
     bool GetInlineFrameBuffer(CLR_RT_InlineBuffer **ppBuffer);

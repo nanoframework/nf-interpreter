@@ -8932,6 +8932,7 @@ HRESULT CLR_RT_GenericDispatch::GetCalleeBinding(
     const CLR_RT_TypeDef_Index &cls,
     const CLR_RT_TypeDef_Instance &declaring,
     const CLR_RT_GenericInstance *site,
+    const CLR_RT_GenericInstance *receiver,
     CLR_RT_GenericTarget &binding,
     bool &ambiguous)
 {
@@ -9006,14 +9007,18 @@ HRESULT CLR_RT_GenericDispatch::GetCalleeBinding(
 
                 if (site != nullptr)
                 {
-                    CLR_RT_GenericRef source = {candidate.m_nodes, candidate.m_nodes + candidate.m_count, 0};
+                    CLR_RT_GenericTarget closed = candidate;
+
+                    if (receiver != nullptr)
+                    {
+                        SubstituteNodes(closed, receiver->m_nodes, receiver->m_nodeCount, nullptr, 0);
+                    }
+
+                    CLR_RT_GenericRef source = {closed.m_nodes, closed.m_nodes + closed.m_count, 0};
                     CLR_RT_GenericRef target = {site->m_nodes, site->m_nodes + site->m_nodeCount, 0};
 
-                    if (candidate.m_count == site->m_nodeCount &&
-                        memcmp(
-                            candidate.m_nodes,
-                            site->m_nodes,
-                            sizeof(CLR_RT_GenericInstanceNode) * candidate.m_count) == 0)
+                    if (closed.m_count == site->m_nodeCount &&
+                        memcmp(closed.m_nodes, site->m_nodes, sizeof(CLR_RT_GenericInstanceNode) * closed.m_count) == 0)
                     {
                         kind = 3;
                     }
@@ -9149,6 +9154,50 @@ static bool MatchInterfaceQualifier(const char *pattern, const char *target, siz
     return t == targetLen;
 }
 
+CLR_INDEX CLR_RT_Assembly::FirstGenericParam(const CLR_RECORD_METHODDEF *md) const
+{
+    if ((md->flags & CLR_RECORD_METHODDEF::MD_ExplicitOverride) == 0)
+    {
+        return md->firstGenericParam;
+    }
+
+    const CLR_TYPEORMETHODDEF owner = (CLR_TYPEORMETHODDEF)(0x8000 | (md - GetMethodDef(0)));
+    CLR_INDEX i = 0;
+
+    while (i < tablesSize[TBL_GenericParam] && GetGenericParam(i)->owner != owner)
+    {
+        i++;
+    }
+
+    return i;
+}
+
+static bool MatchOverrideOwner(
+    CLR_RT_Assembly *assembly,
+    CLR_INDEX owner,
+    const CLR_RT_GenericTarget *context,
+    const CLR_RT_GenericTarget &binding)
+{
+    CLR_RT_TypeSpec_Index index;
+    CLR_RT_TypeSpec_Instance instance{};
+    CLR_RT_SignatureParser parser{};
+    CLR_RT_GenericTarget nodes;
+    bool isByRef;
+
+    index.Set(assembly->assemblyIndex, owner);
+
+    if (!instance.InitializeFromIndex(index))
+    {
+        return false;
+    }
+
+    parser.Initialize_TypeSpec(instance);
+
+    return CLR_RT_GenericDispatch::CollectElementNodes(parser, nodes, isByRef) &&
+           CLR_RT_GenericDispatch::SubstituteNodes(nodes, context) && nodes.m_count == binding.m_count &&
+           memcmp(nodes.m_nodes, binding.m_nodes, sizeof(CLR_RT_GenericInstanceNode) * nodes.m_count) == 0;
+}
+
 bool CLR_RT_GenericDispatch::FindVirtualMethodInChain(
     const CLR_RT_TypeDef_Index &cls,
     CLR_RT_MethodDef_Instance &calleeInst,
@@ -9238,7 +9287,14 @@ bool CLR_RT_GenericDispatch::FindVirtualMethodInChain(
 
                 if (suffix[-1] == '.' && !strcmp(suffix, calleeName))
                 {
-                    nameMatch = MatchInterfaceQualifier(qualifier, targetName, targetLen - calleeLen - 1);
+                    nameMatch =
+                        (targetMDR->flags & CLR_RECORD_METHODDEF::MD_ExplicitOverride) && calleeBinding && contextOk
+                            ? MatchOverrideOwner(
+                                  targetAssm,
+                                  targetMDR->firstGenericParam,
+                                  haveContext ? &context : nullptr,
+                                  *calleeBinding)
+                            : MatchInterfaceQualifier(qualifier, targetName, targetLen - calleeLen - 1);
                 }
             }
 
@@ -9338,7 +9394,8 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
     const CLR_RT_MethodDef_Index &calleeMD,
     CLR_RT_MethodDef_Index &index,
     const CLR_RT_TypeSpec_Index *callSite,
-    bool *cacheable)
+    bool *cacheable,
+    const CLR_RT_HeapBlock *receiver)
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_MethodDef_Instance calleeInst{};
@@ -9355,7 +9412,8 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
 
         if (declaring.target->genericParamCount > 0)
         {
-            useNodes = CLR_RT_GenericDispatch::GetCalleeBinding(cls, declaring, nullptr, binding, ambiguous) == S_OK;
+            useNodes =
+                CLR_RT_GenericDispatch::GetCalleeBinding(cls, declaring, nullptr, nullptr, binding, ambiguous) == S_OK;
 
             if (useNodes && ambiguous && callSite != nullptr && NANOCLR_INDEX_IS_VALID(*callSite))
             {
@@ -9363,8 +9421,26 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
 
                 if (site != nullptr)
                 {
+                    const CLR_RT_GenericInstance *self = nullptr;
+
+                    for (int hop = 0;
+                         receiver != nullptr && hop < 2 &&
+                         (receiver->DataType() == DATATYPE_OBJECT || receiver->DataType() == DATATYPE_BYREF);
+                         hop++)
+                    {
+                        receiver = receiver->Dereference();
+                    }
+
+                    if (receiver != nullptr &&
+                        (receiver->DataType() == DATATYPE_CLASS || receiver->DataType() == DATATYPE_VALUETYPE) &&
+                        receiver->IsAGenericInstance())
+                    {
+                        self = RecordOfTypeSpec(receiver->ObjectGenericType());
+                    }
+
                     useNodes =
-                        CLR_RT_GenericDispatch::GetCalleeBinding(cls, declaring, site, binding, ambiguous) == S_OK;
+                        CLR_RT_GenericDispatch::GetCalleeBinding(cls, declaring, site, self, binding, ambiguous) ==
+                        S_OK;
                 }
             }
         }
@@ -10887,7 +10963,11 @@ HRESULT CLR_RT_TypeSystem::GetGenericArgumentWord(
             return CLR_E_WRONG_TYPE;
         }
 
-        SetGenericParamWord(word, method.Assembly(), method.target->firstGenericParam + head.Position, head.Levels);
+        SetGenericParamWord(
+            word,
+            method.Assembly(),
+            method.assembly->FirstGenericParam(method.target) + head.Position,
+            head.Levels);
 
         return S_OK;
     }
@@ -11130,7 +11210,11 @@ HRESULT CLR_RT_TypeSystem::GetOpenSignatureWord(
             return CLR_E_NOT_SUPPORTED;
         }
 
-        SetGenericParamWord(word, md.Assembly(), md.target->firstGenericParam + elem.GenericParamPosition, elem.Levels);
+        SetGenericParamWord(
+            word,
+            md.Assembly(),
+            md.assembly->FirstGenericParam(md.target) + elem.GenericParamPosition,
+            elem.Levels);
 
         return S_OK;
     }
@@ -12367,7 +12451,8 @@ HRESULT CLR_RT_GenericInstantiation::MakeGenericInstance(
     CLR_RT_ReflectionDef_Index words[CLR_RT_GenericInstance::c_MaxNodes - 1];
     CLR_RT_GenericInstanceNode &root = built.m_nodes[0];
     CLR_UINT32 assembly = method != nullptr ? method->Assembly() : type.Assembly();
-    CLR_UINT32 first = method != nullptr ? method->target->firstGenericParam : type.target->firstGenericParam;
+    CLR_UINT32 first =
+        method != nullptr ? method->assembly->FirstGenericParam(method->target) : type.target->firstGenericParam;
     int arity = method != nullptr ? method->target->genericParamCount : type.target->genericParamCount;
     HRESULT hr;
 
