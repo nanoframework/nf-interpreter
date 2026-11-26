@@ -2829,6 +2829,7 @@ struct CLR_RT_AttributeParser
         const CLR_RT_TypeDef_Index *m_cls,
         const CLR_UINT32 size);
     HRESULT ReadArrayValue(CLR_RT_HeapBlock *&value);
+    HRESULT ReadEnumValue(CLR_RT_HeapBlock *&value);
     HRESULT ReadString(CLR_RT_HeapBlock *&value);
 
     // Stack only, for the same reason as CLR_RT_AttributeParser::Value above: this owns the
