@@ -163,7 +163,6 @@
     ":!/targets/ChibiOS/_mcuboot/hal_community_stub.c",
     ":!/targets/ChibiOS/_mcuboot/mcuboot_board_iface.h",
     ":!/targets/ChibiOS/_mcuboot/mcuboot_booter.ld",
-    ":!/targets/ChibiOS/_mcuboot/mcuboot_confirm_timer.c",
     ":!/targets/ChibiOS/_mcuboot/mcuboot_cpu_init.c",
     ":!/targets/ChibiOS/_mcuboot/mcuboot_hal_stubs.c",
     ":!/targets/ChibiOS/_mcuboot/mcuboot_heartbeat.c",
