@@ -14088,7 +14088,7 @@ HRESULT CLR_RT_AttributeParser::ReadNumericValue(
     }
 
     // need to box this
-    value->PerformBoxing(desc.m_handlerCls);
+    NANOCLR_CHECK_HRESULT(value->PerformBoxing(desc.m_handlerCls));
 
     NANOCLR_NOCLEANUP();
 }
