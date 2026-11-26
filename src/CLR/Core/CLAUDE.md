@@ -1054,7 +1054,9 @@ without `T` was right because nothing needed the TypeSpec.
 `TryGetReceiverTypeSpec` now walks up from the object: its own TypeSpec (or none
 for a non-generic class) and then `CLR_RT_TypeSystem::GetTypeBase` row by row
 until the row's generic definition is the required one, at most 32 steps (same
-bound as `c_MaxInheritanceDepth`). `GetTypeBase` substitutes the derived type's
+bound as `c_MaxInheritanceDepth`; the row reached by the last step is also
+compared, and a hierarchy that does not reach the declaring type within the
+bound fails closed like the nesting limit below). `GetTypeBase` substitutes the derived type's
 arguments into the `extends` row, so `GB2<int> : GB1<T> : GB0<T>` gives
 `GB0<int>` and `class GB<U> : GB0<Box<U>>` gives `GB0<Box<int>>`. The helper is
 shared by the other receiver lookups (`callvirt` on a non-interface callee,
@@ -1064,15 +1066,19 @@ Plain parents (`class D : Plain`, `class Plain : GB0<int>`) are crossed with
 `SwitchToParent`: such a parent has no TypeSpec, so the walk continues from the
 parent's own `extends` row with no context.
 
-Not exact when the walk fails. `GetTypeBase` fails only over the limits (a base
-row that nests generic instances deeper than `c_MaxGenericNestingDepth`, see the
-limits in the generics batch notes). The function then answers false and the
-interpreter continues with `genericType = nullptr`. A callee that needs `T` is
-then closed from whatever context the call has: in a non-generic caller `T` is
-unresolved and the call throws `System.Exception`, but in a generic caller the
-caller's own arguments can be picked up and the answer can be a wrong `T`
-(`CallerCtx<string>` calling over a 4-deep base returned `String`). The same
-happens on develop for any failed recovery. Making it fail closed means
-throwing `NotSupportedException` there, only when the receiver is a class or
-value type object with a generic declaring type (arrays go through
-`SZArrayHelper` and must keep the old path); not done. Skipping the caller-context fallbacks of the two context selectors in `CEE_CALLVIRT` (inline and `Push` paths) for generic callee owners is not enough: all suites passed but the wrong `T` was still returned, so the context is also picked up somewhere else.
+Fails closed when the walk fails. `GetTypeBase` fails only over the limits (a
+base row that nests generic instances deeper than `c_MaxGenericNestingDepth`,
+see the limits in the generics batch notes). `TryGetReceiverTypeSpec` returns
+the failure (`CLR_E_NOT_SUPPORTED`) and `S_FALSE` for "nothing to recover"
+(not an object, no generic ancestor, a primitive receiver). The three callers
+(interface mismatch branch, the `else` branch for a generic declaring type,
+delegate creation) throw `NotSupportedException` on a failure when the callee's
+declaring type is generic. Before, they continued with `genericType = nullptr`
+and the wrong `T` came from the caller: the callee, a small method, is inlined,
+and the inline selector of `CEE_CALLVIRT` took its last fallback ("caller's
+context even if the TypeDef doesn't match", the `Push` selector has the same
+one), so `ldtoken !0` in the callee resolved against the caller's closed
+TypeSpec (`CallerCtx<string>` calling over a 4-deep base returned `String`).
+Failing at the recovery is exact: no recovery, no call, whichever selector would
+have run. Non-generic declaring types, arrays (`SZArrayHelper`, not a class or value
+type receiver) and primitive receivers keep the old path.
