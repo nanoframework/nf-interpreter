@@ -1054,7 +1054,9 @@ without `T` was right because nothing needed the TypeSpec.
 `TryGetReceiverTypeSpec` now walks up from the object: its own TypeSpec (or none
 for a non-generic class) and then `CLR_RT_TypeSystem::GetTypeBase` row by row
 until the row's generic definition is the required one, at most 32 steps (same
-bound as `c_MaxInheritanceDepth`). `GetTypeBase` substitutes the derived type's
+bound as `c_MaxInheritanceDepth`; the row reached by the last step is also
+compared, and a hierarchy that does not reach the declaring type within the
+bound fails closed like the nesting limit below). `GetTypeBase` substitutes the derived type's
 arguments into the `extends` row, so `GB2<int> : GB1<T> : GB0<T>` gives
 `GB0<int>` and `class GB<U> : GB0<Box<U>>` gives `GB0<Box<int>>`. The helper is
 shared by the other receiver lookups (`callvirt` on a non-interface callee,

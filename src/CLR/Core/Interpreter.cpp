@@ -1100,7 +1100,7 @@ static HRESULT TryGetReceiverTypeSpec(
         return S_FALSE;
     }
 
-    for (int depth = 0; depth <= 32; depth++)
+    for (int depth = 0; depth < 32; depth++)
     {
         if (NANOCLR_INDEX_IS_VALID(current))
         {
@@ -1146,7 +1146,18 @@ static HRESULT TryGetReceiverTypeSpec(
         current = base;
     }
 
-    return S_FALSE;
+    if (NANOCLR_INDEX_IS_VALID(current))
+    {
+        CLR_RT_TypeSpec_Instance ts{};
+
+        if (ts.InitializeFromIndex(current) && ts.genericTypeDef.data == def.data)
+        {
+            receiverTypeSpec = current;
+            return S_OK;
+        }
+    }
+
+    return CLR_E_NOT_SUPPORTED;
 }
 
 static void StoreDelegateGenericContext(
