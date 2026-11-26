@@ -2861,8 +2861,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                                     // Attempt to recover the correct closed TypeSpec from 'this'.
                                                     bool recovered = false;
                                                     CLR_RT_TypeSpec_Index receiverTs{};
-                                                    HRESULT recoverHr =
-                                                        TryGetReceiverTypeSpec(pThis[0].Dereference(), &declCheck, receiverTs);
+                                                    HRESULT recoverHr = TryGetReceiverTypeSpec(
+                                                        pThis[0].Dereference(),
+                                                        &declCheck,
+                                                        receiverTs);
 
                                                     if (FAILED(recoverHr) && declCheck.target->genericParamCount > 0)
                                                     {
@@ -2898,8 +2900,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                             if (declReal.InitializeFromMethod(calleeInst) &&
                                                 declReal.target->genericParamCount > 0)
                                             {
-                                                recoverHr =
-                                                    TryGetReceiverTypeSpec(pThis[0].Dereference(), &declReal, receiverTs);
+                                                recoverHr = TryGetReceiverTypeSpec(
+                                                    pThis[0].Dereference(),
+                                                    &declReal,
+                                                    receiverTs);
                                                 NANOCLR_CHECK_HRESULT(recoverHr);
                                             }
 
