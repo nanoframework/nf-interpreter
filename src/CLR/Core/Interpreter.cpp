@@ -1100,7 +1100,7 @@ static HRESULT TryGetReceiverTypeSpec(
         return S_FALSE;
     }
 
-    for (int depth = 0; depth < 32; depth++)
+    for (int depth = 0; depth <= 32; depth++)
     {
         if (NANOCLR_INDEX_IS_VALID(current))
         {
