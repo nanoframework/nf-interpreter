@@ -144,7 +144,8 @@
             "/targets/**/MCUboot/mcuboot_config.h",
             "/targets/**/MCUboot/mcuboot_flash_map_boot.c",
             "/targets/ChibiOS/_common/mcuboot",
-            "/targets/ChibiOS/_mcuboot/mcuboot_log_stubs.c"
+            "/targets/ChibiOS/_mcuboot/mcuboot_log_stubs.c",
+            "/targets/ChibiOS/_mcuboot/mcuboot_confirm_timer.c"
         ],
         "src-clr": [
             "/src",
