@@ -36,11 +36,11 @@ steps:
             throw "Could not resolve the head commit of metadata-processor PR #$testPR."
           }
 
-          Write-Host "Finding a completed MDP build for PR #$testPR at $headSha"
+          Write-Host "Finding a published MDP artifact for PR #$testPR at $headSha"
           $buildApi = 'https://dev.azure.com/nanoframework/metadata-processor/_apis/build'
           $branch = [uri]::EscapeDataString("refs/pull/$testPR/merge")
           $buildsUri = "$buildApi/builds?definitions=43&repositoryId=nanoframework%2Fmetadata-processor" +
-            "&repositoryType=GitHub&branchName=$branch&statusFilter=completed&resultFilter=succeeded,partiallySucceeded,failed" +
+            "&repositoryType=GitHub&branchName=$branch&statusFilter=inProgress,completed" +
             '&queryOrder=queueTimeDescending&$top=100&api-version=7.1'
           $continuationToken = $null
           $selectedBuild = $null
@@ -55,26 +55,31 @@ steps:
 
             $response = Invoke-WebRequest -Uri $pageUri -UseBasicParsing -Method GET
             $builds = $response.Content | ConvertFrom-Json
-            $selectedBuild = $builds.value | Where-Object {
-              $_.status -eq 'completed' -and $_.result -in @('succeeded', 'partiallySucceeded', 'failed') -and
+            $candidates = $builds.value | Where-Object {
+              ($_.status -eq 'inProgress' -or
+                ($_.status -eq 'completed' -and $_.result -in @('succeeded', 'partiallySucceeded', 'failed'))) -and
               $_.triggerInfo.'pr.number' -eq $testPR -and
               $_.triggerInfo.'pr.sourceSha' -eq $headSha
-            } | Select-Object -First 1
+            }
+            foreach($candidate in $candidates)
+            {
+              $candidateBuildId = $candidate.id
+              $artifacts = Invoke-RestMethod -Uri "$buildApi/builds/$candidateBuildId/artifacts?api-version=7.1" -Method GET
+              if($artifacts.value | Where-Object { $_.name -eq 'deployables' -and $_.resource.type -eq 'PipelineArtifact' })
+              {
+                $selectedBuild = $candidate
+                break
+              }
+            }
             $continuationToken = [string]($response.Headers['x-ms-continuationtoken'] | Select-Object -First 1)
           } while(!$selectedBuild -and $continuationToken)
 
           if(!$selectedBuild)
           {
-            throw "No eligible completed MDP build found for PR #$testPR at $headSha. Run the dependency pipeline, then retry."
+            throw "No published deployables artifact found for PR #$testPR at $headSha. Run the artifact-producing job, then retry."
           }
 
           $buildId = $selectedBuild.id
-          $artifacts = Invoke-RestMethod -Uri "$buildApi/builds/$buildId/artifacts?api-version=7.1" -Method GET
-          if(!($artifacts.value | Where-Object { $_.name -eq 'deployables' -and $_.resource.type -eq 'PipelineArtifact' }))
-          {
-            throw "MDP build $buildId has no deployables pipeline artifact."
-          }
-
           Write-Host "Using MDP build ${buildId}: https://dev.azure.com/nanoframework/metadata-processor/_build/results?buildId=$buildId"
           Write-Host "##vso[task.setvariable variable=MDP_BUILDID]$buildId"
         }

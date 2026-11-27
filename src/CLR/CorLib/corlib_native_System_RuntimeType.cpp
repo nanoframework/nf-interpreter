@@ -110,11 +110,15 @@ HRESULT Library_corlib_native_System_RuntimeType::
     GetField___SystemReflectionFieldInfo__STRING__SystemReflectionBindingFlags(CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_CORE();
-    return Library_corlib_native_System_Type::GetFields(
-        stack,
-        stack.Arg1().RecoverString(),
-        stack.Arg2().NumericByRef().s4,
-        false);
+    NANOCLR_HEADER();
+
+    const char *szText = stack.Arg1().RecoverString();
+    FAULT_ON_NULL_ARG(szText);
+
+    NANOCLR_SET_AND_LEAVE(
+        Library_corlib_native_System_Type::GetFields(stack, szText, stack.Arg2().NumericByRef().s4, false));
+
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_RuntimeType::
@@ -589,8 +593,17 @@ HRESULT Library_corlib_native_System_RuntimeType::GetCustomAttributes(
                         // now the constructor parameter(s)
                         returnArray++;
 
-                        // load the constructor parameter
-                        returnArray->LoadFromReference(val->m_value);
+                        // load the constructor parameter, a boxed value type (an enum) keeps its type
+                        CLR_RT_HeapBlock *argument = val->m_value.Dereference();
+
+                        if (argument != nullptr && argument->DataType() == DATATYPE_VALUETYPE && argument->IsBoxed())
+                        {
+                            returnArray->SetObjectReference(argument);
+                        }
+                        else
+                        {
+                            returnArray->LoadFromReference(val->m_value);
+                        }
                     }
                 }
             }

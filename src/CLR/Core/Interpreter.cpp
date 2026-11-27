@@ -1067,7 +1067,7 @@ static bool IsOtherInstantiation(const CLR_RT_TypeSpec_Index *calleeTs, const CL
            calleeInst.genericTypeDef.data == callerInst.genericTypeDef.data;
 }
 
-static bool TryGetReceiverTypeSpec(
+static HRESULT TryGetReceiverTypeSpec(
     const CLR_RT_HeapBlock *obj,
     const CLR_RT_TypeDef_Index *requiredDef,
     CLR_RT_TypeSpec_Index &receiverTypeSpec)
@@ -1079,24 +1079,85 @@ static bool TryGetReceiverTypeSpec(
         obj = obj->Dereference();
     }
 
-    if (obj == nullptr || (obj->DataType() != DATATYPE_CLASS && obj->DataType() != DATATYPE_VALUETYPE) ||
-        !obj->IsAGenericInstance())
+    if (obj == nullptr || (obj->DataType() != DATATYPE_CLASS && obj->DataType() != DATATYPE_VALUETYPE))
     {
-        return false;
+        return S_FALSE;
     }
 
-    const CLR_RT_TypeSpec_Index &objTypeSpec = obj->ObjectGenericType();
     const CLR_RT_TypeDef_Index &def = requiredDef != nullptr ? *requiredDef : obj->ObjectCls();
-    CLR_RT_TypeSpec_Instance objTs{};
+    CLR_RT_TypeSpec_Index current{};
+    CLR_RT_TypeDef_Instance level{};
 
-    if (!NANOCLR_INDEX_IS_VALID(objTypeSpec) || !NANOCLR_INDEX_IS_VALID(def) ||
-        !objTs.InitializeFromIndex(objTypeSpec) || objTs.genericTypeDef.data != def.data)
+    current.Clear();
+
+    if (obj->IsAGenericInstance())
     {
-        return false;
+        current = obj->ObjectGenericType();
     }
 
-    receiverTypeSpec = objTypeSpec;
-    return true;
+    if (!NANOCLR_INDEX_IS_VALID(def) || !level.InitializeFromIndex(obj->ObjectCls()))
+    {
+        return S_FALSE;
+    }
+
+    for (int depth = 0; depth < 32; depth++)
+    {
+        if (NANOCLR_INDEX_IS_VALID(current))
+        {
+            CLR_RT_TypeSpec_Instance ts{};
+
+            if (!ts.InitializeFromIndex(current))
+            {
+                return S_FALSE;
+            }
+
+            if (ts.genericTypeDef.data == def.data)
+            {
+                receiverTypeSpec = current;
+                return S_OK;
+            }
+
+            if (!level.InitializeFromIndex(ts.genericTypeDef))
+            {
+                return S_FALSE;
+            }
+        }
+
+        if (requiredDef == nullptr)
+        {
+            return S_FALSE;
+        }
+
+        CLR_RT_TypeSpec_Index base;
+        HRESULT hr =
+            CLR_RT_TypeSystem::GetTypeBase(level, NANOCLR_INDEX_IS_VALID(current) ? &current : nullptr, false, base);
+
+        if (hr == S_FALSE && level.SwitchToParent())
+        {
+            current.Clear();
+            continue;
+        }
+
+        if (hr != S_OK)
+        {
+            return FAILED(hr) ? hr : S_FALSE;
+        }
+
+        current = base;
+    }
+
+    if (NANOCLR_INDEX_IS_VALID(current))
+    {
+        CLR_RT_TypeSpec_Instance ts{};
+
+        if (ts.InitializeFromIndex(current) && ts.genericTypeDef.data == def.data)
+        {
+            receiverTypeSpec = current;
+            return S_OK;
+        }
+    }
+
+    return CLR_E_NOT_SUPPORTED;
 }
 
 static void StoreDelegateGenericContext(
@@ -2528,7 +2589,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                 {
                                     CLR_RT_HeapBlock *obj = pThisTemp->Dereference();
 
-                                    if (TryGetReceiverTypeSpec(obj, nullptr, objTypeSpec))
+                                    if (TryGetReceiverTypeSpec(obj, nullptr, objTypeSpec) == S_OK)
                                     {
                                         effectiveCallerGeneric = &objTypeSpec;
                                     }
@@ -2811,10 +2872,17 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                                     // Attempt to recover the correct closed TypeSpec from 'this'.
                                                     bool recovered = false;
                                                     CLR_RT_TypeSpec_Index receiverTs{};
-                                                    if (TryGetReceiverTypeSpec(
-                                                            pThis[0].Dereference(),
-                                                            &declCheck,
-                                                            receiverTs))
+                                                    HRESULT recoverHr = TryGetReceiverTypeSpec(
+                                                        pThis[0].Dereference(),
+                                                        &declCheck,
+                                                        receiverTs);
+
+                                                    if (FAILED(recoverHr) && declCheck.target->genericParamCount > 0)
+                                                    {
+                                                        NANOCLR_SET_AND_LEAVE(recoverHr);
+                                                    }
+
+                                                    if (recoverHr == S_OK)
                                                     {
                                                         recovered = calleeInst.InitializeFromIndex(
                                                             calleeReal,
@@ -2839,9 +2907,18 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                                             CLR_RT_TypeDef_Instance declReal{};
                                             CLR_RT_TypeSpec_Index receiverTs{};
+                                            HRESULT recoverHr = S_FALSE;
                                             if (declReal.InitializeFromMethod(calleeInst) &&
-                                                declReal.target->genericParamCount > 0 &&
-                                                TryGetReceiverTypeSpec(pThis[0].Dereference(), &declReal, receiverTs))
+                                                declReal.target->genericParamCount > 0)
+                                            {
+                                                recoverHr = TryGetReceiverTypeSpec(
+                                                    pThis[0].Dereference(),
+                                                    &declReal,
+                                                    receiverTs);
+                                                NANOCLR_CHECK_HRESULT(recoverHr);
+                                            }
+
+                                            if (recoverHr == S_OK)
                                             {
                                                 if (!calleeInst
                                                          .InitializeFromIndex(calleeReal, receiverTs, &stack->m_call) &&
@@ -3414,10 +3491,18 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             CLR_RT_TypeDef_Instance declaring{};
                             CLR_RT_TypeSpec_Index receiverTypeSpec;
 
-                            if (declaring.InitializeFromMethod(dlgInst) &&
-                                TryGetReceiverTypeSpec(&top[0], &declaring, receiverTypeSpec))
+                            if (declaring.InitializeFromMethod(dlgInst))
                             {
-                                dlg->m_genericTypeSpec = receiverTypeSpec;
+                                HRESULT recoverHr = TryGetReceiverTypeSpec(&top[0], &declaring, receiverTypeSpec);
+
+                                if (recoverHr == S_OK)
+                                {
+                                    dlg->m_genericTypeSpec = receiverTypeSpec;
+                                }
+                                else if (FAILED(recoverHr) && declaring.target->genericParamCount > 0)
+                                {
+                                    NANOCLR_SET_AND_LEAVE(recoverHr);
+                                }
                             }
                         }
 

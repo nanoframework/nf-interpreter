@@ -1033,3 +1033,75 @@ hard-codes the base's field count. When an assembly's contract hash changes, the
 stubs of every assembly with types that derive from its types must be
 regenerated in the same change. `scripts/Test-NativeFieldLayout.ps1` checks the
 pairs listed in `scripts/native-cross-assembly-bases.json`.
+
+### Interface call into a method inherited from a generic base
+
+`class GB0<T> : IGen<T> { string G() => typeof(T).Name; } class GB1<T> : GB0<T> {}`,
+then `((IGen<int>)new GB1<int>()).G()`. The callee is `GB0.G` and its `T` comes
+from the closed TypeSpec of `GB0<int>`, but the object carries `GB1<int>` and
+the call site carries `IGen<int>`. The interpreter's mismatch branch (the
+interface TypeSpec does not belong to the callee's declaring type) asks
+`TryGetReceiverTypeSpec(this, declaringType)` for it. That used to answer only
+when the object's own class was the declaring type, so a derived class got
+`genericType = nullptr`, `T` stayed unresolved and the call failed with
+`CLR_E_WRONG_TYPE` (`System.Exception`). It reproduced for one level of
+inheritance, a non-generic derived class (`class D : GB0<int>`, no TypeSpec on
+the object at all), struct arguments and generic methods on the inherited
+method. Direct calls, calls through the base reference and virtual calls were
+right because their call site already carries the base TypeSpec; a method
+without `T` was right because nothing needed the TypeSpec.
+
+`TryGetReceiverTypeSpec` now walks up from the object: its own TypeSpec (or none
+for a non-generic class) and then `CLR_RT_TypeSystem::GetTypeBase` row by row
+until the row's generic definition is the required one, at most 32 steps (same
+bound as `c_MaxInheritanceDepth`; the row reached by the last step is also
+compared, and a hierarchy that does not reach the declaring type within the
+bound fails closed like the nesting limit below). `GetTypeBase` substitutes the derived type's
+arguments into the `extends` row, so `GB2<int> : GB1<T> : GB0<T>` gives
+`GB0<int>` and `class GB<U> : GB0<Box<U>>` gives `GB0<Box<int>>`. The helper is
+shared by the other receiver lookups (`callvirt` on a non-interface callee,
+delegate targets), which now also see ancestors.
+
+Plain parents (`class D : Plain`, `class Plain : GB0<int>`) are crossed with
+`SwitchToParent`: such a parent has no TypeSpec, so the walk continues from the
+parent's own `extends` row with no context.
+
+Fails closed when the walk fails. `GetTypeBase` fails only over the limits (a
+base row that nests generic instances deeper than `c_MaxGenericNestingDepth`,
+see the limits in the generics batch notes). `TryGetReceiverTypeSpec` returns
+the failure (`CLR_E_NOT_SUPPORTED`) and `S_FALSE` for "nothing to recover"
+(not an object, no generic ancestor, a primitive receiver). The three callers
+(interface mismatch branch, the `else` branch for a generic declaring type,
+delegate creation) throw `NotSupportedException` on a failure when the callee's
+declaring type is generic. Before, they continued with `genericType = nullptr`
+and the wrong `T` came from the caller: the callee, a small method, is inlined,
+and the inline selector of `CEE_CALLVIRT` took its last fallback ("caller's
+context even if the TypeDef doesn't match", the `Push` selector has the same
+one), so `ldtoken !0` in the callee resolved against the caller's closed
+TypeSpec (`CallerCtx<string>` calling over a 4-deep base returned `String`).
+Failing at the recovery is exact: no recovery, no call, whichever selector would
+have run. Non-generic declaring types, arrays (`SZArrayHelper`, not a class or value
+type receiver) and primitive receivers keep the old path.
+
+### Method lists and null arguments of `Type.Get*`
+
+`Type.GetMethods()` lists one method per virtual slot, as .NET: the walk
+derived to base skips a virtual base method when `IsOverriddenBelow` finds a
+more derived method with the same name and signature that is virtual and not
+`newslot` (the nearest one decides, so a `new virtual` method starts a new slot
+and both are listed). Non-virtual methods hidden by name and signature are all
+listed, as .NET does; `DeclaredOnly` is unchanged. Private methods of base classes
+are not listed or found (they were with `NonPublic`), and static methods of base
+classes only with `FlattenHierarchy`. Overrides are matched by generic arity too
+(`G()` is not overridden by `G<T>()`). Before, every level's override was listed (a
+40 deep chain listed `Who` 41 times). The signature comparison reuses
+`MatchSignatureClosed` with the slot owners, so closed generic bases compare by
+their arguments; the return type is not compared (covariant returns are not
+modelled). `GetMethod(name)` already
+took the first (most derived) of identical signatures, so it needed no change.
+
+`GetConstructor(null)`, `GetMethod(null)`, `GetMethod(name, null)` and
+`GetField(null)` throw `ArgumentNullException` (`FAULT_ON_NULL_ARG`). Before,
+the first threw `NullReferenceException`, `GetMethod(name, (Type[])null)` ignored
+the array and `GetField(null)` returned the first field. No native signature
+changes, so the native contract hash is unchanged.
