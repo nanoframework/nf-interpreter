@@ -1291,6 +1291,13 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                     {
                         continue;
                     }
+
+                    // private methods are not inherited
+                    if ((md->flags & CLR_RECORD_METHODDEF::MD_Scope_Mask) == CLR_RECORD_METHODDEF::MD_Scope_Private &&
+                        td.target != tdArg.target)
+                    {
+                        continue;
+                    }
                 }
 
                 //--//
