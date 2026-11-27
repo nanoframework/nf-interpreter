@@ -110,11 +110,15 @@ HRESULT Library_corlib_native_System_RuntimeType::
     GetField___SystemReflectionFieldInfo__STRING__SystemReflectionBindingFlags(CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_CORE();
-    return Library_corlib_native_System_Type::GetFields(
-        stack,
-        stack.Arg1().RecoverString(),
-        stack.Arg2().NumericByRef().s4,
-        false);
+    NANOCLR_HEADER();
+
+    const char *szText = stack.Arg1().RecoverString();
+    FAULT_ON_NULL_ARG(szText);
+
+    NANOCLR_SET_AND_LEAVE(
+        Library_corlib_native_System_Type::GetFields(stack, szText, stack.Arg2().NumericByRef().s4, false));
+
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_RuntimeType::
