@@ -13745,6 +13745,14 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
                 uint8_t elementType;
                 NANOCLR_READ_UNALIGNED_UINT8(elementType, m_blob);
 
+                if (elementType == SERIALIZATION_TYPE_ENUM)
+                {
+                    NANOCLR_CHECK_HRESULT(ReadEnumValue(currentParam));
+
+                    currentParam++;
+                    continue;
+                }
+
                 NanoCLRDataType dt = CLR_RT_TypeSystem::MapElementTypeToDataType(elementType);
 
                 if (dt >= DATATYPE_FIRST_INVALID)
@@ -13777,6 +13785,14 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
                 currentParam++;
 
             } while (--paramCount > 0);
+        }
+        else if (*m_blob == SERIALIZATION_TYPE_ENUM)
+        {
+            // single parameter of enum type (the signature carries the underlying type)
+            m_blob += sizeof(CLR_UINT8);
+
+            CLR_RT_HeapBlock *currentParam = &m_lastValue.m_value;
+            NANOCLR_CHECK_HRESULT(ReadEnumValue(currentParam));
         }
         else if (dtl.m_flags & CLR_RT_DataTypeLookup::c_Numeric)
         {
@@ -13864,18 +13880,16 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
 
     res = &m_lastValue;
 
-    //
-    // Check for Enums.
-    //
-    if (m_res.DataType == DATATYPE_VALUETYPE)
+    if (*m_blob == SERIALIZATION_TYPE_ENUM)
     {
-        CLR_RT_TypeDef_Instance td{};
-        td.InitializeFromIndex(m_res.Class);
+        m_blob += sizeof(CLR_UINT8);
 
-        if ((td.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_Enum)
-        {
-            m_res.DataType = (NanoCLRDataType)td.target->dataType;
-        }
+        CLR_RT_HeapBlock *currentParam = &m_lastValue.m_value;
+        NANOCLR_CHECK_HRESULT(ReadEnumValue(currentParam));
+
+        m_lastValue.m_pos = m_currentPos++;
+
+        NANOCLR_SET_AND_LEAVE(S_OK);
     }
 
     //
@@ -13979,6 +13993,35 @@ HRESULT CLR_RT_AttributeParser::ReadArrayValue(CLR_RT_HeapBlock *&value)
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT CLR_RT_AttributeParser::ReadEnumValue(CLR_RT_HeapBlock *&value)
+{
+    NANOCLR_HEADER();
+
+    CLR_RT_TypeDef_Instance cls{};
+    CLR_UINT8 elementType;
+
+    if (!cls.ResolveToken(CLR_TkFromStream(m_blob), m_assm) ||
+        (cls.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) != CLR_RECORD_TYPEDEF::TD_Semantics_Enum)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
+
+    NANOCLR_READ_UNALIGNED_UINT8(elementType, m_blob);
+
+    {
+        NanoCLRDataType dt = CLR_RT_TypeSystem::MapElementTypeToDataType(elementType);
+
+        if (dt != (NanoCLRDataType)cls.target->dataType)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        }
+
+        NANOCLR_CHECK_HRESULT(ReadNumericValue(value, dt, &cls, c_CLR_RT_DataTypeLookup[dt].m_sizeInBytes));
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT CLR_RT_AttributeParser::ReadString(CLR_RT_HeapBlock *&value)
 {
     NANOCLR_HEADER();
@@ -14045,7 +14088,7 @@ HRESULT CLR_RT_AttributeParser::ReadNumericValue(
     }
 
     // need to box this
-    value->PerformBoxing(desc.m_handlerCls);
+    NANOCLR_CHECK_HRESULT(value->PerformBoxing(desc.m_handlerCls));
 
     NANOCLR_NOCLEANUP();
 }

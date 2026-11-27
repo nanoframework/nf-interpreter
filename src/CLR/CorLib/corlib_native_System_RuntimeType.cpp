@@ -589,8 +589,17 @@ HRESULT Library_corlib_native_System_RuntimeType::GetCustomAttributes(
                         // now the constructor parameter(s)
                         returnArray++;
 
-                        // load the constructor parameter
-                        returnArray->LoadFromReference(val->m_value);
+                        // load the constructor parameter, a boxed value type (an enum) keeps its type
+                        CLR_RT_HeapBlock *argument = val->m_value.Dereference();
+
+                        if (argument != nullptr && argument->DataType() == DATATYPE_VALUETYPE && argument->IsBoxed())
+                        {
+                            returnArray->SetObjectReference(argument);
+                        }
+                        else
+                        {
+                            returnArray->LoadFromReference(val->m_value);
+                        }
                     }
                 }
             }
