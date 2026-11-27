@@ -1163,7 +1163,8 @@ static bool IsOverriddenBelow(
             CLR_RT_SignatureParser parserRight{};
             CLR_RT_SignatureParser::Element ret;
 
-            if ((m->flags & CLR_RECORD_METHODDEF::MD_Virtual) == 0 || strcmp(t.assembly->GetString(m->name), name))
+            if ((m->flags & CLR_RECORD_METHODDEF::MD_Virtual) == 0 || m->genericParamCount != md->genericParamCount ||
+                strcmp(t.assembly->GetString(m->name), name))
             {
                 continue;
             }
@@ -1291,14 +1292,15 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                     {
                         continue;
                     }
+                }
 
-                    // private instance methods are not inherited
-                    if ((md->flags & (CLR_RECORD_METHODDEF::MD_Scope_Mask | CLR_RECORD_METHODDEF::MD_Static)) ==
-                            CLR_RECORD_METHODDEF::MD_Scope_Private &&
-                        td.target != tdArg.target)
-                    {
-                        continue;
-                    }
+                // private methods are not inherited, statics only with FlattenHierarchy
+                if (td.target != tdArg.target &&
+                    ((md->flags & CLR_RECORD_METHODDEF::MD_Scope_Mask) == CLR_RECORD_METHODDEF::MD_Scope_Private ||
+                     ((md->flags & CLR_RECORD_METHODDEF::MD_Static) &&
+                      (bindingFlags & c_BindingFlags_FlattenHierarchy) == 0)))
+                {
+                    continue;
                 }
 
                 //--//

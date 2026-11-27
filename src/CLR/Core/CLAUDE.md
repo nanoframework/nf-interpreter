@@ -1090,13 +1090,14 @@ derived to base skips a virtual base method when `IsOverriddenBelow` finds a
 more derived method with the same name and signature that is virtual and not
 `newslot` (the nearest one decides, so a `new virtual` method starts a new slot
 and both are listed). Non-virtual methods hidden by name and signature are all
-listed, as .NET does; `DeclaredOnly` is unchanged and private instance methods of
-base classes are not listed or found (they were with `NonPublic`). Private static
-base methods are still found with `Static | NonPublic` (.NET does not return them;
-`UnitTestReflectionMemberTest` relies on it). Before, every level's override was listed (a 40 deep chain listed
-`Who` 41 times). The signature comparison reuses `MatchSignatureClosed` with the
-slot owners, so closed generic bases compare by their arguments; the return type
-is not compared (covariant returns are not modelled). `GetMethod(name)` already
+listed, as .NET does; `DeclaredOnly` is unchanged. Private methods of base classes
+are not listed or found (they were with `NonPublic`), and static methods of base
+classes only with `FlattenHierarchy`. Overrides are matched by generic arity too
+(`G()` is not overridden by `G<T>()`). Before, every level's override was listed (a
+40 deep chain listed `Who` 41 times). The signature comparison reuses
+`MatchSignatureClosed` with the slot owners, so closed generic bases compare by
+their arguments; the return type is not compared (covariant returns are not
+modelled). `GetMethod(name)` already
 took the first (most derived) of identical signatures, so it needed no change.
 
 `GetConstructor(null)`, `GetMethod(null)`, `GetMethod(name, null)` and
