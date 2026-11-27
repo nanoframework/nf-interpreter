@@ -218,7 +218,7 @@ HRESULT Library_corlib_native_System_Type::GetMethod___SystemReflectionMethodInf
     NANOCLR_HEADER();
 
     const char *szText = stack.Arg1().RecoverString();
-    FAULT_ON_NULL(szText);
+    FAULT_ON_NULL_ARG(szText);
 
     NANOCLR_SET_AND_LEAVE(GetMethods(stack, szText, stack.Arg2().NumericByRef().s4, nullptr, 0, false));
 
@@ -450,7 +450,7 @@ HRESULT Library_corlib_native_System_Type::GetConstructor___SystemReflectionCons
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock_Array *array = stack.Arg1().DereferenceArray();
-    FAULT_ON_NULL(array);
+    FAULT_ON_NULL_ARG(array);
     CLR_RT_HeapBlock *pParams;
     int iParams;
 
@@ -491,22 +491,15 @@ HRESULT Library_corlib_native_System_Type::GetMethod___SystemReflectionMethodInf
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock_Array *array = stack.Arg2().DereferenceArray();
+    const char *szText = stack.Arg1().RecoverString();
     CLR_RT_HeapBlock *pParams;
     int iParams;
 
-    if (array)
-    {
-        pParams = (CLR_RT_HeapBlock *)array->GetFirstElement();
-        iParams = array->m_numOfElements;
-    }
-    else
-    {
-        pParams = nullptr;
-        iParams = 0;
-    }
+    FAULT_ON_NULL_ARG(szText);
+    FAULT_ON_NULL_ARG(array);
 
-    const char *szText = stack.Arg1().RecoverString();
-    FAULT_ON_NULL(szText);
+    pParams = (CLR_RT_HeapBlock *)array->GetFirstElement();
+    iParams = array->m_numOfElements;
 
     NANOCLR_SET_AND_LEAVE(GetMethods(stack, szText, c_BindingFlags_DefaultLookup, pParams, iParams, false));
 
@@ -519,7 +512,7 @@ HRESULT Library_corlib_native_System_Type::GetMethod___SystemReflectionMethodInf
     NANOCLR_HEADER();
 
     const char *szText = stack.Arg1().RecoverString();
-    FAULT_ON_NULL(szText);
+    FAULT_ON_NULL_ARG(szText);
 
     NANOCLR_SET_AND_LEAVE(GetMethods(stack, szText, c_BindingFlags_DefaultLookup, nullptr, 0, false));
 
@@ -1144,6 +1137,62 @@ HRESULT Library_corlib_native_System_Type::GetFields(
     NANOCLR_NOCLEANUP();
 }
 
+// A virtual method that a more derived class overrides is the same slot: listed once, as the most derived method.
+static bool IsOverriddenBelow(
+    const CLR_RT_TypeDef_Instance &start,
+    CLR_UINT16 startSlot,
+    const CLR_RT_TypeDef_Instance &level,
+    CLR_UINT16 levelSlot,
+    const CLR_RECORD_METHODDEF *md)
+{
+    CLR_RT_TypeDef_Instance t = start;
+    CLR_UINT16 slot = startSlot;
+    bool overridden = false;
+    const char *name = level.assembly->GetString(md->name);
+
+    while (t.target != level.target)
+    {
+        const CLR_RECORD_METHODDEF *m = t.assembly->GetMethodDef(t.target->firstMethod);
+        int count = t.target->staticMethodCount + t.target->instanceMethodCount + t.target->virtualMethodCount;
+
+        for (; count > 0; count--, m++)
+        {
+            CLR_RT_TypeSpec_Index leftOwner;
+            CLR_RT_TypeSpec_Index rightOwner;
+            CLR_RT_SignatureParser parserLeft{};
+            CLR_RT_SignatureParser parserRight{};
+            CLR_RT_SignatureParser::Element ret;
+
+            if ((m->flags & CLR_RECORD_METHODDEF::MD_Virtual) == 0 || m->genericParamCount != md->genericParamCount ||
+                strcmp(t.assembly->GetString(m->name), name))
+            {
+                continue;
+            }
+
+            parserLeft.Initialize_MethodSignature(t.assembly, m);
+            parserRight.Initialize_MethodSignature(level.assembly, md);
+
+            if (SUCCEEDED(parserLeft.Advance(ret)) && SUCCEEDED(parserRight.Advance(ret)) &&
+                MatchSignatureClosed(
+                    parserLeft,
+                    parserRight,
+                    false,
+                    SlotOwner(slot, leftOwner),
+                    SlotOwner(levelSlot, rightOwner)))
+            {
+                overridden = (m->flags & CLR_RECORD_METHODDEF::MD_NewSlot) == 0;
+            }
+        }
+
+        if (!AdvanceToParent(t, slot))
+        {
+            break;
+        }
+    }
+
+    return overridden;
+}
+
 HRESULT Library_corlib_native_System_Type::GetMethods(
     CLR_RT_StackFrame &stack,
     const char *szText,
@@ -1245,6 +1294,15 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                     }
                 }
 
+                // private methods are not inherited, statics only with FlattenHierarchy
+                if (td.target != tdArg.target &&
+                    ((md->flags & CLR_RECORD_METHODDEF::MD_Scope_Mask) == CLR_RECORD_METHODDEF::MD_Scope_Private ||
+                     ((md->flags & CLR_RECORD_METHODDEF::MD_Static) &&
+                      (bindingFlags & c_BindingFlags_FlattenHierarchy) == 0)))
+                {
+                    continue;
+                }
+
                 //--//
 
                 if (md->flags & CLR_RECORD_METHODDEF::MD_Constructor)
@@ -1300,6 +1358,12 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
 
                 if (fAllMatches)
                 {
+                    if ((md->flags & CLR_RECORD_METHODDEF::MD_Virtual) && td.target != tdArg.target &&
+                        IsOverriddenBelow(tdArg, ownerSlot, td, levelSlot, md))
+                    {
+                        continue;
+                    }
+
                     if (pass == 1)
                     {
                         CLR_RT_HeapBlock *elem = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetElement(iMethod);
