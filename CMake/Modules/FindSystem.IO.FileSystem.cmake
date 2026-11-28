@@ -60,7 +60,13 @@ foreach(SRC_FILE ${System.IO.FileSystem_SRCS})
 
     set(System.IO.FileSystem_SRC_FILE SRC_FILE-NOTFOUND)
 
-    find_file(System.IO.FileSystem_SRC_FILE ${SRC_FILE}
+    if(NF_CHIBIOS_PICO_TARGET AND NF_FEATURE_HAS_SDCARD AND
+       SRC_FILE STREQUAL "nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard.cpp")
+        set(System.IO.FileSystem_SRC_FILE ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_Pico/SDCard.cpp)
+    elseif(NF_CHIBIOS_PICO_TARGET AND NF_FEATURE_HAS_SDCARD AND SRC_FILE STREQUAL "fatfs_FS_Driver.cpp")
+        set(System.IO.FileSystem_SRC_FILE ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_Pico/fatfs_FS_Driver.cpp)
+    else()
+        find_file(System.IO.FileSystem_SRC_FILE ${SRC_FILE}
         PATHS
 	        ${BASE_PATH_FOR_THIS_MODULE}
 	        ${TARGET_BASE_LOCATION}
@@ -79,7 +85,8 @@ foreach(SRC_FILE ${System.IO.FileSystem_SRCS})
             ${FATFS_PLATFORM}
 
 	    CMAKE_FIND_ROOT_PATH_BOTH
-    )
+        )
+    endif()
 
     if (BUILD_VERBOSE)
         message("${SRC_FILE} >> ${System.IO.FileSystem_SRC_FILE}")

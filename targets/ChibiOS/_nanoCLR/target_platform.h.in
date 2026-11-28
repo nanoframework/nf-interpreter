@@ -24,6 +24,10 @@
 #define HAL_USE_UART                @HAL_USE_UART_OPTION@
 #define HAL_USE_MAC                 @HAL_USE_MAC_OPTION@
 #define HAL_USE_SDC                 @HAL_USE_SDC_OPTION@
+#if @NF_CHIBIOS_PICO_TARGET@
+#define HAL_USE_MMC_SPI             @HAL_USE_MMC_SPI_OPTION@
+#define NF_CHIBIOS_PICO_SDCARD      @HAL_USE_MMC_SPI_OPTION@
+#endif
 #define HAL_USE_WDG                 @HAL_USE_WDG_OPTION@
 #define HAL_USE_CAN                 @HAL_USE_CAN_OPTION@
 #define HAL_NF_USE_STM32_CRC        @HAL_NF_USE_STM32_CRC_OPTION@

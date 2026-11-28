@@ -64,6 +64,12 @@ settings.ClockFrequency = 1_000_000;
 var spi = SpiDevice.Create(settings);
 ```
 
+### SD Card (SPI)
+
+SPI SD card support, wiring, and managed usage are the same as on
+[Pico RP2040](../PICO_RP2040/README.md#sd-card-spi). One FAT16/FAT32 card can
+be mounted as `D:\` on either SPI bus; internal LittleFS remains at `I:\`.
+
 ### I2C Bus Configuration
 
 I2C bus IDs are 1-based in nanoFramework: I2C1 (bus ID 1) maps to hardware bus 0, and I2C2 (bus ID 2) maps to hardware bus 1.

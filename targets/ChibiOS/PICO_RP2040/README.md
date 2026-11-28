@@ -64,6 +64,50 @@ settings.ClockFrequency = 1_000_000;
 var spi = SpiDevice.Create(settings);
 ```
 
+### SD Card (SPI)
+
+SD card support is enabled on Pico, Pico W, Pico 2 and Pico 2 W. Connect a
+3.3 V SPI SD card module to either SPI bus using the pin mapping above.
+Use a FAT16/FAT32-formatted card; exFAT and native SDMMC are not supported.
+
+For SPI1, connect SCK to GP18, MOSI to GP19, MISO to GP16, and CS to GP17.
+Connect the module's ground and 3.3 V supply as well.
+
+```csharp
+using System.IO;
+using nanoFramework.System.IO.FileSystem;
+
+using (var card = new SDCard(new SDCardSpiParameters
+{
+    slotIndex = 0,
+    spiBus = 1,
+    chipSelectPin = 17
+}))
+{
+    card.Mount();
+    File.WriteAllText(@"D:\hello.txt", "Hello from Pico");
+    card.Unmount();
+}
+```
+
+One card is supported at a time, in slot 0, mounted as `D:\`. Internal LittleFS
+storage remains available as `I:\`. SPI bus IDs are 1-based; use `spiBus = 2`
+for SPI2 (GP10/GP11/GP12), with a separate CS pin such as GP13.
+
+The SPI bus can be shared with other full-duplex SPI devices using distinct CS
+pins. Do not use its bus pins, the card's CS pin, or its optional detect pin as
+GPIO while the card object is alive. On W boards, do not use the WiFi pins
+GP23, GP24, GP25 or GP29 for CS or card detection.
+
+An optional `CardDetectParameters` argument enables card-detect events,
+`IsCardDetected`, and automatic mounting/unmounting on insertion/removal.
+Without a detect pin, mount and unmount explicitly. Close file streams before
+unmounting or removing the card. Disposing the card releases its SPI and detect
+resources; CLR-only reboots also clean them up.
+
+Custom builds can omit SD support by setting `CONFIG_NF_FEATURE_HAS_SDCARD=n`
+in the user Kconfig override.
+
 ### I2C Bus Configuration
 
 I2C bus IDs are 1-based in nanoFramework: I2C1 (bus ID 1) maps to hardware bus 0, and I2C2 (bus ID 2) maps to hardware bus 1.

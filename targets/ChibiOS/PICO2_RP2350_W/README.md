@@ -33,6 +33,14 @@ The Pico 2 W uses the same **Infineon CYW43439** wireless chip as the original P
 | Deployment | `0x10194000` | 2352 KB |
 | LittleFS | `0x103E0000` | 128 KB |
 
+## SD Card (SPI)
+
+SD card support is enabled, with the same SPI pin mapping and managed usage as
+[Pico RP2040](../PICO_RP2040/README.md#sd-card-spi). One FAT16/FAT32 card can
+be mounted as `D:\`, alongside internal LittleFS at `I:\`. The WiFi module
+uses PIO rather than either hardware SPI bus. Do not use GP23, GP24, GP25 or
+GP29 for the SD card's chip select or card detection.
+
 ## Differences from PICO2_RP2350
 
 This WiFi target adds:

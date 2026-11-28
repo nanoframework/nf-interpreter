@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <sys_dev_spi_native_target.h>
+#include "../_Pico/pico_spi_pins.h"
 
 //////////
 // SPI0 //
@@ -13,7 +13,7 @@
 // SCK  = GP18
 // MISO = GP16
 // MOSI = GP19
-SPI_CONFIG_PINS(0, 18, 16, 19)
+PICO_SPI_CONFIG_PINS(0, 18, 16, 19)
 
 //////////
 // SPI1 //
@@ -23,4 +23,4 @@ SPI_CONFIG_PINS(0, 18, 16, 19)
 // SCK  = GP10
 // MISO = GP12
 // MOSI = GP11
-SPI_CONFIG_PINS(1, 10, 12, 11)
+PICO_SPI_CONFIG_PINS(1, 10, 12, 11)

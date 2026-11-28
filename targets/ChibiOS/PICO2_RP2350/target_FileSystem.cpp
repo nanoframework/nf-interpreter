@@ -12,8 +12,17 @@
 extern FILESYSTEM_DRIVER_INTERFACE g_LITTLEFS_FILE_SYSTEM_DriverInterface;
 extern STREAM_DRIVER_INTERFACE g_LITTLEFS_STREAM_DriverInterface;
 
+#if HAL_USE_MMC_SPI
+#include <fatfs_FS_Driver.h>
+extern FILESYSTEM_DRIVER_INTERFACE g_FATFS_FILE_SYSTEM_DriverInterface;
+extern STREAM_DRIVER_INTERFACE g_FATFS_STREAM_DriverInterface;
+#endif
+
 FILESYSTEM_INTERFACES g_AvailableFSInterfaces[] = {
     {&g_LITTLEFS_FILE_SYSTEM_DriverInterface, &g_LITTLEFS_STREAM_DriverInterface},
+#if HAL_USE_MMC_SPI
+    {&g_FATFS_FILE_SYSTEM_DriverInterface, &g_FATFS_STREAM_DriverInterface},
+#endif
 };
 
 const size_t g_InstalledFSCount = ARRAYSIZE(g_AvailableFSInterfaces);
@@ -42,5 +51,5 @@ void FS_AddVolumes()
 
 void FS_MountRemovableVolumes()
 {
-    // No removable volumes on RP2350
+    // SPI SD cards are mounted explicitly by the managed SDCard API.
 }
