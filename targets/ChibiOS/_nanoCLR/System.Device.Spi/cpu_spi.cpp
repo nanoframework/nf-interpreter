@@ -59,13 +59,20 @@ NF_PAL_SPI SPI1_PAL;
 
 #define RP_SPI_PERI_CLK 125000000
 
+#if defined(NF_CHIBIOS_PICO_SDCARD) && NF_CHIBIOS_PICO_SDCARD
+void GetPins_SPI0(GPIO_PIN &clk, GPIO_PIN &miso, GPIO_PIN &mosi);
+void GetPins_SPI1(GPIO_PIN &clk, GPIO_PIN &miso, GPIO_PIN &mosi);
+#endif
+
 // Tidy up after completing tranfer
 // CAUTION: has to be called from thread context, never from an ISR!
 // spiReleaseBus() unlocks a mutex which is owned by the thread that acquired the bus, so calling it
 // from an ISR would operate on whatever thread happens to be running at that moment.
 static void CompleteTranfer(NF_PAL_SPI *palSpi)
 {
+#if !defined(NF_CHIBIOS_PICO_SDCARD) || !NF_CHIBIOS_PICO_SDCARD
     spiUnselect(palSpi->Driver);
+#endif
 
     if (palSpi->TransferFailed)
     {
@@ -354,7 +361,9 @@ HRESULT CPU_SPI_nWrite_nRead(
         }
 
         spiStart(palSpi->Driver, &palSpi->Configuration);
+#if !defined(NF_CHIBIOS_PICO_SDCARD) || !NF_CHIBIOS_PICO_SDCARD
         spiSelect(palSpi->Driver);
+#endif
 
         palSpi->ChipSelect = wrc.DeviceChipSelect;
         if (wrc.DeviceChipSelect >= 0)
@@ -646,11 +655,32 @@ HRESULT CPU_SPI_Add_Device(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig, uint
 
 void CPU_SPI_GetPins(uint32_t busIndex, GPIO_PIN &clk, GPIO_PIN &miso, GPIO_PIN &mosi)
 {
-    (void)busIndex;
-
+#if defined(NF_CHIBIOS_PICO_SDCARD) && NF_CHIBIOS_PICO_SDCARD
     clk = (GPIO_PIN)-1;
     miso = (GPIO_PIN)-1;
     mosi = (GPIO_PIN)-1;
+
+    switch (busIndex)
+    {
+#if RP_SPI_USE_SPI0
+        case 0:
+            GetPins_SPI0(clk, miso, mosi);
+            break;
+#endif
+#if RP_SPI_USE_SPI1
+        case 1:
+            GetPins_SPI1(clk, miso, mosi);
+            break;
+#endif
+        default:
+            break;
+    }
+#else
+    (void)busIndex;
+    clk = (GPIO_PIN)-1;
+    miso = (GPIO_PIN)-1;
+    mosi = (GPIO_PIN)-1;
+#endif
 }
 
 HRESULT CPU_SPI_MinClockFrequency(uint32_t spiBus, int32_t *frequency)

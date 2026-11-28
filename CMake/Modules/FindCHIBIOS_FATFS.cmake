@@ -11,6 +11,9 @@ FetchContent_GetProperties(chibios-contrib)
 # List of the required FatFs include files.
 list(APPEND CHIBIOS_FATFS_INCLUDE_DIRS ${fatfs_SOURCE_DIR}/source)
 
+if(NF_CHIBIOS_PICO_TARGET)
+    list(APPEND CHIBIOS_FATFS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_Pico)
+endif()
 
 set(FATFS_SRCS
     # bindings
@@ -42,7 +45,9 @@ foreach(SRC_FILE ${FATFS_SRCS})
 endforeach()
 
 # fatfs_diskio is hacked because of USB Host, so we need to use the source from the appropriate location
-if(NF_FEATURE_HAS_USB_MSD)
+if(NF_CHIBIOS_PICO_TARGET AND NF_FEATURE_HAS_SDCARD)
+    list(APPEND CHIBIOS_FATFS_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_Pico/fatfs_diskio.c)
+elseif(NF_FEATURE_HAS_USB_MSD)
     # get it from ChibiOS contribution
     list(APPEND CHIBIOS_FATFS_SOURCES ${chibios-contrib_SOURCE_DIR}/os/various/fatfs_bindings/fatfs_diskio.c)
 else()

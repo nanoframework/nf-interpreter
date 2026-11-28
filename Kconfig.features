@@ -34,6 +34,7 @@ config NF_FEATURE_HAS_SDCARD
     bool "SD Card support"
     default n
     select API_SYSTEM_IO_FILESYSTEM
+    select API_SYSTEM_DEVICE_SPI if RTOS_CHIBIOS && (TARGET_BOARD = "PICO_RP2040" || TARGET_BOARD = "PICO_RP2040_W" || TARGET_BOARD = "PICO2_RP2350" || TARGET_BOARD = "PICO2_RP2350_W")
 
 config NF_FEATURE_HAS_CONFIG_BLOCK
     bool "Configuration block storage"

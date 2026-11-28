@@ -14,6 +14,9 @@
 #include <nanoHAL_ConfigurationManager.h>
 #include <nanoHAL_StorageOperation.h>
 #include <nanoHAL_Graphics.h>
+#if defined(NF_CHIBIOS_PICO_SDCARD) && NF_CHIBIOS_PICO_SDCARD
+extern "C" void SdCardUninitialize();
+#endif
 
 #if (HAL_USE_CAN == TRUE)
 #include <nf_device_can_native_target.h>
@@ -189,6 +192,10 @@ void nanoHAL_Uninitialize(bool isPoweringDown)
 #endif
 
     FileSystemVolumeList::UninitializeVolumes();
+
+#if defined(NF_CHIBIOS_PICO_SDCARD) && NF_CHIBIOS_PICO_SDCARD
+    SdCardUninitialize();
+#endif
 
     BlockStorageList_UnInitializeDevices();
 

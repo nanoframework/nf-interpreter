@@ -6,6 +6,6 @@
 #ifndef _TARGET_STORAGE_CONFIG_H_
 #define _TARGET_STORAGE_CONFIG_H_
 
-// RP2040 has no SD card or USB mass storage
+#define SD_CARD_DRIVER MMCD1
 
 #endif // _TARGET_STORAGE_CONFIG_H_
